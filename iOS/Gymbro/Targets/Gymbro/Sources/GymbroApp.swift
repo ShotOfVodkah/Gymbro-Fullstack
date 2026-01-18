@@ -1,10 +1,13 @@
 import SwiftUI
+import GymbroWorkouts
 
 @main
 struct GymbroApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            appServicesFactory.makeWorkoutsScreen()
         }
     }
+    
+    let appServicesFactory = AppServicesFactory()
 }
