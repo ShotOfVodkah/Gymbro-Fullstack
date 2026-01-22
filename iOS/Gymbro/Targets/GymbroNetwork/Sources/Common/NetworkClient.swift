@@ -41,11 +41,11 @@ extension NetworkError: LocalizedError {
     }
 }
 
-final class NetworkClient {
+public final class NetworkClient {
     private let baseURL: URL
     private let token: String
 
-    init(baseURL: String, token: String) {
+    public init(baseURL: String, token: String) {
         guard let url = URL(string: baseURL) else {
             fatalError("Invalid base URL: \(baseURL)")
         }
@@ -54,7 +54,7 @@ final class NetworkClient {
     }
 
 
-    func request<T: Decodable>(
+    public func request<T: Decodable>(
         method: String,
         path: String,
         queryItems: [URLQueryItem]? = nil,

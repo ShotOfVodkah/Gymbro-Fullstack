@@ -1,16 +1,18 @@
 import Foundation
+import DivKit
 
 final class WorkoutsListViewModel: ObservableObject {
-    
+
     init(networkClient: WorkoutsNetworkClient) {
         self.networkClient = networkClient
     }
-    
+
     func onAppear() {
-        exampleText = networkClient.fetchWorkouts()
+        let jsonData = networkClient.fetchWorkoutsDivJson()
+        source = DivViewSource(kind: .data(jsonData), cardId: "WorkoutsCard")
     }
-    
-    @Published var exampleText: String = "Loading"
-    
+
+    @Published var source: DivViewSource? = nil
     private let networkClient: WorkoutsNetworkClient
 }
+
