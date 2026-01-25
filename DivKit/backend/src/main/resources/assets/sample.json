@@ -1,0 +1,281 @@
+{
+  "templates": {
+    "card": {
+      "type": "container",
+      "margins": {
+        "left": 12,
+        "right": 12,
+        "top": 12,
+        "bottom": 12
+      },
+      "background": [
+        {
+          "type": "solid",
+          "color": "#fff"
+        }
+      ],
+      "width": {
+        "type": "fixed",
+        "value": 150
+      },
+      "border": {
+        "corner_radius": 14,
+        "shadow": {
+          "offset": {
+            "x": {
+              "value": 1
+            },
+            "y": {
+              "value": 2
+            }
+          },
+          "color": "#000"
+        },
+        "has_shadow": true
+      },
+      "items": [
+        {
+          "type": "image",
+          "$image_url": "card_image",
+          "aspect": {
+            "ratio": 0.75
+          },
+          "content_alignment_vertical": "top"
+        },
+        {
+          "type": "text",
+          "margins": {
+            "left": 12,
+            "right": 12,
+            "top": 12,
+            "bottom": 12
+          },
+          "$text": "description",
+          "max_lines": 3,
+          "font_size": 12,
+          "text_color": "#333",
+          "text_alignment_horizontal": "center"
+        }
+      ]
+    }
+  },
+  "card": {
+    "timers": [
+      {
+        "id": "update_timer",
+        "tick_interval": 3000,
+        "tick_actions": [
+          {
+            "log_id": "update_page",
+            "url": "sample-action://update"
+          }
+        ]
+      }
+    ],
+    "variables": [
+      {
+        "name": "search_text",
+        "type": "string",
+        "value": ""
+      },
+      {
+        "name": "data",
+        "type": "array",
+        "value": [
+          {
+            "description": "Облако с ногами бежит под дождем",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/15067795/img_0d163c3a4d4111f0899a2aa11dc6dfe1/orig",
+            "post_url": "https://shedevrum.ai/post/0d163c3a4d4111f0899a2aa11dc6dfe1/"
+          },
+          {
+            "description": "Волнистый попугайчик, сине-зеленого окраса, в костюме зайчика, нарисованный масляными красками, а на фоне облака из карамели",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/14919379/img_020e50fd50e111f0ae9dda33849e98dc/orig",
+            "post_url": "https://shedevrum.ai/post/020e50fd50e111f0ae9dda33849e98dc/"
+          },
+          {
+            "description": "Beautiful landscape, unusual, in pastel colors, minimalistic, scalaria fish, quiet",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/14797701/img_04a236604c6a11f0bb03724f6c58f87a/orig",
+            "post_url": "https://shedevrum.ai/post/04a236604c6a11f0bb03724f6c58f87a/"
+          },
+          {
+            "description": "Маленький прозрачный монстрик из капельки воды на пеньке, серый фон, вид снизу, фентези, сияние, алмазная пыль, мультяшно, мило",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/14887244/img_00edf0734eaf11f0a695e2eafd4d8d77/orig",
+            "post_url": "https://shedevrum.ai/post/00edf0734eaf11f0a695e2eafd4d8d77/"
+          },
+          {
+            "description": "Пейзаж вытекает на стол из упавшей банки краски на белом фоне",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/15067795/img_581a57d250f611f0bf5de62a8f27b445/orig",
+            "post_url": "https://shedevrum.ai/post/581a57d250f611f0bf5de62a8f27b445/"
+          },
+          {
+            "description": "Очень красивый зонтик, солнечный, солнечные цветы, чашка с блюдцем, 5D формат, как солнце, большого размера, с красивым рисунком, цифровая графика",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/15240847/img_07e2f7c24e1211f09c645a1b9081af39/orig",
+            "post_url": "https://shedevrum.ai/post/07e2f7c24e1211f09c645a1b9081af39/"
+          },
+          {
+            "description": "Эндре Пеновац, пушистик ветер",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/16449972/img_0734827c4c8b11f0a3d1564bb4657f04/orig",
+            "post_url": "https://shedevrum.ai/post/0734827c4c8b11f0a3d1564bb4657f04/"
+          },
+          {
+            "description": "Вязанная пушистая кошка летит на воздушном пушистом шаре",
+            "img_url": "https://avatars.mds.yandex.net/get-shedevrum/16295926/img_077cf9c1513411f081ac5e65fce3d180/orig",
+            "post_url": "https://shedevrum.ai/post/077cf9c1513411f081ac5e65fce3d180/"
+          }
+        ]
+      }
+    ],
+    "log_id": "grid_card",
+    "states": [
+      {
+        "state_id": 0,
+        "div": {
+          "type": "container",
+          "content_alignment_horizontal": "center",
+          "width": {
+            "type": "match_parent"
+          },
+          "height": {
+            "type": "match_parent"
+          },
+          "items": [
+            {
+              "type": "input",
+              "text_variable": "search_text",
+              "height": {
+                "type": "fixed",
+                "value": 56
+              },
+              "width": {
+                "type": "match_parent"
+              },
+              "alignment_horizontal": "center",
+              "alignment_vertical": "center",
+              "font_size": 16,
+              "font_weight": "medium",
+              "text_color": "#000000",
+              "hint_color": "#888888",
+              "text_alignment_vertical": "center",
+              "line_height": 22,
+              "background": [
+                {
+                  "type": "solid",
+                  "color": "#fff"
+                }
+              ],
+              "paddings": {
+                "left": 10,
+                "top": 8,
+                "right": 10,
+                "bottom": 8
+              },
+              "border": {
+                "corner_radius": 16,
+                "stroke": {
+                  "color": "#fc0",
+                  "width": 2
+                }
+              },
+              "hint_text": "Отфильтровать результаты",
+              "visibility_actions": [
+                {
+                  "log_id": "on_page_visible",
+                  "url": "div-action://timer?id=update_timer&action=start"
+                }
+              ]
+            },
+            {
+              "type": "container",
+              "orientation": "overlap",
+              "width": {
+                "type": "wrap_content"
+              },
+              "height": {
+                "type": "match_parent"
+              },
+              "content_alignment_horizontal": "center",
+              "items": [
+                {
+                  "type": "gallery",
+                  "orientation": "vertical",
+                  "width": {
+                    "type": "wrap_content"
+                  },
+                  "height": {
+                    "type": "match_parent"
+                  },
+                  "cross_spacing": 30,
+                  "column_count": 2,
+                  "item_builder": {
+                    "data": "@{data}",
+                    "data_element_name": "element",
+                    "prototypes": [
+                      {
+                        "id": "card",
+                        "div": {
+                          "type": "card",
+                          "card_image": "@{getStringFromDict(element,'img_url')}",
+                          "description": "@{getStringFromDict(element,'description')}",
+                          "visibility": "@{contains(trim(toLowerCase(getStringFromDict(element,'description'))), trim(toLowerCase(search_text))) ? 'visible' : 'gone'}"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "text",
+                  "text": "Обновить",
+                  "height": {
+                    "type": "wrap_content"
+                  },
+                  "width": {
+                    "type": "wrap_content"
+                  },
+                  "font_size": 16,
+                  "font_weight": "medium",
+                  "text_color": "#FFFFFF",
+                  "text_alignment_horizontal": "center",
+                  "text_alignment_vertical": "center",
+                  "background": [
+                    {
+                      "type": "solid",
+                      "color": "#bb0707"
+                    }
+                  ],
+                  "margins": {
+                    "top": 10
+                  },
+                  "paddings": {
+                    "left": 10,
+                    "top": 8,
+                    "right": 10,
+                    "bottom": 8
+                  },
+                  "border": {
+                    "corner_radius": 16,
+                    "stroke": {
+                      "color": "#fc0",
+                      "width": 2
+                    }
+                  },
+                  "actions": [
+                    {
+                      "log_id": "update_page",
+                      "url": "sample-action://update"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "margins": {
+            "top": 8,
+            "bottom": 8,
+            "left": 8,
+            "right": 8
+          }
+        }
+      }
+    ]
+  }
+}

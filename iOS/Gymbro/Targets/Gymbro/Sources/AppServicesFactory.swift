@@ -6,6 +6,7 @@ import GymbroNetwork
 
 final class AppServicesFactory {
     
+    @MainActor
     func makeWorkoutsScreen() -> some View {
 //        return screenFactories.workoutsFactory.makeWorkoutsScreen(with: NetworkClient(baseURL: "", token: ""))
         return screenFactories.workoutsFactory.makeWorkoutsScreen()

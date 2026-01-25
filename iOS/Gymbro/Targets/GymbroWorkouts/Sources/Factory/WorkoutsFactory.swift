@@ -9,8 +9,9 @@ public final class WorkoutsFactory {
 
 //    public func makeWorkoutsScreen(with networkClient: NetworkClient) -> some View {
 //        let workoutsNetworkClient = WorkoutsNetworkClientStub(networkClient: networkClient)
+    @MainActor
     public func makeWorkoutsScreen() -> some View {
-        let workoutsNetworkClient = WorkoutsNetworkClientStub()
+        let workoutsNetworkClient = WorkoutsNetworkClientImpl()
         let viewModel = WorkoutsListViewModel(networkClient: workoutsNetworkClient)
         let view = WorkoutsListView(viewModel: viewModel)
         return view

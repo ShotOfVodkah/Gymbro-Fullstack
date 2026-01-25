@@ -70,7 +70,7 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         WorkoutsListView(
             viewModel: WorkoutsListViewModel(
-                networkClient: WorkoutsNetworkClientStub()
+                networkClient: WorkoutsNetworkClientImpl()
             )
         )
     }
