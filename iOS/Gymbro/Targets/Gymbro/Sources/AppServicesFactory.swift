@@ -7,6 +7,7 @@ import GymbroNetwork
 final class AppServicesFactory {
     
     func makeWorkoutsScreen() -> some View {
+//        return screenFactories.workoutsFactory.makeWorkoutsScreen(with: NetworkClient(baseURL: "", token: ""))
         return screenFactories.workoutsFactory.makeWorkoutsScreen()
     }
     
@@ -14,5 +15,5 @@ final class AppServicesFactory {
 }
 
 private struct ScreenFactories {
-    let workoutsFactory = WorkoutsFactory(networkClient: WorkoutsNetworkClientImpl())
+    let workoutsFactory = WorkoutsFactory()
 }

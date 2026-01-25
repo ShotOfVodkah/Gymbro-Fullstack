@@ -43,9 +43,7 @@ let networkTarget: ProjectDescription.Target = .target(
     ),
     sources: ["\(basePath)/GymbroNetwork/Sources/**"],
     resources: ["\(basePath)/GymbroNetwork/Resources/**"],
-    dependencies: [
-        .target(name: "GymbroWorkouts")
-    ],
+    dependencies: [],
     settings: baseSettings()
 )
 
@@ -62,7 +60,10 @@ let workoutsTarget: ProjectDescription.Target = .target(
     ),
     sources: ["\(basePath)/GymbroWorkouts/Sources/**"],
     resources: ["\(basePath)/GymbroWorkouts/Resources/**"],
-    dependencies: [],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .external(name: "DivKit")
+    ],
     settings: baseSettings()
 )
 
