@@ -1,13 +1,42 @@
 import SwiftUI
 import GymbroWorkouts
+import GymbroNavigation
+import GymbroNetwork
+import SwiftData
 
 @main
 struct GymbroApp: App {
-    var body: some Scene {
-        WindowGroup {
-            appServicesFactory.makeWorkoutsScreen()
-        }
+
+    @State private var modelContainer: ModelContainer
+    @StateObject private var router = AppRouter()
+    private let appServicesFactory: AppServicesFactory
+    
+    init() {
+        let r = AppRouter()
+        let container: ModelContainer = {
+            do {
+                return try ModelContainer(
+                    for: DivJsonCache.self,
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: false))
+            } catch {
+                fatalError("Failed to create ModelContainer: \(error)")
+            }
+        }()
+        _modelContainer = State(initialValue: container)
+        _router = StateObject(wrappedValue: r)
+        self.appServicesFactory = AppServicesFactory(router: r, container: container)
     }
     
-    let appServicesFactory = AppServicesFactory()
+    var body: some Scene {
+        WindowGroup {
+            NavigationStack(path: $router.path) {
+                appServicesFactory.makeWorkoutsScreen()
+                    .navigationDestination(for: NavigationRoute.self) { route in
+                        appServicesFactory.makeDestinationView(for: route)
+                    }
+            }
+        }
+        .modelContainer(modelContainer)
+    }
+
 }

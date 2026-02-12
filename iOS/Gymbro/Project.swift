@@ -25,7 +25,10 @@ let mainAppTarget: ProjectDescription.Target = .target(
     resources: ["\(basePath)/Gymbro/Resources/**"],
     dependencies: [
         .target(name: "GymbroNetwork"),
-        .target(name: "GymbroWorkouts")
+        .target(name: "GymbroNavigation"),
+        .target(name: "GymbroWorkouts"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroTypes")
     ],
     settings: baseSettings()
 )
@@ -47,6 +50,57 @@ let networkTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let navigationTarget: ProjectDescription.Target = .target(
+    name: "GymbroNavigation",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).navigation",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroNavigation/Sources/**"],
+    resources: ["\(basePath)/GymbroNavigation/Resources/**"],
+    dependencies: [],
+    settings: baseSettings()
+)
+
+let commonUITarget: ProjectDescription.Target = .target(
+    name: "GymbroCommonUI",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).commonUI",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroCommonUI/Sources/**"],
+    resources: ["\(basePath)/GymbroCommonUI/Resources/**"],
+    dependencies: [],
+    settings: baseSettings()
+)
+
+let typesTarget: ProjectDescription.Target = .target(
+    name: "GymbroTypes",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).workouts",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroTypes/Sources/**"],
+    resources: ["\(basePath)/GymbroTypes/Resources/**"],
+    dependencies: [],
+    settings: baseSettings()
+)
+
 let workoutsTarget: ProjectDescription.Target = .target(
     name: "GymbroWorkouts",
     destinations: .iOS,
@@ -62,6 +116,9 @@ let workoutsTarget: ProjectDescription.Target = .target(
     resources: ["\(basePath)/GymbroWorkouts/Resources/**"],
     dependencies: [
         .target(name: "GymbroNetwork"),
+        .target(name: "GymbroNavigation"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroTypes"),
         .external(name: "DivKit")
     ],
     settings: baseSettings()
@@ -75,7 +132,10 @@ let project = Project(
     targets: [
         mainAppTarget,
         networkTarget,
-        workoutsTarget
+        workoutsTarget,
+        navigationTarget,
+        commonUITarget,
+        typesTarget
     ]
 )
 
