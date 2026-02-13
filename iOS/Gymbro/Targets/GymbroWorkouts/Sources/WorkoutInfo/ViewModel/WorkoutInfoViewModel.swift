@@ -62,7 +62,6 @@ final class WorkoutInfoViewModel: ObservableObject {
             do {
                 let data = try await networkClient.fetchWorkoutInfoDivJson(with: id)
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutInfoCard")
-//                localRepository.save(key: "workoutsList", data: data)
                 screenState = .loaded
             } catch {
                 guard let data = localMapper.render(id: id) else {
@@ -90,7 +89,7 @@ final class WorkoutInfoViewModel: ObservableObject {
     @Published var source: DivViewSource? = nil
     @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
 
-    private let localMapper: WorkoutInfoLocalMapper
+    private var localMapper: WorkoutInfoLocalMapper
     private let modelModifier: WorkoutsModelModifier
     private let localRepository: DivCacheRepository
     private let router: any Router

@@ -17,7 +17,7 @@ public final class WorkoutInfoFactoryImpl {
     ) -> some View  {
         guard let viewModelCache, id == idCache else {
             let workoutsNetworkClient = WorkoutsNetworkClientImpl()
-            let localMapper = WorkoutInfoLocalMapper()
+            let localMapper = WorkoutInfoLocalMapper(localRepository: localRepository)
             let viewModel = WorkoutInfoViewModel(
                 id: id,
                 networkClient: workoutsNetworkClient,

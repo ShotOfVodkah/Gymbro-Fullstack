@@ -1,664 +1,235 @@
 import Foundation
+
+import GymbroNetwork
 import GymbroTypes
 
-struct WorkoutInfoLocalMapper {
-
-    func render(id: String) -> Data? {
-        guard let workout = workoutsMock.first(where: { $0.id == id }) else { return nil }
-
-        let card = buildWorkoutCard(workout)
-
-        let divKitJson: [String: Any] = [
-            "card": card,
-            "templates": [:],
-            "variables": []
-        ]
-
-        return try? JSONSerialization.data(withJSONObject: divKitJson, options: [.prettyPrinted])
+final class WorkoutInfoLocalMapper {
+    
+    init(localRepository: DivCacheRepository) {
+        self.localRepository = localRepository
     }
     
-    // Private types
-
-    private func buildWorkoutCard(_ workout: Workout) -> [String: Any] {
-        let style = workout.type.style
-
-        return [
-            "log_id": "workout_info_\(workout.id)",
-            "states": [
-                buildMainState(workout: workout, style: style)
-            ]
-        ]
-    }
-
-    private func buildMainState(workout: Workout, style: WorkoutStyle) -> [String: Any] {
-        [
-            "state_id": 0,
-            "div": [
-                "type": "container",
-                "orientation": "vertical",
-                "width": ["type": "match_parent"],
-                "height": ["type": "match_parent"],
-                "items": [
-                    buildHeaderBlock(workout: workout, style: style),
-
-                    buildExercisesSectionDiv(),
-
-                    buildExercisesGalleryDiv(workout: workout, style: style),
-
-                    buildStartButtonDiv(workoutId: workout.id)
-                ]
-            ]
-        ]
-    }
-
-    private func buildHeaderBlock(workout: Workout, style: WorkoutStyle) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "vertical",
-            "height": ["type": "wrap_content"],
-            "width": ["type": "match_parent"],
-            "items": [
-                buildActionButtons(workoutId: workout.id),
-                buildWorkoutHeader(workout: workout, style: style)
-            ]
-        ]
-    }
-
-    private func buildActionButtons(workoutId: String) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "horizontal",
-            "content_alignment_horizontal": "right",
-            "items": [
-                buildActionButton(
-                    logId: "edit",
-                    url: "app://edit?id=\(workoutId)",
-                    iconUrl: "http://localhost:8080/assets/edit.png",
-                    margins: ["bottom": 12, "left": 16, "top": 16]
-                ),
-                buildActionButton(
-                    logId: "delete",
-                    url: "app://delete?id=\(workoutId)",
-                    iconUrl: "http://localhost:8080/assets/trash.png",
-                    margins: ["bottom": 12, "left": 16, "top": 16]
-                )
-            ],
-            "width": ["type": "match_parent"]
-        ]
-    }
-
-    private func buildActionButton(
-        logId: String,
-        url: String,
-        iconUrl: String,
-        margins: [String: Any]
-    ) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "overlap",
-            "action_animation": [
-                "duration": 120,
-                "end_value": 0.9,
-                "interpolator": "ease_in_out",
-                "name": "scale",
-                "start_value": 1.0
-            ],
-            "actions": [
-                [
-                    "log_id": logId,
-                    "url": url
-                ]
-            ],
-            "border": ["corner_radius": 20],
-            "height": ["type": "wrap_content"],
-            "items": [
-                [
-                    "type": "container",
-                    "background": [
-                        [
-                            "type": "gradient",
-                            "angle": 180,
-                            "colors": ["#99FFFFFF", "#45FFFFFF", "#00FFFFFF"]
-                        ]
-                    ],
-                    "border": ["corner_radius": 20],
-                    "height": ["type": "match_parent"],
-                    "paddings": ["bottom": 1, "left": 1, "right": 1, "top": 1],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "background": [
-                        [
-                            "type": "solid",
-                            "color": "#732AFF"
-                        ]
-                    ],
-                    "border": ["corner_radius": 19],
-                    "height": ["type": "match_parent"],
-                    "margins": ["bottom": 1, "left": 1, "right": 1, "top": 1],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "background": [
-                        [
-                            "type": "gradient",
-                            "angle": -45,
-                            "colors": ["#45FFFFFF", "#20FFFFFF", "#00FFFFFF"]
-                        ]
-                    ],
-                    "height": ["type": "match_parent"],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "background": [
-                        [
-                            "type": "solid",
-                            "color": "#00FFFFFF"
-                        ]
-                    ],
-                    "border": ["corner_radius": 20],
-                    "items": [
-                        [
-                            "type": "image",
-                            "image_url": iconUrl,
-                            "height": ["type": "fixed", "value": 21],
-                            "width": ["type": "fixed", "value": 21]
-                        ]
-                    ],
-                    "paddings": ["bottom": 8, "left": 8, "right": 8, "top": 8],
-                    "width": ["type": "wrap_content"]
-                ]
-            ],
-            "margins": margins,
-            "width": ["type": "wrap_content"]
-        ]
-    }
-
-    private func buildWorkoutHeader(workout: Workout, style: WorkoutStyle) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "horizontal",
-            "alignment_vertical": "center",
-            "background": [
-                [
-                    "type": "gradient",
-                    "angle": 0,
-                    "colors": [style.headerGradientStart, style.headerGradientEnd]
-                ]
-            ],
-            "border": ["corner_radius": 22],
-            "items": [
-                [
-                    "type": "container",
-                    "orientation": "vertical",
-                    "alignment_vertical": "center",
-                    "items": [
-                        [
-                            "type": "text",
-                            "text": workout.name,
-                            "font_size": 21,
-                            "font_weight": "bold",
-                            "max_lines": 1,
-                            "text_color": "#FFFFFF"
-                        ],
-                        [
-                            "type": "container",
-                            "orientation": "horizontal",
-                            "items": [
-                                buildTypeTag(iconUrl: style.iconUrl, text: workout.type.title),
-                                buildExercisesCountTag(count: workout.exercises.count)
-                            ],
-                            "margins": ["top": 15],
-                            "width": ["type": "wrap_content"]
-                        ]
-                    ],
-                    "paddings": ["bottom": 10, "top": 10],
-                    "width": ["type": "match_parent"]
-                ]
-            ],
-            "margins": [
-                "bottom": 0,
-                "left": 16,
-                "right": 16,
-                "top": 10
-            ],
-            "paddings": [
-                "bottom": 10,
-                "left": 15,
-                "right": 15,
-                "top": 10
-            ],
-            "width": ["type": "match_parent"]
-        ]
-    }
-
-    private func buildTypeTag(iconUrl: String, text: String) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "horizontal",
-            "alignment_vertical": "center",
-            "background": [
-                ["type": "solid", "color": "#701F1F1F"]
-            ],
-            "border": ["corner_radius": 15],
-            "items": [
-                [
-                    "type": "image",
-                    "image_url": iconUrl,
-                    "height": ["type": "fixed", "value": 20],
-                    "width": ["type": "fixed", "value": 20]
-                ],
-                [
-                    "type": "text",
-                    "text": text,
-                    "font_size": 15,
-                    "font_weight": "regular",
-                    "max_lines": 1,
-                    "paddings": ["left": 10],
-                    "text_color": "#FFFFFF"
-                ]
-            ],
-            "margins": ["right": 10],
-            "paddings": ["bottom": 10, "left": 10, "right": 10, "top": 10],
-            "width": ["type": "wrap_content"]
-        ]
-    }
-
-    private func buildExercisesCountTag(count: Int) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "horizontal",
-            "alignment_vertical": "center",
-            "background": [
-                ["type": "solid", "color": "#701F1F1F"]
-            ],
-            "border": ["corner_radius": 15],
-            "items": [
-                [
-                    "type": "image",
-                    "image_url": "http://localhost:8080/assets/dumbell.png",
-                    "height": ["type": "fixed", "value": 20],
-                    "width": ["type": "fixed", "value": 20]
-                ],
-                [
-                    "type": "text",
-                    "text": "\(count) exercises",
-                    "font_size": 15,
-                    "font_weight": "regular",
-                    "max_lines": 1,
-                    "paddings": ["left": 10],
-                    "text_color": "#FFFFFF"
-                ]
-            ],
-            "paddings": ["bottom": 10, "left": 10, "right": 10, "top": 10],
-            "width": ["type": "wrap_content"]
-        ]
-    }
-
-    private func buildExercisesSectionDiv() -> [String: Any] {
-        [
-            "type": "text",
-            "text": "EXERCISES",
-            "font_size": 16,
-            "font_weight": "bold",
-            "margins": ["bottom": 17, "left": 25, "top": 17],
-            "max_lines": 1,
-            "text_color": "#4A4A4A"
-        ]
-    }
-
-    private func buildExercisesGalleryDiv(workout: Workout, style: WorkoutStyle) -> [String: Any] {
-        [
-            "type": "gallery",
-            "column_count": 1,
-            "height": ["type": "match_parent"],
-            "orientation": "vertical",
-            "items": workout.exercises.enumerated().map { index, exercise in
-                buildExerciseCard(
-                    exercise: exercise,
-                    number: index + 1,
-                    gradientColor: style.exerciseGradientColor
-                )
+    private let localRepository: DivCacheRepository
+    
+    // MARK: - Internal
+    
+    func render(id: String) -> Data? {
+        
+        guard let workout = workoutsMock.first(where: { $0.id == id }) else { return nil }
+        
+        guard let templatesData = localRepository.load(key: "workoutInfoTemplate") else {
+            
+            return nil
+        }
+            
+        do {
+            let jsonObject = try JSONSerialization.jsonObject(with: templatesData)
+            
+            guard let dict = jsonObject as? [String: Any] else {
+                return nil
             }
-        ]
-    }
-
-    private func buildExerciseCard(exercise: Exercise, number: Int, gradientColor: String) -> [String: Any] {
-        switch exercise {
-        case let strength as StrengthExercise:
-            return buildStrengthExerciseCard(exercise: strength, number: number, gradientColor: gradientColor)
-        case let cardio as CardioExercise:
-            return buildCardioExerciseCard(exercise: cardio, number: number, gradientColor: gradientColor)
-        case let yoga as YogaExercise:
-            return buildYogaExerciseCard(exercise: yoga, number: number, gradientColor: gradientColor)
-        default:
-            assertionFailure("Unhandled exercise type: \(type(of: exercise))")
-            return [:]
+            
+            guard let templates = dict["templates"] as? [String: Any] else {
+                return nil
+            }
+            
+            let context = buildContext(for: workout)
+            
+            guard let cardTemplate = templates["workout_card"] else {
+                
+                return nil
+            }
+            
+            let renderedCard = renderTemplate(
+                cardTemplate,
+                context: context,
+                templates: templates,
+                workout: workout
+            ) as? [String: Any]
+            
+            let divKitJson: [String: Any] = [
+                "card": renderedCard ?? [:],
+                "templates": [:],
+                "variables": []
+            ]
+            
+            return try? JSONSerialization.data(withJSONObject: divKitJson, options: [.prettyPrinted])
+            
+        } catch {
+            print("Error: \(error)")
+            return nil
         }
     }
-
-    private func buildStrengthExerciseCard(
-        exercise: StrengthExercise,
-        number: Int,
-        gradientColor: String
-    ) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "vertical",
-            "alignment_vertical": "center",
-            "background": [["type": "gradient", "angle": 0, "colors": ["#1D1D34", gradientColor]]],
-            "border": ["corner_radius": 22],
-            "items": [
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "items": [
-                        buildExerciseNumber(number: number, marginRight: 30),
-                        buildExerciseNameAndMuscle(name: exercise.name, muscleGroup: exercise.muscleGroup.title)
-                    ],
-                    "paddings": ["bottom": 10, "top": 10],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "content_alignment_horizontal": "center",
-                    "items": [
-                        buildMetricCard(title: "Sets", value: "\(exercise.sets)"),
-                        buildMetricCard(title: "Reps", value: "\(exercise.reps)"),
-                        buildMetricCard(title: "Weight", value: "\(String(format: "%.1f", exercise.weightKg)) Kg")
-                    ],
-                    "margins": ["left": 35],
-                    "paddings": ["bottom": 10, "top": 5],
-                    "width": ["type": "match_parent"]
-                ]
-            ],
-            "margins": ["bottom": 5, "left": 16, "right": 16],
-            "paddings": ["bottom": 10, "left": 15, "right": 15, "top": 10],
-            "width": ["type": "match_parent"]
+    
+    private func renderTemplate(_ node: Any, context: [String: String], templates: [String: Any], workout: Workout) -> Any {
+        switch node {
+        case let dict as [String: Any]:
+            var newDict: [String: Any] = [:]
+            for (key, value) in dict {
+                newDict[key] = renderTemplate(value, context: context, templates: templates, workout: workout)
+            }
+            return newDict
+            
+        case let array as [Any]:
+            var newArray: [Any] = []
+            for element in array {
+                if let placeholder = element as? String,
+                   placeholder.hasPrefix("!!") && placeholder.hasSuffix("??") {
+                    
+                    let placeholderName = String(placeholder.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespaces)
+                    
+                    if let replacement = context[placeholderName] {
+                        newArray.append(replacement)
+                    } else if placeholderName == "exercise_cards_array" {
+                        newArray.append(contentsOf: renderExerciseCards(for: workout, templates: templates))
+                    } else if let blockTemplate = templates[placeholderName] {
+                        newArray.append(renderTemplate(blockTemplate, context: context, templates: templates, workout: workout))
+                    } else {
+                        newArray.append(placeholder)
+                    }
+                } else {
+                    newArray.append(renderTemplate(element, context: context, templates: templates, workout: workout))
+                }
+            }
+            return newArray
+            
+        case let str as String:
+            if str.hasPrefix("!!") && str.hasSuffix("??") {
+                let placeholderName = String(str.dropFirst(2).dropLast(2)).trimmingCharacters(in: .whitespaces)
+                
+                if let replacement = context[placeholderName] {
+                    return replacement
+                }
+                
+                if placeholderName == "exercise_cards_array" {
+                    return renderExerciseCards(for: workout, templates: templates)
+                }
+                
+                if let blockTemplate = templates[placeholderName] {
+                    return renderTemplate(blockTemplate, context: context, templates: templates, workout: workout)
+                }
+                
+                return str
+            }
+            
+            let pattern = "!!([\\w.]+)\\?\\?"
+            guard let regex = try? NSRegularExpression(pattern: pattern) else {
+                return str
+            }
+            
+            let nsString = str as NSString
+            let matches = regex.matches(in: str, range: NSRange(location: 0, length: nsString.length))
+            
+            guard !matches.isEmpty else {
+                return str
+            }
+            
+            var result = str
+            for match in matches.reversed() {
+                let placeholderRange = match.range
+                let keyRange = match.range(at: 1)
+                
+                let placeholderName = nsString.substring(with: keyRange)
+                
+                if let replacement = context[placeholderName] {
+                    guard let swiftRange = Range(placeholderRange, in: result) else { continue }
+                    result.replaceSubrange(swiftRange, with: replacement)
+                }
+            }
+            
+            return result
+            
+        default:
+            return node
+        }
+    }
+    
+    private func renderExerciseCards(for workout: Workout, templates: [String: Any]) -> [Any] {
+        let style = workout.type.style
+        var exerciseCards: [Any] = []
+        
+        for (index, exercise) in workout.exercises.enumerated() {
+            let number = index + 1
+            let exerciseContext = buildExerciseContext(exercise: exercise, number: number, style: style)
+            
+            let templateKey: String
+            switch exercise {
+            case is StrengthExercise:
+                templateKey = "exercise_card_strength"
+            case is CardioExercise:
+                templateKey = "exercise_card_cardio"
+            case is YogaExercise:
+                templateKey = "exercise_card_yoga"
+            default:
+                continue
+            }
+            
+            guard let template = templates[templateKey] else {
+                continue
+            }
+            
+            let renderedCard = renderTemplate(template, context: exerciseContext, templates: templates, workout: workout)
+            exerciseCards.append(renderedCard)
+        }
+        
+        return exerciseCards
+    }
+    
+    private func buildContext(for workout: Workout) -> [String: String] {
+        let style = workout.type.style
+        
+        return [
+            "workout.id": workout.id,
+            "workout.name": workout.name,
+            "workout.type_title": workout.type.title,
+            "workout.exercises_count": "\(workout.exercises.count)",
+            
+            "style.header_gradient_start": style.headerGradientStart,
+            "style.header_gradient_end": style.headerGradientEnd,
+            "style.exercise_gradient_color": style.exerciseGradientColor,
+            "style.icon_url": style.iconUrl
         ]
     }
-
-    private func buildCardioExerciseCard(
-        exercise: CardioExercise,
-        number: Int,
-        gradientColor: String
-    ) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "vertical",
-            "alignment_vertical": "center",
-            "background": [["type": "gradient", "angle": 0, "colors": ["#1D1D34", gradientColor]]],
-            "border": ["corner_radius": 22],
-            "items": [
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "items": [
-                        buildExerciseNumber(number: number, marginRight: 20),
-                        buildExerciseNameAndMuscle(name: exercise.name, muscleGroup: exercise.muscleGroup.title)
-                    ],
-                    "paddings": ["bottom": 10, "top": 10],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "content_alignment_horizontal": "center",
-                    "items": [
-                        buildMetricCard(title: "Duration", value: "\(exercise.durationMinutes) min"),
-                        buildMetricCard(title: "Pace", value: exercise.pace.title)
-                    ],
-                    "margins": ["left": 35],
-                    "paddings": ["bottom": 10, "top": 5],
-                    "width": ["type": "match_parent"]
-                ]
-            ],
-            "margins": ["bottom": 5, "left": 16, "right": 16],
-            "paddings": ["bottom": 10, "left": 15, "right": 15, "top": 10],
-            "width": ["type": "match_parent"]
+    
+    private func buildExerciseContext(exercise: Exercise, number: Int, style: WorkoutStyle) -> [String: String] {
+        var context: [String: String] = [
+            "exercise.number": "\(number)",
+            "exercise.name": exercise.name,
+            "exercise.muscle_group": exercise.muscleGroup.title,
+            "style.exercise_gradient_color": style.exerciseGradientColor
         ]
-    }
-
-    private func buildYogaExerciseCard(
-        exercise: YogaExercise,
-        number: Int,
-        gradientColor: String
-    ) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "vertical",
-            "alignment_vertical": "center",
-            "background": [["type": "gradient", "angle": 0, "colors": ["#1D1D34", gradientColor]]],
-            "border": ["corner_radius": 22],
-            "items": [
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "items": [
-                        buildExerciseNumber(number: number, marginRight: 20),
-                        buildExerciseNameAndMuscle(name: exercise.name, muscleGroup: exercise.muscleGroup.title)
-                    ],
-                    "paddings": ["bottom": 10, "top": 10],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_vertical": "center",
-                    "content_alignment_horizontal": "center",
-                    "items": [
-                        buildMetricCard(title: "Hold for", value: "\(exercise.holdSeconds) sec"),
-                        buildMetricCard(title: "Breath Count", value: "\(exercise.breathCount)/min")
-                    ],
-                    "margins": ["left": 35],
-                    "paddings": ["bottom": 10, "top": 5],
-                    "width": ["type": "match_parent"]
-                ]
-            ],
-            "margins": ["bottom": 5, "left": 16, "right": 16],
-            "paddings": ["bottom": 10, "left": 15, "right": 15, "top": 10],
-            "width": ["type": "match_parent"]
-        ]
-    }
-
-    private func buildExerciseNumber(number: Int, marginRight: Int) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "horizontal",
-            "alignment_horizontal": "center",
-            "alignment_vertical": "center",
-            "background": [["type": "solid", "color": "#501F1F1F"]],
-            "border": ["corner_radius": 10],
-            "items": [
-                [
-                    "type": "text",
-                    "text": "\(number)",
-                    "alignment_horizontal": "center",
-                    "alignment_vertical": "center",
-                    "font_size": 15,
-                    "font_weight": "bold",
-                    "max_lines": 1,
-                    "text_color": "#FFFFFF"
-                ]
-            ],
-            "margins": ["right": marginRight],
-            "paddings": ["bottom": 10, "left": 10, "right": 10, "top": 10],
-            "width": ["type": "wrap_content"]
-        ]
-    }
-
-    private func buildExerciseNameAndMuscle(name: String, muscleGroup: String) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "horizontal",
-            "alignment_vertical": "center",
-            "items": [
-                [
-                    "type": "text",
-                    "text": name,
-                    "alignment_horizontal": "center",
-                    "alignment_vertical": "center",
-                    "font_size": 18,
-                    "font_weight": "bold",
-                    "max_lines": 1,
-                    "text_color": "#FFFFFF"
-                ],
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_horizontal": "center",
-                    "alignment_vertical": "center",
-                    "background": [["type": "solid", "color": "#501F1F1F"]],
-                    "border": ["corner_radius": 15],
-                    "items": [
-                        [
-                            "type": "text",
-                            "text": muscleGroup,
-                            "alignment_horizontal": "center",
-                            "alignment_vertical": "center",
-                            "font_size": 15,
-                            "font_weight": "regular",
-                            "max_lines": 1,
-                            "text_color": "#FFFFFF"
-                        ]
-                    ],
-                    "margins": ["left": 10],
-                    "paddings": ["bottom": 10, "left": 10, "right": 10, "top": 10],
-                    "width": ["type": "wrap_content"]
-                ]
-            ],
-            "width": ["type": "wrap_content"]
-        ]
-    }
-
-    private func buildMetricCard(title: String, value: String) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "vertical",
-            "alignment_horizontal": "center",
-            "alignment_vertical": "center",
-            "background": [["type": "solid", "color": "#501F1F1F"]],
-            "border": ["corner_radius": 10],
-            "items": [
-                [
-                    "type": "text",
-                    "text": title,
-                    "alignment_horizontal": "center",
-                    "alignment_vertical": "center",
-                    "font_size": 15,
-                    "font_weight": "bold",
-                    "margins": ["bottom": 10, "top": 5],
-                    "max_lines": 1,
-                    "text_color": "#55FFFFFF",
-                    "width": ["type": "wrap_content"]
-                ],
-                [
-                    "type": "text",
-                    "text": value,
-                    "alignment_horizontal": "center",
-                    "alignment_vertical": "center",
-                    "font_size": 15,
-                    "font_weight": "bold",
-                    "margins": ["bottom": 5],
-                    "max_lines": 1,
-                    "text_color": "#FFFFFF",
-                    "width": ["type": "wrap_content"]
-                ]
-            ],
-            "margins": ["right": 10],
-            "paddings": ["bottom": 5, "left": 20, "right": 20, "top": 5],
-            "width": ["type": "match_parent"]
-        ]
-    }
-
-    // MARK: - Start button (Div)
-
-    private func buildStartButtonDiv(workoutId: String) -> [String: Any] {
-        [
-            "type": "container",
-            "orientation": "overlap",
-            "action_animation": [
-                "duration": 120,
-                "end_value": 0.9,
-                "interpolator": "ease_in_out",
-                "name": "scale",
-                "start_value": 1.0
-            ],
-            "actions": [
-                ["log_id": "open_player", "url": "app://open_player?id=\(workoutId)"]
-            ],
-            "border": ["corner_radius": 28],
-            "height": ["type": "wrap_content"],
-            "items": [
-                [
-                    "type": "container",
-                    "background": [
-                        ["type": "gradient", "angle": 180, "colors": ["#99FFFFFF", "#45FFFFFF", "#00FFFFFF"]]
-                    ],
-                    "border": ["corner_radius": 28],
-                    "height": ["type": "match_parent"],
-                    "paddings": ["bottom": 1, "left": 1, "right": 1, "top": 1],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "background": [
-                        ["type": "solid", "color": "#732AFF"]
-                    ],
-                    "border": ["corner_radius": 26],
-                    "height": ["type": "match_parent"],
-                    "margins": ["bottom": 2, "left": 2, "right": 2, "top": 2],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "background": [
-                        ["type": "gradient", "angle": -45, "colors": ["#45FFFFFF", "#20FFFFFF", "#00FFFFFF"]]
-                    ],
-                    "height": ["type": "match_parent"],
-                    "width": ["type": "match_parent"]
-                ],
-                [
-                    "type": "container",
-                    "orientation": "horizontal",
-                    "alignment_horizontal": "center",
-                    "alignment_vertical": "center",
-                    "background": [
-                        ["type": "solid", "color": "#00FFFFFF"]
-                    ],
-                    "border": ["corner_radius": 28],
-                    "items": [
-                        [
-                            "type": "text",
-                            "text": "Start Workout",
-                            "alignment_vertical": "center",
-                            "font_size": 20,
-                            "font_weight": "medium",
-                            "text_color": "#FFFFFF"
-                        ]
-                    ],
-                    "paddings": ["bottom": 18, "left": 18, "right": 18, "top": 18],
-                    "width": ["type": "wrap_content"]
-                ]
-            ],
-            "margins": ["bottom": 12, "left": 16, "right": 16, "top": 16],
-            "width": ["type": "match_parent"]
-        ]
+        
+        let numberMargin: Int
+        switch exercise {
+        case is StrengthExercise:
+            numberMargin = 30
+        default:
+            numberMargin = 20
+        }
+        context["exercise.number_margin"] = "\(numberMargin)"
+        
+        switch exercise {
+        case let strength as StrengthExercise:
+            context["exercise.sets"] = "\(strength.sets)"
+            context["exercise.reps"] = "\(strength.reps)"
+            context["exercise.weight"] = String(format: "%.1f", strength.weightKg)
+            
+        case let cardio as CardioExercise:
+            context["exercise.duration"] = "\(cardio.durationMinutes)"
+            context["exercise.pace"] = cardio.pace.title
+            
+        case let yoga as YogaExercise:
+            context["exercise.hold_seconds"] = "\(yoga.holdSeconds)"
+            context["exercise.breath_count"] = "\(yoga.breathCount)"
+            
+        default:
+            break
+        }
+        
+        return context
     }
     
     private let workoutsMock: [Workout] = [
-        
         Workout(
             id: "1",
             name: "Easy Run",
@@ -687,7 +258,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "2",
             name: "Chest Day",
@@ -727,7 +297,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "3",
             name: "Legs",
@@ -775,7 +344,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "4",
             name: "HIIT",
@@ -846,7 +414,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "5",
             name: "Morning Stretch",
@@ -889,7 +456,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "6",
             name: "Yoga Flow",
@@ -904,7 +470,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "7",
             name: "HIIT",
@@ -919,7 +484,6 @@ struct WorkoutInfoLocalMapper {
                 )
             ]
         ),
-        
         Workout(
             id: "8",
             name: "Chest Day",
@@ -937,7 +501,3 @@ struct WorkoutInfoLocalMapper {
         )
     ]
 }
-
-
-
-

@@ -5,6 +5,7 @@ import GymbroNetwork
 public protocol WorkoutsNetworkClient {
     func fetchWorkoutsDivJson() async throws -> Data
     func fetchWorkoutInfoDivJson(with id: String) async throws -> Data
+    func fetchWorkoutInfoTemplates() async throws -> Data
 }
 
 final class WorkoutsNetworkClientImpl: WorkoutsNetworkClient {
@@ -12,6 +13,8 @@ final class WorkoutsNetworkClientImpl: WorkoutsNetworkClient {
     enum ClientError: Error {
         case badStatus(Int)
         case emptyData
+        case invalidJSON
+        case missingTemplates
     }
     
     private let baseURL: URL
@@ -54,4 +57,21 @@ final class WorkoutsNetworkClientImpl: WorkoutsNetworkClient {
         guard !data.isEmpty else { throw ClientError.emptyData }
         return data
     }
+    
+    func fetchWorkoutInfoTemplates() async throws -> Data {
+        let url = baseURL.appendingPathComponent("divkit/templates/workout_info")
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        if let http = response as? HTTPURLResponse,
+           !(200...299).contains(http.statusCode) {
+            throw ClientError.badStatus(http.statusCode)
+        }
+
+        return data
+    }
+
 }

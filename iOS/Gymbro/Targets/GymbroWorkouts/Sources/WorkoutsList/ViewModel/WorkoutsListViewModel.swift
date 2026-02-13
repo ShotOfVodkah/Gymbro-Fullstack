@@ -85,8 +85,10 @@ final class WorkoutsListViewModel: ObservableObject {
         Task {
             do {
                 let data = try await networkClient.fetchWorkoutsDivJson()
+                let templates = try await networkClient.fetchWorkoutInfoTemplates()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
                 localRepository.save(key: "workoutsList", data: data)
+                localRepository.save(key: "workoutInfoTemplate", data: templates)
                 screenState = .loaded
             } catch {
                 guard let data = localRepository.load(key: "workoutsList") else {
