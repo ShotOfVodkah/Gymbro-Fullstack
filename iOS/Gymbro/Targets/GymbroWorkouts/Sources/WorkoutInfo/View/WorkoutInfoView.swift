@@ -75,6 +75,7 @@ struct WorkoutInfoView: View {
         .interactiveDismissDisabled(false)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 
     @ObservedObject private var viewModel: WorkoutInfoViewModel

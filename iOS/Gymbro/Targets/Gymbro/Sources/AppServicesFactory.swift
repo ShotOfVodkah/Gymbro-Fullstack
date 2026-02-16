@@ -11,6 +11,7 @@ final class AppServicesFactory {
     
     let workoutsLocalRepository: DivCacheRepository
     let workoutsModelModifier = WorkoutsModelModifier()
+    let localMapper: WorkoutsLocalMapper
     
     private var screenFactories = ScreenFactories()
 
@@ -21,6 +22,7 @@ final class AppServicesFactory {
         self.router = router
         let cacheDS = WorkoutsDivCacheDataSource(container: container)
         self.workoutsLocalRepository = DivCacheRepository(dataSource: cacheDS)
+        self.localMapper = WorkoutsLocalMapper(localRepository: workoutsLocalRepository)
     }
 
     @MainActor
@@ -42,7 +44,8 @@ final class AppServicesFactory {
         screenFactories.workoutsListFactory.makeView(
             router: router,
             localRepository: workoutsLocalRepository,
-            modelModifier: workoutsModelModifier
+            modelModifier: workoutsModelModifier,
+            localMapper: localMapper
         )
     }
     
@@ -52,13 +55,19 @@ final class AppServicesFactory {
             id: id,
             router: router,
             localRepository: workoutsLocalRepository,
-            modelModifier: workoutsModelModifier
+            modelModifier: workoutsModelModifier,
+            localMapper: localMapper
         )
     }
     
     @MainActor
     func makeWorkoutBuilderScreen() -> some View {
-        screenFactories.workoutBuilderFactory.makeView()
+        screenFactories.workoutBuilderFactory.makeView(
+            router: router,
+            localRepository: workoutsLocalRepository,
+            modelModifier: workoutsModelModifier,
+            localMapper: localMapper
+        )
     }
     
 }

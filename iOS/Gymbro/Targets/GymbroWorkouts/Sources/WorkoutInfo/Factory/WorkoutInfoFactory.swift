@@ -13,11 +13,11 @@ public final class WorkoutInfoFactoryImpl {
         id: String,
         router: any Router,
         localRepository: DivCacheRepository,
-        modelModifier: WorkoutsModelModifier
+        modelModifier: WorkoutsModelModifier,
+        localMapper: WorkoutsLocalMapper
     ) -> some View  {
         guard let viewModelCache, id == idCache else {
             let workoutsNetworkClient = WorkoutsNetworkClientImpl()
-            let localMapper = WorkoutInfoLocalMapper(localRepository: localRepository)
             let viewModel = WorkoutInfoViewModel(
                 id: id,
                 networkClient: workoutsNetworkClient,

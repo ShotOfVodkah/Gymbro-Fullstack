@@ -15,4 +15,3 @@ public final class DivJsonCache {
         self.updatedAt = updatedAt
     }
 }
-

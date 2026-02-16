@@ -36,12 +36,14 @@ final class WorkoutsListViewModel: ObservableObject {
         networkClient: WorkoutsNetworkClient,
         localRepository: DivCacheRepository,
         router: any Router,
-        modelModifier: WorkoutsModelModifier
+        modelModifier: WorkoutsModelModifier,
+        localMapper: WorkoutsLocalMapper
     ) {
         self.networkClient = networkClient
         self.localRepository = localRepository
         self.router = router
         self.modelModifier = modelModifier
+        self.localMapper = localMapper
         
         let handler = WorkoutsDivUrlHandler{ [weak self] link in
             self?.handle(link: link)
@@ -53,6 +55,7 @@ final class WorkoutsListViewModel: ObservableObject {
                 guard let self else { return }
                 switch event {
                 case .workoutDeleted: fetchData()
+                case .premadeWorkoutAdded(let id): handlePremade(id: id)
                 }
             }
             .store(in: &cancellables)
@@ -65,11 +68,7 @@ final class WorkoutsListViewModel: ObservableObject {
            case .openWorkout(let id):
                router.navigate(to: .workoutInfo(id: id))
            case .openBuilder:
-               if screenState == .offline {
-                   showOfflineAlert = true
-               } else {
-                   router.navigate(to: .workoutBuilder)
-               }
+               router.navigate(to: .workoutBuilder)
            case .openStreak(let current, let goal, let daysLeft, let value):
                streakModel = StreakSheetModel(
                 current: current,
@@ -100,7 +99,21 @@ final class WorkoutsListViewModel: ObservableObject {
             }
         }
     }
-
+    
+    func handlePremade(id: String) {
+        // TODO handle online
+        guard let data = localRepository.load(key: "workoutsList"),
+              let newData = localMapper.addWorkoutCard(to: data, id: id)
+        else {
+            return
+        }
+        source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
+        sourceDebugId += 1
+        localRepository.save(key: "workoutsList", data: newData)
+    }
+    
+    @Published var sourceDebugId: Int = 0
+    @Published var hostingView: DivHostingView? = nil
     @Published var screenState: ScreenState = .loading
     @Published var source: DivViewSource? = nil
     @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
@@ -108,6 +121,7 @@ final class WorkoutsListViewModel: ObservableObject {
     @Published var showOfflineAlert: Bool = false
 
     private var cancellables = Set<AnyCancellable>()
+    private let localMapper: WorkoutsLocalMapper
     private let modelModifier: WorkoutsModelModifier
     private let localRepository: DivCacheRepository
     private let router: any Router

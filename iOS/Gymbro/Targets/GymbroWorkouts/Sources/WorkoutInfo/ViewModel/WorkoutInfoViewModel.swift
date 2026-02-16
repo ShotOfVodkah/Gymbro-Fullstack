@@ -21,7 +21,7 @@ final class WorkoutInfoViewModel: ObservableObject {
         localRepository: DivCacheRepository,
         router: any Router,
         modelModifier: WorkoutsModelModifier,
-        localMapper: WorkoutInfoLocalMapper
+        localMapper: WorkoutsLocalMapper
     ) {
         self.networkClient = networkClient
         self.localRepository = localRepository
@@ -64,7 +64,7 @@ final class WorkoutInfoViewModel: ObservableObject {
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutInfoCard")
                 screenState = .loaded
             } catch {
-                guard let data = localMapper.render(id: id) else {
+                guard let data = localMapper.renderWorkoutInfo(id: id) else {
                     screenState = .error
                     return
                 }
@@ -89,7 +89,7 @@ final class WorkoutInfoViewModel: ObservableObject {
     @Published var source: DivViewSource? = nil
     @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
 
-    private var localMapper: WorkoutInfoLocalMapper
+    private var localMapper: WorkoutsLocalMapper
     private let modelModifier: WorkoutsModelModifier
     private let localRepository: DivCacheRepository
     private let router: any Router
