@@ -5,20 +5,30 @@ import GymbroTypes
 
 public final class WorkoutsLocalMapper {
     
-    public init(localRepository: DivCacheRepository) {
-        self.localRepository = localRepository
+    public init(
+        divLocalRepository: DivCacheRepository,
+        workoutsLocalRepository: WorkoutsCacheRepository
+    ) {
+        self.divLocalRepository = divLocalRepository
+        self.workoutsLocalRepository = workoutsLocalRepository
     }
     
-    private let localRepository: DivCacheRepository
+    private let divLocalRepository: DivCacheRepository
+    private let workoutsLocalRepository: WorkoutsCacheRepository
     
     
     // MARK: - Public API
     
-    public func addWorkoutCard(to screenData: Data, id: String) -> Data? {
+    public func addWorkoutCard(to screenData: Data, id: String, fromPremade: Bool) -> Data? {
         do {
-            guard let workout = premadeWorkouts.first(where: { $0.id == id }),
-                  var screenJson = try JSONSerialization.jsonObject(with: screenData) as? [String: Any],
-                  let templatesData = localRepository.load(key: "workoutInfoTemplate")
+            let workout = workoutsLocalRepository.loadWorkout(key: fromPremade ? "premade" : "user", workoutId: id)
+            
+            guard let workout = workoutsLocalRepository.loadWorkout(
+                key: fromPremade ? "premade" : "user",
+                workoutId: id
+            ),
+            var screenJson = try JSONSerialization.jsonObject(with: screenData) as? [String: Any],
+            let templatesData = divLocalRepository.load(key: "workoutInfoTemplate")
             else {
                 return nil
             }
@@ -71,7 +81,9 @@ public final class WorkoutsLocalMapper {
                 states[0] = firstState
                 card["states"] = states
                 screenJson["card"] = card
-                workoutsMock.append(workout)
+                if fromPremade {
+                    workoutsLocalRepository.upsertWorkout(key: "user", workout: workout)
+                }
                 return try JSONSerialization.data(withJSONObject: screenJson, options: [.prettyPrinted])
             }
                     
@@ -80,14 +92,58 @@ public final class WorkoutsLocalMapper {
             return nil
         }
     }
+    
+    public func removeWorkoutCard(from screenData: Data, id: String) -> Data? {
+        do {
+            guard
+                var screenJson = try JSONSerialization.jsonObject(with: screenData) as? [String: Any],
+                var card = screenJson["card"] as? [String: Any],
+                var states = card["states"] as? [[String: Any]],
+                !states.isEmpty
+            else { return nil }
+
+            var firstState = states[0]
+
+            guard
+                var div = firstState["div"] as? [String: Any],
+                var items = div["items"] as? [Any],
+                items.count > 2,
+                var gallery = items[2] as? [String: Any],
+                var galleryItems = gallery["items"] as? [[String: Any]]
+            else { return nil }
+
+            galleryItems.removeAll { item in
+                guard let openUrl = item["open_url"] as? String else { return false }
+                return extractId(fromOpenUrl: openUrl) == id
+            }
+
+            gallery["items"] = galleryItems
+            items[2] = gallery
+            div["items"] = items
+            firstState["div"] = div
+            states[0] = firstState
+            card["states"] = states
+            screenJson["card"] = card
+
+            return try JSONSerialization.data(withJSONObject: screenJson, options: [.prettyPrinted])
+        } catch {
+            return nil
+        }
+    }
 
     public func renderWorkoutInfo(id: String) -> Data? {
-        guard let workout = workoutsMock.first(where: { $0.id == id }) else { return nil }
+        guard let workout = workoutsLocalRepository.loadWorkout(
+            key: "user",
+            workoutId: id
+        ) else { return nil }
         return render(id: id, screenType: .workoutInfo, workout: workout)
     }
     
     public func renderWorkoutBuilder(id: String) -> Data? {
-        guard let workout = premadeWorkouts.first(where: { $0.id == id }) else {
+        guard let workout = workoutsLocalRepository.loadWorkout(
+            key: "premade",
+            workoutId: id
+        ) else {
             return nil
         }
         return render(id: id, screenType: .workoutBuilder, workout: workout)
@@ -102,7 +158,7 @@ public final class WorkoutsLocalMapper {
     
     private func render(id: String, screenType: ScreenType, workout: Workout) -> Data? {
         
-        guard let templatesData = localRepository.load(key: "workoutInfoTemplate") else {
+        guard let templatesData = divLocalRepository.load(key: "workoutInfoTemplate") else {
             return nil
         }
             
@@ -327,4 +383,10 @@ public final class WorkoutsLocalMapper {
         
         return context
     }
+    
+    private func extractId(fromOpenUrl urlString: String) -> String? {
+        guard let components = URLComponents(string: urlString) else { return nil }
+        return components.queryItems?.first(where: { $0.name == "id" })?.value
+    }
+
 }

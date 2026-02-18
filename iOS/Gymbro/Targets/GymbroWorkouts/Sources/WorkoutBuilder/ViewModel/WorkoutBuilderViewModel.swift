@@ -4,6 +4,7 @@ import Combine
 
 import GymbroNavigation
 import GymbroNetwork
+import GymbroTypes
 
 @MainActor
 final class WorkoutBuilderViewModel: ObservableObject {
@@ -18,13 +19,15 @@ final class WorkoutBuilderViewModel: ObservableObject {
     init(
         networkClient: WorkoutsNetworkClient,
         router: any Router,
-        localRepository: DivCacheRepository,
+        divLocalRepository: DivCacheRepository,
+        actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
         localMapper: WorkoutsLocalMapper
     ) {
         self.router = router
         self.networkClient = networkClient
-        self.localRepository = localRepository
+        self.divLocalRepository = divLocalRepository
+        self.actionsRepository = actionsRepository
         self.modelModifier = modelModifier
         self.localMapper = localMapper
         
@@ -33,6 +36,16 @@ final class WorkoutBuilderViewModel: ObservableObject {
         }
         self.divkitComponents = DivKitComponents(urlHandler: handler)
         
+        modelModifier.events
+            .sink { [weak self] event in
+                guard let self else { return }
+                switch event {
+                case .statusChanged(let status): handleStatusChange(status: status)
+                default: break
+                }
+            }
+            .store(in: &cancellables)
+        
         fetchData()
     }
     
@@ -40,11 +53,12 @@ final class WorkoutBuilderViewModel: ObservableObject {
            switch link {
            case .openAI:
                print("stub")
-           case .openBuilder:
-               print("stub")
+           case .openBuilder(let type):
+               router.navigate(to: .workoutBuilderForType(type: type, workoutId: nil))
            case .openPremade(let id):
                presentSheet(id: id)
            case .savePremade(let id):
+               actionsRepository.enqueueSmart(.premadeAdded(id: id))
                modelModifier.events.send(.premadeWorkoutAdded(id: id))
                sheetModel = nil
                backButtonTapped()
@@ -56,15 +70,17 @@ final class WorkoutBuilderViewModel: ObservableObject {
         Task {
             do {
                 let data = try await networkClient.fetchWorkoutBuilderTitleJson()
-                localRepository.save(key: "workoutBuilderTitle", data: data)
+                divLocalRepository.save(key: "workoutBuilderTitle", data: data)
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutBuilder")
+                modelModifier.events.send(.statusChanged(status: .online))
                 screenState = .loaded
             } catch {
-                guard let data = localRepository.load(key: "workoutBuilderTitle") else {
+                guard let data = divLocalRepository.load(key: "workoutBuilderTitle") else {
                     screenState = .error
                     return
                 }
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
+                modelModifier.events.send(.statusChanged(status: .offline))
                 screenState = .offline
             }
         }
@@ -93,15 +109,28 @@ final class WorkoutBuilderViewModel: ObservableObject {
     func backButtonTapped() {
         router.pop()
     }
+    
+    private func handleStatusChange(status: OfflineStatus) {
+        switch screenState {
+        case .loaded, .offline:
+            switch status {
+            case .offline: screenState = .offline
+            case .online: screenState = .loaded
+            }
+        case .error, .loading: break
+        }
+    }
 
     @Published var screenState: ScreenState = .loading
     @Published var source: DivViewSource? = nil
     @Published var sheetModel: PremadeWorkoutSheet.Model? = nil
     @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
 
+    private var cancellables = Set<AnyCancellable>()
     private let modelModifier: WorkoutsModelModifier
     private let localMapper: WorkoutsLocalMapper
-    private let localRepository: DivCacheRepository
+    private let divLocalRepository: DivCacheRepository
+    private let actionsRepository: OfflineActionsRepository
     private let router: any Router
     private let networkClient: WorkoutsNetworkClient
 }

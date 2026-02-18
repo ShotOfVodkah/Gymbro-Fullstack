@@ -12,7 +12,8 @@ public final class WorkoutInfoFactoryImpl {
     public func makeView(
         id: String,
         router: any Router,
-        localRepository: DivCacheRepository,
+        divLocalRepository: DivCacheRepository,
+        actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
         localMapper: WorkoutsLocalMapper
     ) -> some View  {
@@ -21,7 +22,8 @@ public final class WorkoutInfoFactoryImpl {
             let viewModel = WorkoutInfoViewModel(
                 id: id,
                 networkClient: workoutsNetworkClient,
-                localRepository: localRepository,
+                divLocalRepository: divLocalRepository,
+                actionsRepository: actionsRepository,
                 router: router,
                 modelModifier: modelModifier,
                 localMapper: localMapper

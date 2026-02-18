@@ -9,7 +9,11 @@ import GymbroNavigation
 final class AppServicesFactory {
     let router: AppRouter
     
-    let workoutsLocalRepository: DivCacheRepository
+    let divLocalRepository: DivCacheRepository
+    let workoutsRepository: WorkoutsCacheRepository
+    let exercisesRepository: ExercisesRepository
+    let actionsRepository: OfflineActionsRepository
+    
     let workoutsModelModifier = WorkoutsModelModifier()
     let localMapper: WorkoutsLocalMapper
     
@@ -20,9 +24,23 @@ final class AppServicesFactory {
         container: ModelContainer
     ) {
         self.router = router
+        
         let cacheDS = WorkoutsDivCacheDataSource(container: container)
-        self.workoutsLocalRepository = DivCacheRepository(dataSource: cacheDS)
-        self.localMapper = WorkoutsLocalMapper(localRepository: workoutsLocalRepository)
+        self.divLocalRepository = DivCacheRepository(dataSource: cacheDS)
+        
+        let workoutsCacheDS = WorkoutsSwiftDataCacheDataSource(container: container)
+        self.workoutsRepository = WorkoutsCacheRepository(dataSource: workoutsCacheDS)
+        
+        let exercisesDS = ExercisesSwiftDataSource(container: container)
+        self.exercisesRepository = ExercisesRepository(dataSource: exercisesDS)
+        
+        let offlineDS = OfflineActionsSwiftDataSource(container: container)
+        self.actionsRepository = OfflineActionsRepository(dataSource: offlineDS)
+        
+        self.localMapper = WorkoutsLocalMapper(
+            divLocalRepository: divLocalRepository,
+            workoutsLocalRepository: workoutsRepository
+        )
     }
 
     @MainActor
@@ -33,7 +51,8 @@ final class AppServicesFactory {
             makeWorkoutInfoScreen(id: id)
         case .workoutBuilder:
             makeWorkoutBuilderScreen()
-            
+        case .workoutBuilderForType(let type, let id):
+            makeWorkoutBuilderForTypeScreen(type: type, workoutId: id)
         }
     }
     
@@ -43,7 +62,9 @@ final class AppServicesFactory {
     func makeWorkoutsScreen() -> some View {
         screenFactories.workoutsListFactory.makeView(
             router: router,
-            localRepository: workoutsLocalRepository,
+            divLocalRepository: divLocalRepository,
+            workoutsRepository: workoutsRepository,
+            exercisesRepository: exercisesRepository,
             modelModifier: workoutsModelModifier,
             localMapper: localMapper
         )
@@ -54,7 +75,8 @@ final class AppServicesFactory {
         screenFactories.workoutInfoFactory.makeView(
             id: id,
             router: router,
-            localRepository: workoutsLocalRepository,
+            divLocalRepository: divLocalRepository,
+            actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
             localMapper: localMapper
         )
@@ -64,9 +86,24 @@ final class AppServicesFactory {
     func makeWorkoutBuilderScreen() -> some View {
         screenFactories.workoutBuilderFactory.makeView(
             router: router,
-            localRepository: workoutsLocalRepository,
+            divLocalRepository: divLocalRepository,
+            actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
             localMapper: localMapper
+        )
+    }
+    
+    @MainActor
+    func makeWorkoutBuilderForTypeScreen(type: String?, workoutId: String?) -> some View {
+        screenFactories.workoutBuilderForTypeFactory.makeView(
+            router: router,
+            divLocalRepository: divLocalRepository,
+            workoutsRepository: workoutsRepository,
+            exercisesRepository: exercisesRepository,
+            actionsRepository: actionsRepository,
+            modelModifier: workoutsModelModifier,
+            type: type,
+            workoutId: workoutId
         )
     }
     
@@ -79,4 +116,5 @@ private struct ScreenFactories {
     lazy var workoutsListFactory = WorkoutsListFactoryImpl()
     lazy var workoutInfoFactory = WorkoutInfoFactoryImpl()
     lazy var workoutBuilderFactory = WorkoutBuilderFactoryImpl()
+    lazy var workoutBuilderForTypeFactory = WorkoutBuilderForTypeFactoryImpl()
 }

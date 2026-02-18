@@ -4,7 +4,7 @@ import SwiftUI
 import GymbroNetwork
 import GymbroNavigation
 
-public final class WorkoutsListFactoryImpl {
+public final class WorkoutBuilderForTypeFactoryImpl {
 
     public init() {}
 
@@ -14,26 +14,33 @@ public final class WorkoutsListFactoryImpl {
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
+        actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
-        localMapper: WorkoutsLocalMapper
+        type: String?,
+        workoutId: String?
     ) -> some View  {
-        guard let viewModelCache else {
+        guard let viewModelCache, typeCache == type, idCache == workoutId else {
             let workoutsNetworkClient = WorkoutsNetworkClientImpl()
-            let viewModel = WorkoutsListViewModel(
+            let viewModel = WorkoutBuilderForTypeViewModel(
                 networkClient: workoutsNetworkClient,
+                router: router,
                 divLocalRepository: divLocalRepository,
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,
-                router: router,
+                actionsRepository: actionsRepository,
                 modelModifier: modelModifier,
-                localMapper: localMapper
+                type: type,
+                workoutId: workoutId
             )
             viewModelCache = viewModel
-            return WorkoutsListView(viewModel: viewModel)
+            typeCache = type
+            idCache = workoutId
+            return WorkoutBuilderForTypeView(viewModel: viewModel)
         }
-        return WorkoutsListView(viewModel: viewModelCache)
+        return WorkoutBuilderForTypeView(viewModel: viewModelCache)
     }
     
-    private var viewModelCache: WorkoutsListViewModel?
+    private var viewModelCache: WorkoutBuilderForTypeViewModel?
+    private var idCache: String?
+    private var typeCache: String?
 }
-

@@ -56,6 +56,7 @@ public struct AppButton: View {
     private let title: String
     private let size: AppButtonSize
     private let action: () -> Void
+    private let wrapContent: Bool
     
     private let borderGradient = LinearGradient(
         colors: [
@@ -80,11 +81,13 @@ public struct AppButton: View {
     public init(
         _ title: String,
         size: AppButtonSize = .l,
-        action: @escaping () -> Void
+        action: @escaping () -> Void,
+        wrapContent: Bool = true
     ) {
         self.title = title
         self.size = size
         self.action = action
+        self.wrapContent = wrapContent
     }
 
 
@@ -96,6 +99,7 @@ public struct AppButton: View {
                 .padding(.horizontal, size.horizontalPadding)
                 .padding(.vertical, size.verticalPadding)
                 .frame(minHeight: size.minHeight)
+                .frame(maxWidth: wrapContent ? nil : .infinity)
                 .overlay(
                     Capsule()
                         .stroke(borderGradient, lineWidth: size.lineWidth)

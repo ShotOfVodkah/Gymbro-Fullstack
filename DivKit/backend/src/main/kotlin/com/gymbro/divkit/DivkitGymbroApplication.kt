@@ -81,125 +81,6 @@ val workouts: List<Workout> = listOf(
 		)
 	),
 
-//	Workout(
-//		id = "3",
-//		name = "Legs",
-//		type = WorkoutType.STRENGTH,
-//		exercises = listOf(
-//			StrengthExercise(
-//				id = "strength_3_1",
-//				name = "Barbell Squats",
-//				muscleGroup = MuscleGroup.LEGS,
-//				sets = 4,
-//				reps = 10,
-//				weightKg = 70.0
-//			),
-//			StrengthExercise(
-//				id = "strength_3_2",
-//				name = "Romanian Deadlifts",
-//				muscleGroup = MuscleGroup.GLUTES,
-//				sets = 3,
-//				reps = 12,
-//				weightKg = 50.0
-//			),
-//			StrengthExercise(
-//				id = "strength_3_3",
-//				name = "Walking Lunges",
-//				muscleGroup = MuscleGroup.LEGS,
-//				sets = 3,
-//				reps = 16,
-//				weightKg = 12.0
-//			),
-//			StrengthExercise(
-//				id = "strength_3_4",
-//				name = "Leg Press",
-//				muscleGroup = MuscleGroup.LEGS,
-//				sets = 3,
-//				reps = 15,
-//				weightKg = 100.0
-//			),
-//			StrengthExercise(
-//				id = "strength_3_5",
-//				name = "Calf Raises",
-//				muscleGroup = MuscleGroup.LEGS,
-//				sets = 4,
-//				reps = 20,
-//				weightKg = 30.0
-//			)
-//		)
-//	),
-//
-//	Workout(
-//		id = "4",
-//		name = "HIIT",
-//		type = WorkoutType.CARDIO,
-//		exercises = listOf(
-//			CardioExercise(
-//				id = "cardio_4_1",
-//				name = "Warm-up",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				durationMinutes = 3,
-//				pace = PaceType.JOG
-//			),
-//			CardioExercise(
-//				id = "cardio_4_2",
-//				name = "Sprint Intervals",
-//				muscleGroup = MuscleGroup.LEGS,
-//				durationMinutes = 1,
-//				pace = PaceType.SPRINT
-//			),
-//			CardioExercise(
-//				id = "cardio_4_3",
-//				name = "Recovery",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				durationMinutes = 1,
-//				pace = PaceType.RECOVERY
-//			),
-//			CardioExercise(
-//				id = "cardio_4_4",
-//				name = "Sprint Intervals",
-//				muscleGroup = MuscleGroup.LEGS,
-//				durationMinutes = 1,
-//				pace = PaceType.SPRINT
-//			),
-//			CardioExercise(
-//				id = "cardio_4_5",
-//				name = "Recovery",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				durationMinutes = 1,
-//				pace = PaceType.RECOVERY
-//			),
-//			CardioExercise(
-//				id = "cardio_4_6",
-//				name = "Sprint Intervals",
-//				muscleGroup = MuscleGroup.LEGS,
-//				durationMinutes = 1,
-//				pace = PaceType.SPRINT
-//			),
-//			CardioExercise(
-//				id = "cardio_4_7",
-//				name = "Recovery",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				durationMinutes = 1,
-//				pace = PaceType.RECOVERY
-//			),
-//			CardioExercise(
-//				id = "cardio_4_8",
-//				name = "Sprint Intervals",
-//				muscleGroup = MuscleGroup.LEGS,
-//				durationMinutes = 1,
-//				pace = PaceType.SPRINT
-//			),
-//			CardioExercise(
-//				id = "cardio_4_9",
-//				name = "Cool-down",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				durationMinutes = 5,
-//				pace = PaceType.WALK
-//			)
-//		)
-//	),
-
 	Workout(
 		id = "5",
 		name = "Morning Stretch",
@@ -242,52 +123,6 @@ val workouts: List<Workout> = listOf(
 			)
 		)
 	),
-
-//	Workout(
-//		id = "6",
-//		name = "Yoga Flow",
-//		type = WorkoutType.YOGA,
-//		exercises = listOf(
-//			YogaExercise(
-//				id = "yoga_6_1",
-//				name = "Mountain Pose → Forward Fold",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				holdSeconds = 30,
-//				breathCount = 5
-//			)
-//		)
-//	),
-//
-//	Workout(
-//		id = "7",
-//		name = "HIIT",
-//		type = WorkoutType.CARDIO,
-//		exercises = listOf(
-//			CardioExercise(
-//				id = "cardio_7_1",
-//				name = "Dynamic Warm-up",
-//				muscleGroup = MuscleGroup.FULL_BODY,
-//				durationMinutes = 5,
-//				pace = PaceType.JOG
-//			)
-//		)
-//	),
-//
-//	Workout(
-//		id = "8",
-//		name = "Chest Day",
-//		type = WorkoutType.STRENGTH,
-//		exercises = listOf(
-//			StrengthExercise(
-//				id = "strength_8_1",
-//				name = "Dumbbell Bench Press",
-//				muscleGroup = MuscleGroup.CHEST,
-//				sets = 4,
-//				reps = 12,
-//				weightKg = 25.0
-//			)
-//		)
-//	)
 )
 
 val premadeWorkouts: List<Workout> = listOf(
@@ -425,6 +260,194 @@ val premadeWorkouts: List<Workout> = listOf(
 				pace = PaceType.RECOVERY
 			)
 		)
+	)
+)
+
+// Strength Exercises
+val strengthExercises = listOf(
+	StrengthExercise(
+		id = "str_001",
+		name = "Barbell Bench Press",
+		muscleGroup = MuscleGroup.CHEST,
+		sets = 4,
+		reps = 8,
+		weightKg = 80.0
+	),
+	StrengthExercise(
+		id = "str_002",
+		name = "Deadlift",
+		muscleGroup = MuscleGroup.BACK,
+		sets = 3,
+		reps = 5,
+		weightKg = 120.0
+	),
+	StrengthExercise(
+		id = "str_003",
+		name = "Barbell Squat",
+		muscleGroup = MuscleGroup.LEGS,
+		sets = 4,
+		reps = 10,
+		weightKg = 100.0
+	),
+	StrengthExercise(
+		id = "str_004",
+		name = "Overhead Press",
+		muscleGroup = MuscleGroup.SHOULDERS,
+		sets = 3,
+		reps = 12,
+		weightKg = 50.0
+	),
+	StrengthExercise(
+		id = "str_005",
+		name = "Pull Up",
+		muscleGroup = MuscleGroup.BACK,
+		sets = 3,
+		reps = 8,
+		weightKg = 0.0
+	),
+	StrengthExercise(
+		id = "str_006",
+		name = "Dumbbell Bicep Curl",
+		muscleGroup = MuscleGroup.GLUTES,
+		sets = 3,
+		reps = 15,
+		weightKg = 15.0
+	),
+	StrengthExercise(
+		id = "str_007",
+		name = "Leg Press",
+		muscleGroup = MuscleGroup.LEGS,
+		sets = 4,
+		reps = 12,
+		weightKg = 180.0
+	),
+	StrengthExercise(
+		id = "str_008",
+		name = "Barbell Row",
+		muscleGroup = MuscleGroup.BACK,
+		sets = 4,
+		reps = 10,
+		weightKg = 70.0
+	)
+)
+
+// Cardio Exercises
+val cardioExercises = listOf(
+	CardioExercise(
+		id = "car_001",
+		name = "Easy Run",
+		muscleGroup = MuscleGroup.FULL_BODY,
+		durationMinutes = 30,
+		pace = PaceType.JOG
+	),
+	CardioExercise(
+		id = "car_002",
+		name = "HIIT Sprint",
+		muscleGroup = MuscleGroup.BACK,
+		durationMinutes = 20,
+		pace = PaceType.JOG
+	),
+	CardioExercise(
+		id = "car_003",
+		name = "Jump Rope",
+		muscleGroup = MuscleGroup.CHEST,
+		durationMinutes = 15,
+		pace = PaceType.RUN
+	),
+	CardioExercise(
+		id = "car_004",
+		name = "Rowing Machine",
+		muscleGroup = MuscleGroup.BACK,
+		durationMinutes = 25,
+		pace = PaceType.RUN
+	),
+	CardioExercise(
+		id = "car_005",
+		name = "Cycling",
+		muscleGroup = MuscleGroup.LEGS,
+		durationMinutes = 45,
+		pace = PaceType.SPRINT
+	),
+	CardioExercise(
+		id = "car_006",
+		name = "Stair Climber",
+		muscleGroup = MuscleGroup.LEGS,
+		durationMinutes = 20,
+		pace = PaceType.RECOVERY
+	),
+	CardioExercise(
+		id = "car_007",
+		name = "Swimming",
+		muscleGroup = MuscleGroup.LEGS,
+		durationMinutes = 40,
+		pace = PaceType.JOG
+	),
+	CardioExercise(
+		id = "car_008",
+		name = "Elliptical",
+		muscleGroup = MuscleGroup.FULL_BODY,
+		durationMinutes = 35,
+		pace = PaceType.WALK
+	)
+)
+
+// Yoga Exercises
+val yogaExercises = listOf(
+	YogaExercise(
+		id = "yog_001",
+		name = "Downward Dog",
+		muscleGroup = MuscleGroup.FULL_BODY,
+		holdSeconds = 60,
+		breathCount = 8
+	),
+	YogaExercise(
+		id = "yog_002",
+		name = "Warrior II",
+		muscleGroup = MuscleGroup.LEGS,
+		holdSeconds = 45,
+		breathCount = 6
+	),
+	YogaExercise(
+		id = "yog_003",
+		name = "Tree Pose",
+		muscleGroup = MuscleGroup.LEGS,
+		holdSeconds = 30,
+		breathCount = 5
+	),
+	YogaExercise(
+		id = "yog_004",
+		name = "Cobra Pose",
+		muscleGroup = MuscleGroup.BACK,
+		holdSeconds = 30,
+		breathCount = 4
+	),
+	YogaExercise(
+		id = "yog_005",
+		name = "Bridge Pose",
+		muscleGroup = MuscleGroup.GLUTES,
+		holdSeconds = 45,
+		breathCount = 6
+	),
+	YogaExercise(
+		id = "yog_006",
+		name = "Pigeon Pose",
+		muscleGroup = MuscleGroup.LEGS,
+		holdSeconds = 60,
+		breathCount = 8
+	),
+	YogaExercise(
+		id = "yog_007",
+		name = "Shoulder Stand",
+		muscleGroup = MuscleGroup.SHOULDERS,
+		holdSeconds = 30,
+		breathCount = 5
+	),
+	YogaExercise(
+		id = "yog_008",
+		name = "Child's Pose",
+		muscleGroup = MuscleGroup.FULL_BODY,
+		holdSeconds = 90,
+		breathCount = 12
 	)
 )
 

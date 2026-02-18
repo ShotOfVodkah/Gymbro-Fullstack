@@ -4,6 +4,7 @@ import Combine
 
 import GymbroNavigation
 import GymbroNetwork
+import GymbroTypes
 
 @MainActor
 final class WorkoutsListViewModel: ObservableObject {
@@ -34,13 +35,17 @@ final class WorkoutsListViewModel: ObservableObject {
 
     init(
         networkClient: WorkoutsNetworkClient,
-        localRepository: DivCacheRepository,
+        divLocalRepository: DivCacheRepository,
+        workoutsRepository: WorkoutsCacheRepository,
+        exercisesRepository: ExercisesRepository,
         router: any Router,
         modelModifier: WorkoutsModelModifier,
         localMapper: WorkoutsLocalMapper
     ) {
         self.networkClient = networkClient
-        self.localRepository = localRepository
+        self.divLocalRepository = divLocalRepository
+        self.workoutsRepository = workoutsRepository
+        self.exercisesRepository = exercisesRepository
         self.router = router
         self.modelModifier = modelModifier
         self.localMapper = localMapper
@@ -54,8 +59,11 @@ final class WorkoutsListViewModel: ObservableObject {
             .sink { [weak self] event in
                 guard let self else { return }
                 switch event {
-                case .workoutDeleted: fetchData()
-                case .premadeWorkoutAdded(let id): handlePremade(id: id)
+                case .statusChanged(let status): handleStatusChange(status: status)
+                case .workoutDeleted(let id): handleDelete(id: id)
+                case .premadeWorkoutAdded(let id): handleAdd(id: id, fromPremade: true)
+                case .workoutAdded(id: let id): handleAdd(id: id, fromPremade: false)
+                case .workoutEdited: break
                 }
             }
             .store(in: &cancellables)
@@ -83,33 +91,67 @@ final class WorkoutsListViewModel: ObservableObject {
     func fetchData() {
         Task {
             do {
+                
+                workoutsRepository.saveWorkouts(key: "user", workouts: workoutsMock)
+                workoutsRepository.saveWorkouts(key: "premade", workouts: premadeWorkouts)
+                exercisesRepository.save(type: .cardio, items: cardioExercises.map{ ExerciseItemDTO(from: $0)})
+                exercisesRepository.save(type: .yoga, items: yogaExercises.map{ ExerciseItemDTO(from: $0)})
+                exercisesRepository.save(type: .strength, items: strengthExercises.map{ ExerciseItemDTO(from: $0)})
+                
                 let data = try await networkClient.fetchWorkoutsDivJson()
                 let templates = try await networkClient.fetchWorkoutInfoTemplates()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
-                localRepository.save(key: "workoutsList", data: data)
-                localRepository.save(key: "workoutInfoTemplate", data: templates)
+                divLocalRepository.save(key: "workoutsList", data: data)
+                
+                divLocalRepository.save(key: "workoutInfoTemplate", data: templates)
+                
+                modelModifier.events.send(.statusChanged(status: .online))
                 screenState = .loaded
             } catch {
-                guard let data = localRepository.load(key: "workoutsList") else {
+                guard let data = divLocalRepository.load(key: "workoutsList") else {
                     screenState = .error
                     return
                 }
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
+                modelModifier.events.send(.statusChanged(status: .offline))
                 screenState = .offline
             }
         }
     }
     
-    func handlePremade(id: String) {
+    func handleAdd(id: String, fromPremade: Bool) {
         // TODO handle online
-        guard let data = localRepository.load(key: "workoutsList"),
-              let newData = localMapper.addWorkoutCard(to: data, id: id)
+        guard let data = divLocalRepository.load(key: "workoutsList"),
+              let newData = localMapper.addWorkoutCard(to: data, id: id, fromPremade: fromPremade)
         else {
             return
         }
         source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
         sourceDebugId += 1
-        localRepository.save(key: "workoutsList", data: newData)
+        divLocalRepository.save(key: "workoutsList", data: newData)
+    }
+    
+    func handleDelete(id: String) {
+        // TODO handle online
+        guard let data = divLocalRepository.load(key: "workoutsList"),
+              let newData = localMapper.removeWorkoutCard(from: data, id: id)
+        else {
+            return
+        }
+        source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
+        sourceDebugId += 1
+        divLocalRepository.save(key: "workoutsList", data: newData)
+    }
+    
+    private func handleStatusChange(status: OfflineStatus) {
+        switch screenState {
+        case .loaded, .offline:
+            switch status {
+            case .offline: screenState = .offline
+            case .online: screenState = .loaded
+            }
+        case .error, .loading: break
+        }
     }
     
     @Published var sourceDebugId: Int = 0
@@ -123,7 +165,9 @@ final class WorkoutsListViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let localMapper: WorkoutsLocalMapper
     private let modelModifier: WorkoutsModelModifier
-    private let localRepository: DivCacheRepository
+    private let divLocalRepository: DivCacheRepository
+    private let workoutsRepository: WorkoutsCacheRepository
+    private let exercisesRepository: ExercisesRepository
     private let router: any Router
     private let networkClient: WorkoutsNetworkClient
 }

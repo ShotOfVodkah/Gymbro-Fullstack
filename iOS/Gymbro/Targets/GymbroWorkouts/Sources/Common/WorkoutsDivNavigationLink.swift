@@ -18,8 +18,13 @@ enum WorkoutInfoNavigationLink {
 enum WorkoutBuilderTitleNavigationLink {
     case savePremade(id: String)
     case openPremade(id: String)
-    case openBuilder(type: WorkoutType)
+    case openBuilder(type: String)
     case openAI
+}
+
+enum WorkoutBuilderForTypeNavigationLink {
+    case add(id: String)
+    case remove(id: String)
 }
 
 final class NoopDivUrlHandler: DivUrlHandler {
@@ -97,123 +102,6 @@ var workoutsMock: [Workout] = [
         ]
     ),
     Workout(
-        id: "3",
-        name: "Legs",
-        type: .strength,
-        exercises: [
-            StrengthExercise(
-                id: "strength_3_1",
-                name: "Barbell Squats",
-                muscleGroup: .legs,
-                sets: 4,
-                reps: 10,
-                weightKg: 70.0
-            ),
-            StrengthExercise(
-                id: "strength_3_2",
-                name: "Romanian Deadlifts",
-                muscleGroup: .glutes,
-                sets: 3,
-                reps: 12,
-                weightKg: 50.0
-            ),
-            StrengthExercise(
-                id: "strength_3_3",
-                name: "Walking Lunges",
-                muscleGroup: .legs,
-                sets: 3,
-                reps: 16,
-                weightKg: 12.0
-            ),
-            StrengthExercise(
-                id: "strength_3_4",
-                name: "Leg Press",
-                muscleGroup: .legs,
-                sets: 3,
-                reps: 15,
-                weightKg: 100.0
-            ),
-            StrengthExercise(
-                id: "strength_3_5",
-                name: "Calf Raises",
-                muscleGroup: .legs,
-                sets: 4,
-                reps: 20,
-                weightKg: 30.0
-            )
-        ]
-    ),
-    Workout(
-        id: "4",
-        name: "HIIT",
-        type: .cardio,
-        exercises: [
-            CardioExercise(
-                id: "cardio_4_1",
-                name: "Warm-up",
-                muscleGroup: .fullBody,
-                durationMinutes: 3,
-                pace: .jog
-            ),
-            CardioExercise(
-                id: "cardio_4_2",
-                name: "Sprint Intervals",
-                muscleGroup: .legs,
-                durationMinutes: 1,
-                pace: .sprint
-            ),
-            CardioExercise(
-                id: "cardio_4_3",
-                name: "Recovery",
-                muscleGroup: .fullBody,
-                durationMinutes: 1,
-                pace: .recovery
-            ),
-            CardioExercise(
-                id: "cardio_4_4",
-                name: "Sprint Intervals",
-                muscleGroup: .legs,
-                durationMinutes: 1,
-                pace: .sprint
-            ),
-            CardioExercise(
-                id: "cardio_4_5",
-                name: "Recovery",
-                muscleGroup: .fullBody,
-                durationMinutes: 1,
-                pace: .recovery
-            ),
-            CardioExercise(
-                id: "cardio_4_6",
-                name: "Sprint Intervals",
-                muscleGroup: .legs,
-                durationMinutes: 1,
-                pace: .sprint
-            ),
-            CardioExercise(
-                id: "cardio_4_7",
-                name: "Recovery",
-                muscleGroup: .fullBody,
-                durationMinutes: 1,
-                pace: .recovery
-            ),
-            CardioExercise(
-                id: "cardio_4_8",
-                name: "Sprint Intervals",
-                muscleGroup: .legs,
-                durationMinutes: 1,
-                pace: .sprint
-            ),
-            CardioExercise(
-                id: "cardio_4_9",
-                name: "Cool-down",
-                muscleGroup: .fullBody,
-                durationMinutes: 5,
-                pace: .walk
-            )
-        ]
-    ),
-    Workout(
         id: "5",
         name: "Morning Stretch",
         type: .yoga,
@@ -252,49 +140,6 @@ var workoutsMock: [Workout] = [
                 muscleGroup: .legs,
                 holdSeconds: 90,
                 breathCount: 12
-            )
-        ]
-    ),
-    Workout(
-        id: "6",
-        name: "Yoga Flow",
-        type: .yoga,
-        exercises: [
-            YogaExercise(
-                id: "yoga_6_1",
-                name: "Mountain Pose → Forward Fold",
-                muscleGroup: .fullBody,
-                holdSeconds: 30,
-                breathCount: 5
-            )
-        ]
-    ),
-    Workout(
-        id: "7",
-        name: "HIIT",
-        type: .cardio,
-        exercises: [
-            CardioExercise(
-                id: "cardio_7_1",
-                name: "Dynamic Warm-up",
-                muscleGroup: .fullBody,
-                durationMinutes: 5,
-                pace: .jog
-            )
-        ]
-    ),
-    Workout(
-        id: "8",
-        name: "Chest Day",
-        type: .strength,
-        exercises: [
-            StrengthExercise(
-                id: "strength_8_1",
-                name: "Dumbbell Bench Press",
-                muscleGroup: .chest,
-                sets: 4,
-                reps: 12,
-                weightKg: 25.0
             )
         ]
     )
@@ -450,5 +295,193 @@ var premadeWorkouts: [Workout] = [
                 pace: .recovery
             )
         ]
+    )
+]
+
+// Strength Exercises
+let strengthExercises: [StrengthExercise] = [
+    StrengthExercise(
+        id: "str_001",
+        name: "Barbell Bench Press",
+        muscleGroup: .chest,
+        sets: 4,
+        reps: 8,
+        weightKg: 80.0
+    ),
+    StrengthExercise(
+        id: "str_002",
+        name: "Deadlift",
+        muscleGroup: .back,
+        sets: 3,
+        reps: 5,
+        weightKg: 120.0
+    ),
+    StrengthExercise(
+        id: "str_003",
+        name: "Barbell Squat",
+        muscleGroup: .legs,
+        sets: 4,
+        reps: 10,
+        weightKg: 100.0
+    ),
+    StrengthExercise(
+        id: "str_004",
+        name: "Overhead Press",
+        muscleGroup: .shoulders,
+        sets: 3,
+        reps: 12,
+        weightKg: 50.0
+    ),
+    StrengthExercise(
+        id: "str_005",
+        name: "Pull Up",
+        muscleGroup: .back,
+        sets: 3,
+        reps: 8,
+        weightKg: 0.0
+    ),
+    StrengthExercise(
+        id: "str_006",
+        name: "Dumbbell Bicep Curl",
+        muscleGroup: .glutes,
+        sets: 3,
+        reps: 15,
+        weightKg: 15.0
+    ),
+    StrengthExercise(
+        id: "str_007",
+        name: "Leg Press",
+        muscleGroup: .legs,
+        sets: 4,
+        reps: 12,
+        weightKg: 180.0
+    ),
+    StrengthExercise(
+        id: "str_008",
+        name: "Barbell Row",
+        muscleGroup: .back,
+        sets: 4,
+        reps: 10,
+        weightKg: 70.0
+    )
+]
+
+// Cardio Exercises
+let cardioExercises: [CardioExercise] = [
+    CardioExercise(
+        id: "car_001",
+        name: "Easy Run",
+        muscleGroup: .fullBody,
+        durationMinutes: 30,
+        pace: .jog
+    ),
+    CardioExercise(
+        id: "car_002",
+        name: "HIIT Sprint",
+        muscleGroup: .back,
+        durationMinutes: 20,
+        pace: .jog
+    ),
+    CardioExercise(
+        id: "car_003",
+        name: "Jump Rope",
+        muscleGroup: .chest,
+        durationMinutes: 15,
+        pace: .run
+    ),
+    CardioExercise(
+        id: "car_004",
+        name: "Rowing Machine",
+        muscleGroup: .back,
+        durationMinutes: 25,
+        pace: .run
+    ),
+    CardioExercise(
+        id: "car_005",
+        name: "Cycling",
+        muscleGroup: .legs,
+        durationMinutes: 45,
+        pace: .sprint
+    ),
+    CardioExercise(
+        id: "car_006",
+        name: "Stair Climber",
+        muscleGroup: .legs,
+        durationMinutes: 20,
+        pace: .recovery
+    ),
+    CardioExercise(
+        id: "car_007",
+        name: "Swimming",
+        muscleGroup: .legs,
+        durationMinutes: 40,
+        pace: .jog
+    ),
+    CardioExercise(
+        id: "car_008",
+        name: "Elliptical",
+        muscleGroup: .fullBody,
+        durationMinutes: 35,
+        pace: .walk
+    )
+]
+
+// Yoga Exercises
+let yogaExercises: [YogaExercise] = [
+    YogaExercise(
+        id: "yog_001",
+        name: "Downward Dog",
+        muscleGroup: .fullBody,
+        holdSeconds: 60,
+        breathCount: 8
+    ),
+    YogaExercise(
+        id: "yog_002",
+        name: "Warrior II",
+        muscleGroup: .legs,
+        holdSeconds: 45,
+        breathCount: 6
+    ),
+    YogaExercise(
+        id: "yog_003",
+        name: "Tree Pose",
+        muscleGroup: .legs,
+        holdSeconds: 30,
+        breathCount: 5
+    ),
+    YogaExercise(
+        id: "yog_004",
+        name: "Cobra Pose",
+        muscleGroup: .back,
+        holdSeconds: 30,
+        breathCount: 4
+    ),
+    YogaExercise(
+        id: "yog_005",
+        name: "Bridge Pose",
+        muscleGroup: .glutes,
+        holdSeconds: 45,
+        breathCount: 6
+    ),
+    YogaExercise(
+        id: "yog_006",
+        name: "Pigeon Pose",
+        muscleGroup: .legs,
+        holdSeconds: 60,
+        breathCount: 8
+    ),
+    YogaExercise(
+        id: "yog_007",
+        name: "Shoulder Stand",
+        muscleGroup: .shoulders,
+        holdSeconds: 30,
+        breathCount: 5
+    ),
+    YogaExercise(
+        id: "yog_008",
+        name: "Child's Pose",
+        muscleGroup: .fullBody,
+        holdSeconds: 90,
+        breathCount: 12
     )
 ]

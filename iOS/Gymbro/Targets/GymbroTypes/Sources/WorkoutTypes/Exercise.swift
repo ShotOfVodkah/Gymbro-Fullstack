@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol Exercise {
+public protocol Exercise: Equatable, Codable {
     
     var id: String { get }
     var name: String { get }
@@ -9,6 +9,18 @@ public protocol Exercise {
 }
 
 // MARK: - Exercises Variations
+
+public struct DefaultExercise: Exercise {
+    public let id: String
+    public let name: String
+    public let muscleGroup: MuscleGroup
+    
+    public init(id: String, name: String, muscleGroup: MuscleGroup) {
+        self.id = id
+        self.name = name
+        self.muscleGroup = muscleGroup
+    }
+}
 
 public struct StrengthExercise: Exercise {
     public let id: String

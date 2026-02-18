@@ -16,7 +16,7 @@ struct GymbroApp: App {
         let container: ModelContainer = {
             do {
                 return try ModelContainer(
-                    for: DivJsonCache.self,
+                    for: DivJsonCache.self, WorkoutsCache.self, ExercisesCache.self, OfflineActionEntity.self,
                     configurations: ModelConfiguration(isStoredInMemoryOnly: false))
             } catch {
                 fatalError("Failed to create ModelContainer: \(error)")

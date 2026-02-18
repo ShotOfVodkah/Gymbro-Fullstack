@@ -3,7 +3,7 @@ import DivKit
 
 import GymbroTypes
 
-extension WorkoutBuilderTitleNavigationLink {
+extension WorkoutBuilderForTypeNavigationLink {
     init?(url: URL) {
         guard url.scheme == "app" else { return nil }
         
@@ -11,26 +11,18 @@ extension WorkoutBuilderTitleNavigationLink {
         let host = url.host ?? ""
         
         switch host {
-        case "open_builder_for_type":
-            let type = comps?.queryItems?
-                .first(where: { $0.name == "type" })?
-                .value
-            guard let type, !type.isEmpty else { return nil }
-            self = .openBuilder(type: type)
-        case "open_ai":
-            self = .openAI
-        case "open_premade":
+        case "add":
             let id = comps?.queryItems?
                 .first(where: { $0.name == "id" })?
                 .value
             guard let id, !id.isEmpty else { return nil }
-            self = .openPremade(id: id)
-        case "save_workout":
+            self = .add(id: id)
+        case "remove":
             let id = comps?.queryItems?
                 .first(where: { $0.name == "id" })?
                 .value
             guard let id, !id.isEmpty else { return nil }
-            self = .savePremade(id: id)
+            self = .remove(id: id)
         default:
             return nil
         }
@@ -38,16 +30,16 @@ extension WorkoutBuilderTitleNavigationLink {
 }
 
 
-final class WorkoutBuilderTitleDivUrlHandler: DivUrlHandler {
-    private let handleNavigationLink: @MainActor (WorkoutBuilderTitleNavigationLink) -> Void
+final class WorkoutBuilderForTypeDivUrlHandler: DivUrlHandler {
+    private let handleNavigationLink: @MainActor (WorkoutBuilderForTypeNavigationLink) -> Void
 
 
-    init(handleNavigationLink: @escaping @MainActor (WorkoutBuilderTitleNavigationLink) -> Void) {
+    init(handleNavigationLink: @escaping @MainActor (WorkoutBuilderForTypeNavigationLink) -> Void) {
         self.handleNavigationLink = handleNavigationLink
     }
 
     func handle(_ url: URL, sender: AnyObject?) {
-        guard let link = WorkoutBuilderTitleNavigationLink(url: url) else { return }
+        guard let link = WorkoutBuilderForTypeNavigationLink(url: url) else { return }
         Task { @MainActor in handleNavigationLink(link) }
     }
 }

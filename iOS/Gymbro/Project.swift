@@ -46,7 +46,9 @@ let networkTarget: ProjectDescription.Target = .target(
     ),
     sources: ["\(basePath)/GymbroNetwork/Sources/**"],
     resources: ["\(basePath)/GymbroNetwork/Resources/**"],
-    dependencies: [],
+    dependencies: [
+        .target(name: "GymbroTypes")
+    ],
     settings: baseSettings()
 )
 

@@ -1,6 +1,63 @@
 import Foundation
 
-public enum WorkoutType {
+public enum ExerciseItem: Identifiable, Equatable {
+    case strength(StrengthExercise)
+    case cardio(CardioExercise)
+    case yoga(YogaExercise)
+    case fallback(DefaultExercise)
+    
+    public init(from exercise: any Exercise) {
+        switch exercise {
+        case let e as StrengthExercise:
+            self = .strength(e)
+            
+        case let e as CardioExercise:
+            self = .cardio(e)
+                
+        case let e as YogaExercise:
+            self = .yoga(e)
+                
+        case let e as DefaultExercise:
+            self = .fallback(e)
+            
+        default:
+            fatalError("Unsupported Exercise type: \(type(of: exercise))")
+        }
+    }
+
+    public  var id: String {
+        switch self {
+        case .strength(let e): return e.id
+        case .cardio(let e): return e.id
+        case .yoga(let e): return e.id
+        case .fallback(let e): return e.id
+        }
+    }
+
+    public var name: String {
+        switch self {
+        case .strength(let e): return e.name
+        case .cardio(let e): return e.name
+        case .yoga(let e): return e.name
+        case .fallback(let e): return e.name
+        }
+    }
+    
+    public var exercise: any Exercise {
+        switch self {
+        case .strength(let e):
+            return e
+        case .cardio(let e):
+            return e
+        case .yoga(let e):
+            return e
+        case .fallback(let e):
+            return e
+        }
+    }
+}
+
+public enum WorkoutType: Codable {
     case strength
     case cardio
     case yoga
@@ -40,7 +97,7 @@ public enum WorkoutType {
     }
 }
 
-public enum PaceType {
+public enum PaceType: CaseIterable, Hashable, Codable {
     case walk, jog, run, sprint, recovery
     
     public var title: String {
@@ -54,7 +111,7 @@ public enum PaceType {
     }
 }
 
-public enum MuscleGroup {
+public enum MuscleGroup: Codable {
     case chest, back, shoulders, biceps, triceps, legs, glutes, core, fullBody
     
     public var title: String {
