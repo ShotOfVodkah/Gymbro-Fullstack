@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/alexandra-gritsaenko/gymbro-backend/handlers"
+	"github.com/alexandra-gritsaenko/gymbro-auth/handlers"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -37,9 +37,12 @@ func main() {
 		authMiddleware(userH).ServeHTTP(w, r)
 	})
 	mux.Handle("/users/", authMiddleware(userH))
-	mux.Handle("/auth", authH)
-	mux.Handle("/refresh", authH)
-	mux.Handle("/logout", authH)
+	// mux.Handle("/auth", authH)
+	// mux.Handle("/refresh", authH)
+	// mux.Handle("/logout", authH)
+	
+	// AUTH (login/refresh/logout)
+	mux.Handle("/auth/", authH)
 
-	http.ListenAndServe(":8080", mux)
+	http.ListenAndServe(":8081", mux)
 }

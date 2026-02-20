@@ -3,7 +3,7 @@ package store
 import (
 	"fmt"
 
-	"github.com/alexandra-gritsaenko/gymbro-backend/types"
+	"github.com/alexandra-gritsaenko/gymbro-auth/types"
 	"github.com/jmoiron/sqlx"
 )
 
