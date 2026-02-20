@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/alexandra-gritsaenko/gymbro-backend/service"
-	"github.com/alexandra-gritsaenko/gymbro-backend/types"
+	"github.com/alexandra-gritsaenko/gymbro-auth/service"
+	"github.com/alexandra-gritsaenko/gymbro-auth/types"
 	"github.com/alexedwards/argon2id"
 	"github.com/jmoiron/sqlx"
 )

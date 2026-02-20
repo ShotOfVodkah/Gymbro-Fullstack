@@ -30,6 +30,7 @@ struct GymbroApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $router.path) {
+//                AuthScreen()
                 appServicesFactory.makeWorkoutsScreen()
                     .navigationDestination(for: NavigationRoute.self) { route in
                         appServicesFactory.makeDestinationView(for: route)

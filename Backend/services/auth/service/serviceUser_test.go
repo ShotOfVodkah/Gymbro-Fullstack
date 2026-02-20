@@ -3,9 +3,9 @@ package service_test
 import (
 	"database/sql"
 
-	"github.com/alexandra-gritsaenko/gymbro-backend/service"
-	"github.com/alexandra-gritsaenko/gymbro-backend/store"
-	"github.com/alexandra-gritsaenko/gymbro-backend/types"
+	"github.com/alexandra-gritsaenko/gymbro-auth/service"
+	"github.com/alexandra-gritsaenko/gymbro-auth/store"
+	"github.com/alexandra-gritsaenko/gymbro-auth/types"
 	"github.com/alexedwards/argon2id"
 )
 

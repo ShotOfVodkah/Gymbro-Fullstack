@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/alexandra-gritsaenko/gymbro-backend/service"
-	"github.com/alexandra-gritsaenko/gymbro-backend/store"
+	"github.com/alexandra-gritsaenko/gymbro-auth/service"
+	"github.com/alexandra-gritsaenko/gymbro-auth/store"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jmoiron/sqlx"
 	"net/http"
@@ -22,11 +22,11 @@ func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	switch {
-	case r.Method == http.MethodPost && r.URL.Path == "/auth":
+	case r.Method == http.MethodPost && r.URL.Path == "/auth/login":
 		h.Token(w, r)
-	case r.Method == http.MethodPost && r.URL.Path == "/refresh":
+	case r.Method == http.MethodPost && r.URL.Path == "/auth/refresh":
 		h.Refresh(w, r)
-	case r.Method == http.MethodPost && r.URL.Path == "/logout":
+	case r.Method == http.MethodPost && r.URL.Path == "/auth/logout":
 		h.Logout(w, r)
 	default:
 		notFound(w, r)

@@ -1,0 +1,43 @@
+services:
+  postgres_auth:
+    image: postgres:14
+    container_name: postgres_auth
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_auth_data:/var/lib/postgresql/data
+
+  auth_service:
+    build:
+      context: ..
+      dockerfile: deploy/auth.Dockerfile
+    container_name: auth_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_auth:5432/gymbro_auth?sslmode=disable"
+      JWT_SECRET: "supersecret_noone_will_get_out"
+      PGHOST: postgres_auth
+      PGPORT: 5432
+    depends_on:
+      - postgres_auth
+    expose:
+      - "8081"
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/gateway.Dockerfile
+    container_name: gateway
+    environment:
+      AUTH_URL: "http://auth_service:8081"
+      # WORKOUTS_URL: "http://workouts_service:8082"
+    depends_on:
+      - auth_service
+    ports:
+      - "8080:8080"
+
+volumes:
+  pg_auth_data:

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/alexandra-gritsaenko/gymbro-backend/store"
-	"github.com/alexandra-gritsaenko/gymbro-backend/types"
+	"github.com/alexandra-gritsaenko/gymbro-auth/store"
+	"github.com/alexandra-gritsaenko/gymbro-auth/types"
 	"github.com/jmoiron/sqlx"
 )
 
