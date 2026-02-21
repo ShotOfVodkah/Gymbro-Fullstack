@@ -1,13 +1,16 @@
 import SwiftUI
+import SwiftData
+
 import GymbroWorkouts
 import GymbroNavigation
 import GymbroNetwork
-import SwiftData
+import GymbroCommonUI
 
 @main
 struct GymbroApp: App {
 
     @State private var modelContainer: ModelContainer
+    @State var tab: AppTab = .workouts
     @StateObject private var router = AppRouter()
     private let appServicesFactory: AppServicesFactory
     
@@ -30,11 +33,31 @@ struct GymbroApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $router.path) {
-//                AuthScreen()
-                appServicesFactory.makeWorkoutsScreen()
-                    .navigationDestination(for: NavigationRoute.self) { route in
-                        appServicesFactory.makeDestinationView(for: route)
+                ZStack(alignment: .bottom) {
+                    Group {
+                        switch tab {
+                        case .workouts:
+                            appServicesFactory.makeWorkoutsScreen()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
+                        case .feeds:
+                            Text("feeds")
+                        case .profile:
+                            Text("Profile")
+                        case .challenge:
+                            Text("Challenges")
+                        case .perks:
+                            Text("Perks")
+                        }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                    AppTabBar(selected: $tab)
+                        .padding(.horizontal, 10)
+                        .padding(.bottom, 10)
+                }
+                .ignoresSafeArea(.container, edges: .bottom)
             }
         }
         .modelContainer(modelContainer)

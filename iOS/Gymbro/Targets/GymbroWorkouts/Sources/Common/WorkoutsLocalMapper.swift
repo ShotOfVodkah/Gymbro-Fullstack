@@ -148,6 +148,59 @@ public final class WorkoutsLocalMapper {
         }
         return render(id: id, screenType: .workoutBuilder, workout: workout)
     }
+    public func expandExercises(
+        in screenData: Data,
+        exerciseIds: [String]
+    ) -> Data? {
+        do {
+            guard var screenJson = try JSONSerialization.jsonObject(with: screenData) as? [String: Any],
+                  var card = screenJson["card"] as? [String: Any],
+                  var states = card["states"] as? [[String: Any]],
+                  !states.isEmpty
+            else {
+                return nil
+            }
+
+            var firstState = states[0]
+
+            guard var div = firstState["div"] as? [String: Any],
+                var items = div["items"] as? [Any],
+                !items.isEmpty,
+                var gallery = items[0] as? [String: Any],
+                var galleryItems = gallery["items"] as? [[String: Any]]
+            else {
+                print("⚠️ Failed to parse gallery path")
+                return nil
+            }
+
+            let expandedIds = Set(exerciseIds)
+            galleryItems = galleryItems.map { item in
+                guard var stateItem = item as? [String: Any],
+                      stateItem["type"] as? String == "state",
+                      let exerciseId = stateItem["id"] as? String,
+                      expandedIds.contains(exerciseId)
+                else {
+                    return item
+                }
+                
+                stateItem["default_state_id"] = "expanded"
+                return stateItem
+            }
+            gallery["items"] = galleryItems
+            items[0] = gallery
+            div["items"] = items
+            firstState["div"] = div
+            states[0] = firstState
+            card["states"] = states
+            screenJson["card"] = card
+
+            return try JSONSerialization.data(withJSONObject: screenJson, options: [.prettyPrinted])
+            
+        } catch {
+            print("Expand exercises error: \(error)")
+            return nil
+        }
+    }
     
     // MARK: - Internal
     

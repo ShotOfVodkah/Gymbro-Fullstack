@@ -28,6 +28,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
         actionsRepository: OfflineActionsRepository,
+        localMapper: WorkoutsLocalMapper,
         modelModifier: WorkoutsModelModifier,
         type: String?,
         workoutId: String?
@@ -37,6 +38,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         self.divLocalRepository = divLocalRepository
         self.workoutsRepository = workoutsRepository
         self.actionsRepository = actionsRepository
+        self.localMapper = localMapper
         self.modelModifier = modelModifier
         
         if let workoutId,
@@ -137,7 +139,12 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
                     screenState = .error
                     return
                 }
-                source = DivViewSource(kind: .data(data), cardId: "WorkoutBuilder")
+                if !selectedExercises.isEmpty,
+                   let expandedData = localMapper.expandExercises(in: data, exerciseIds: selectedExercises.map({$0.id})) {
+                    source = DivViewSource(kind: .data(expandedData), cardId: "WorkoutBuilder")
+                } else {
+                    source = DivViewSource(kind: .data(data), cardId: "WorkoutBuilder")
+                }
                 modelModifier.events.send(.statusChanged(status: .offline))
                 screenState = .offline
             }
@@ -220,6 +227,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
     private let divLocalRepository: DivCacheRepository
     private let workoutsRepository: WorkoutsCacheRepository
     private let actionsRepository: OfflineActionsRepository
+    private let localMapper: WorkoutsLocalMapper
     private let router: any Router
     private let networkClient: WorkoutsNetworkClient
     private var screenMode: ScreenMode

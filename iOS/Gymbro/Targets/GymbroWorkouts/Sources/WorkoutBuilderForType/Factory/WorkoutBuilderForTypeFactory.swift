@@ -15,6 +15,7 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
         actionsRepository: OfflineActionsRepository,
+        localMapper: WorkoutsLocalMapper,
         modelModifier: WorkoutsModelModifier,
         type: String?,
         workoutId: String?
@@ -28,6 +29,7 @@ public final class WorkoutBuilderForTypeFactoryImpl {
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,
                 actionsRepository: actionsRepository,
+                localMapper: localMapper,
                 modelModifier: modelModifier,
                 type: type,
                 workoutId: workoutId

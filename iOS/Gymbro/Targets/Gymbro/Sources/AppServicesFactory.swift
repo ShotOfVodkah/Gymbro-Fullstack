@@ -101,6 +101,7 @@ final class AppServicesFactory {
             workoutsRepository: workoutsRepository,
             exercisesRepository: exercisesRepository,
             actionsRepository: actionsRepository,
+            localMapper: localMapper,
             modelModifier: workoutsModelModifier,
             type: type,
             workoutId: workoutId
