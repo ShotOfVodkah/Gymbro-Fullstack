@@ -19,6 +19,7 @@ import divkit.dsl.animation
 import divkit.dsl.asList
 import divkit.dsl.bold
 import divkit.dsl.border
+import divkit.dsl.bottom
 import divkit.dsl.center
 import divkit.dsl.right
 import divkit.dsl.color
@@ -50,31 +51,38 @@ object WorkoutInfoRenderer {
         return container(
             width = matchParentSize(),
             height = matchParentSize(),
-            orientation = vertical,
+            orientation = overlap,
             items = listOf(
-                buttons(workout.id),
-                header(
-                    workout.name,
-                    typeTitle(workout.type),
-                    workout.exercises.count(),
-                    styleFor(workout.type)
-                ),
-                text(
-                    text = "EXERCISES",
-                    fontSize = 16,
-                    margins = edgeInsets(left = 25, top = 17, bottom = 17),
-                    fontWeight = bold,
-                    textColor = color("#4A4A4A"),
-                    maxLines = 1
-                ),
-                gallery(
+                container(
                     width = matchParentSize(),
                     height = matchParentSize(),
                     orientation = vertical,
-                    columnCount = 1,
-                    items = workout.exercises.mapIndexed { index, exercise ->
-                        exerciseCard(exercise, number = index + 1)
-                    }
+                    items = listOf(
+                        buttons(workout.id),
+                        header(
+                            workout.name,
+                            typeTitle(workout.type),
+                            workout.exercises.count(),
+                            styleFor(workout.type)
+                        ),
+                        text(
+                            text = "EXERCISES",
+                            fontSize = 16,
+                            margins = edgeInsets(left = 25, top = 17, bottom = 17),
+                            fontWeight = bold,
+                            textColor = color("#4A4A4A"),
+                            maxLines = 1
+                        ),
+                        gallery(
+                            width = matchParentSize(),
+                            height = matchParentSize(),
+                            orientation = vertical,
+                            columnCount = 1,
+                            items = workout.exercises.mapIndexed { index, exercise ->
+                                exerciseCard(exercise, number = index + 1)
+                            }
+                        )
+                    )
                 ),
                 playButton(workout.id)
             )
@@ -342,9 +350,10 @@ object WorkoutInfoRenderer {
         return container(
             orientation = overlap,
             border = border(cornerRadius = 28),
+            alignmentVertical = bottom,
             width = matchParentSize(),
             height = wrapContentSize(),
-            margins = edgeInsets(top = 16, left = 16, right = 16, bottom = 12),
+            margins = edgeInsets( left = 10, right = 10, bottom = 25),
             items = listOf(
                 container(
                     width = matchParentSize(),
@@ -414,7 +423,7 @@ object WorkoutInfoRenderer {
         )
     }
 
-    private fun DivScope.exerciseCard(
+    fun DivScope.exerciseCard(
         exercise: Exercise,
         number: Int
     ): Div {

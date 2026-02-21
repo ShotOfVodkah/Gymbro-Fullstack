@@ -61,20 +61,12 @@ struct WorkoutInfoView: View {
                 })
             )
         )
-        .customAlert(
-            isPresented: $viewModel.showOfflineAlert,
-            data: CustomAlertData(
-                message: "You are currently offline. Some actions are limited.",
-                primaryButton: AppButton("Okay", action: {
-                    viewModel.showOfflineAlert = false
-                })
-            )
-        )
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .interactiveDismissDisabled(false)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 
     @ObservedObject private var viewModel: WorkoutInfoViewModel

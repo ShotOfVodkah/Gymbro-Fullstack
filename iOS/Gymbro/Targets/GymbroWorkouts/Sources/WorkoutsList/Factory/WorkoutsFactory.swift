@@ -11,16 +11,22 @@ public final class WorkoutsListFactoryImpl {
     @MainActor
     public func makeView(
         router: any Router,
-        localRepository: DivCacheRepository,
-        modelModifier: WorkoutsModelModifier
+        divLocalRepository: DivCacheRepository,
+        workoutsRepository: WorkoutsCacheRepository,
+        exercisesRepository: ExercisesRepository,
+        modelModifier: WorkoutsModelModifier,
+        localMapper: WorkoutsLocalMapper
     ) -> some View  {
         guard let viewModelCache else {
             let workoutsNetworkClient = WorkoutsNetworkClientImpl()
             let viewModel = WorkoutsListViewModel(
                 networkClient: workoutsNetworkClient,
-                localRepository: localRepository,
+                divLocalRepository: divLocalRepository,
+                workoutsRepository: workoutsRepository,
+                exercisesRepository: exercisesRepository,
                 router: router,
-                modelModifier: modelModifier
+                modelModifier: modelModifier,
+                localMapper: localMapper
             )
             viewModelCache = viewModel
             return WorkoutsListView(viewModel: viewModel)

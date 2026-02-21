@@ -5,12 +5,18 @@ import SwiftData
 import GymbroWorkouts
 import GymbroNetwork
 import GymbroNavigation
+import GymbroFeeds
 
 final class AppServicesFactory {
     let router: AppRouter
     
-    let workoutsLocalRepository: DivCacheRepository
+    let divLocalRepository: DivCacheRepository
+    let workoutsRepository: WorkoutsCacheRepository
+    let exercisesRepository: ExercisesRepository
+    let actionsRepository: OfflineActionsRepository
+    
     let workoutsModelModifier = WorkoutsModelModifier()
+    let localMapper: WorkoutsLocalMapper
     
     private var screenFactories = ScreenFactories()
 
@@ -19,8 +25,23 @@ final class AppServicesFactory {
         container: ModelContainer
     ) {
         self.router = router
+        
         let cacheDS = WorkoutsDivCacheDataSource(container: container)
-        self.workoutsLocalRepository = DivCacheRepository(dataSource: cacheDS)
+        self.divLocalRepository = DivCacheRepository(dataSource: cacheDS)
+        
+        let workoutsCacheDS = WorkoutsSwiftDataCacheDataSource(container: container)
+        self.workoutsRepository = WorkoutsCacheRepository(dataSource: workoutsCacheDS)
+        
+        let exercisesDS = ExercisesSwiftDataSource(container: container)
+        self.exercisesRepository = ExercisesRepository(dataSource: exercisesDS)
+        
+        let offlineDS = OfflineActionsSwiftDataSource(container: container)
+        self.actionsRepository = OfflineActionsRepository(dataSource: offlineDS)
+        
+        self.localMapper = WorkoutsLocalMapper(
+            divLocalRepository: divLocalRepository,
+            workoutsLocalRepository: workoutsRepository
+        )
     }
 
     @MainActor
@@ -31,7 +52,8 @@ final class AppServicesFactory {
             makeWorkoutInfoScreen(id: id)
         case .workoutBuilder:
             makeWorkoutBuilderScreen()
-            
+        case .workoutBuilderForType(let type, let id):
+            makeWorkoutBuilderForTypeScreen(type: type, workoutId: id)
         }
     }
     
@@ -41,8 +63,11 @@ final class AppServicesFactory {
     func makeWorkoutsScreen() -> some View {
         screenFactories.workoutsListFactory.makeView(
             router: router,
-            localRepository: workoutsLocalRepository,
-            modelModifier: workoutsModelModifier
+            divLocalRepository: divLocalRepository,
+            workoutsRepository: workoutsRepository,
+            exercisesRepository: exercisesRepository,
+            modelModifier: workoutsModelModifier,
+            localMapper: localMapper
         )
     }
     
@@ -51,14 +76,42 @@ final class AppServicesFactory {
         screenFactories.workoutInfoFactory.makeView(
             id: id,
             router: router,
-            localRepository: workoutsLocalRepository,
-            modelModifier: workoutsModelModifier
+            divLocalRepository: divLocalRepository,
+            actionsRepository: actionsRepository,
+            modelModifier: workoutsModelModifier,
+            localMapper: localMapper
         )
     }
     
     @MainActor
     func makeWorkoutBuilderScreen() -> some View {
-        screenFactories.workoutBuilderFactory.makeView()
+        screenFactories.workoutBuilderFactory.makeView(
+            router: router,
+            divLocalRepository: divLocalRepository,
+            actionsRepository: actionsRepository,
+            modelModifier: workoutsModelModifier,
+            localMapper: localMapper
+        )
+    }
+    
+    @MainActor
+    func makeWorkoutBuilderForTypeScreen(type: String?, workoutId: String?) -> some View {
+        screenFactories.workoutBuilderForTypeFactory.makeView(
+            router: router,
+            divLocalRepository: divLocalRepository,
+            workoutsRepository: workoutsRepository,
+            exercisesRepository: exercisesRepository,
+            actionsRepository: actionsRepository,
+            localMapper: localMapper,
+            modelModifier: workoutsModelModifier,
+            type: type,
+            workoutId: workoutId
+        )
+    }
+    
+    @MainActor
+    func makeFeedsMainTab() -> some View {
+        screenFactories.feedsMainTabFactory.makeView()
     }
     
 }
@@ -70,4 +123,9 @@ private struct ScreenFactories {
     lazy var workoutsListFactory = WorkoutsListFactoryImpl()
     lazy var workoutInfoFactory = WorkoutInfoFactoryImpl()
     lazy var workoutBuilderFactory = WorkoutBuilderFactoryImpl()
+    lazy var workoutBuilderForTypeFactory = WorkoutBuilderForTypeFactoryImpl()
+    
+    // Feeds factories
+    
+    lazy var feedsMainTabFactory = FeedsMainTabFactoryImpl()
 }

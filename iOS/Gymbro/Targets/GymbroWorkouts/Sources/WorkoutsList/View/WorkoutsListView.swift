@@ -16,10 +16,12 @@ struct WorkoutsListView: View {
                 WorkoutsListViewStub()
             case .loaded:
                 DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
+                    .id(viewModel.sourceDebugId)
             case .offline:
                 VStack{
                     OfflineHeader()
                     DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
+                        .id(viewModel.sourceDebugId)
                 }
             case .error:
                 VStack(alignment: .center) {
@@ -33,15 +35,6 @@ struct WorkoutsListView: View {
                 .padding(.horizontal, 40)
             }
         }
-        .customAlert(
-            isPresented: $viewModel.showOfflineAlert,
-            data: CustomAlertData(
-                message: "You are currently offline. Some actions are limited.",
-                primaryButton: AppButton("Okay", action: {
-                    viewModel.showOfflineAlert = false
-                })
-            )
-        )
         .sheet(item: $viewModel.streakModel, onDismiss: {
             viewModel.streakModel = nil
         }) { model in
@@ -56,6 +49,7 @@ struct WorkoutsListView: View {
         .transition(.blurReplace)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 
     @ObservedObject private var viewModel: WorkoutsListViewModel

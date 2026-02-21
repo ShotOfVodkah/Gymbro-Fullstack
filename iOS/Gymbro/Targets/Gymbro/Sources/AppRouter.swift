@@ -12,4 +12,8 @@ public final class AppRouter: Router {
     public func pop() {
         _ = path.popLast()
     }
+    
+    public func popToRoot() {
+        path.removeAll()
+    }
 }
