@@ -28,7 +28,8 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroNavigation"),
         .target(name: "GymbroWorkouts"),
         .target(name: "GymbroCommonUI"),
-        .target(name: "GymbroTypes")
+        .target(name: "GymbroTypes"),
+        .target(name: "GymbroFeeds")
     ],
     settings: baseSettings()
 )
@@ -126,6 +127,28 @@ let workoutsTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let feedsTarget: ProjectDescription.Target = .target(
+    name: "GymbroFeeds",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).feeds",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroFeeds/Sources/**"],
+    resources: ["\(basePath)/GymbroFeeds/Resources/**"],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .target(name: "GymbroNavigation"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
 // Project
 
 let project = Project(
@@ -137,7 +160,8 @@ let project = Project(
         workoutsTarget,
         navigationTarget,
         commonUITarget,
-        typesTarget
+        typesTarget,
+        feedsTarget
     ]
 )
 

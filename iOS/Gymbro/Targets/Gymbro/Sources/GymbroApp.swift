@@ -42,7 +42,7 @@ struct GymbroApp: App {
                                     appServicesFactory.makeDestinationView(for: route)
                                 }
                         case .feeds:
-                            Text("feeds")
+                            appServicesFactory.makeFeedsMainTab()
                         case .profile:
                             Text("Profile")
                         case .challenge:
