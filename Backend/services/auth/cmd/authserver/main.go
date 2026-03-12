@@ -37,11 +37,6 @@ func main() {
 		authMiddleware(userH).ServeHTTP(w, r)
 	})
 	mux.Handle("/users/", authMiddleware(userH))
-	// mux.Handle("/auth", authH)
-	// mux.Handle("/refresh", authH)
-	// mux.Handle("/logout", authH)
-	
-	// AUTH (login/refresh/logout)
 	mux.Handle("/auth/", authH)
 
 	http.ListenAndServe(":8081", mux)

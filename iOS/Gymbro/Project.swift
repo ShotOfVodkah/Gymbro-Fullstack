@@ -29,7 +29,8 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroWorkouts"),
         .target(name: "GymbroCommonUI"),
         .target(name: "GymbroTypes"),
-        .target(name: "GymbroFeeds")
+        .target(name: "GymbroFeeds"),
+        .target(name: "GymbroAuth")
     ],
     settings: baseSettings()
 )
@@ -149,6 +150,27 @@ let feedsTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let authTarget: ProjectDescription.Target = .target(
+    name: "GymbroAuth",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).auth",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroAuth/Sources/**"],
+    resources: ["\(basePath)/GymbroAuth/Resources/**"],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
 // Project
 
 let project = Project(
@@ -161,7 +183,8 @@ let project = Project(
         navigationTarget,
         commonUITarget,
         typesTarget,
-        feedsTarget
+        feedsTarget,
+        authTarget
     ]
 )
 

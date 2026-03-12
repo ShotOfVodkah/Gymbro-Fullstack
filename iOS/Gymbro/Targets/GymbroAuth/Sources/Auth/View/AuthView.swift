@@ -2,21 +2,8 @@ import SwiftUI
 import GymbroCommonUI
 
 
-struct AuthScreen: View {
-    @State private var tab: AuthTab = .login
-    @State private var role: UserRole = .athlete
-    
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var isPasswordHidden: Bool = true
-    
-    @State private var isAlertPresented = false
-    @State private var alertData = CustomAlertData()
-    
-    @State private var isLegalSheetPresented = false
-    @State private var legalSheetType: LegalDocType = .terms
-    @AppStorage("termsAccepted_v1") private var termsAccepted: Bool = false
-    @AppStorage("privacyAccepted_v1") private var privacyAccepted: Bool = false
+struct AuthView: View {
+    @StateObject private var vm = AuthViewModel()
     
     var body: some View {
         ZStack {
@@ -30,14 +17,10 @@ struct AuthScreen: View {
             .padding(.top, 30)
             .padding(.bottom, 40)
         }
-        .customAlert(isPresented: $isAlertPresented, data: alertData)
-        .sheet(isPresented: $isLegalSheetPresented) {
-            LegalDocScreen(type: legalSheetType, isAlreadyAccepted: legalSheetType == .terms ? termsAccepted : privacyAccepted) {
-                if legalSheetType == .terms {
-                    termsAccepted = true
-                } else {
-                    privacyAccepted = true
-                }
+        .customAlert(isPresented: $vm.isAlertPresented, data: vm.alertData)
+        .sheet(isPresented: $vm.isLegalSheetPresented) {
+            LegalDocScreen(type: vm.legalSheetType, isAlreadyAccepted: vm.consent.isAccepted(vm.legalSheetType)) {
+                vm.acceptCurrentLegal()
             }
             .preferredColorScheme(.dark)
         }
@@ -74,9 +57,9 @@ struct AuthScreen: View {
     
     private var authCard: some View {
         VStack(spacing: 18) {
-            SegmentedPill(tab: $tab)
+            SegmentedPill(tab: $vm.tab)
             
-            if tab == .register {
+            if vm.tab == .register {
                 rolePicker
             }
             
@@ -84,37 +67,21 @@ struct AuthScreen: View {
                 IconEmailField(
                     title: "Email",
                     systemImage: "envelope",
-                    text: $email
+                    text: $vm.email
                 )
                 IconSecureField(
                     title: "Password",
                     systemImage: "lock",
-                    text: $password,
-                    isHidden: $isPasswordHidden
+                    text: $vm.password,
+                    isHidden: $vm.isPasswordHidden
                 )
             }
             
             Button {
-                guard termsAccepted && privacyAccepted else {
-                    showAlert("Please read and accept Terms of Service and Privacy Policy to continue.")
-                    return
-                }
-                
-                let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard validateEmail(trimmedEmail) else {
-                    showAlert("Enter a valid email address.")
-                    return
-                }
-                
-                if let error = validatePassword(password) {
-                    showAlert(error)
-                    return
-                }
-                
-                // TODO: дернуть AuthService
+                vm.submit()
             } label: {
                 HStack(spacing: 10) {
-                    Text(tab == .login ? "Log in" : "Create an account")
+                    Text(vm.tab == .login ? "Log in" : "Create an account")
                         .font(.system(size: 18, weight: .semibold))
                     Image(systemName: "arrow.right")
                         .font(.system(size: 16, weight: .semibold))
@@ -148,17 +115,16 @@ struct AuthScreen: View {
     
     private var legalText: some View {
         VStack(spacing: 6) {
-            Text((termsAccepted && privacyAccepted) ? "You're all set legally." : "By continuing, you agree to GymBro's")
+            Text(vm.consent.allAccepted ? "You're all set legally." : "By continuing, you agree to GymBro's")
                 .font(.system(size: 14))
                 .foregroundStyle(.white.opacity(0.35))
             
             HStack(spacing: 6) {
                 Button {
-                    legalSheetType = .terms
-                    isLegalSheetPresented = true
+                    vm.openLegal(.terms)
                 } label: {
                     Text("Terms of Service")
-                        .foregroundStyle(termsAccepted ? .white.opacity(0.35) : .white.opacity(0.6))
+                        .foregroundStyle(vm.consent.termsAccepted ? .white.opacity(0.35) : .white.opacity(0.6))
                         .underline()
                 }
                 
@@ -166,11 +132,10 @@ struct AuthScreen: View {
                     .foregroundStyle(.white.opacity(0.35))
                 
                 Button {
-                    legalSheetType = .privacy
-                    isLegalSheetPresented = true
+                    vm.openLegal(.privacy)
                 } label: {
                     Text("Privacy Policy")
-                        .foregroundStyle(privacyAccepted ? .white.opacity(0.35) : .white.opacity(0.6))
+                        .foregroundStyle(vm.consent.privacyAccepted ? .white.opacity(0.35) : .white.opacity(0.6))
                         .underline()
                 }
             }
@@ -190,28 +155,18 @@ struct AuthScreen: View {
                 RoleCard(
                     title: "Athlete",
                     systemImage: "figure.run",
-                    selected: role == .athlete
+                    selected: vm.role == .athlete
                 )
-                .onTapGesture { role = .athlete }
+                .onTapGesture { vm.role = .athlete }
                 
                 RoleCard(
                     title: "Coach",
                     systemImage: "person.3.fill",
-                    selected: role == .coach
+                    selected: vm.role == .coach
                 )
-                .onTapGesture { role = .coach }
+                .onTapGesture { vm.role = .coach }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
-    private func showAlert(_ message: String) {
-        alertData = CustomAlertData(
-            message: message,
-            primaryButton: AppButton("OK", size: .m) {
-                isAlertPresented = false
-            }
-        )
-        isAlertPresented = true
     }
 }

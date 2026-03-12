@@ -43,6 +43,9 @@ struct GymbroApp: App {
                                 }
                         case .feeds:
                             appServicesFactory.makeFeedsMainTab()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
                         case .profile:
                             Text("Profile")
                         case .challenge:
@@ -62,5 +65,4 @@ struct GymbroApp: App {
         }
         .modelContainer(modelContainer)
     }
-
 }
