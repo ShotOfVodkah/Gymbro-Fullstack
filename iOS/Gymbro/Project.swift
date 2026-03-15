@@ -30,7 +30,8 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroCommonUI"),
         .target(name: "GymbroTypes"),
         .target(name: "GymbroFeeds"),
-        .target(name: "GymbroAuth")
+        .target(name: "GymbroAuth"),
+        .target(name: "GymbroProfile")
     ],
     settings: baseSettings()
 )
@@ -67,7 +68,9 @@ let navigationTarget: ProjectDescription.Target = .target(
     ),
     sources: ["\(basePath)/GymbroNavigation/Sources/**"],
     resources: ["\(basePath)/GymbroNavigation/Resources/**"],
-    dependencies: [],
+    dependencies: [
+        .target(name: "GymbroTypes")
+    ],
     settings: baseSettings()
 )
 
@@ -166,7 +169,31 @@ let authTarget: ProjectDescription.Target = .target(
     dependencies: [
         .target(name: "GymbroNetwork"),
         .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroNavigation"),
         .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
+let profileTarget: ProjectDescription.Target = .target(
+    name: "GymbroProfile",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).profile",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroProfile/Sources/**"],
+    resources: ["\(basePath)/GymbroProfile/Resources/**"],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroNavigation"),
+        .target(name: "GymbroTypes"),
+        .target(name: "GymbroAuth")
     ],
     settings: baseSettings()
 )
@@ -184,7 +211,8 @@ let project = Project(
         commonUITarget,
         typesTarget,
         feedsTarget,
-        authTarget
+        authTarget,
+        profileTarget
     ]
 )
 

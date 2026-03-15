@@ -2,10 +2,12 @@ import SwiftUI
 import GymbroCommonUI
 
 
-struct AuthView: View {
+public struct AuthView: View {
     @StateObject private var vm = AuthViewModel()
     
-    var body: some View {
+    public init() {}
+    
+    public var body: some View {
         ZStack {
             BlurredBackground()
             VStack(spacing: 18) {

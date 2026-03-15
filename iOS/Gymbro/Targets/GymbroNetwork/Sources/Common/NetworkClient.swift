@@ -1,7 +1,6 @@
 import Foundation
-import Network
 
-enum NetworkError: Error {
+public enum NetworkError: Error {
     case invalidURL
     case invalidResponse
     case unauthorized
@@ -14,27 +13,35 @@ enum NetworkError: Error {
     case unknown(Error)
 }
 
+public enum HTTPMethod: String {
+    case GET
+    case POST
+    case PUT
+    case PATCH
+    case DELETE
+}
+
 extension NetworkError: LocalizedError {
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Неверный URL 💖"
+            return "Invalid URL"
         case .invalidResponse:
-            return "Некорректный ответ от сервера 🪂"
+            return "Invalid server response"
         case .unauthorized:
-            return "Вы не авторизованы... 🌸"
-        case .serverError(_):
-            return "Ошибка сервера, блин 👙 "
+            return "You are not authorized"
+        case .serverError(let code):
+            return "Server error: \(code)"
         case .decodingError:
-            return "Не удалось декодировать ответ, sorry about it 🫶"
+            return "Failed to decode server response"
         case .encodingError:
-            return "Не удалось закодировать запрос, программиста на мыло 😝"
+            return "Failed to encode request body"
         case .noInternet:
-            return "Отсутствует подключение к интернету 👨‍🦽"
+            return "No internet connection"
         case .hostNotFound:
-            return "Проверьте стабильность вашего соединения, вылезай из подвала 💜"
+            return "Could not reach the server"
         case .cancelled:
-            return "Запрос отменён, увы и ах 🫦"
+            return "Request was cancelled"
         case .unknown(let error):
             return error.localizedDescription
         }
@@ -43,51 +50,109 @@ extension NetworkError: LocalizedError {
 
 public final class NetworkClient {
     private let baseURL: URL
-    private let token: String
-
-    public init(baseURL: String, token: String) {
+    private let session: URLSession
+    private let tokenProvider: (() -> String?)?
+    private let refreshHandler: (() async throws -> Bool)?
+    
+    public init(
+        baseURL: String,
+        session: URLSession = .shared,
+        tokenProvider: (() -> String?)? = nil,
+        refreshHandler: (() async throws -> Bool)? = nil
+    ) {
         guard let url = URL(string: baseURL) else {
             fatalError("Invalid base URL: \(baseURL)")
         }
         self.baseURL = url
-        self.token = token
+        self.session = session
+        self.tokenProvider = tokenProvider
+        self.refreshHandler = refreshHandler
     }
-
-
-    public func request<T: Decodable>(
-        method: String,
+    
+    public func request<Response: Decodable, Body: Encodable>(
+        method: HTTPMethod,
         path: String,
         queryItems: [URLQueryItem]? = nil,
-        body: Encodable? = nil,
-        responseType: T.Type
-    ) async throws -> T {
-        do {
-            print("интернет супер")
-            let testURL = URL(string: "https://captive.apple.com")!
-            var testRequest = URLRequest(url: testURL)
-            testRequest.timeoutInterval = 1
-                    
-            let (_, _) = try await URLSession.shared.data(for: testRequest)
-        } catch {
-            print("кидаю тебе эррор интернет")
-            throw NetworkError.noInternet
+        body: Body? = nil,
+        requiresAuth: Bool = true,
+        responseType: Response.Type
+    ) async throws -> Response {
+        let request = try buildRequest(
+            method: method,
+            path: path,
+            queryItems: queryItems,
+            body: body,
+            requiresAuth: requiresAuth
+        )
+        
+        let (data, _) = try await performWithAutoRefresh(
+            request: request,
+            requiresAuth: requiresAuth
+        )
+        
+        if data.isEmpty {
+            throw NetworkError.decodingError
         }
         
-        var url = baseURL.appendingPathComponent(path)
-        if let queryItems = queryItems {
-            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-            components?.queryItems = queryItems
-            if let newURL = components?.url {
-                url = newURL
-            }
+        do {
+            return try makeDecoder().decode(Response.self, from: data)
+        } catch {
+            throw NetworkError.decodingError
         }
-
+    }
+    
+    public func requestVoid<Body: Encodable>(
+        method: HTTPMethod,
+        path: String,
+        queryItems: [URLQueryItem]? = nil,
+        body: Body? = nil,
+        requiresAuth: Bool = true
+    ) async throws {
+        let request = try buildRequest(
+            method: method,
+            path: path,
+            queryItems: queryItems,
+            body: body,
+            requiresAuth: requiresAuth
+        )
+        
+        _ = try await performWithAutoRefresh(
+            request: request,
+            requiresAuth: requiresAuth
+        )
+    }
+    
+    private func buildRequest<Body: Encodable>(
+        method: HTTPMethod,
+        path: String,
+        queryItems: [URLQueryItem]? = nil,
+        body: Body? = nil,
+        requiresAuth: Bool
+    ) throws -> URLRequest {
+        let cleanPath = path.hasPrefix("/") ? String(path.dropFirst()) : path
+        var url = baseURL.appendingPathComponent(cleanPath)
+        
+        if let queryItems, !queryItems.isEmpty {
+            guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+                throw NetworkError.invalidURL
+            }
+            components.queryItems = queryItems
+            guard let finalURL = components.url else {
+                throw NetworkError.invalidURL
+            }
+            url = finalURL
+        }
+        
         var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        if let body = body {
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        if requiresAuth, let token = tokenProvider?(), !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        if let body {
             do {
                 let encoder = JSONEncoder()
                 encoder.dateEncodingStrategy = .iso8601
@@ -96,17 +161,52 @@ public final class NetworkClient {
                 throw NetworkError.encodingError
             }
         }
-
+        
+        return request
+    }
+    
+    private func performWithAutoRefresh(
+        request: URLRequest,
+        requiresAuth: Bool
+    ) async throws -> (Data, HTTPURLResponse) {
+        
+        do {
+            return try await perform(request)
+        } catch NetworkError.unauthorized {
+            guard requiresAuth else {
+                throw NetworkError.unauthorized
+            }
+            
+            guard let refreshHandler else {
+                throw NetworkError.unauthorized
+            }
+            
+            let refreshed = try await refreshHandler()
+            guard refreshed else {
+                throw NetworkError.unauthorized
+            }
+            print("Refresh successful, rebuilding request")
+            var retriedRequest = request
+            if let token = tokenProvider?(), !token.isEmpty {
+                retriedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
+            print("Retrying request")
+            return try await perform(retriedRequest)
+        }
+    }
+    
+    
+    private func perform(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         let data: Data
         let response: URLResponse
-
+        
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await session.data(for: request)
         } catch let urlError as URLError {
             switch urlError.code {
             case .notConnectedToInternet:
                 throw NetworkError.noInternet
-            case .cannotFindHost, .cannotConnectToHost:
+            case .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed:
                 throw NetworkError.hostNotFound
             case .cancelled:
                 throw NetworkError.cancelled
@@ -116,51 +216,41 @@ public final class NetworkClient {
         } catch {
             throw NetworkError.unknown(error)
         }
-
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.invalidResponse
         }
-
+        
         switch httpResponse.statusCode {
         case 200..<300:
-            break
+            return (data, httpResponse)
         case 401:
             throw NetworkError.unauthorized
-        case 400..<500, 500..<600:
+        case 400..<600:
             throw NetworkError.serverError(code: httpResponse.statusCode)
         default:
             throw NetworkError.invalidResponse
         }
-        if httpResponse.statusCode == 204 {
-            if T.self == EmptyResponse.self {
-                return EmptyResponse() as! T
-            } else {
-                throw NetworkError.decodingError
+    }
+    
+    private func makeDecoder() -> JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let dateString = try container.decode(String.self)
+            
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            if let date = formatter.date(from: dateString) {
+                return date
             }
+            
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Invalid date format: \(dateString)"
+            )
         }
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .custom { decoder in
-                let container = try decoder.singleValueContainer()
-                let dateString = try container.decode(String.self)
-                
-                let formatter = ISO8601DateFormatter()
-                formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-                
-                if let date = formatter.date(from: dateString) {
-                    return date
-                }
-                
-                throw DecodingError.dataCorruptedError(
-                    in: container,
-                    debugDescription: "Invalid date format: \(dateString)"
-                )
-            }
-            return try decoder.decode(T.self, from: data)
-        } catch {
-            throw NetworkError.decodingError
-        }
+        return decoder
     }
 }
-
-fileprivate struct EmptyResponse: Decodable {}

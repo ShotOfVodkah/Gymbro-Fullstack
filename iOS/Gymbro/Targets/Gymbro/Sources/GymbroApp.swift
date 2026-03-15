@@ -5,6 +5,7 @@ import GymbroWorkouts
 import GymbroNavigation
 import GymbroNetwork
 import GymbroCommonUI
+import GymbroAuth
 
 @main
 struct GymbroApp: App {
@@ -12,7 +13,15 @@ struct GymbroApp: App {
     @State private var modelContainer: ModelContainer
     @State var tab: AppTab = .workouts
     @StateObject private var router = AppRouter()
+    @StateObject private var session = SessionManager.shared
     private let appServicesFactory: AppServicesFactory
+    
+    private var authBinding: Binding<Bool> {
+        Binding(
+            get: { !session.isAuthenticated },
+            set: { _ in }
+        )
+    }
     
     init() {
         let r = AppRouter()
@@ -47,7 +56,10 @@ struct GymbroApp: App {
                                     appServicesFactory.makeDestinationView(for: route)
                                 }
                         case .profile:
-                            Text("Profile")
+                            appServicesFactory.makeProfileMainTab()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
                         case .challenge:
                             Text("Challenges")
                         case .perks:
@@ -55,12 +67,15 @@ struct GymbroApp: App {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+                    
                     AppTabBar(selected: $tab)
                         .padding(.horizontal, 10)
                         .padding(.bottom, 10)
                 }
                 .ignoresSafeArea(.container, edges: .bottom)
+            }
+            .fullScreenCover(isPresented: authBinding) {
+                AuthView()
             }
         }
         .modelContainer(modelContainer)

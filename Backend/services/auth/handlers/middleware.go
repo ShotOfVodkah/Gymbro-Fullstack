@@ -14,12 +14,14 @@ const (
 	ContextUserIDKey contextKey = "userID"
 	ContextEmailKey  contextKey = "email"
 	ContextRoleKey   contextKey = "role"
+	ContextSessionIDKey contextKey = "sessionID"
 )
 
 type CustomClaims struct {
 	UserID int    `json:"user_id"`
 	Email  string `json:"email"`
 	Role   string `json:"role"`
+	SessionID string `json:"session_id"`
 	jwt.StandardClaims
 }
 
@@ -58,6 +60,7 @@ func AuthMiddleware(key []byte) func(http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), ContextUserIDKey, claims.UserID)
 			ctx = context.WithValue(ctx, ContextEmailKey, claims.Email)
 			ctx = context.WithValue(ctx, ContextRoleKey, claims.Role)
+			ctx = context.WithValue(ctx, ContextSessionIDKey, claims.SessionID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

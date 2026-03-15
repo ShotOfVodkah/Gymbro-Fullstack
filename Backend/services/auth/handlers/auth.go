@@ -26,8 +26,6 @@ func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.Token(w, r)
 	case r.Method == http.MethodPost && r.URL.Path == "/auth/refresh":
 		h.Refresh(w, r)
-	case r.Method == http.MethodPost && r.URL.Path == "/auth/logout":
-		h.Logout(w, r)
 	default:
 		notFound(w, r)
 	}
@@ -46,10 +44,16 @@ func (h *authHandler) Token(w http.ResponseWriter, r *http.Request) {
 		unauthorized(w, r)
 		return
 	}
+
+	sessionBytes := make([]byte, 16)
+	rand.Read(sessionBytes)
+	sessionID := hex.EncodeToString(sessionBytes)
+
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, CustomClaims{
 		UserID: user.ID,
 		Email:  user.Email,
 		Role:   user.Role,
+		SessionID: sessionID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(15 * time.Minute).Unix(), // 15 minutes
 			Issuer:    "gymbro",
@@ -66,7 +70,7 @@ func (h *authHandler) Token(w http.ResponseWriter, r *http.Request) {
 	refreshToken := hex.EncodeToString(refreshBytes)
 	refreshExpires := time.Now().Add(7 * 24 * time.Hour) // a week
 
-	err = h.refreshStore.Save(user.ID, refreshToken, refreshExpires)
+	err = h.refreshStore.Save(user.ID, sessionID, refreshToken, refreshExpires)
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -88,7 +92,7 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, expires, err := h.refreshStore.Find(req.RefreshToken)
+	userID, sessionID, expires, err := h.refreshStore.Find(req.RefreshToken)
 	if err != nil || time.Now().After(expires) {
 		unauthorized(w, r)
 		return
@@ -106,6 +110,7 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		UserID: user.ID,
 		Email:  user.Email,
 		Role:   user.Role,
+		SessionID: sessionID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(15 * time.Minute).Unix(),
 			Issuer:    "gymbro",
@@ -119,7 +124,7 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	newRefresh := hex.EncodeToString(refreshBytes)
 	newRefreshExpires := time.Now().Add(7 * 24 * time.Hour)
 
-	if err := h.refreshStore.Save(user.ID, newRefresh, newRefreshExpires); err != nil {
+	if err := h.refreshStore.Save(user.ID, sessionID, newRefresh, newRefreshExpires); err != nil {
 		internalServerError(w, r)
 		return
 	}
@@ -131,21 +136,19 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	req := struct {
-		RefreshToken string `json:"refresh_token"`
-	}{}
-
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		badRequest(w, r)
+	sessionIDVal := r.Context().Value(ContextSessionIDKey)
+	if sessionIDVal == nil {
+		unauthorized(w, r)
 		return
 	}
 
-	if req.RefreshToken == "" {
-		badRequest(w, r)
+	sessionID, ok := sessionIDVal.(string)
+	if !ok {
+		unauthorized(w, r)
 		return
 	}
 
-	if err := h.refreshStore.Delete(req.RefreshToken); err != nil {
+	if err := h.refreshStore.DeleteBySessionID(sessionID); err != nil {
 		internalServerError(w, r)
 		return
 	}
@@ -153,7 +156,7 @@ func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"ok":      true,
-		"message": "token deleted",
+		"message": "session deleted",
 	})
 }
 
