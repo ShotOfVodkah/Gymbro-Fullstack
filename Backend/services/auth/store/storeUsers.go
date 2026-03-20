@@ -26,7 +26,7 @@ func (us *UserStore) GetUserByEmail(email string) (*types.User, error) {
 
 func (us *UserStore) InsertUser(user *types.User) (*types.User, error) {
 	var result types.User
-	err := us.db.Get(&result, `insert into users (email, password_hash, role) values ($1, $2, 'user') returning *`, user.Email, user.PasswordHash)
+	err := us.db.Get(&result, `insert into users (email, password_hash, role) values ($1, $2, $3) returning *`, user.Email, user.PasswordHash, user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("InsertUser: %w", err)
 	}

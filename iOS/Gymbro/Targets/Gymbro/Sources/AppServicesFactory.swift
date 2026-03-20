@@ -6,6 +6,7 @@ import GymbroWorkouts
 import GymbroNetwork
 import GymbroNavigation
 import GymbroFeeds
+import GymbroProfile
 
 final class AppServicesFactory {
     let router: AppRouter
@@ -114,6 +115,10 @@ final class AppServicesFactory {
         screenFactories.feedsMainTabFactory.makeView()
     }
     
+    @MainActor
+    func makeProfileMainTab() -> some View {
+        screenFactories.profileMainTabFactory.makeView()
+    }
 }
 
 private struct ScreenFactories {
@@ -128,4 +133,8 @@ private struct ScreenFactories {
     // Feeds factories
     
     lazy var feedsMainTabFactory = FeedsMainTabFactoryImpl()
+    
+    // Profile factories
+    
+    lazy var profileMainTabFactory = ProfileMainTabFactoryImpl()
 }

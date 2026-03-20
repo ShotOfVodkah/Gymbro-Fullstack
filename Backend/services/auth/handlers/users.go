@@ -6,24 +6,16 @@ import (
 	"regexp"
 
 	"github.com/alexandra-gritsaenko/gymbro-auth/service"
-	"github.com/alexandra-gritsaenko/gymbro-auth/types"
-	"github.com/alexedwards/argon2id"
 	"github.com/jmoiron/sqlx"
 )
 
 var (
 	listUsersRe  = regexp.MustCompile(`^\/users[\/]*$`)
 	getUserRe    = regexp.MustCompile(`^/users/([^/]+)$`)
-	createUserRe = regexp.MustCompile(`^\/users[\/]*$`)
 )
 
 type userHandler struct {
 	service service.UserService
-}
-
-type createUserRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
 }
 
 func NewUserHandler(db *sqlx.DB) *userHandler {
@@ -41,9 +33,6 @@ func (h *userHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	case r.Method == http.MethodGet && getUserRe.MatchString(r.URL.Path):
 		h.GetUser(w, r)
-		return
-	case r.Method == http.MethodPost && createUserRe.MatchString(r.URL.Path):
-		h.CreateUser(w, r)
 		return
 	default:
 		notFound(w, r)
@@ -122,38 +111,5 @@ func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		ID:    user.ID,
 		Email: user.Email,
 		Role:  user.Role,
-	})
-}
-
-func (h *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req createUserRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		badRequest(w, r)
-		return
-	}
-
-	hash, err := argon2id.CreateHash(req.Password, argon2id.DefaultParams)
-	if err != nil {
-		internalServerError(w, r)
-		return
-	}
-
-	user := &types.User{
-		Email:        req.Email,
-		PasswordHash: &hash,
-	}
-
-	created, err := h.service.CreateUser(user)
-	if err != nil {
-		internalServerError(w, r)
-		return
-	}
-
-	json.NewEncoder(w).Encode(struct {
-		ID    int    `json:"id"`
-		Email string `json:"email"`
-	}{
-		ID:    created.ID,
-		Email: created.Email,
 	})
 }

@@ -29,20 +29,11 @@ func main() {
 
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
-	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			userH.CreateUser(w, r)
-			return
-		}
-		authMiddleware(userH).ServeHTTP(w, r)
-	})
+	mux.Handle("/users", authMiddleware(userH))
 	mux.Handle("/users/", authMiddleware(userH))
-	// mux.Handle("/auth", authH)
-	// mux.Handle("/refresh", authH)
-	// mux.Handle("/logout", authH)
-	
-	// AUTH (login/refresh/logout)
+
 	mux.Handle("/auth/", authH)
+	mux.Handle("/auth/logout", authMiddleware(http.HandlerFunc(authH.Logout)))
 
 	http.ListenAndServe(":8081", mux)
 }
