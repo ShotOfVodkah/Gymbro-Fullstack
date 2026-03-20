@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"github.com/alexandra-gritsaenko/gymbro-auth/service"
 	"github.com/alexandra-gritsaenko/gymbro-auth/store"
+	"github.com/alexandra-gritsaenko/gymbro-auth/types"
+	"github.com/alexedwards/argon2id"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jmoiron/sqlx"
 	"net/http"
@@ -18,10 +20,23 @@ type authHandler struct {
 	refreshStore store.RefreshStore
 }
 
+type createUserRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type loginRequest struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
+}
+
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	switch {
+	case r.Method == http.MethodPost && r.URL.Path == "/auth/register":
+		h.CreateUser(w, r)
 	case r.Method == http.MethodPost && r.URL.Path == "/auth/login":
 		h.Token(w, r)
 	case r.Method == http.MethodPost && r.URL.Path == "/auth/refresh":
@@ -31,14 +46,76 @@ func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func NewAuthHandler(db *sqlx.DB, secretKey []byte) *authHandler {
+	return &authHandler{
+		key:          secretKey,
+		userService:  service.NewUserService(db),
+		refreshStore: store.NewRefreshStore(db),
+	}
+}
+
+func (h *authHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var req createUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		badRequest(w, r)
+		return
+	}
+
+	if req.Email == "" || req.Password == "" || req.Role == "" {
+		badRequest(w, r)
+		return
+	}
+
+	if !isValidRole(req.Role) {
+		badRequest(w, r)
+		return
+	}
+
+	hash, err := argon2id.CreateHash(req.Password, argon2id.DefaultParams)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	user := &types.User{
+		Email:        req.Email,
+		PasswordHash: &hash,
+		Role:         req.Role,
+	}
+
+	created, err := h.userService.CreateUser(user)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	json.NewEncoder(w).Encode(struct {
+		ID    int    `json:"id"`
+		Email string `json:"email"`
+		Role  string `json:"role"`
+	}{
+		ID:    created.ID,
+		Email: created.Email,
+		Role:  created.Role,
+	})
+}
+
+func isValidRole(role string) bool {
+	switch role {
+	case "athlete", "coach", "admin":
+		return true
+	default:
+		return false
+	}
+}
+
 func (h *authHandler) Token(w http.ResponseWriter, r *http.Request) {
-	req := struct {
-		User, Password string
-	}{}
+	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		internalServerError(w, r)
 		return
 	}
+
 	user, err := h.userService.AuthenticateUserByEmailPassword(req.User, req.Password)
 	if err != nil {
 		unauthorized(w, r)
@@ -158,12 +235,4 @@ func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		"ok":      true,
 		"message": "session deleted",
 	})
-}
-
-func NewAuthHandler(db *sqlx.DB, secretKey []byte) *authHandler {
-	return &authHandler{
-		key:          secretKey,
-		userService:  service.NewUserService(db),
-		refreshStore: store.NewRefreshStore(db),
-	}
 }

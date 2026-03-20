@@ -13,10 +13,12 @@ public struct LoginRequest: Encodable {
 public struct RegisterRequest: Encodable {
     public let email: String
     public let password: String
+    public let role: String
 
-    public init(email: String, password: String) {
+    public init(email: String, password: String, role: String) {
         self.email = email
         self.password = password
+        self.role = role
     }
 }
 
@@ -41,10 +43,12 @@ public struct TokenResponse: Decodable {
 public struct UserResponse: Decodable {
     public let id: Int
     public let email: String
+    public let role: String
 
-    public init(id: Int, email: String) {
+    public init(id: Int, email: String, role: String) {
         self.id = id
         self.email = email
+        self.role = role
     }
 }
 

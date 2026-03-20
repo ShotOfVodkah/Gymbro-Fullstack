@@ -25,13 +25,14 @@ public final class AuthService {
     
     public func register(
         email: String,
-        password: String
+        password: String,
+        role: String
     ) async throws -> UserResponse {
-        let body = RegisterRequest(email: email, password: password)
+        let body = RegisterRequest(email: email, password: password, role: role)
 
         return try await client.request(
             method: .POST,
-            path: "/users",
+            path: "/auth/register",
             body: body,
             requiresAuth: false,
             responseType: UserResponse.self

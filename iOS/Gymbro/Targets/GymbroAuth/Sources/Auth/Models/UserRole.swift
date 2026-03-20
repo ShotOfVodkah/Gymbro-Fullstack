@@ -1,4 +1,4 @@
 enum UserRole: String, CaseIterable {
-    case athlete = "Athlete"
-    case coach = "Coach"
+    case athlete = "athlete"
+    case coach = "coach"
 }

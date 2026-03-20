@@ -66,7 +66,7 @@ final class AuthViewModel: ObservableObject {
                     try await login(email: trimmedEmail, password: password)
                     
                 case .register:
-                    try await registerAndLogin(email: trimmedEmail, password: password)
+                    try await registerAndLogin(email: trimmedEmail, password: password, role: role.rawValue)
                 }
             } catch {
                 showAlert(error.localizedDescription)
@@ -86,10 +86,11 @@ final class AuthViewModel: ObservableObject {
         print("saved refresh =", AppMicroservices.tokens.refreshToken ?? "nil")
     }
     
-    private func registerAndLogin(email: String, password: String) async throws {
+    private func registerAndLogin(email: String, password: String, role: String) async throws {
         let user = try await AppMicroservices.auth.register(
             email: email,
-            password: password
+            password: password,
+            role: role
         )
         print("created user =", user.email)
         
