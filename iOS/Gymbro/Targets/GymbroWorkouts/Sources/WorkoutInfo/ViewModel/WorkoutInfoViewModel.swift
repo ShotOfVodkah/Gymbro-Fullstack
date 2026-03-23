@@ -57,7 +57,7 @@ final class WorkoutInfoViewModel: ObservableObject {
     private func handle(link: WorkoutInfoNavigationLink) {
         switch link {
         case .openPlayer(let id):
-            print("player")
+            router.navigate(to: .workoutPlayer(id: id))
         case .edit(let id):
             router.navigate(to: .workoutBuilderForType(type: nil, workoutId: id))
         case .delete(let id):

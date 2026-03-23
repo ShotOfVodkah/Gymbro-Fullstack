@@ -51,6 +51,8 @@ final class AppServicesFactory {
         switch route {
         case .workoutInfo(let id):
             makeWorkoutInfoScreen(id: id)
+        case .workoutPlayer(let id):
+            makeWorkoutPlayerScreen(id: id)
         case .workoutBuilder:
             makeWorkoutBuilderScreen()
         case .workoutBuilderForType(let type, let id):
@@ -81,6 +83,14 @@ final class AppServicesFactory {
             actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
             localMapper: localMapper
+        )
+    }
+
+    @MainActor
+    func makeWorkoutPlayerScreen(id: String) -> some View {
+        screenFactories.workoutPlayerFactory.makeView(
+            id: id,
+            router: router
         )
     }
     
@@ -127,6 +137,7 @@ private struct ScreenFactories {
     
     lazy var workoutsListFactory = WorkoutsListFactoryImpl()
     lazy var workoutInfoFactory = WorkoutInfoFactoryImpl()
+    lazy var workoutPlayerFactory = WorkoutPlayerFactoryImpl()
     lazy var workoutBuilderFactory = WorkoutBuilderFactoryImpl()
     lazy var workoutBuilderForTypeFactory = WorkoutBuilderForTypeFactoryImpl()
     
