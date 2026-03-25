@@ -4,48 +4,57 @@ import GymbroCommonUI
 import GymbroTypes
 
 struct WorkoutPlayerExerciseSlideView: View {
-    
+
     let exercise: ExerciseItem
+    let action: (() -> Void)?
 
     var body: some View {
-            VStack(spacing: 12) {
-                Spacer()
+        VStack(spacing: 12) {
+            Spacer()
 
-                header
-                
-                Spacer()
-                
-                icon
-                
-                Spacer()
-                
-                bottomStack
-
+            header
+            
+            if case .cardio(let cardioExercise) = exercise {
+                CardioTimerView(
+                    durationSeconds: cardioExercise.durationMinutes * 60,
+                    accentColor: exercise.accentColor,
+                    onNext: action
+                )
             }
-            .padding(.all, 25)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 35, style: .continuous)
-                    .fill(LinearGradient(
-                        colors: [exercise.accentColor.opacity(0.5),Color.appDarkGray],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 35, style: .continuous)
-                            .strokeBorder(LinearGradient(
-                                colors: [.white.opacity(0.4), .clear],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 2
-                        )
+
+            Spacer()
+
+            icon
+
+            Spacer()
+
+            bottomStack
+            
+        }
+        .padding(.all, 25)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 35, style: .continuous)
+                .fill(LinearGradient(
+                    colors: [exercise.accentColor.opacity(0.5), Color.appDarkGray],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 35, style: .continuous)
+                        .strokeBorder(LinearGradient(
+                            colors: [.white.opacity(0.4), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
                     )
-            )
+                )
+        )
     }
-    
-    // UI Components
-    
+
+    // MARK: - UI Components
+
     @ViewBuilder
     private var header: some View {
         Text(exercise.name)
@@ -71,7 +80,7 @@ struct WorkoutPlayerExerciseSlideView: View {
                     )
             )
     }
-    
+
     @ViewBuilder
     private var icon: some View {
         switch exercise {
@@ -85,7 +94,7 @@ struct WorkoutPlayerExerciseSlideView: View {
             Image("cardio", bundle: .module)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 200, height: 200)
+                .frame(width: 160, height: 160)
 
         case .yoga:
             Image("yoga", bundle: .module)
@@ -100,7 +109,7 @@ struct WorkoutPlayerExerciseSlideView: View {
                 .frame(width: 200, height: 200)
         }
     }
-    
+
     @ViewBuilder
     private var bottomStack: some View {
         HStack(spacing: 8) {
@@ -115,11 +124,12 @@ struct WorkoutPlayerExerciseSlideView: View {
             case .yoga(let exercise):
                 paramCapsule(title: "Breath Count", subtitle: "\(exercise.breathCount)")
                 paramCapsule(title: "Hold for", subtitle: "\(exercise.holdSeconds) sec")
-            case .fallback: Text("")
+            case .fallback:
+                EmptyView()
             }
         }
     }
-    
+
     private func paramCapsule(title: String, subtitle: String) -> some View {
         VStack {
             Text(title)
@@ -146,7 +156,7 @@ struct WorkoutPlayerExerciseSlideView: View {
     }
 }
 
-// Helpers
+// MARK: - Helpers
 
 extension ExerciseItem {
     fileprivate var accentColor: Color {
