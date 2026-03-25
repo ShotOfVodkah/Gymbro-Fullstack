@@ -133,7 +133,11 @@ struct WorkoutPlayerView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 0) {
                 ForEach(viewModel.exercises, id: \.id) { item in
-                    WorkoutPlayerExerciseSlideView(exercise: item, action: makeAction(for: item))
+                    WorkoutPlayerExerciseSlideView(
+                        exercise: item,
+                        onNext: makeNextAction(for: item),
+                        onWeightChanged: { viewModel.updateWeight(exerciseId: item.id, weight: $0) }
+                    )
                         .padding(.horizontal, 16)
                         .containerRelativeFrame(.horizontal, alignment: .center)
                         .scrollTransition(.interactive, axis: .horizontal) { content, phase in
@@ -271,14 +275,12 @@ extension WorkoutPlayerView {
         viewModel.currentExerciseIndex = index
     }
     
-    private func makeAction(for item: ExerciseItem) -> (() -> Void)? {
+    private func makeNextAction(for item: ExerciseItem) -> () -> Void {
         guard
             let idx = viewModel.exercises.firstIndex(where: { $0.id == item.id }),
             idx + 1 < viewModel.exercises.count
-        else { return nil }
-        return {
-            withAnimation { scrolledExerciseId = viewModel.exercises[idx + 1].id }
-        }
+        else { return {} }
+        return { withAnimation { scrolledExerciseId = viewModel.exercises[idx + 1].id } }
     }
 }
 

@@ -60,6 +60,10 @@ final class WorkoutPlayerViewModel: ObservableObject {
         router.pop()
     }
 
+    func updateWeight(exerciseId: String, weight: Double) {
+        weightUpdates[exerciseId] = weight
+    }
+
     // MARK: - Published state
 
     @Published var screenState: ScreenState = .loading
@@ -106,6 +110,9 @@ final class WorkoutPlayerViewModel: ObservableObject {
         case .error, .loading: break
         }
     }
+
+    // Accumulated weight changes per exercise; sent to network at workout end.
+    private(set) var weightUpdates: [String: Double] = [:]
 
     let workoutId: String
     private let router: any Router

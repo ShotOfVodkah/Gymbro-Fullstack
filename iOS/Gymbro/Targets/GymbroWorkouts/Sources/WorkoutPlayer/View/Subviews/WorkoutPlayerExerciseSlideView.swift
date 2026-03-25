@@ -6,7 +6,25 @@ import GymbroTypes
 struct WorkoutPlayerExerciseSlideView: View {
 
     let exercise: ExerciseItem
-    let action: (() -> Void)?
+    let onNext: (() -> Void)?
+    let onWeightChanged: ((Double) -> Void)?
+
+    @State private var selectedWeight: Double
+
+    init(
+        exercise: ExerciseItem,
+        onNext: (() -> Void)?,
+        onWeightChanged: ((Double) -> Void)?
+    ) {
+        self.exercise = exercise
+        self.onNext = onNext
+        self.onWeightChanged = onWeightChanged
+        if case .strength(let e) = exercise {
+            _selectedWeight = State(initialValue: e.weightKg)
+        } else {
+            _selectedWeight = State(initialValue: 0)
+        }
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -18,8 +36,9 @@ struct WorkoutPlayerExerciseSlideView: View {
                 CardioTimerView(
                     durationSeconds: cardioExercise.durationMinutes * 60,
                     accentColor: exercise.accentColor,
-                    onNext: action
+                    onNext: onNext
                 )
+                .padding(.top, 8)
             }
 
             Spacer()
@@ -29,6 +48,11 @@ struct WorkoutPlayerExerciseSlideView: View {
             Spacer()
 
             bottomStack
+
+            if case .strength = exercise {
+                WeightPickerView(weight: $selectedWeight, accentColor: exercise.accentColor)
+                    .padding(.top, 8)
+            }
             
         }
         .padding(.all, 25)
@@ -51,6 +75,11 @@ struct WorkoutPlayerExerciseSlideView: View {
                     )
                 )
         )
+        .onChange(of: selectedWeight) { _, newWeight in
+            if case .strength = exercise, let onWeightChanged {
+                onWeightChanged(newWeight)
+            }
+        }
     }
 
     // MARK: - UI Components
@@ -114,16 +143,16 @@ struct WorkoutPlayerExerciseSlideView: View {
     private var bottomStack: some View {
         HStack(spacing: 8) {
             switch exercise {
-            case .strength(let exercise):
-                paramCapsule(title: "Sets", subtitle: "\(exercise.sets)")
-                paramCapsule(title: "Reps", subtitle: "\(exercise.reps)")
-                paramCapsule(title: "Weight", subtitle: "\(exercise.weightKg)")
-            case .cardio(let exercise):
-                paramCapsule(title: "Duration", subtitle: "\(exercise.durationMinutes) min")
-                paramCapsule(title: "Pace", subtitle: exercise.pace.title)
-            case .yoga(let exercise):
-                paramCapsule(title: "Breath Count", subtitle: "\(exercise.breathCount)")
-                paramCapsule(title: "Hold for", subtitle: "\(exercise.holdSeconds) sec")
+            case .strength(let e):
+                paramCapsule(title: "Sets", subtitle: "\(e.sets)")
+                paramCapsule(title: "Reps", subtitle: "\(e.reps)")
+                paramCapsule(title: "Weight", subtitle: formatKg(selectedWeight))
+            case .cardio(let e):
+                paramCapsule(title: "Duration", subtitle: "\(e.durationMinutes) min")
+                paramCapsule(title: "Pace", subtitle: e.pace.title)
+            case .yoga(let e):
+                paramCapsule(title: "Breath Count", subtitle: "\(e.breathCount)")
+                paramCapsule(title: "Hold for", subtitle: "\(e.holdSeconds) sec")
             case .fallback:
                 EmptyView()
             }
@@ -138,6 +167,7 @@ struct WorkoutPlayerExerciseSlideView: View {
             Text(subtitle)
                 .font(.system(.subheadline, design: .rounded).weight(.medium))
                 .foregroundStyle(.white)
+                .animation(.easeInOut(duration: 0.2), value: subtitle)
         }
         .padding(.all, 10)
         .frame(maxWidth: .infinity)
@@ -153,6 +183,12 @@ struct WorkoutPlayerExerciseSlideView: View {
                     lineWidth: 1
                 )
         )
+    }
+    
+    private func formatKg(_ kg: Double) -> String {
+        kg.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(kg)) kg"
+            : String(format: "%.1f kg", kg)
     }
 }
 
