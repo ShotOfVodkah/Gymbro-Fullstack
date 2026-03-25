@@ -9,13 +9,6 @@ import GymbroTypes
 @MainActor
 final class WorkoutsListViewModel: ObservableObject {
     
-    enum ScreenState {
-        case loading
-        case loaded
-        case offline
-        case error
-    }
-    
     struct StreakSheetModel: Identifiable {
         var id: Int
         

@@ -13,13 +13,6 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         case create
         case edit
     }
-    
-    enum ScreenState {
-        case loading
-        case loaded
-        case offline
-        case error
-    }
 
     init(
         networkClient: WorkoutsNetworkClient,

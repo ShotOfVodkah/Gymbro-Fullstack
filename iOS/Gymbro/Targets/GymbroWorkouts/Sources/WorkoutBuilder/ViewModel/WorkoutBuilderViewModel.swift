@@ -8,13 +8,6 @@ import GymbroTypes
 
 @MainActor
 final class WorkoutBuilderViewModel: ObservableObject {
-    
-    enum ScreenState {
-        case loading
-        case loaded
-        case offline
-        case error
-    }
 
     init(
         networkClient: WorkoutsNetworkClient,
