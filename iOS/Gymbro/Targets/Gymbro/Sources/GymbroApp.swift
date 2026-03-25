@@ -74,9 +74,9 @@ struct GymbroApp: App {
                 }
                 .ignoresSafeArea(.container, edges: .bottom)
             }
-//            .fullScreenCover(isPresented: authBinding) {
-//                AuthView()
-//            }
+            .fullScreenCover(isPresented: authBinding) {
+                AuthView()
+            }
         }
         .modelContainer(modelContainer)
     }

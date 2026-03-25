@@ -19,17 +19,19 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         modelModifier: WorkoutsModelModifier,
         type: String?,
         workoutId: String?
-    ) -> some View  {
+    ) -> some View {
         guard let viewModelCache, typeCache == type, idCache == workoutId else {
-            let workoutsNetworkClient = WorkoutsNetworkClientImpl()
-            let viewModel = WorkoutBuilderForTypeViewModel(
-                networkClient: workoutsNetworkClient,
-                router: router,
+            let service = WorkoutBuilderForTypeServiceImpl(
+                networkClient: WorkoutsNetworkClientImpl(),
                 divLocalRepository: divLocalRepository,
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,
                 actionsRepository: actionsRepository,
-                localMapper: localMapper,
+                localMapper: localMapper
+            )
+            let viewModel = WorkoutBuilderForTypeViewModel(
+                service: service,
+                router: router,
                 modelModifier: modelModifier,
                 type: type,
                 workoutId: workoutId
@@ -41,7 +43,7 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         }
         return WorkoutBuilderForTypeView(viewModel: viewModelCache)
     }
-    
+
     private var viewModelCache: WorkoutBuilderForTypeViewModel?
     private var idCache: String?
     private var typeCache: String?

@@ -34,14 +34,20 @@ final class WorkoutPlayerViewModel: ObservableObject {
     // MARK: - Actions
     
     func loadWorkout() async {
-        (viewState, screenState) = await service.fetchWorkout(id: workoutId)
-        switch screenState {
-        case .loaded:
-            modelModifier.events.send(.statusChanged(status: .online))
-        case .offline:
-            modelModifier.events.send(.statusChanged(status: .offline))
-        case .error, .loading:
-            break
+        do {
+            let (viewState, screenState) = try await service.fetchWorkout(id: workoutId)
+            self.viewState = viewState
+            self.screenState = screenState
+            switch screenState {
+            case .loaded:
+                modelModifier.events.send(.statusChanged(status: .online))
+            case .offline:
+                modelModifier.events.send(.statusChanged(status: .offline))
+            case .error, .loading:
+                break
+            }
+        } catch {
+            screenState = .error
         }
         
     }

@@ -123,7 +123,7 @@ struct WorkoutPlayerExerciseSlideView: View {
     private func paramCapsule(title: String, subtitle: String) -> some View {
         VStack {
             Text(title)
-                .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                .font(.system(.headline, design: .rounded).weight(.bold))
                 .foregroundStyle(.white)
             Text(subtitle)
                 .font(.system(.subheadline, design: .rounded).weight(.medium))

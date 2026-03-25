@@ -3,15 +3,18 @@ import Foundation
 import GymbroTypes
 
 protocol WorkoutPlayerService {
-    func fetchWorkout(id: String) async -> (WorkoutPlayerViewState, ScreenState)
+    func fetchWorkout(id: String) async throws -> (WorkoutPlayerViewState, ScreenState)
 }
 
 final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
 
     init() {}
 
-    func fetchWorkout(id: String) async -> (WorkoutPlayerViewState, ScreenState) {
-        let workout = WorkoutPlayerMockData.workout(for: id)
+    func fetchWorkout(id: String) async throws -> (WorkoutPlayerViewState, ScreenState) {
+        let workout = workoutsMock.first(where: {$0.id == id})
+        guard let workout else {
+            throw WorkoutsServiceError.noData
+        }
         return (WorkoutPlayerViewState(
             workoutName: workout.name,
             workoutType: workout.type,

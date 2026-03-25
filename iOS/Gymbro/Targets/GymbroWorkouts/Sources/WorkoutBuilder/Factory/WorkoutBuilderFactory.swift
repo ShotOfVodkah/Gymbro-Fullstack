@@ -15,22 +15,24 @@ public final class WorkoutBuilderFactoryImpl {
         actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
         localMapper: WorkoutsLocalMapper
-    ) -> some View  {
+    ) -> some View {
         guard let viewModelCache else {
-            let workoutsNetworkClient = WorkoutsNetworkClientImpl()
-            let viewModel = WorkoutBuilderViewModel(
-                networkClient: workoutsNetworkClient,
-                router: router,
+            let service = WorkoutBuilderServiceImpl(
+                networkClient: WorkoutsNetworkClientImpl(),
                 divLocalRepository: divLocalRepository,
                 actionsRepository: actionsRepository,
-                modelModifier: modelModifier,
                 localMapper: localMapper
+            )
+            let viewModel = WorkoutBuilderViewModel(
+                service: service,
+                router: router,
+                modelModifier: modelModifier
             )
             viewModelCache = viewModel
             return WorkoutBuilderView(viewModel: viewModel)
         }
         return WorkoutBuilderView(viewModel: viewModelCache)
     }
-    
+
     private var viewModelCache: WorkoutBuilderViewModel?
 }

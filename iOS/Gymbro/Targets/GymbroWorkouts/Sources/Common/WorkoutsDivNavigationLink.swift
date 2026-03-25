@@ -43,7 +43,7 @@ var workoutsMock: [Workout] = [
                 id: "cardio_1_1",
                 name: "Warm-up Walk",
                 muscleGroup: .fullBody,
-                durationMinutes: 5,
+                durationMinutes: 1,
                 pace: .walk
             ),
             CardioExercise(
