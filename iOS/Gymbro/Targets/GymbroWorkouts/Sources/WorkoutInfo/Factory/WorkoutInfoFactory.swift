@@ -16,17 +16,19 @@ public final class WorkoutInfoFactoryImpl {
         actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
         localMapper: WorkoutsLocalMapper
-    ) -> some View  {
+    ) -> some View {
         guard let viewModelCache, id == idCache else {
-            let workoutsNetworkClient = WorkoutsNetworkClientImpl()
-            let viewModel = WorkoutInfoViewModel(
-                id: id,
-                networkClient: workoutsNetworkClient,
+            let service = WorkoutInfoServiceImpl(
+                networkClient: WorkoutsNetworkClientImpl(),
                 divLocalRepository: divLocalRepository,
                 actionsRepository: actionsRepository,
-                router: router,
-                modelModifier: modelModifier,
                 localMapper: localMapper
+            )
+            let viewModel = WorkoutInfoViewModel(
+                id: id,
+                service: service,
+                router: router,
+                modelModifier: modelModifier
             )
             viewModelCache = viewModel
             idCache = id
@@ -34,8 +36,7 @@ public final class WorkoutInfoFactoryImpl {
         }
         return WorkoutInfoView(viewModel: viewModelCache, id: id)
     }
-    
+
     private var idCache: String?
     private var viewModelCache: WorkoutInfoViewModel?
 }
-

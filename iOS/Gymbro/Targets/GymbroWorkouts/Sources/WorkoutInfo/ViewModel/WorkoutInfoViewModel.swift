@@ -9,36 +9,22 @@ import GymbroTypes
 
 @MainActor
 final class WorkoutInfoViewModel: ObservableObject {
-    
-    enum ScreenState {
-        case loading
-        case loaded
-        case offline
-        case error
-    }
 
     init(
         id: String,
-        networkClient: WorkoutsNetworkClient,
-        divLocalRepository: DivCacheRepository,
-        actionsRepository: OfflineActionsRepository,
+        service: any WorkoutInfoService,
         router: any Router,
-        modelModifier: WorkoutsModelModifier,
-        localMapper: WorkoutsLocalMapper
+        modelModifier: WorkoutsModelModifier
     ) {
-        self.networkClient = networkClient
-        
-        self.localRepository = divLocalRepository
-        self.actionsRepository = actionsRepository
-        
+        self.service = service
         self.router = router
         self.modelModifier = modelModifier
-        self.localMapper = localMapper
-        
-        let handler = WorkoutInfoDivUrlHandler{ [weak self] link in
+
+        let handler = WorkoutInfoDivUrlHandler { [weak self] link in
             self?.handle(link: link)
         }
-        
+        self.divkitComponents = DivKitComponents(urlHandler: handler)
+
         modelModifier.events
             .sink { [weak self] event in
                 guard let self else { return }
@@ -49,11 +35,52 @@ final class WorkoutInfoViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-        
-        self.divkitComponents = DivKitComponents(urlHandler: handler)
+
         fetchData(with: id)
     }
-    
+
+    // MARK: - Actions
+
+    func fetchData(with id: String) {
+        screenState = .loading
+        Task {
+            do {
+                let (data, state) = try await service.fetchScreen(id: id)
+                source = DivViewSource(kind: .data(data), cardId: "WorkoutInfoCard")
+                modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
+                screenState = state
+            } catch {
+                screenState = .error
+            }
+        }
+    }
+
+    func backButtonTapped() {
+        router.pop()
+    }
+
+    func deleteCurrentWorkout() {
+        guard let id else { return }
+        service.deleteWorkout(id: id)
+        modelModifier.events.send(.workoutDeleted(id: id))
+        router.pop()
+    }
+
+    // MARK: - Published state
+
+    @Published var screenState: ScreenState = .loading
+    @Published var showAlert: Bool = false
+    @Published var source: DivViewSource? = nil
+    @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
+
+    // MARK: - Private
+
+    private var id: String?
+    private var cancellables = Set<AnyCancellable>()
+    private let service: any WorkoutInfoService
+    private let modelModifier: WorkoutsModelModifier
+    private let router: any Router
+
     private func handle(link: WorkoutInfoNavigationLink) {
         switch link {
         case .openPlayer(let id):
@@ -66,38 +93,6 @@ final class WorkoutInfoViewModel: ObservableObject {
         }
     }
 
-
-    func fetchData(with id: String) {
-        screenState = .loading
-        Task {
-            do {
-                let data = try await networkClient.fetchWorkoutInfoDivJson(with: id)
-                source = DivViewSource(kind: .data(data), cardId: "WorkoutInfoCard")
-                modelModifier.events.send(.statusChanged(status: .online))
-                screenState = .loaded
-            } catch {
-                guard let data = localMapper.renderWorkoutInfo(id: id) else {
-                    screenState = .error
-                    return
-                }
-                source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
-                modelModifier.events.send(.statusChanged(status: .offline))
-                screenState = .offline
-            }
-        }
-    }
-    
-    func backButtonTapped() {
-        router.pop()
-    }
-    
-    func deleteCurrentWorkout() {
-        guard let id else { return }
-        actionsRepository.enqueueSmart(.deletedWorkout(id: id))
-        modelModifier.events.send(.workoutDeleted(id: id))
-        router.pop()
-    }
-    
     private func handleStatusChange(status: OfflineStatus) {
         switch screenState {
         case .loaded, .offline:
@@ -108,18 +103,4 @@ final class WorkoutInfoViewModel: ObservableObject {
         case .error, .loading: break
         }
     }
-
-    @Published var screenState: ScreenState = .loading
-    @Published var showAlert: Bool = false
-    @Published var source: DivViewSource? = nil
-    @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
-
-    private var id: String?
-    private var cancellables = Set<AnyCancellable>()
-    private var localMapper: WorkoutsLocalMapper
-    private let modelModifier: WorkoutsModelModifier
-    private let localRepository: DivCacheRepository
-    private let actionsRepository: OfflineActionsRepository
-    private let router: any Router
-    private let networkClient: WorkoutsNetworkClient
 }

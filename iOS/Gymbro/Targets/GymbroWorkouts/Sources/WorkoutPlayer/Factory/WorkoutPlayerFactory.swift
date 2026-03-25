@@ -10,10 +10,12 @@ public final class WorkoutPlayerFactoryImpl {
     @MainActor
     public func makeView(
         id: String,
-        router: any Router
+        router: any Router,
+        modelModifier: WorkoutsModelModifier,
     ) -> some View {
         guard let viewModelCache, id == idCache else {
-            let viewModel = WorkoutPlayerViewModel(id: id, router: router)
+            let service = WorkoutPlayerServiceImpl()
+            let viewModel = WorkoutPlayerViewModel(id: id, router: router, modelModifier: modelModifier, service: service)
             viewModelCache = viewModel
             idCache = id
             return WorkoutPlayerView(viewModel: viewModel)

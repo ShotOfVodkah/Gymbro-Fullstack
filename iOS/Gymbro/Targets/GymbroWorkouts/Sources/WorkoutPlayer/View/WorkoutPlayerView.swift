@@ -3,6 +3,12 @@ import SwiftUI
 import GymbroCommonUI
 import GymbroTypes
 
+struct WorkoutPlayerViewState {
+    let workoutName: String
+    let workoutType: WorkoutType
+    let exercises: [ExerciseItem]
+}
+
 struct WorkoutPlayerView: View {
 
     init(viewModel: WorkoutPlayerViewModel) {
@@ -12,30 +18,27 @@ struct WorkoutPlayerView: View {
     var body: some View {
         ZStack {
             TopGradientBackground()
-
-            VStack(alignment: .leading, spacing: 0) {
-                headerBlock
-                    .padding(.horizontal, 16)
-
-                if viewModel.exercises.isEmpty {
-                    Spacer()
-                    Text("No exercises in this workout")
-                        .font(.system(.body, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.6))
-                        .frame(maxWidth: .infinity)
-                    Spacer()
-                } else {
-                    exerciseScrollPager
-                        .padding(.top, 12)
-                    
-                    upNext
-                        .padding(.top, 20)
-                        .padding(.horizontal, 16)
-                    
-                    progressBar
-                        .padding(.horizontal, 16)
-                        .padding(.top, 20)
+            switch viewModel.screenState {
+            case .loading:
+                Text("loading")
+            case .loaded:
+                content
+            case .offline:
+                VStack(spacing: 0){
+                    OfflineHeader()
+                    content
                 }
+                .ignoresSafeArea(.container, edges: .bottom)
+            case .error:
+                VStack(alignment: .center) {
+                    Text("Something went wrong, oopsie...")
+                        .font(.title3)
+                        .foregroundStyle(Color.white)
+                    AppButton("Refresh", size: .xl) {
+                        Task { await viewModel.loadWorkout() }
+                    }
+                }
+                .padding(.horizontal, 40)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -64,6 +67,33 @@ struct WorkoutPlayerView: View {
     }
     
     // Subviews
+    
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            headerBlock
+                .padding(.horizontal, 16)
+
+            if viewModel.exercises.isEmpty {
+                Spacer()
+                Text("No exercises in this workout")
+                    .font(.system(.body, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .frame(maxWidth: .infinity)
+                Spacer()
+            } else {
+                exerciseScrollPager
+                    .padding(.top, 12)
+                
+                upNext
+                    .padding(.top, 20)
+                    .padding(.horizontal, 16)
+                
+                progressBar
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
+            }
+        }
+    }
     
     private var headerBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -103,7 +133,11 @@ struct WorkoutPlayerView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: 0) {
                 ForEach(viewModel.exercises, id: \.id) { item in
-                    WorkoutPlayerExerciseSlideView(exercise: item)
+                    WorkoutPlayerExerciseSlideView(
+                        exercise: item,
+                        onNext: makeNextAction(for: item),
+                        onWeightChanged: { viewModel.updateWeight(exerciseId: item.id, weight: $0) }
+                    )
                         .padding(.horizontal, 16)
                         .containerRelativeFrame(.horizontal, alignment: .center)
                         .scrollTransition(.interactive, axis: .horizontal) { content, phase in
@@ -239,6 +273,14 @@ extension WorkoutPlayerView {
               viewModel.currentExerciseIndex != index
         else { return }
         viewModel.currentExerciseIndex = index
+    }
+    
+    private func makeNextAction(for item: ExerciseItem) -> () -> Void {
+        guard
+            let idx = viewModel.exercises.firstIndex(where: { $0.id == item.id }),
+            idx + 1 < viewModel.exercises.count
+        else { return {} }
+        return { withAnimation { scrolledExerciseId = viewModel.exercises[idx + 1].id } }
     }
 }
 

@@ -90,7 +90,8 @@ final class AppServicesFactory {
     func makeWorkoutPlayerScreen(id: String) -> some View {
         screenFactories.workoutPlayerFactory.makeView(
             id: id,
-            router: router
+            router: router,
+            modelModifier: workoutsModelModifier
         )
     }
     
