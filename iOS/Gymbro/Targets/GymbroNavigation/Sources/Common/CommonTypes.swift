@@ -10,6 +10,7 @@ public protocol NavigationDestination {
 
 public enum NavigationRoute: Hashable {
     case workoutInfo(id: String)
+    case workoutPlayer(id: String)
     case workoutBuilder
     case workoutBuilderForType(type: String?, workoutId: String?)
     // другие маршруты

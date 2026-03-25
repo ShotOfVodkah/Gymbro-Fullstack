@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 public enum ExerciseItem: Identifiable, Equatable {
     case strength(StrengthExercise)
@@ -43,6 +44,15 @@ public enum ExerciseItem: Identifiable, Equatable {
         }
     }
     
+    public var muscleGroup: MuscleGroup {
+        switch self {
+        case .strength(let e): return e.muscleGroup
+        case .cardio(let e): return e.muscleGroup
+        case .yoga(let e): return e.muscleGroup
+        case .fallback(let e): return e.muscleGroup
+        }
+    }
+    
     public var exercise: any Exercise {
         switch self {
         case .strength(let e):
@@ -54,7 +64,7 @@ public enum ExerciseItem: Identifiable, Equatable {
         case .fallback(let e):
             return e
         }
-    }
+    }    
 }
 
 public enum WorkoutType: Codable {
