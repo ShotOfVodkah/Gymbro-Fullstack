@@ -2,7 +2,6 @@ package store
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -20,19 +19,111 @@ func NewWorkoutStore(db *sqlx.DB) WorkoutStore {
 	return WorkoutStore{db: db}
 }
 
+// workoutRow maps the workouts table (no exercises column anymore).
 type workoutRow struct {
-	ID            string `db:"id"`
-	UserID        string `db:"user_id"`
-	Name          string `db:"name"`
-	Type          string `db:"type"`
-	ExercisesJSON []byte `db:"exercises"`
+	ID     string `db:"id"`
+	UserID string `db:"user_id"`
+	Name   string `db:"name"`
+	Type   string `db:"type"`
 }
 
-func rowToWorkout(row workoutRow) (*types.Workout, error) {
-	var exercises []types.Exercise
-	if err := json.Unmarshal(row.ExercisesJSON, &exercises); err != nil {
-		return nil, fmt.Errorf("unmarshal exercises: %w", err)
+// workoutExerciseRow maps the JOIN result of workout_exercises + exercises.
+type workoutExerciseRow struct {
+	// from exercises catalog
+	ExerciseID  string `db:"exercise_id"`
+	Name        string `db:"name"`
+	ExType      string `db:"ex_type"`
+	MuscleGroup string `db:"muscle_group"`
+	// execution params
+	Sets            *int     `db:"sets"`
+	Reps            *int     `db:"reps"`
+	WeightKg        *float64 `db:"weight_kg"`
+	DurationMinutes *int     `db:"duration_minutes"`
+	Pace            *string  `db:"pace"`
+	HoldSeconds     *int     `db:"hold_seconds"`
+	BreathCount     *int     `db:"breath_count"`
+}
+
+func rowToExercise(r workoutExerciseRow) types.Exercise {
+	return types.Exercise{
+		ID:              r.ExerciseID,
+		Name:            r.Name,
+		Type:            r.ExType,
+		MuscleGroup:     r.MuscleGroup,
+		Sets:            r.Sets,
+		Reps:            r.Reps,
+		WeightKg:        r.WeightKg,
+		DurationMinutes: r.DurationMinutes,
+		Pace:            r.Pace,
+		HoldSeconds:     r.HoldSeconds,
+		BreathCount:     r.BreathCount,
 	}
+}
+
+const exerciseJoinQuery = `
+	SELECT
+		we.exercise_id,
+		e.name,
+		e.type        AS ex_type,
+		e.muscle_group,
+		we.sets,
+		we.reps,
+		we.weight_kg,
+		we.duration_minutes,
+		we.pace,
+		we.hold_seconds,
+		we.breath_count
+	FROM workout_exercises we
+	JOIN exercises e ON e.id = we.exercise_id
+	WHERE we.workout_id = $1
+	ORDER BY we.position
+`
+
+func (ws *WorkoutStore) loadExercises(workoutID string) ([]types.Exercise, error) {
+	var rows []workoutExerciseRow
+	if err := ws.db.Select(&rows, exerciseJoinQuery, workoutID); err != nil {
+		return nil, fmt.Errorf("loadExercises: %w", err)
+	}
+	exercises := make([]types.Exercise, len(rows))
+	for i, r := range rows {
+		exercises[i] = rowToExercise(r)
+	}
+	return exercises, nil
+}
+
+func (ws *WorkoutStore) insertExercises(tx *sqlx.Tx, workoutID string, inputs []types.WorkoutExerciseInput) error {
+	for i, ex := range inputs {
+		_, err := tx.Exec(`
+			INSERT INTO workout_exercises
+				(workout_id, exercise_id, position, sets, reps, weight_kg, duration_minutes, pace, hold_seconds, breath_count)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+			workoutID, ex.ExerciseID, i,
+			ex.Sets, ex.Reps, ex.WeightKg,
+			ex.DurationMinutes, ex.Pace,
+			ex.HoldSeconds, ex.BreathCount,
+		)
+		if err != nil {
+			return fmt.Errorf("insertExercises pos %d: %w", i, err)
+		}
+	}
+	return nil
+}
+
+func (ws *WorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
+	var row workoutRow
+	err := ws.db.Get(&row, `SELECT id, user_id, name, type FROM workouts WHERE id = $1`, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("GetWorkoutByID: %w", err)
+	}
+
+	exercises, err := ws.loadExercises(id)
+	if err != nil {
+		return nil, err
+	}
+
 	return &types.Workout{
 		ID:        row.ID,
 		UserID:    row.UserID,
@@ -42,59 +133,65 @@ func rowToWorkout(row workoutRow) (*types.Workout, error) {
 	}, nil
 }
 
-func (ws *WorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
-	var row workoutRow
-	err := ws.db.Get(&row, `SELECT id, user_id, name, type, exercises FROM workouts WHERE id = $1`, id)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, ErrNotFound
-	}
-	if err != nil {
-		return nil, fmt.Errorf("GetWorkoutByID: %w", err)
-	}
-	return rowToWorkout(row)
-}
-
 func (ws *WorkoutStore) ListWorkoutsByUserID(userID string) ([]types.Workout, error) {
 	var rows []workoutRow
-	err := ws.db.Select(&rows, `SELECT id, user_id, name, type, exercises FROM workouts WHERE user_id = $1 ORDER BY id`, userID)
+	err := ws.db.Select(&rows,
+		`SELECT id, user_id, name, type FROM workouts WHERE user_id = $1 ORDER BY id`,
+		userID,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("ListWorkoutsByUserID: %w", err)
 	}
 
 	workouts := make([]types.Workout, 0, len(rows))
 	for _, row := range rows {
-		w, err := rowToWorkout(row)
+		exercises, err := ws.loadExercises(row.ID)
 		if err != nil {
 			return nil, err
 		}
-		workouts = append(workouts, *w)
+		workouts = append(workouts, types.Workout{
+			ID:        row.ID,
+			UserID:    row.UserID,
+			Name:      row.Name,
+			Type:      types.WorkoutType(row.Type),
+			Exercises: exercises,
+		})
 	}
 	return workouts, nil
 }
 
-func (ws *WorkoutStore) InsertWorkout(w *types.Workout) error {
-	exercisesJSON, err := json.Marshal(w.Exercises)
+func (ws *WorkoutStore) InsertWorkout(input *types.WorkoutInput) error {
+	tx, err := ws.db.Beginx()
 	if err != nil {
-		return fmt.Errorf("InsertWorkout marshal: %w", err)
+		return fmt.Errorf("InsertWorkout begin: %w", err)
 	}
-	_, err = ws.db.Exec(
-		`INSERT INTO workouts (id, user_id, name, type, exercises) VALUES ($1, $2, $3, $4, $5)`,
-		w.ID, w.UserID, w.Name, string(w.Type), exercisesJSON,
+	defer tx.Rollback()
+
+	_, err = tx.Exec(
+		`INSERT INTO workouts (id, user_id, name, type) VALUES ($1, $2, $3, $4)`,
+		input.ID, input.UserID, input.Name, string(input.Type),
 	)
 	if err != nil {
 		return fmt.Errorf("InsertWorkout: %w", err)
 	}
-	return nil
+
+	if err := ws.insertExercises(tx, input.ID, input.Exercises); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
-func (ws *WorkoutStore) UpdateWorkout(id string, w *types.Workout) error {
-	exercisesJSON, err := json.Marshal(w.Exercises)
+func (ws *WorkoutStore) UpdateWorkout(id string, input *types.WorkoutInput) error {
+	tx, err := ws.db.Beginx()
 	if err != nil {
-		return fmt.Errorf("UpdateWorkout marshal: %w", err)
+		return fmt.Errorf("UpdateWorkout begin: %w", err)
 	}
-	res, err := ws.db.Exec(
-		`UPDATE workouts SET name = $1, type = $2, exercises = $3 WHERE id = $4`,
-		w.Name, string(w.Type), exercisesJSON, id,
+	defer tx.Rollback()
+
+	res, err := tx.Exec(
+		`UPDATE workouts SET name = $1, type = $2 WHERE id = $3`,
+		input.Name, string(input.Type), id,
 	)
 	if err != nil {
 		return fmt.Errorf("UpdateWorkout: %w", err)
@@ -103,7 +200,16 @@ func (ws *WorkoutStore) UpdateWorkout(id string, w *types.Workout) error {
 	if n == 0 {
 		return ErrNotFound
 	}
-	return nil
+
+	if _, err = tx.Exec(`DELETE FROM workout_exercises WHERE workout_id = $1`, id); err != nil {
+		return fmt.Errorf("UpdateWorkout delete exercises: %w", err)
+	}
+
+	if err := ws.insertExercises(tx, id, input.Exercises); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (ws *WorkoutStore) DeleteWorkout(id string) error {

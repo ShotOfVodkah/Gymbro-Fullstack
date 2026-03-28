@@ -41,7 +41,7 @@ func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /workouts/
+	// /workouts/ or /workouts
 	if r.URL.Path == "/workouts/" || r.URL.Path == "/workouts" {
 		switch r.Method {
 		case http.MethodGet:
@@ -85,16 +85,21 @@ func (h *workoutHandler) ListWorkoutsByUser(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *workoutHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
-	var workout types.Workout
-	if err := json.NewDecoder(r.Body).Decode(&workout); err != nil {
+	var input types.WorkoutInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		badRequest(w, r)
 		return
 	}
-	if workout.ID == "" || workout.UserID == "" || workout.Name == "" || workout.Type == "" {
+	if input.ID == "" || input.UserID == "" || input.Name == "" || input.Type == "" {
 		badRequest(w, r)
 		return
 	}
-	if err := h.workoutStore.InsertWorkout(&workout); err != nil {
+	if err := h.workoutStore.InsertWorkout(&input); err != nil {
+		internalServerError(w, r)
+		return
+	}
+	workout, err := h.workoutStore.GetWorkoutByID(input.ID)
+	if err != nil {
 		internalServerError(w, r)
 		return
 	}
@@ -103,16 +108,16 @@ func (h *workoutHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, id string) {
-	var workout types.Workout
-	if err := json.NewDecoder(r.Body).Decode(&workout); err != nil {
+	var input types.WorkoutInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		badRequest(w, r)
 		return
 	}
-	if workout.Name == "" || workout.Type == "" {
+	if input.Name == "" || input.Type == "" {
 		badRequest(w, r)
 		return
 	}
-	if err := h.workoutStore.UpdateWorkout(id, &workout); err != nil {
+	if err := h.workoutStore.UpdateWorkout(id, &input); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			notFound(w, r)
 			return
@@ -120,7 +125,11 @@ func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, i
 		internalServerError(w, r)
 		return
 	}
-	workout.ID = id
+	workout, err := h.workoutStore.GetWorkoutByID(id)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
 	json.NewEncoder(w).Encode(workout)
 }
 
@@ -133,6 +142,5 @@ func (h *workoutHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request, i
 		internalServerError(w, r)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{"ok": true, "id": id})
 }
