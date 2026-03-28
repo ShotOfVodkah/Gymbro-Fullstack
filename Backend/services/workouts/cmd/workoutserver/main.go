@@ -18,11 +18,14 @@ func main() {
 
 	workoutH := handlers.NewWorkoutHandler(db)
 	exerciseH := handlers.NewExerciseHandler(db)
+	sessionH := handlers.NewSessionHandler(db)
 
 	mux := http.NewServeMux()
 	mux.Handle("/workouts/", workoutH)
 	mux.Handle("/workouts", workoutH)
 	mux.Handle("/exercises", exerciseH)
+	mux.Handle("/sessions", sessionH)
+	mux.Handle("/sessions/", sessionH)
 
 	log.Println("workouts service listening on :8082")
 	log.Fatal(http.ListenAndServe(":8082", mux))
