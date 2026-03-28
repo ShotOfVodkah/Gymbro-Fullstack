@@ -5,6 +5,8 @@ public final class AppMicroservices {
     
     public let tokenStorage: TokenStorage
     public let authService: AuthService
+    public let workoutsClient: WorkoutsClient
+    
     public let networkClient: NetworkClient
     
     private init() {
@@ -41,6 +43,7 @@ public final class AppMicroservices {
             }
         )
         authService = AuthService(client: networkClient)
+        workoutsClient = WorkoutsClient(client: networkClient)
     }
     
     @MainActor
@@ -53,4 +56,5 @@ public final class AppMicroservices {
 extension AppMicroservices {
     public static var auth: AuthService { shared.authService }
     public static var tokens: TokenStorage { shared.tokenStorage }
+    public static var workouts: WorkoutsClient { shared.workoutsClient }
 }

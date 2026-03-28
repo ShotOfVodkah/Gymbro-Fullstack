@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 import kotlin.collections.listOf
 
 @RestController
-@RequestMapping("/workoutBuilderTitle") // Listening at localhost:8080/workoutBuilderTitle
+@RequestMapping("/workoutBuilderTitle") // Listening at localhost:8090/workoutBuilderTitle
 class WorkoutBuilerTitleController {
 
     @GetMapping

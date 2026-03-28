@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController
 import kotlin.collections.listOf
 
 @RestController
-@RequestMapping("/workoutBuilderForType") // Listening at localhost:8080/workoutBuilderSheet
+@RequestMapping("/workoutBuilderForType") // Listening at localhost:8090/workoutBuilderSheet
 class WorkoutBuilderForTypeController {
 
     @GetMapping

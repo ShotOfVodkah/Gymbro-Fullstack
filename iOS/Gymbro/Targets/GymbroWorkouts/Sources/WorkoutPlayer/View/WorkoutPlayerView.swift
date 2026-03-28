@@ -20,7 +20,19 @@ struct WorkoutPlayerView: View {
             TopGradientBackground()
             switch viewModel.screenState {
             case .loading:
-                Text("loading")
+                ZStack(alignment: .topLeading) {
+                    WorkoutPlayerViewStub()
+
+                    Button {
+                        viewModel.exit()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                            .imageScale(.large)
+                    }
+                    .padding(.leading, 16)
+                }
             case .loaded:
                 content
             case .offline:
@@ -30,15 +42,28 @@ struct WorkoutPlayerView: View {
                 }
                 .ignoresSafeArea(.container, edges: .bottom)
             case .error:
-                VStack(alignment: .center) {
-                    Text("Something went wrong, oopsie...")
-                        .font(.title3)
-                        .foregroundStyle(Color.white)
-                    AppButton("Refresh", size: .xl) {
-                        Task { await viewModel.loadWorkout() }
+                ZStack {
+                    Button {
+                        viewModel.exit()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                            .imageScale(.large)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.leading, 16)
+                    
+                    VStack(alignment: .center) {
+                        Text("Something went wrong, oopsie...")
+                            .font(.title3)
+                            .foregroundStyle(Color.white)
+                        AppButton("Refresh", size: .xl) {
+                            Task { await viewModel.loadWorkout() }
+                        }
+                    }
+                    .padding(.horizontal, 40)
                 }
-                .padding(.horizontal, 40)
             }
         }
         .toolbar(.hidden, for: .navigationBar)

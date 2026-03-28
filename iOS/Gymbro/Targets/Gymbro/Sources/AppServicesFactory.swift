@@ -18,7 +18,7 @@ final class AppServicesFactory {
     
     let workoutsModelModifier = WorkoutsModelModifier()
     let localMapper: WorkoutsLocalMapper
-    
+
     private var screenFactories = ScreenFactories()
 
     init(
@@ -91,7 +91,10 @@ final class AppServicesFactory {
         screenFactories.workoutPlayerFactory.makeView(
             id: id,
             router: router,
-            modelModifier: workoutsModelModifier
+            modelModifier: workoutsModelModifier,
+            workoutsRepository: workoutsRepository,
+            actionsRepository: actionsRepository,
+            client: AppMicroservices.workouts
         )
     }
     

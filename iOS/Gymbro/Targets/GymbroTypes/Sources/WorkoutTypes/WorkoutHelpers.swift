@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-public enum ExerciseItem: Identifiable, Equatable {
+public enum ExerciseItem: Identifiable, Equatable, Codable {
     case strength(StrengthExercise)
     case cardio(CardioExercise)
     case yoga(YogaExercise)
@@ -11,21 +11,52 @@ public enum ExerciseItem: Identifiable, Equatable {
         switch exercise {
         case let e as StrengthExercise:
             self = .strength(e)
-            
         case let e as CardioExercise:
             self = .cardio(e)
-                
         case let e as YogaExercise:
             self = .yoga(e)
-                
         case let e as DefaultExercise:
             self = .fallback(e)
-            
         default:
             fatalError("Unsupported Exercise type: \(type(of: exercise))")
         }
     }
-
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        
+        switch type {
+        case "strength":
+            self = .strength(try StrengthExercise(from: decoder))
+        case "cardio":
+            self = .cardio(try CardioExercise(from: decoder))
+        case "yoga":
+            self = .yoga(try YogaExercise(from: decoder))
+        default:
+            self = .fallback(try DefaultExercise(from: decoder))
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .strength(let e):
+            try container.encode("strength", forKey: .type)
+            try e.encode(to: encoder)
+        case .cardio(let e):
+            try container.encode("cardio", forKey: .type)
+            try e.encode(to: encoder)
+        case .yoga(let e):
+            try container.encode("yoga", forKey: .type)
+            try e.encode(to: encoder)
+        case .fallback(let e):
+            try container.encode("fallback", forKey: .type)
+            try e.encode(to: encoder)
+        }
+    }
+    
     public  var id: String {
         switch self {
         case .strength(let e): return e.id
@@ -64,10 +95,14 @@ public enum ExerciseItem: Identifiable, Equatable {
         case .fallback(let e):
             return e
         }
-    }    
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case type
+    }
 }
 
-public enum WorkoutType: Codable {
+public enum WorkoutType: String, Codable {
     case strength
     case cardio
     case yoga
@@ -107,7 +142,7 @@ public enum WorkoutType: Codable {
     }
 }
 
-public enum PaceType: CaseIterable, Hashable, Codable {
+public enum PaceType: String, CaseIterable, Hashable, Codable {
     case walk, jog, run, sprint, recovery
     
     public var title: String {
@@ -121,7 +156,7 @@ public enum PaceType: CaseIterable, Hashable, Codable {
     }
 }
 
-public enum MuscleGroup: Codable {
+public enum MuscleGroup: String, Codable {
     case chest, back, shoulders, biceps, triceps, legs, glutes, core, fullBody
     
     public var title: String {

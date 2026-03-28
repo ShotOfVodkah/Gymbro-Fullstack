@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/divkit/templates") // localhost:8080/divkit/templates
+@RequestMapping("/divkit/templates") // localhost:8090/divkit/templates
 class DivkitTemplatesController {
 
 
@@ -123,7 +123,7 @@ private val WORKOUT_INFO_TEMPLATES_JSON: String = """
                           "items": [
                             {
                               "type": "image",
-                              "image_url": "http://localhost:8080/assets/edit.png",
+                              "image_url": "http://localhost:8090/assets/edit.png",
                               "height": { "type": "fixed", "value": 21 },
                               "width": { "type": "fixed", "value": 21 }
                             }
@@ -207,7 +207,7 @@ private val WORKOUT_INFO_TEMPLATES_JSON: String = """
                           "items": [
                             {
                               "type": "image",
-                              "image_url": "http://localhost:8080/assets/trash.png",
+                              "image_url": "http://localhost:8090/assets/trash.png",
                               "height": { "type": "fixed", "value": 21 },
                               "width": { "type": "fixed", "value": 21 }
                             }
@@ -318,7 +318,7 @@ private val WORKOUT_INFO_TEMPLATES_JSON: String = """
                   "items": [
                     {
                       "type": "image",
-                      "image_url": "http://localhost:8080/assets/dumbell.png",
+                      "image_url": "http://localhost:8090/assets/dumbell.png",
                       "height": { "type": "fixed", "value": 20 },
                       "width": { "type": "fixed", "value": 20 }
                     },
@@ -984,7 +984,7 @@ private val WORKOUT_INFO_TEMPLATES_JSON: String = """
                         "items": [
                           {
                             "type": "image",
-                            "image_url": "http://localhost:8080/assets/dumbell.png",
+                            "image_url": "http://localhost:8090/assets/dumbell.png",
                             "height": { "type": "fixed", "value": 20 },
                             "width": { "type": "fixed", "value": 20 }
                           },

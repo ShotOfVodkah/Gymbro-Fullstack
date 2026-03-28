@@ -81,7 +81,7 @@ object WorkoutsListRenderer {
         daysLeft: Int,
         current: Int
     ): Div {
-        val imageUrl = "http://localhost:8080/assets/fire.png"
+        val imageUrl = "http://localhost:8090/assets/fire.png"
         return container(
             orientation = horizontal,
             alignmentVertical = center,
@@ -180,7 +180,7 @@ object WorkoutsListRenderer {
     }
 
     private fun DivScope.workoutSecondRow(): Div {
-        val imageUrl = "http://localhost:8080/assets/plus.png"
+        val imageUrl = "http://localhost:8090/assets/plus.png"
         return container(
             width = matchParentSize(),
             height = wrapContentSize(),
@@ -263,7 +263,7 @@ object WorkoutsListRenderer {
     }
 
     private fun DivScope.workoutSearchBar(): Div {
-        val imageUrl = "http://localhost:8080/assets/search.png"
+        val imageUrl = "http://localhost:8090/assets/search.png"
         return container(
             width = matchParentSize(),
             height = wrapContentSize(),

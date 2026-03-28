@@ -20,4 +20,5 @@ public struct Workout {
         self.type = type
         self.exercises = exercises
     }
+    
 }

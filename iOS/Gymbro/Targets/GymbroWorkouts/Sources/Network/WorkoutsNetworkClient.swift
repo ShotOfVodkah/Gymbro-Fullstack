@@ -24,7 +24,7 @@ final class WorkoutsNetworkClientImpl: WorkoutsNetworkClient {
     private let baseURL: URL
     private let session: URLSession
     
-    init(baseURL: URL = URL(string: "http://localhost:8080")!,
+    init(baseURL: URL = URL(string: "http://localhost:8090")!,
          session: URLSession = .shared) {
         self.baseURL = baseURL
         self.session = session
