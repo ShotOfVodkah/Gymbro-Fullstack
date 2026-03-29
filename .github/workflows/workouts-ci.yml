@@ -1,0 +1,27 @@
+name: Workouts CI
+
+on:
+  push:
+    paths:
+      - 'Backend/services/workouts/**'
+  pull_request:
+
+jobs:
+  test:
+    name: Go tests — workouts service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/services/workouts
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: Backend/services/workouts/go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./handlers/ -v
