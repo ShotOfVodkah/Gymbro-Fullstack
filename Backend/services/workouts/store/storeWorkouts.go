@@ -11,12 +11,20 @@ import (
 
 var ErrNotFound = errors.New("not found")
 
+type WorkoutStorer interface {
+	GetWorkoutByID(id string) (*types.Workout, error)
+	ListWorkoutsByUserID(userID string) ([]types.Workout, error)
+	InsertWorkout(input *types.WorkoutInput) error
+	UpdateWorkout(id string, input *types.WorkoutInput) error
+	DeleteWorkout(id string) error
+}
+
 type WorkoutStore struct {
 	db *sqlx.DB
 }
 
-func NewWorkoutStore(db *sqlx.DB) WorkoutStore {
-	return WorkoutStore{db: db}
+func NewWorkoutStore(db *sqlx.DB) *WorkoutStore {
+	return &WorkoutStore{db: db}
 }
 
 type workoutRow struct {

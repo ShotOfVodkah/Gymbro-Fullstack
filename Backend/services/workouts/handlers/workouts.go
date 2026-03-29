@@ -8,19 +8,16 @@ import (
 
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
-	"github.com/jmoiron/sqlx"
 )
 
 var reWorkoutByID = regexp.MustCompile(`^/workouts/([^/]+)$`)
 
 type workoutHandler struct {
-	workoutStore store.WorkoutStore
+	workoutStore store.WorkoutStorer
 }
 
-func NewWorkoutHandler(db *sqlx.DB) *workoutHandler {
-	return &workoutHandler{
-		workoutStore: store.NewWorkoutStore(db),
-	}
+func NewWorkoutHandler(s store.WorkoutStorer) *workoutHandler {
+	return &workoutHandler{workoutStore: s}
 }
 
 func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

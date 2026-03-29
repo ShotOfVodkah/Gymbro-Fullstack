@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/alexandra-gritsaenko/gymbro-workouts/handlers"
+	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -16,7 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	workoutH := handlers.NewWorkoutHandler(db)
+	workoutH := handlers.NewWorkoutHandler(store.NewWorkoutStore(db))
 	exerciseH := handlers.NewExerciseHandler(db)
 	sessionH := handlers.NewSessionHandler(db)
 
