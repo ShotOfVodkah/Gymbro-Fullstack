@@ -15,11 +15,12 @@ public final class WorkoutsListFactoryImpl {
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
         modelModifier: WorkoutsModelModifier,
+        client: WorkoutsClient,
         localMapper: WorkoutsLocalMapper
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutsListServiceImpl(
-                networkClient: WorkoutsNetworkClientImpl(),
+                networkClient: client,
                 divLocalRepository: divLocalRepository,
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,

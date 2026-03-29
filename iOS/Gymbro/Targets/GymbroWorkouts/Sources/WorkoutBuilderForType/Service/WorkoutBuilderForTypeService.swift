@@ -6,16 +6,15 @@ import GymbroTypes
 protocol WorkoutBuilderForTypeService {
     func fetchScreen(type: String, workout: Workout?, selectedExerciseIds: [String]) async throws -> (Data, ScreenState)
     func loadWorkout(id: String) -> Workout?
-    func loadAvailableExercises(type: String) -> [any Exercise]
-    func saveWorkout(_ workout: Workout)
-    func enqueueAddWorkout(_ workout: Workout)
-    func enqueueEditWorkout(_ workout: Workout)
+    func fetchAvailableExercises(type: String) async -> [any Exercise]
+    func saveWorkout(_ workout: Workout) async
+    func editWorkout(_ workout: Workout) async
 }
 
 final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
 
     init(
-        networkClient: WorkoutsNetworkClient,
+        networkClient: WorkoutsClient,
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
@@ -51,43 +50,47 @@ final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
         workoutsRepository.loadWorkout(key: "user", workoutId: id)
     }
 
-    func loadAvailableExercises(type: String) -> [any Exercise] {
+    func fetchAvailableExercises(type: String) async -> [any Exercise] {
+        let workoutType: WorkoutType
         let key: AvailableExercisesKey
-        let fallback: [any Exercise]
 
         switch type {
-        case "Yoga":
-            key = .yoga
-            fallback = yogaExercises
-        case "Cardio":
-            key = .cardio
-            fallback = cardioExercises
-        case "Strength":
-            key = .strength
-            fallback = strengthExercises
-        default:
-            return []
+        case "Yoga":     workoutType = .yoga;     key = .yoga
+        case "Cardio":   workoutType = .cardio;   key = .cardio
+        case "Strength": workoutType = .strength; key = .strength
+        default: return []
         }
 
-        let fromRepo = exercisesRepository.load(type: key).map(\.asExercise)
-        return fromRepo.isEmpty ? fallback : fromRepo
+        do {
+            let items = try await networkClient.fetchExercises(type: workoutType)
+            exercisesRepository.save(type: key, items: items)
+            return items.map(\.asExercise)
+        } catch {
+            return exercisesRepository.load(type: key).map(\.asExercise)
+        }
     }
 
-    func saveWorkout(_ workout: Workout) {
+    func saveWorkout(_ workout: Workout) async {
         workoutsRepository.upsertWorkout(key: "user", workout: workout)
+        do {
+            try await networkClient.createWorkout(workout)
+        } catch {
+            actionsRepository.enqueueSmart(.addedWorkout(workout: WorkoutDTO(from: workout)))
+        }
     }
 
-    func enqueueAddWorkout(_ workout: Workout) {
-        actionsRepository.enqueueSmart(.addedWorkout(workout: WorkoutDTO(from: workout)))
-    }
-
-    func enqueueEditWorkout(_ workout: Workout) {
-        actionsRepository.enqueueSmart(.editedWorkout(workout: WorkoutDTO(from: workout)))
+    func editWorkout(_ workout: Workout) async {
+        workoutsRepository.upsertWorkout(key: "user", workout: workout)
+        do {
+            try await networkClient.editWorkout(workout)
+        } catch {
+            actionsRepository.enqueueSmart(.editedWorkout(workout: WorkoutDTO(from: workout)))
+        }
     }
 
     // MARK: - Private
 
-    private let networkClient: WorkoutsNetworkClient
+    private let networkClient: WorkoutsClient
     private let divLocalRepository: DivCacheRepository
     private let workoutsRepository: WorkoutsCacheRepository
     private let exercisesRepository: ExercisesRepository

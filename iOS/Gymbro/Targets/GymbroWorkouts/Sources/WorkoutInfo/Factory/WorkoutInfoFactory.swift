@@ -15,11 +15,12 @@ public final class WorkoutInfoFactoryImpl {
         divLocalRepository: DivCacheRepository,
         actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
+        сlient: WorkoutsClient,
         localMapper: WorkoutsLocalMapper
     ) -> some View {
         guard let viewModelCache, id == idCache else {
             let service = WorkoutInfoServiceImpl(
-                networkClient: WorkoutsNetworkClientImpl(),
+                networkClient: сlient,
                 divLocalRepository: divLocalRepository,
                 actionsRepository: actionsRepository,
                 localMapper: localMapper

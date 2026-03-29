@@ -70,6 +70,7 @@ final class AppServicesFactory {
             workoutsRepository: workoutsRepository,
             exercisesRepository: exercisesRepository,
             modelModifier: workoutsModelModifier,
+            client: AppMicroservices.workouts,
             localMapper: localMapper
         )
     }
@@ -82,6 +83,7 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
+            сlient: AppMicroservices.workouts,
             localMapper: localMapper
         )
     }
@@ -105,6 +107,7 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
+            сlient: AppMicroservices.workouts,
             localMapper: localMapper
         )
     }
@@ -119,6 +122,7 @@ final class AppServicesFactory {
             actionsRepository: actionsRepository,
             localMapper: localMapper,
             modelModifier: workoutsModelModifier,
+            сlient: AppMicroservices.workouts,
             type: type,
             workoutId: workoutId
         )

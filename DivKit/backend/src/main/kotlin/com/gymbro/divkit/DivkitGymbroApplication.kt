@@ -334,6 +334,13 @@ val strengthExercises = listOf(
 // Cardio Exercises
 val cardioExercises = listOf(
 	CardioExercise(
+		id = "running",
+		name = "Бег",
+		muscleGroup = MuscleGroup.LEGS,
+		durationMinutes = 30,
+		pace = PaceType.JOG
+	),
+	CardioExercise(
 		id = "car_001",
 		name = "Easy Run",
 		muscleGroup = MuscleGroup.FULL_BODY,

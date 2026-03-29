@@ -51,5 +51,3 @@ public struct UserResponse: Decodable {
         self.role = role
     }
 }
-
-public struct EmptyBody: Encodable {}

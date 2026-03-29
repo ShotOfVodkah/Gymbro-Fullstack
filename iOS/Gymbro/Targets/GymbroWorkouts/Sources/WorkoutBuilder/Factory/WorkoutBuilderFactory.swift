@@ -14,11 +14,12 @@ public final class WorkoutBuilderFactoryImpl {
         divLocalRepository: DivCacheRepository,
         actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
+        сlient: WorkoutsClient,
         localMapper: WorkoutsLocalMapper
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutBuilderServiceImpl(
-                networkClient: WorkoutsNetworkClientImpl(),
+                networkClient: сlient,
                 divLocalRepository: divLocalRepository,
                 actionsRepository: actionsRepository,
                 localMapper: localMapper

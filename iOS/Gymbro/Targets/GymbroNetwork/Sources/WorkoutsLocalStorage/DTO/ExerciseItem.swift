@@ -93,6 +93,33 @@ public extension WorkoutDTO {
     }
 }
 
+public struct CatalogExerciseDTO: Codable {
+    public let id: String
+    public let name: String
+    public let type: String
+    public let muscleGroup: MuscleGroup
+
+    public func toExerciseItemDTO() -> ExerciseItemDTO {
+        if type == "yoga" {
+            return ExerciseItemDTO.yoga(
+                YogaExercise(id: id, name: name, muscleGroup: muscleGroup, holdSeconds: 0, breathCount: 0)
+            )
+        } else if type == "cardio" {
+            return ExerciseItemDTO.cardio(
+                CardioExercise(id: id, name: name, muscleGroup: muscleGroup, durationMinutes: 0, pace: .jog)
+            )
+        } else if type == "strength" {
+            return ExerciseItemDTO.strength(
+                StrengthExercise(id: id, name: name, muscleGroup: muscleGroup, sets: 0, reps: 0, weightKg: 0)
+            )
+        } else {
+            return ExerciseItemDTO.fallback(
+                DefaultExercise(id: id, name: name, muscleGroup: muscleGroup)
+            )
+        }
+    }
+}
+
 public enum AvailableExercisesKey {
     case strength
     case cardio

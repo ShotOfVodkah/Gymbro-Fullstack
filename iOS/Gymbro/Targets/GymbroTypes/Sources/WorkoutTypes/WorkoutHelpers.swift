@@ -157,7 +157,8 @@ public enum PaceType: String, CaseIterable, Hashable, Codable {
 }
 
 public enum MuscleGroup: String, Codable {
-    case chest, back, shoulders, biceps, triceps, legs, glutes, core, fullBody
+    case chest, back, shoulders, biceps, triceps, legs, glutes, core
+    case fullBody = "full_body"
     
     public var title: String {
         switch self {
