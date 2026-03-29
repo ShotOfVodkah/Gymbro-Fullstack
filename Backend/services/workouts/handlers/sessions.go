@@ -27,7 +27,6 @@ func NewSessionHandler(db *sqlx.DB) *sessionHandler {
 func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	// /sessions/{id}
 	if m := reSessionByID.FindStringSubmatch(r.URL.Path); m != nil {
 		if r.Method == http.MethodGet {
 			h.GetSessionByID(w, r, m[1])
@@ -37,7 +36,6 @@ func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /sessions or /sessions/
 	if r.URL.Path == "/sessions" || r.URL.Path == "/sessions/" {
 		switch r.Method {
 		case http.MethodGet:

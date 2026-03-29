@@ -8,7 +8,6 @@ const (
 	WorkoutTypeYoga     WorkoutType = "yoga"
 )
 
-// CatalogExercise is an entry in the exercise catalog table.
 type CatalogExercise struct {
 	ID          string `json:"id"          db:"id"`
 	Name        string `json:"name"        db:"name"`
@@ -16,8 +15,6 @@ type CatalogExercise struct {
 	MuscleGroup string `json:"muscleGroup" db:"muscle_group"`
 }
 
-// WorkoutExerciseInput is what the client sends when creating/updating a workout.
-// Only the reference to the catalog + execution params are required.
 type WorkoutExerciseInput struct {
 	ExerciseID      string   `json:"exerciseId"`
 	Sets            *int     `json:"sets,omitempty"`
@@ -29,7 +26,6 @@ type WorkoutExerciseInput struct {
 	BreathCount     *int     `json:"breathCount,omitempty"`
 }
 
-// WorkoutInput is what the client sends when creating/updating a workout.
 type WorkoutInput struct {
 	ID        string                 `json:"id"`
 	UserID    string                 `json:"userId"`
@@ -38,8 +34,6 @@ type WorkoutInput struct {
 	Exercises []WorkoutExerciseInput `json:"exercises"`
 }
 
-// Exercise is a fully enriched exercise as returned in API responses —
-// catalog metadata joined with execution params from workout_exercises.
 type Exercise struct {
 	ID              string   `json:"id"`
 	Name            string   `json:"name"`
@@ -54,7 +48,6 @@ type Exercise struct {
 	BreathCount     *int     `json:"breathCount,omitempty"`
 }
 
-// Workout is the full response object returned by the API.
 type Workout struct {
 	ID        string      `json:"id"`
 	UserID    string      `json:"userId"`

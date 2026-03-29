@@ -18,8 +18,6 @@ func NewExerciseHandler(db *sqlx.DB) *exerciseHandler {
 	}
 }
 
-// GET /exercises          → all exercises
-// GET /exercises?type=    → filtered by type (strength / cardio / yoga)
 func (h *exerciseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 

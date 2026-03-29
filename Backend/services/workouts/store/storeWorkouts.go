@@ -19,7 +19,6 @@ func NewWorkoutStore(db *sqlx.DB) WorkoutStore {
 	return WorkoutStore{db: db}
 }
 
-// workoutRow maps the workouts table (no exercises column anymore).
 type workoutRow struct {
 	ID     string `db:"id"`
 	UserID string `db:"user_id"`
@@ -27,14 +26,11 @@ type workoutRow struct {
 	Type   string `db:"type"`
 }
 
-// workoutExerciseRow maps the JOIN result of workout_exercises + exercises.
 type workoutExerciseRow struct {
-	// from exercises catalog
 	ExerciseID  string `db:"exercise_id"`
 	Name        string `db:"name"`
 	ExType      string `db:"ex_type"`
 	MuscleGroup string `db:"muscle_group"`
-	// execution params
 	Sets            *int     `db:"sets"`
 	Reps            *int     `db:"reps"`
 	WeightKg        *float64 `db:"weight_kg"`

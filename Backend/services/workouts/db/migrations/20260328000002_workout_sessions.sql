@@ -17,14 +17,11 @@ CREATE TABLE session_exercises (
     exercise_type    TEXT        NOT NULL,
     muscle_group     TEXT        NOT NULL,
     position         INT         NOT NULL DEFAULT 0,
-    -- strength
     sets             INT,
     reps             INT,
     weight_kg        FLOAT,
-    -- cardio
     duration_minutes INT,
     pace             TEXT,
-    -- yoga
     hold_seconds     INT,
     breath_count     INT
 );

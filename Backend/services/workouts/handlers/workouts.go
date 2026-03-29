@@ -26,7 +26,6 @@ func NewWorkoutHandler(db *sqlx.DB) *workoutHandler {
 func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	// /workouts/{id}
 	if m := reWorkoutByID.FindStringSubmatch(r.URL.Path); m != nil {
 		switch r.Method {
 		case http.MethodGet:
@@ -41,7 +40,6 @@ func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// /workouts/ or /workouts
 	if r.URL.Path == "/workouts/" || r.URL.Path == "/workouts" {
 		switch r.Method {
 		case http.MethodGet:

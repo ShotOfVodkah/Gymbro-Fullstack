@@ -12,21 +12,17 @@ CREATE TABLE workout_exercises (
     workout_id       TEXT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
     exercise_id      TEXT NOT NULL REFERENCES exercises(id),
     position         INT  NOT NULL DEFAULT 0,
-    -- strength
     sets             INT,
     reps             INT,
     weight_kg        FLOAT,
-    -- cardio
     duration_minutes INT,
     pace             TEXT,
-    -- yoga
     hold_seconds     INT,
     breath_count     INT
 );
 
 ALTER TABLE workouts DROP COLUMN exercises;
 
--- seed: strength exercises
 INSERT INTO exercises (id, name, type, muscle_group) VALUES
     ('bench-press',       'Жим лёжа',              'strength', 'chest'),
     ('incline-press',     'Жим на наклонной',      'strength', 'chest'),
@@ -46,7 +42,6 @@ INSERT INTO exercises (id, name, type, muscle_group) VALUES
     ('plank',             'Планка',                 'strength', 'core'),
     ('crunch',            'Скручивания',            'strength', 'core');
 
--- seed: cardio exercises
 INSERT INTO exercises (id, name, type, muscle_group) VALUES
     ('running',           'Бег',                   'cardio', 'legs'),
     ('cycling',           'Велосипед',              'cardio', 'legs'),
@@ -55,7 +50,6 @@ INSERT INTO exercises (id, name, type, muscle_group) VALUES
     ('elliptical',        'Эллиптический тренажёр', 'cardio', 'legs'),
     ('swimming',          'Плавание',               'cardio', 'full_body');
 
--- seed: yoga exercises
 INSERT INTO exercises (id, name, type, muscle_group) VALUES
     ('warrior-1',         'Поза воина I',           'yoga', 'legs'),
     ('warrior-2',         'Поза воина II',          'yoga', 'legs'),

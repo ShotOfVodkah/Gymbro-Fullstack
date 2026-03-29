@@ -143,10 +143,8 @@ func (ss *SessionStore) ListSessionsByUserID(userID string, from, to *time.Time)
 	return sessions, nil
 }
 
-// InsertSession creates a new session. It resolves workout name/type and exercise
-// names from the DB at insertion time, snapshotting them into session_exercises.
 func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
-	// resolve workout snapshot
+
 	var workoutName, workoutType string
 	err := ss.db.QueryRow(
 		`SELECT name, type FROM workouts WHERE id = $1`, input.WorkoutID,
