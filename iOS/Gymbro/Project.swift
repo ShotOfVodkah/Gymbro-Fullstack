@@ -87,7 +87,9 @@ let commonUITarget: ProjectDescription.Target = .target(
     ),
     sources: ["\(basePath)/GymbroCommonUI/Sources/**"],
     resources: ["\(basePath)/GymbroCommonUI/Resources/**"],
-    dependencies: [],
+    dependencies: [
+        .external(name: "Lottie")
+    ],
     settings: baseSettings()
 )
 

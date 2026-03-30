@@ -146,7 +146,7 @@ object WorkoutInfoRenderer {
                             paddings = edgeInsets(8),
                             items = listOf(
                                 image(
-                                    imageUrl = Url.create("http://localhost:8080/assets/edit.png"),
+                                    imageUrl = Url.create("http://localhost:8090/assets/edit.png"),
                                     width = fixedSize(21),
                                     height = fixedSize(21)
                                 )
@@ -216,7 +216,7 @@ object WorkoutInfoRenderer {
                         paddings = edgeInsets(8),
                         items = listOf(
                             image(
-                                imageUrl = Url.create("http://localhost:8080/assets/trash.png"),
+                                imageUrl = Url.create("http://localhost:8090/assets/trash.png"),
                                 width = fixedSize(21),
                                 height = fixedSize(21)
                             )
@@ -326,7 +326,7 @@ object WorkoutInfoRenderer {
                     border = border(cornerRadius = 15),
                     items = listOf(
                         image(
-                            imageUrl = Url.create("http://localhost:8080/assets/dumbell.png"),
+                            imageUrl = Url.create("http://localhost:8090/assets/dumbell.png"),
                             width = fixedSize(20),
                             height = fixedSize(20)
                         ),

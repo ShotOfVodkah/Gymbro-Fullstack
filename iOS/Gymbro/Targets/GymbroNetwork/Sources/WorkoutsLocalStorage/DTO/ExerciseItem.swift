@@ -15,35 +15,65 @@ public enum ExerciseItemDTO: Codable, Equatable {
     case yoga(YogaExercise)
     case fallback(DefaultExercise)
 
-    private enum Kind: String, Codable { case strength, cardio, yoga, fallback }
-    private enum CodingKeys: String, CodingKey { case kind, payload }
+    private enum AllKeys: String, CodingKey {
+        case id, name, type, muscleGroup
+        case sets, reps, weightKg
+        case durationMinutes, pace
+        case holdSeconds, breathCount
+    }
 
     public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        let kind = try c.decode(Kind.self, forKey: .kind)
-        switch kind {
-        case .strength: self = .strength(try c.decode(StrengthExercise.self, forKey: .payload))
-        case .cardio: self = .cardio(try c.decode(CardioExercise.self, forKey: .payload))
-        case .yoga: self = .yoga(try c.decode(YogaExercise.self, forKey: .payload))
-        case .fallback: self = .fallback(try c.decode(DefaultExercise.self, forKey: .payload))
+        let container = try decoder.container(keyedBy: AllKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+
+        switch type {
+        case "strength":
+            self = .strength(try StrengthExercise(from: decoder))
+        case "cardio":
+            self = .cardio(try CardioExercise(from: decoder))
+        case "yoga":
+            self = .yoga(try YogaExercise(from: decoder))
+        default:
+            self = .fallback(try DefaultExercise(from: decoder))
         }
     }
 
     public func encode(to encoder: Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
+        var container = encoder.container(keyedBy: AllKeys.self)
+        
         switch self {
         case .strength(let e):
-            try c.encode(Kind.strength, forKey: .kind)
-            try c.encode(e, forKey: .payload)
+            try container.encode("strength", forKey: .type)
+            try e.encode(to: encoder)
         case .cardio(let e):
-            try c.encode(Kind.cardio, forKey: .kind)
-            try c.encode(e, forKey: .payload)
+            try container.encode("cardio", forKey: .type)
+            try e.encode(to: encoder)
         case .yoga(let e):
-            try c.encode(Kind.yoga, forKey: .kind)
-            try c.encode(e, forKey: .payload)
+            try container.encode("yoga", forKey: .type)
+            try e.encode(to: encoder)
         case .fallback(let e):
-            try c.encode(Kind.fallback, forKey: .kind)
-            try c.encode(e, forKey: .payload)
+            try container.encode("fallback", forKey: .type)
+            try e.encode(to: encoder)
+        }
+    }
+    
+    public var asExercise: any Exercise {
+        switch self {
+        case .strength(let e): return e
+        case .cardio(let e): return e
+        case .yoga(let e): return e
+        case .fallback(let e): return e
+        }
+    }
+    
+    public init(from exercise: any Exercise) {
+        switch exercise {
+        case let e as StrengthExercise: self = .strength(e)
+        case let e as CardioExercise: self = .cardio(e)
+        case let e as YogaExercise: self = .yoga(e)
+        case let e as DefaultExercise: self = .fallback(e)
+        default:
+            self = .fallback(DefaultExercise(id: UUID().uuidString, name: exercise.name, muscleGroup: exercise.muscleGroup))
         }
     }
 }
@@ -63,24 +93,29 @@ public extension WorkoutDTO {
     }
 }
 
-public extension ExerciseItemDTO {
-    init(from exercise: any Exercise) {
-        switch exercise {
-        case let e as StrengthExercise: self = .strength(e)
-        case let e as CardioExercise: self = .cardio(e)
-        case let e as YogaExercise: self = .yoga(e)
-        case let e as DefaultExercise: self = .fallback(e)
-        default:
-            self = .fallback(DefaultExercise(id: UUID().uuidString, name: exercise.name, muscleGroup: exercise.muscleGroup))
-        }
-    }
+public struct CatalogExerciseDTO: Codable {
+    public let id: String
+    public let name: String
+    public let type: String
+    public let muscleGroup: MuscleGroup
 
-    var asExercise: any Exercise {
-        switch self {
-        case .strength(let e): return e
-        case .cardio(let e): return e
-        case .yoga(let e): return e
-        case .fallback(let e): return e
+    public func toExerciseItemDTO() -> ExerciseItemDTO {
+        if type == "yoga" {
+            return ExerciseItemDTO.yoga(
+                YogaExercise(id: id, name: name, muscleGroup: muscleGroup, holdSeconds: 0, breathCount: 0)
+            )
+        } else if type == "cardio" {
+            return ExerciseItemDTO.cardio(
+                CardioExercise(id: id, name: name, muscleGroup: muscleGroup, durationMinutes: 0, pace: .jog)
+            )
+        } else if type == "strength" {
+            return ExerciseItemDTO.strength(
+                StrengthExercise(id: id, name: name, muscleGroup: muscleGroup, sets: 0, reps: 0, weightKg: 0)
+            )
+        } else {
+            return ExerciseItemDTO.fallback(
+                DefaultExercise(id: id, name: name, muscleGroup: muscleGroup)
+            )
         }
     }
 }

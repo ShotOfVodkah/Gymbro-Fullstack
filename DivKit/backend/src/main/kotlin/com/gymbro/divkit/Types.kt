@@ -73,7 +73,7 @@ fun typeTitle(type: WorkoutType): String = when (type) {
 }
 
 fun styleFor(type: WorkoutType): WorkoutStyle {
-    val base = "http://localhost:8080/assets"
+    val base = "http://localhost:8090/assets"
     return when (type) {
         WorkoutType.STRENGTH -> WorkoutStyle(
             backgroundColor = "#2E27FF",

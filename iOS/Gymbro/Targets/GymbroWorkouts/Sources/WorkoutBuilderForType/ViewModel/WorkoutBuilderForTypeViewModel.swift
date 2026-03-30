@@ -34,25 +34,25 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
             self.name = workout.name
             self.type = workout.type.title
             self.workoutId = workout.id
-            self.availableExercises = service.loadAvailableExercises(type: workout.type.title)
-            
+            self.availableExercises = []
+
             let handler = WorkoutBuilderForTypeDivUrlHandler { [weak self] link in
                 self?.handle(link: link)
             }
             self.divkitComponents = DivKitComponents(urlHandler: handler)
-            
+
             fetchData(for: workout.type.title, workout: workout)
         } else {
             self.screenMode = .create
             self.type = type ?? ""
             self.workoutId = workoutId ?? UUID().uuidString
-            self.availableExercises = service.loadAvailableExercises(type: type ?? "")
-            
+            self.availableExercises = []
+
             let handler = WorkoutBuilderForTypeDivUrlHandler { [weak self] link in
                 self?.handle(link: link)
             }
             self.divkitComponents = DivKitComponents(urlHandler: handler)
-            
+
             fetchData(for: type ?? "", workout: nil)
         }
 
@@ -72,6 +72,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
     func fetchData(for type: String, workout: Workout?) {
         Task {
             do {
+                availableExercises = await service.fetchAvailableExercises(type: type)
                 let (data, state) = try await service.fetchScreen(
                     type: type,
                     workout: workout,
@@ -105,17 +106,18 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         }
 
         let workout = Workout(id: workoutId, name: name, type: workoutType, exercises: exercises)
-        service.saveWorkout(workout)
 
-        switch screenMode {
-        case .create:
-            service.enqueueAddWorkout(workout)
-            modelModifier.events.send(.workoutAdded(id: workoutId))
-            router.popToRoot()
-        case .edit:
-            service.enqueueEditWorkout(workout)
-            modelModifier.events.send(.workoutEdited(id: workoutId))
-            router.pop()
+        Task {
+            switch screenMode {
+            case .create:
+                await service.saveWorkout(workout)
+                modelModifier.events.send(.workoutAdded(id: workoutId))
+                router.popToRoot()
+            case .edit:
+                await service.editWorkout(workout)
+                modelModifier.events.send(.workoutEdited(id: workoutId))
+                router.pop()
+            }
         }
     }
 

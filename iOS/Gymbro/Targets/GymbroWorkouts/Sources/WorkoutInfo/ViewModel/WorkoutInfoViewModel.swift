@@ -61,9 +61,11 @@ final class WorkoutInfoViewModel: ObservableObject {
 
     func deleteCurrentWorkout() {
         guard let id else { return }
-        service.deleteWorkout(id: id)
-        modelModifier.events.send(.workoutDeleted(id: id))
-        router.pop()
+        Task {
+            await service.deleteWorkout(id: id)
+            modelModifier.events.send(.workoutDeleted(id: id))
+            router.pop()
+        }
     }
 
     // MARK: - Published state

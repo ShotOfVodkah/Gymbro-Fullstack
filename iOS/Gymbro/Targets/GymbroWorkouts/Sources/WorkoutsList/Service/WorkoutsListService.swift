@@ -12,7 +12,7 @@ protocol WorkoutsListService {
 final class WorkoutsListServiceImpl: WorkoutsListService {
 
     init(
-        networkClient: WorkoutsNetworkClient,
+        networkClient: WorkoutsClient,
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
@@ -26,9 +26,9 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     }
 
     func fetchScreen() async throws -> (Data, ScreenState) {
-        seedInitialData()
+        try await seedInitialData()
         do {
-            let data = try await networkClient.fetchWorkoutsDivJson()
+            let data = try await networkClient.fetchWorkoutsList()
             let templates = try await networkClient.fetchWorkoutInfoTemplates()
             divLocalRepository.save(key: "workoutsList", data: data)
             divLocalRepository.save(key: "workoutInfoTemplate", data: templates)
@@ -61,17 +61,25 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
 
     // MARK: - Private
 
-    private let networkClient: WorkoutsNetworkClient
+    private let networkClient: WorkoutsClient
     private let divLocalRepository: DivCacheRepository
     private let workoutsRepository: WorkoutsCacheRepository
     private let exercisesRepository: ExercisesRepository
     private let localMapper: WorkoutsLocalMapper
 
-    private func seedInitialData() {
-        workoutsRepository.saveWorkouts(key: "user", workouts: workoutsMock)
+    private func seedInitialData() async throws {
+        let workouts = try await networkClient.fetchUserWorkouts()
+        workoutsRepository.saveWorkouts(key: "user", workouts: workouts)
+
+        for workoutType in [WorkoutType.strength, .cardio, .yoga] {
+            let exercises = try await networkClient.fetchExercises(type: workoutType)
+            exercisesRepository.save(
+                type: AvailableExercisesKey(workoutType: workoutType),
+                items: exercises
+            )
+        }
+
+        let premadeWorkouts = try await networkClient.fetchPremadeWorkouts()
         workoutsRepository.saveWorkouts(key: "premade", workouts: premadeWorkouts)
-        exercisesRepository.save(type: .cardio, items: cardioExercises.map { ExerciseItemDTO(from: $0) })
-        exercisesRepository.save(type: .yoga, items: yogaExercises.map { ExerciseItemDTO(from: $0) })
-        exercisesRepository.save(type: .strength, items: strengthExercises.map { ExerciseItemDTO(from: $0) })
     }
 }

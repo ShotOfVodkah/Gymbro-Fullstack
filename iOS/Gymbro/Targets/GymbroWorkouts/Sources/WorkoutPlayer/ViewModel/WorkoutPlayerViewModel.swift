@@ -3,6 +3,7 @@ import Combine
 
 import GymbroNavigation
 import GymbroTypes
+import GymbroNetwork
 
 @MainActor
 final class WorkoutPlayerViewModel: ObservableObject {
@@ -23,7 +24,8 @@ final class WorkoutPlayerViewModel: ObservableObject {
                 guard let self else { return }
                 switch event {
                 case .statusChanged(let status): handleStatusChange(status: status)
-                case .workoutEdited, .workoutAdded, .premadeWorkoutAdded, .workoutDeleted: break
+                case .workoutEdited: Task { await self.loadWorkout() }
+                case .workoutAdded, .premadeWorkoutAdded, .workoutDeleted: break
                 }
             }
             .store(in: &cancellables)
@@ -49,7 +51,6 @@ final class WorkoutPlayerViewModel: ObservableObject {
         } catch {
             screenState = .error
         }
-        
     }
 
     func backButtonTapped() {
@@ -64,12 +65,35 @@ final class WorkoutPlayerViewModel: ObservableObject {
         weightUpdates[exerciseId] = weight
     }
 
+    func finishWorkout() {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        let id = workoutId
+        let name = workoutName
+        let type = workoutType
+        Task {
+            await service.submitSession(
+                workoutId: id,
+                workoutName: name,
+                workoutType: type,
+                exercises: exercises,
+                weightUpdates: weightUpdates
+            )
+            isSubmitting = false
+            showFinishPopup = false
+            modelModifier.events.send(.workoutEdited(id: id))
+            router.popToRoot()
+        }
+    }
+
     // MARK: - Published state
 
     @Published var screenState: ScreenState = .loading
     @Published private(set) var viewState: WorkoutPlayerViewState?
     @Published var currentExerciseIndex: Int = 0
     @Published var showAlert = false
+    @Published var showFinishPopup = false
+    @Published private(set) var isSubmitting = false
 
     // MARK: - helpers
 
@@ -99,7 +123,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
     }
 
     // MARK: - Private
-    
+
     private func handleStatusChange(status: OfflineStatus) {
         switch screenState {
         case .loaded, .offline:
@@ -111,7 +135,6 @@ final class WorkoutPlayerViewModel: ObservableObject {
         }
     }
 
-    // Accumulated weight changes per exercise; sent to network at workout end.
     private(set) var weightUpdates: [String: Double] = [:]
 
     let workoutId: String
@@ -119,5 +142,4 @@ final class WorkoutPlayerViewModel: ObservableObject {
     private let service: any WorkoutPlayerService
     private let modelModifier: WorkoutsModelModifier
     private var cancellables = Set<AnyCancellable>()
-
 }

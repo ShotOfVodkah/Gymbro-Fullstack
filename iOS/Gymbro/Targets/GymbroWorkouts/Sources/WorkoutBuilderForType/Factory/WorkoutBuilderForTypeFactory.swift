@@ -17,12 +17,13 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         actionsRepository: OfflineActionsRepository,
         localMapper: WorkoutsLocalMapper,
         modelModifier: WorkoutsModelModifier,
+        сlient: WorkoutsClient,
         type: String?,
         workoutId: String?
     ) -> some View {
         guard let viewModelCache, typeCache == type, idCache == workoutId else {
             let service = WorkoutBuilderForTypeServiceImpl(
-                networkClient: WorkoutsNetworkClientImpl(),
+                networkClient: сlient,
                 divLocalRepository: divLocalRepository,
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,

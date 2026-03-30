@@ -1,0 +1,201 @@
+package store
+
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
+	"github.com/jmoiron/sqlx"
+)
+
+type SessionStore struct {
+	db *sqlx.DB
+}
+
+func NewSessionStore(db *sqlx.DB) SessionStore {
+	return SessionStore{db: db}
+}
+
+type sessionRow struct {
+	ID          string     `db:"id"`
+	UserID      string     `db:"user_id"`
+	WorkoutID   *string    `db:"workout_id"`
+	WorkoutName string     `db:"workout_name"`
+	WorkoutType string     `db:"workout_type"`
+	CompletedAt time.Time  `db:"completed_at"`
+}
+
+type sessionExerciseRow struct {
+	ExerciseID      *string  `db:"exercise_id"`
+	ExerciseName    string   `db:"exercise_name"`
+	ExerciseType    string   `db:"exercise_type"`
+	MuscleGroup     string   `db:"muscle_group"`
+	Sets            *int     `db:"sets"`
+	Reps            *int     `db:"reps"`
+	WeightKg        *float64 `db:"weight_kg"`
+	DurationMinutes *int     `db:"duration_minutes"`
+	Pace            *string  `db:"pace"`
+	HoldSeconds     *int     `db:"hold_seconds"`
+	BreathCount     *int     `db:"breath_count"`
+}
+
+func rowToSession(row sessionRow, exercises []types.SessionExercise) types.WorkoutSession {
+	return types.WorkoutSession{
+		ID:          row.ID,
+		UserID:      row.UserID,
+		WorkoutID:   row.WorkoutID,
+		WorkoutName: row.WorkoutName,
+		WorkoutType: row.WorkoutType,
+		CompletedAt: row.CompletedAt,
+		Exercises:   exercises,
+	}
+}
+
+func (ss *SessionStore) loadSessionExercises(sessionID string) ([]types.SessionExercise, error) {
+	var rows []sessionExerciseRow
+	err := ss.db.Select(&rows, `
+		SELECT exercise_id, exercise_name, exercise_type, muscle_group,
+		       sets, reps, weight_kg, duration_minutes, pace, hold_seconds, breath_count
+		FROM session_exercises
+		WHERE session_id = $1
+		ORDER BY position
+	`, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("loadSessionExercises: %w", err)
+	}
+
+	exercises := make([]types.SessionExercise, len(rows))
+	for i, r := range rows {
+		id := ""
+		if r.ExerciseID != nil {
+			id = *r.ExerciseID
+		}
+		exercises[i] = types.SessionExercise{
+			ID:              id,
+			Name:            r.ExerciseName,
+			Type:            r.ExerciseType,
+			MuscleGroup:     r.MuscleGroup,
+			Sets:            r.Sets,
+			Reps:            r.Reps,
+			WeightKg:        r.WeightKg,
+			DurationMinutes: r.DurationMinutes,
+			Pace:            r.Pace,
+			HoldSeconds:     r.HoldSeconds,
+			BreathCount:     r.BreathCount,
+		}
+	}
+	return exercises, nil
+}
+
+func (ss *SessionStore) GetSessionByID(id string) (*types.WorkoutSession, error) {
+	var row sessionRow
+	err := ss.db.Get(&row, `
+		SELECT id, user_id, workout_id, workout_name, workout_type, completed_at
+		FROM workout_sessions WHERE id = $1
+	`, id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("GetSessionByID: %w", err)
+	}
+
+	exercises, err := ss.loadSessionExercises(id)
+	if err != nil {
+		return nil, err
+	}
+
+	s := rowToSession(row, exercises)
+	return &s, nil
+}
+
+func (ss *SessionStore) ListSessionsByUserID(userID string, from, to *time.Time) ([]types.WorkoutSession, error) {
+	query := `SELECT id, user_id, workout_id, workout_name, workout_type, completed_at
+		FROM workout_sessions WHERE user_id = $1`
+	args := []any{userID}
+
+	if from != nil {
+		args = append(args, *from)
+		query += fmt.Sprintf(" AND completed_at >= $%d", len(args))
+	}
+	if to != nil {
+		args = append(args, *to)
+		query += fmt.Sprintf(" AND completed_at <= $%d", len(args))
+	}
+	query += " ORDER BY completed_at DESC"
+
+	var rows []sessionRow
+	err := ss.db.Select(&rows, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("ListSessionsByUserID: %w", err)
+	}
+
+	sessions := make([]types.WorkoutSession, 0, len(rows))
+	for _, row := range rows {
+		exercises, err := ss.loadSessionExercises(row.ID)
+		if err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, rowToSession(row, exercises))
+	}
+	return sessions, nil
+}
+
+func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
+
+	var workoutName, workoutType string
+	err := ss.db.QueryRow(
+		`SELECT name, type FROM workouts WHERE id = $1`, input.WorkoutID,
+	).Scan(&workoutName, &workoutType)
+	if err != nil {
+		return fmt.Errorf("InsertSession resolve workout: %w", err)
+	}
+
+	completedAt := time.Now()
+	if input.CompletedAt != nil {
+		completedAt = *input.CompletedAt
+	}
+
+	tx, err := ss.db.Beginx()
+	if err != nil {
+		return fmt.Errorf("InsertSession begin: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(`
+		INSERT INTO workout_sessions (id, user_id, workout_id, workout_name, workout_type, completed_at)
+		VALUES ($1, $2, $3, $4, $5, $6)`,
+		input.ID, input.UserID, input.WorkoutID, workoutName, workoutType, completedAt,
+	)
+	if err != nil {
+		return fmt.Errorf("InsertSession insert session: %w", err)
+	}
+
+	for i, ex := range input.Exercises {
+		var exName, exType, muscleGroup string
+		err := ss.db.QueryRow(
+			`SELECT name, type, muscle_group FROM exercises WHERE id = $1`, ex.ExerciseID,
+		).Scan(&exName, &exType, &muscleGroup)
+		if err != nil {
+			return fmt.Errorf("InsertSession resolve exercise %s: %w", ex.ExerciseID, err)
+		}
+
+		_, err = tx.Exec(`
+			INSERT INTO session_exercises
+				(session_id, exercise_id, exercise_name, exercise_type, muscle_group, position,
+				 sets, reps, weight_kg, duration_minutes, pace, hold_seconds, breath_count)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+			input.ID, ex.ExerciseID, exName, exType, muscleGroup, i,
+			ex.Sets, ex.Reps, ex.WeightKg,
+			ex.DurationMinutes, ex.Pace,
+			ex.HoldSeconds, ex.BreathCount,
+		)
+		if err != nil {
+			return fmt.Errorf("InsertSession insert exercise pos %d: %w", i, err)
+		}
+	}
+
+	return tx.Commit()
+}

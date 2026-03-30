@@ -1,0 +1,68 @@
+import Foundation
+import GymbroTypes
+
+public struct WorkoutExerciseRequest: Encodable {
+    public let exerciseId: String
+    public let sets: Int?
+    public let reps: Int?
+    public let weightKg: Double?
+    public let durationMinutes: Int?
+    public let pace: PaceType?
+    public let holdSeconds: Int?
+    public let breathCount: Int?
+
+    public init(
+        exerciseId: String,
+        sets: Int? = nil,
+        reps: Int? = nil,
+        weightKg: Double? = nil,
+        durationMinutes: Int? = nil,
+        pace: PaceType? = nil,
+        holdSeconds: Int? = nil,
+        breathCount: Int? = nil
+    ) {
+        self.exerciseId = exerciseId
+        self.sets = sets
+        self.reps = reps
+        self.weightKg = weightKg
+        self.durationMinutes = durationMinutes
+        self.pace = pace
+        self.holdSeconds = holdSeconds
+        self.breathCount = breathCount
+    }
+
+    public init(from exercise: any Exercise) {
+        switch exercise {
+        case let e as StrengthExercise:
+            self.init(exerciseId: e.id, sets: e.sets, reps: e.reps, weightKg: e.weightKg)
+        case let e as CardioExercise:
+            self.init(exerciseId: e.id, durationMinutes: e.durationMinutes, pace: e.pace)
+        case let e as YogaExercise:
+            self.init(exerciseId: e.id, holdSeconds: e.holdSeconds, breathCount: e.breathCount)
+        default:
+            self.init(exerciseId: exercise.id)
+        }
+    }
+}
+
+public struct CreateWorkoutRequest: Encodable {
+    public let id: String
+    public let userId: String
+    public let name: String
+    public let type: WorkoutType
+    public let exercises: [WorkoutExerciseRequest]
+}
+
+public struct UpdateWorkoutRequest: Encodable {
+    public let name: String
+    public let type: WorkoutType
+    public let exercises: [WorkoutExerciseRequest]
+}
+
+public struct CreateSessionRequest: Encodable {
+    public let id: String
+    public let userId: String
+    public let workoutId: String
+    public let completedAt: String
+    public let exercises: [WorkoutExerciseRequest]
+}

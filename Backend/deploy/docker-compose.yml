@@ -26,6 +26,32 @@ services:
     expose:
       - "8081"
 
+  postgres_workouts:
+    image: postgres:14
+    container_name: postgres_workouts
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_workouts
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_workouts_data:/var/lib/postgresql/data
+
+  workouts_service:
+    build:
+      context: ..
+      dockerfile: deploy/workouts.Dockerfile
+    container_name: workouts_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_workouts:5432/gymbro_workouts?sslmode=disable"
+      PGHOST: postgres_workouts
+      PGPORT: 5432
+    depends_on:
+      - postgres_workouts
+    expose:
+      - "8082"
+
   gateway:
     build:
       context: ..
@@ -33,11 +59,13 @@ services:
     container_name: gateway
     environment:
       AUTH_URL: "http://auth_service:8081"
-      # WORKOUTS_URL: "http://workouts_service:8082"
+      WORKOUTS_URL: "http://workouts_service:8082"
     depends_on:
       - auth_service
+      - workouts_service
     ports:
       - "8080:8080"
 
 volumes:
   pg_auth_data:
+  pg_workouts_data:

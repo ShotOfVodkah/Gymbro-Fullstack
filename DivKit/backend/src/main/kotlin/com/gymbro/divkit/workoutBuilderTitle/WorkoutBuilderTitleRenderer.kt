@@ -103,7 +103,7 @@ object WorkoutBuilderTitleRenderer {
     }
 
     private fun DivScope.aiCard(): Div {
-        val imageUrl = "http://localhost:8080/assets/lightning.png"
+        val imageUrl = "http://localhost:8090/assets/lightning.png"
         return container(
             orientation = vertical,
             alignmentVertical = center,

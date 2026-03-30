@@ -21,9 +21,6 @@ public final class WorkoutsCacheRepository {
 
     public func loadWorkout(key: String, workoutId: String) -> Workout? {
         let workouts = loadWorkouts(key: key)
-        print(workoutId)
-        print(workouts)
-        
         return workouts.first { $0.id == workoutId }
     }
 

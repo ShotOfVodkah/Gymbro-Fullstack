@@ -42,8 +42,9 @@ func main() {
 	routes := []Route{
 		{Prefix: "/auth", EnvKey: "AUTH_URL", Default: "http://auth_service:8081"},
 		{Prefix: "/users", EnvKey: "AUTH_URL", Default: "http://auth_service:8081"},
-
-		// {Prefix: "/workouts", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
+		{Prefix: "/workouts", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
+		{Prefix: "/exercises", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
+		{Prefix: "/sessions", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
 	}
 
 	mux := http.NewServeMux()

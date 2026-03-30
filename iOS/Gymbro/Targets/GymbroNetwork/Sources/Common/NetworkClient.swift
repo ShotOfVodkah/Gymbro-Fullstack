@@ -48,6 +48,8 @@ extension NetworkError: LocalizedError {
     }
 }
 
+public struct EmptyBody: Encodable {}
+
 public final class NetworkClient {
     private let baseURL: URL
     private let session: URLSession
@@ -71,6 +73,7 @@ public final class NetworkClient {
     
     public func request<Response: Decodable, Body: Encodable>(
         method: HTTPMethod,
+        base: URL? = nil,
         path: String,
         queryItems: [URLQueryItem]? = nil,
         body: Body? = nil,
@@ -79,6 +82,7 @@ public final class NetworkClient {
     ) async throws -> Response {
         let request = try buildRequest(
             method: method,
+            base: base,
             path: path,
             queryItems: queryItems,
             body: body,
@@ -96,9 +100,51 @@ public final class NetworkClient {
         
         do {
             return try makeDecoder().decode(Response.self, from: data)
-        } catch {
+        } catch let error as DecodingError {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📦 Raw JSON:\n\(jsonString)")
+            }
+            switch error {
+            case .dataCorrupted(let context):
+                print("❌ DataCorrupted: \(context.debugDescription)")
+                print("📍 CodingPath: \(context.codingPath.map { $0.stringValue })")
+            case .typeMismatch(let type, let context):
+                print("❌ TypeMismatch: ожидался \(type)")
+                print("📍 CodingPath: \(context.codingPath.map { $0.stringValue })")
+            case .keyNotFound(let key, let context):
+                print("❌ KeyNotFound: \(key.stringValue)")
+                print("📍 CodingPath: \(context.codingPath.map { $0.stringValue })")
+            default:
+                print("❌ DecodingError: \(error)")
+            }
+            
             throw NetworkError.decodingError
         }
+    }
+    
+    func requestData<Body: Encodable>(
+        method: HTTPMethod,
+        base: URL? = nil,
+        path: String,
+        queryItems: [URLQueryItem]? = nil,
+        body: Body? = nil,
+        requiresAuth: Bool = true
+    ) async throws -> Data {
+        let request = try buildRequest(
+            method: method,
+            base: base,
+            path: path,
+            queryItems: queryItems,
+            body: body,
+            requiresAuth: requiresAuth
+        )
+        
+        let (data, _) = try await performWithAutoRefresh(
+            request: request,
+            requiresAuth: requiresAuth
+        )
+        
+        return data
     }
     
     public func requestVoid<Body: Encodable>(
@@ -124,13 +170,14 @@ public final class NetworkClient {
     
     private func buildRequest<Body: Encodable>(
         method: HTTPMethod,
+        base: URL? = nil,
         path: String,
         queryItems: [URLQueryItem]? = nil,
         body: Body? = nil,
         requiresAuth: Bool
     ) throws -> URLRequest {
         let cleanPath = path.hasPrefix("/") ? String(path.dropFirst()) : path
-        var url = baseURL.appendingPathComponent(cleanPath)
+        var url = (base ?? baseURL).appendingPathComponent(cleanPath)
         
         if let queryItems, !queryItems.isEmpty {
             guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
