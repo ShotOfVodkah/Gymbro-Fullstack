@@ -181,6 +181,22 @@ public final class WorkoutsClient {
         )
     }
     
+    public func createSession(workoutId: String, exercises: [WorkoutExerciseRequest]) async throws {
+        let body = CreateSessionRequest(
+            id: UUID().uuidString,
+            userId: userId,
+            workoutId: workoutId,
+            completedAt: ISO8601DateFormatter().string(from: Date()),
+            exercises: exercises
+        )
+        try await client.requestVoid(
+            method: .POST,
+            path: "sessions",
+            body: body,
+            requiresAuth: false
+        )
+    }
+
     public func deleteWorkout(id: String) async throws {
         _ = try await client.request(
             method: .DELETE,

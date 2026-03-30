@@ -1,10 +1,7 @@
 package com.gymbro.divkit.workoutBuilderForType
 
 import com.gymbro.divkit.Exercise
-import com.gymbro.divkit.cardioExercises
 import com.gymbro.divkit.nameFor
-import com.gymbro.divkit.strengthExercises
-import com.gymbro.divkit.yogaExercises
 import divkit.dsl.Background
 import divkit.dsl.Container
 import divkit.dsl.Div

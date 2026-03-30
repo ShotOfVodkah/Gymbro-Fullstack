@@ -58,3 +58,11 @@ public struct UpdateWorkoutRequest: Encodable {
     public let type: WorkoutType
     public let exercises: [WorkoutExerciseRequest]
 }
+
+public struct CreateSessionRequest: Encodable {
+    public let id: String
+    public let userId: String
+    public let workoutId: String
+    public let completedAt: String
+    public let exercises: [WorkoutExerciseRequest]
+}

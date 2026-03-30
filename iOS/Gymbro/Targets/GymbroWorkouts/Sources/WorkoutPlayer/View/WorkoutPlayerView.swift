@@ -89,6 +89,20 @@ struct WorkoutPlayerView: View {
                 })
             )
         )
+        .overlay {
+            WorkoutFinishPopup(
+                isPresented: $viewModel.showFinishPopup,
+                onDone: { viewModel.finishWorkout() }
+            )
+        }
+        .overlay {
+            if viewModel.showFinishPopup {
+                GymbroLottieView(name: "confetti", loopMode: .playOnce)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea(.all)
+                    .scaledToFill()
+            }
+        }
     }
     
     // Subviews
@@ -207,7 +221,7 @@ struct WorkoutPlayerView: View {
                         .foregroundStyle(.white)
                 }
                 Spacer()
-                AppButton("Finish", action: {})
+                AppButton("Finish", action: { viewModel.showFinishPopup = true })
             }
             
         }
