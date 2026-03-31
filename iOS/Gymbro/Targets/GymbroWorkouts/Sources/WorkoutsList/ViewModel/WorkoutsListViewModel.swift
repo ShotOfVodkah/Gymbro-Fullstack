@@ -91,9 +91,22 @@ final class WorkoutsListViewModel: ObservableObject {
     }
 
     func handleDelete(id: String) {
-        guard let newData = service.removeWorkoutCard(id: id) else { return }
-        source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
-        sourceDebugId += 1
+        Task {
+            do {
+                let (data, state) = try await service.fetchScreen()
+                source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
+                modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
+                sourceDebugId += 1
+                screenState = state
+            } catch {
+                guard let newData = service.removeWorkoutCard(id: id) else {
+                    screenState = .error
+                    return
+                }
+                source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
+                sourceDebugId += 1
+            }
+        }
     }
 
     // MARK: - Published state

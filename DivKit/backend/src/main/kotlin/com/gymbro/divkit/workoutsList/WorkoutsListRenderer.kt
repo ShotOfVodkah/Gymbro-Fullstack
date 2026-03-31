@@ -37,6 +37,7 @@ import divkit.dsl.gallery
 import divkit.dsl.horizontal
 import divkit.dsl.overlap
 import divkit.dsl.matchParentSize
+import divkit.dsl.medium
 import divkit.dsl.scope.DivScope
 import divkit.dsl.solidBackground
 import divkit.dsl.stroke
@@ -64,13 +65,109 @@ object WorkoutsListRenderer {
             items = listOf(
                 workoutHeader(streakData, streakGoal, daysLeft, currentStreak),
                 workoutSecondRow(),
-                gallery(
-                    width = matchParentSize(),
-                    height = matchParentSize(),
-                    orientation = vertical,
-                    columnCount = 1,
-                    items = workouts.map { workoutCard(it) }
-                )
+                if (workouts.isEmpty()) {
+                    emptyStateView()
+                } else {
+                    gallery(
+                        width = matchParentSize(),
+                        height = matchParentSize(),
+                        orientation = vertical,
+                        columnCount = 1,
+                        items = workouts.map { workoutCard(it) }
+                    )
+                }
+            )
+        )
+    }
+
+    private fun DivScope.emptyStateView(): Div {
+        return container(
+            orientation = vertical,
+            contentAlignmentVertical = center,
+            contentAlignmentHorizontal = center,
+            width = matchParentSize(),
+            height = matchParentSize(),
+            items = listOf(
+                text(
+                    text = "Wow, so empty here... Hit the plus button to add your first workout!",
+                    fontSize = 20,
+                    fontWeight = medium,
+                    textAlignmentHorizontal = center,
+                    textColor = color("#FFFFFF"),
+                    margins = edgeInsets(top = 16, left = 20, right = 20, bottom = 20),
+                    alignmentVertical = center,
+                    alignmentHorizontal = center
+                ),
+                container(
+                    orientation = overlap,
+                    border = border(cornerRadius = 38),
+                    margins = edgeInsets(top = 16, left = 20, right = 20, bottom = 100),
+                    width = wrapContentSize(),
+                    height = wrapContentSize(),
+                    items = listOf(
+                        container(
+                            width = matchParentSize(),
+                            height = matchParentSize(),
+                            border = border(cornerRadius = 38),
+                            paddings = edgeInsets(1),
+                            background = linearGradient(
+                                angle = 180,
+                                colors = listOf(
+                                    colorArrayElement("#99FFFFFF"),
+                                    colorArrayElement("#45FFFFFF"),
+                                    colorArrayElement("#00FFFFFF")
+                                )
+                            ).asList()
+                        ),
+                        container(
+                            width = matchParentSize(),
+                            height = matchParentSize(),
+                            border = border(cornerRadius = 38),
+                            margins = edgeInsets(1),
+                            background = solidBackground(color("#732AFF")).asList()
+                        ),
+                        container(
+                            width = matchParentSize(),
+                            height = matchParentSize(),
+                            background = linearGradient(
+                                angle = -45,
+                                colors = listOf(
+                                    colorArrayElement("#38FFFFFF"),
+                                    colorArrayElement("#19FFFFFF"),
+                                    colorArrayElement("#00FFFFFF")
+                                )
+                            ).asList()
+                        ),
+                        container(
+                            width = wrapContentSize(),
+                            height = wrapContentSize(),
+                            orientation = horizontal,
+                            alignmentVertical = center,
+                            border = border(cornerRadius = 38),
+                            paddings = edgeInsets(18),
+                            items = listOf(
+                                image(
+                                    imageUrl = Url.create("http://localhost:8090/assets/plus.png"),
+                                    width = fixedSize(30),
+                                    height = fixedSize(30)
+                                )
+                            )
+                        )
+                    ),
+                    actionAnimation = animation(
+                        name = scale,
+                        startValue = 1.0,
+                        endValue = 0.8,
+                        duration = 120,
+                        interpolator = ease_in_out
+                    ),
+                    actions = listOf(
+                        action(
+                            logId = "open_builder",
+                            url = Url.create("app://open_builder")
+                        )
+                    )
+                ),
             )
         )
     }
@@ -415,3 +512,4 @@ object WorkoutsListRenderer {
         }
     }
 }
+            

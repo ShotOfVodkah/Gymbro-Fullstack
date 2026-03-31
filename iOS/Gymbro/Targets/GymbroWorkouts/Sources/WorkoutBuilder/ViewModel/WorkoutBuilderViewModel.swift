@@ -88,7 +88,9 @@ final class WorkoutBuilderViewModel: ObservableObject {
         case .openPremade(let id):
             presentSheet(id: id)
         case .savePremade(let id):
-            service.enqueuePremadeAdded(id: id)
+            Task {
+                await service.addPremadeWorkout(id: id)
+            }
             modelModifier.events.send(.premadeWorkoutAdded(id: id))
             sheetModel = nil
             backButtonTapped()

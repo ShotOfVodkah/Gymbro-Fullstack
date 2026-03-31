@@ -296,6 +296,126 @@ func TestDeleteWorkout_InternalError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
+// ─── CopyPremadeWorkout ───────────────────────────────────────────────────────
+
+func TestCopyPremadeWorkout_OK(t *testing.T) {
+	sets := 3
+	reps := 10
+	premade := &types.Workout{
+		ID:     "premade-1",
+		UserID: "premade",
+		Name:   "Грудь и трицепс",
+		Type:   types.WorkoutTypeStrength,
+		Exercises: []types.Exercise{
+			{ID: "bench-press", Name: "Жим лёжа", Sets: &sets, Reps: &reps},
+		},
+	}
+
+	var capturedInput *types.WorkoutInput
+
+	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) {
+			if id == "premade-1" {
+				return premade, nil
+			}
+			// второй вызов — после InsertWorkout, возвращаем копию с новым id
+			return &types.Workout{
+				ID:        id,
+				UserID:    "user-42",
+				Name:      premade.Name,
+				Type:      premade.Type,
+				Exercises: premade.Exercises,
+			}, nil
+		},
+		insert: func(input *types.WorkoutInput) error {
+			capturedInput = input
+			return nil
+		},
+	})
+
+	body := copyPremadeRequest{UserID: "user-42", PremadeID: "premade-1"}
+	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+
+	assert.Equal(t, http.StatusCreated, rr.Code)
+
+	var got types.Workout
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+
+	assert.Equal(t, "user-42", got.UserID)
+	assert.Equal(t, premade.Name, got.Name)
+	assert.Equal(t, premade.Type, got.Type)
+
+	require.NotNil(t, capturedInput)
+	assert.NotEqual(t, "premade-1", capturedInput.ID, "новый ID не должен совпадать с premade ID")
+	assert.Equal(t, "user-42", capturedInput.UserID)
+	assert.Len(t, capturedInput.Exercises, 1)
+	assert.Equal(t, "bench-press", capturedInput.Exercises[0].ExerciseID)
+}
+
+func TestCopyPremadeWorkout_PremadeNotFound(t *testing.T) {
+	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) {
+			return nil, store.ErrNotFound
+		},
+	})
+
+	body := copyPremadeRequest{UserID: "user-42", PremadeID: "premade-999"}
+	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func TestCopyPremadeWorkout_BadRequest_MissingUserID(t *testing.T) {
+	h := newHandler(&mockWorkoutStore{})
+
+	body := copyPremadeRequest{UserID: "", PremadeID: "premade-1"}
+	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestCopyPremadeWorkout_BadRequest_MissingPremadeID(t *testing.T) {
+	h := newHandler(&mockWorkoutStore{})
+
+	body := copyPremadeRequest{UserID: "user-42", PremadeID: ""}
+	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestCopyPremadeWorkout_BadJSON(t *testing.T) {
+	h := newHandler(&mockWorkoutStore{})
+
+	req := httptest.NewRequest(http.MethodPost, "/workouts/copy-premade", bytes.NewBufferString("{bad json"))
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+}
+
+func TestCopyPremadeWorkout_InsertError(t *testing.T) {
+	premade := &types.Workout{
+		ID: "premade-1", UserID: "premade", Name: "Ноги", Type: types.WorkoutTypeStrength,
+		Exercises: []types.Exercise{},
+	}
+	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) { return premade, nil },
+		insert:  func(input *types.WorkoutInput) error { return errors.New("db down") },
+	})
+
+	body := copyPremadeRequest{UserID: "user-42", PremadeID: "premade-1"}
+	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+func TestCopyPremadeWorkout_WrongMethod(t *testing.T) {
+	h := newHandler(&mockWorkoutStore{})
+
+	rr := doRequest(h, http.MethodGet, "/workouts/copy-premade", nil)
+	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
 // ─── ServeHTTP dispatch ───────────────────────────────────────────────────────
 
 func TestServeHTTP_UnknownPath(t *testing.T) {

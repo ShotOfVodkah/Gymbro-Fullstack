@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,6 +11,17 @@ import (
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
 )
+
+func newID() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+type copyPremadeRequest struct {
+	UserID    string `json:"userId"`
+	PremadeID string `json:"premadeId"`
+}
 
 var reWorkoutByID = regexp.MustCompile(`^/workouts/([^/]+)$`)
 
@@ -22,6 +35,15 @@ func NewWorkoutHandler(s store.WorkoutStorer) *workoutHandler {
 
 func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	if r.URL.Path == "/workouts/copy-premade" {
+		if r.Method == http.MethodPost {
+			h.CopyPremadeWorkout(w, r)
+		} else {
+			notFound(w, r)
+		}
+		return
+	}
 
 	if m := reWorkoutByID.FindStringSubmatch(r.URL.Path); m != nil {
 		switch r.Method {
@@ -138,4 +160,63 @@ func (h *workoutHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request, i
 		return
 	}
 	json.NewEncoder(w).Encode(map[string]any{"ok": true, "id": id})
+}
+
+func (h *workoutHandler) CopyPremadeWorkout(w http.ResponseWriter, r *http.Request) {
+	var req copyPremadeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		badRequest(w, r)
+		return
+	}
+	if req.UserID == "" || req.PremadeID == "" {
+		badRequest(w, r)
+		return
+	}
+
+	premade, err := h.workoutStore.GetWorkoutByID(req.PremadeID)
+	if errors.Is(err, store.ErrNotFound) {
+		notFound(w, r)
+		return
+	}
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	exercises := make([]types.WorkoutExerciseInput, len(premade.Exercises))
+	for i, ex := range premade.Exercises {
+		exercises[i] = types.WorkoutExerciseInput{
+			ExerciseID:      ex.ID,
+			Sets:            ex.Sets,
+			Reps:            ex.Reps,
+			WeightKg:        ex.WeightKg,
+			DurationMinutes: ex.DurationMinutes,
+			Pace:            ex.Pace,
+			HoldSeconds:     ex.HoldSeconds,
+			BreathCount:     ex.BreathCount,
+		}
+	}
+
+	newID := newID()
+	input := types.WorkoutInput{
+		ID:        newID,
+		UserID:    req.UserID,
+		Name:      premade.Name,
+		Type:      premade.Type,
+		Exercises: exercises,
+	}
+
+	if err := h.workoutStore.InsertWorkout(&input); err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	workout, err := h.workoutStore.GetWorkoutByID(newID)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(workout)
 }

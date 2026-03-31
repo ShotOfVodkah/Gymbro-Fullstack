@@ -207,9 +207,25 @@ public final class WorkoutsClient {
         )
     }
 
+    public func addPremadeWorkout(premadeId: String) async throws {
+        let body = AddPremadeWorkoutRequest(userId: userId, premadeId: premadeId)
+        let dto = try await client.request(
+            method: .POST,
+            path: "workouts/copy-premade",
+            body: body,
+            requiresAuth: false,
+            responseType: WorkoutDTO.self
+        )
+    }
+
     private struct DeleteWorkoutResponse: Decodable {
         let ok: Bool
         let id: String
+    }
+
+    private struct AddPremadeWorkoutRequest: Encodable {
+        let userId: String
+        let premadeId: String
     }
 
     private let client: NetworkClient
