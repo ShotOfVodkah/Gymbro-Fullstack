@@ -65,17 +65,13 @@ object WorkoutsListRenderer {
             items = listOf(
                 workoutHeader(streakData, streakGoal, daysLeft, currentStreak),
                 workoutSecondRow(),
-                if (workouts.isEmpty()) {
-                    emptyStateView()
-                } else {
-                    gallery(
-                        width = matchParentSize(),
-                        height = matchParentSize(),
-                        orientation = vertical,
-                        columnCount = 1,
-                        items = workouts.map { workoutCard(it) }
-                    )
-                }
+                gallery(
+                    width = matchParentSize(),
+                    height = matchParentSize(),
+                    orientation = vertical,
+                    columnCount = 1,
+                    items = workouts.map { workoutCard(it) }
+                )
             )
         )
     }

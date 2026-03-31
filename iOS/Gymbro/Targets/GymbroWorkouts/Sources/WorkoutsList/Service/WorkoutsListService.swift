@@ -5,6 +5,7 @@ import GymbroTypes
 
 protocol WorkoutsListService {
     func fetchScreen() async throws -> (Data, ScreenState)
+    func fetchAfterAction() async throws -> (Data, ScreenState)
     func addWorkoutCard(id: String, fromPremade: Bool) -> Data?
     func removeWorkoutCard(id: String) -> Data?
 }
@@ -38,6 +39,19 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
                 throw WorkoutsServiceError.noData
             }
             return (data, .offline)
+        }
+    }
+    
+    func fetchAfterAction() async throws -> (Data, ScreenState) {
+        do {
+            try await seedInitialData()
+            let data = try await networkClient.fetchWorkoutsList()
+            let templates = try await networkClient.fetchWorkoutInfoTemplates()
+            divLocalRepository.save(key: "workoutsList", data: data)
+            divLocalRepository.save(key: "workoutInfoTemplate", data: templates)
+            return (data, .loaded)
+        } catch {
+            throw WorkoutsServiceError.noData
         }
     }
 

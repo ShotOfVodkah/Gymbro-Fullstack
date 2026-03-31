@@ -76,7 +76,7 @@ final class WorkoutsListViewModel: ObservableObject {
     func handleAdd(id: String, fromPremade: Bool) {
         Task {
             do {
-                let (data, state) = try await service.fetchScreen()
+                let (data, state) = try await service.fetchAfterAction()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
                 sourceDebugId += 1
@@ -87,6 +87,7 @@ final class WorkoutsListViewModel: ObservableObject {
                     return
                 }
                 source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
+                screenState = .offline
                 sourceDebugId += 1
             }
         }
@@ -95,7 +96,7 @@ final class WorkoutsListViewModel: ObservableObject {
     func handleDelete(id: String) {
         Task {
             do {
-                let (data, state) = try await service.fetchScreen()
+                let (data, state) = try await service.fetchAfterAction()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
                 sourceDebugId += 1
