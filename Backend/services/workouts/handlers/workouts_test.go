@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// mockWorkoutStore реализует store.WorkoutStorer для тестов.
 type mockWorkoutStore struct {
 	getByID func(id string) (*types.Workout, error)
 	listBy  func(userID string) ([]types.Workout, error)
@@ -47,7 +46,6 @@ func newHandler(m *mockWorkoutStore) *workoutHandler {
 
 func ptr[T any](v T) *T { return &v }
 
-// ─── helpers ────────────────────────────────────────────────────────────────
 
 func doRequest(h http.Handler, method, path string, body any) *httptest.ResponseRecorder {
 	var buf bytes.Buffer
@@ -59,8 +57,6 @@ func doRequest(h http.Handler, method, path string, body any) *httptest.Response
 	h.ServeHTTP(rr, req)
 	return rr
 }
-
-// ─── GetWorkoutByID ──────────────────────────────────────────────────────────
 
 func TestGetWorkoutByID_OK(t *testing.T) {
 	w := &types.Workout{ID: "w1", UserID: "u1", Name: "Test", Type: types.WorkoutTypeStrength, Exercises: []types.Exercise{}}
@@ -102,8 +98,6 @@ func TestGetWorkoutByID_InternalError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
-// ─── ListWorkoutsByUser ───────────────────────────────────────────────────────
-
 func TestListWorkoutsByUser_OK(t *testing.T) {
 	workouts := []types.Workout{
 		{ID: "w1", UserID: "u1", Name: "A", Type: types.WorkoutTypeCardio, Exercises: []types.Exercise{}},
@@ -141,8 +135,6 @@ func TestListWorkoutsByUser_InternalError(t *testing.T) {
 	rr := doRequest(h, http.MethodGet, "/workouts?userId=u1", nil)
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
-
-// ─── CreateWorkout ────────────────────────────────────────────────────────────
 
 func TestCreateWorkout_OK(t *testing.T) {
 	input := types.WorkoutInput{
@@ -206,8 +198,6 @@ func TestCreateWorkout_InsertError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
-// ─── UpdateWorkout ────────────────────────────────────────────────────────────
-
 func TestUpdateWorkout_OK(t *testing.T) {
 	input := types.WorkoutInput{Name: "Updated", Type: types.WorkoutTypeYoga}
 	updated := &types.Workout{ID: "w1", UserID: "u1", Name: "Updated", Type: types.WorkoutTypeYoga, Exercises: []types.Exercise{}}
@@ -259,8 +249,6 @@ func TestUpdateWorkout_InternalError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
-// ─── DeleteWorkout ────────────────────────────────────────────────────────────
-
 func TestDeleteWorkout_OK(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
 		delete: func(id string) error {
@@ -296,8 +284,6 @@ func TestDeleteWorkout_InternalError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
-// ─── CopyPremadeWorkout ───────────────────────────────────────────────────────
-
 func TestCopyPremadeWorkout_OK(t *testing.T) {
 	sets := 3
 	reps := 10
@@ -318,7 +304,6 @@ func TestCopyPremadeWorkout_OK(t *testing.T) {
 			if id == "premade-1" {
 				return premade, nil
 			}
-			// второй вызов — после InsertWorkout, возвращаем копию с новым id
 			return &types.Workout{
 				ID:        id,
 				UserID:    "user-42",
@@ -415,8 +400,6 @@ func TestCopyPremadeWorkout_WrongMethod(t *testing.T) {
 	rr := doRequest(h, http.MethodGet, "/workouts/copy-premade", nil)
 	assert.Equal(t, http.StatusNotFound, rr.Code)
 }
-
-// ─── ServeHTTP dispatch ───────────────────────────────────────────────────────
 
 func TestServeHTTP_UnknownPath(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
