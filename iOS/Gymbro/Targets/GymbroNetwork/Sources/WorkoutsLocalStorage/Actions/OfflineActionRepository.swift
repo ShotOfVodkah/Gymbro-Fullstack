@@ -90,7 +90,7 @@ public final class OfflineActionsRepository {
                 switch action {
                 case .addedWorkout(let w): return w.id == id
                 case .editedWorkout(let w): return w.id == id
-                case .completedWorkout(let x): return x == id
+                case .completedWorkout(let x, let y): return x == id
                 case .deletedWorkout(let x): return x == id
                 case .premadeAdded: return false
                 }
@@ -103,13 +103,12 @@ public final class OfflineActionsRepository {
                 return result
             }
             
-        case .completedWorkout(let id):
-            // не дублируем completed
+        case .completedWorkout(let id, let exercises):
             let already = result.contains {
-                if case .completedWorkout(let x) = $0 { return x == id }
+                if case .completedWorkout(let x, let y) = $0 { return x == id }
                 return false
             }
-            if !already { result.append(.completedWorkout(id: id)) }
+            if !already { result.append(.completedWorkout(id: id, exercises: exercises)) }
             return result
 
         case .premadeAdded(let id):
@@ -127,7 +126,7 @@ public final class OfflineActionsRepository {
         case .addedWorkout(let w): return w.id == id
         case .editedWorkout(let w): return w.id == id
         case .deletedWorkout(let x): return x == id
-        case .completedWorkout(let x): return x == id
+        case .completedWorkout(let x, let y): return x == id
         case .premadeAdded: return false
         }
     }

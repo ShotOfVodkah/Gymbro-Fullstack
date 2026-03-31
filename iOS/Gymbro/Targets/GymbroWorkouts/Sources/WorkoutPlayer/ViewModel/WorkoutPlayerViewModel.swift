@@ -25,7 +25,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
                 switch event {
                 case .statusChanged(let status): handleStatusChange(status: status)
                 case .workoutEdited: Task { await self.loadWorkout() }
-                case .workoutAdded, .premadeWorkoutAdded, .workoutDeleted: break
+                case .workoutAdded, .premadeWorkoutAdded, .workoutDeleted, .forceReload: break
                 }
             }
             .store(in: &cancellables)

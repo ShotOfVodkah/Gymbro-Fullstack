@@ -83,7 +83,7 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
         do {
             try await client.createSession(workoutId: workoutId, exercises: sessionExercises)
         } catch {
-            actionsRepository.enqueueSmart(.completedWorkout(id: workoutId))
+            actionsRepository.enqueueSmart(.completedWorkout(id: workoutId, exercises: sessionExercises))
         }
 
         let updatedExercises: [any Exercise] = exercises.map { item in

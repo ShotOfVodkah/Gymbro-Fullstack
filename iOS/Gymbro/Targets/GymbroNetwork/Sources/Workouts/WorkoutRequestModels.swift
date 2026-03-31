@@ -1,7 +1,7 @@
 import Foundation
 import GymbroTypes
 
-public struct WorkoutExerciseRequest: Encodable {
+public struct WorkoutExerciseRequest: Encodable, Decodable, Equatable {
     public let exerciseId: String
     public let sets: Int?
     public let reps: Int?

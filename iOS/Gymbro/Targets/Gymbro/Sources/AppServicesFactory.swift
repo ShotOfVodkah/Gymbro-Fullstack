@@ -19,6 +19,7 @@ final class AppServicesFactory {
     let workoutsModelModifier = WorkoutsModelModifier()
     let localMapper: WorkoutsLocalMapper
 
+    private let offlineSyncService: OfflineSyncService
     private var screenFactories = ScreenFactories()
 
     init(
@@ -43,6 +44,13 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             workoutsLocalRepository: workoutsRepository
         )
+
+        self.offlineSyncService = OfflineSyncService(
+            actionsRepository: actionsRepository,
+            networkClient: AppMicroservices.workouts,
+            modelModifier: workoutsModelModifier
+        )
+        offlineSyncService.start()
     }
 
     @MainActor

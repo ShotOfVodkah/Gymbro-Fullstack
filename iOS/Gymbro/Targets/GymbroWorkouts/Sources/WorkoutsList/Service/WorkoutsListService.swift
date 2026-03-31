@@ -26,8 +26,8 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     }
 
     func fetchScreen() async throws -> (Data, ScreenState) {
-        try await seedInitialData()
         do {
+            try await seedInitialData()
             let data = try await networkClient.fetchWorkoutsList()
             let templates = try await networkClient.fetchWorkoutInfoTemplates()
             divLocalRepository.save(key: "workoutsList", data: data)

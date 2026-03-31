@@ -48,6 +48,7 @@ final class WorkoutsListViewModel: ObservableObject {
                 case .workoutDeleted(let id): handleDelete(id: id)
                 case .premadeWorkoutAdded(let id): handleAdd(id: id, fromPremade: true)
                 case .workoutAdded(let id): handleAdd(id: id, fromPremade: false)
+                case .forceReload: fetchData()
                 case .workoutEdited: break
                 }
             }
@@ -64,6 +65,7 @@ final class WorkoutsListViewModel: ObservableObject {
                 let (data, state) = try await service.fetchScreen()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
+                sourceDebugId += 1
                 screenState = state
             } catch {
                 screenState = .error
