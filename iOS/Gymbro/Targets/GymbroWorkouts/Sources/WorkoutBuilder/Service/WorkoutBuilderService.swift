@@ -6,7 +6,7 @@ import GymbroTypes
 protocol WorkoutBuilderService {
     func fetchScreen() async throws -> (Data, ScreenState)
     func fetchSheet(id: String) async throws -> Data
-    func enqueuePremadeAdded(id: String)
+    func addPremadeWorkout(id: String) async
 }
 
 final class WorkoutBuilderServiceImpl: WorkoutBuilderService {
@@ -47,8 +47,13 @@ final class WorkoutBuilderServiceImpl: WorkoutBuilderService {
         }
     }
 
-    func enqueuePremadeAdded(id: String) {
-        actionsRepository.enqueueSmart(.premadeAdded(id: id))
+    func addPremadeWorkout(id: String) async {
+        do {
+            try await networkClient.addPremadeWorkout(premadeId: id)
+        } catch {
+            print("[WorkoutBuilderService] addPremadeWorkout failed: \(error), queuing offline")
+            actionsRepository.enqueueSmart(.premadeAdded(id: id))
+        }
     }
 
     // MARK: - Private

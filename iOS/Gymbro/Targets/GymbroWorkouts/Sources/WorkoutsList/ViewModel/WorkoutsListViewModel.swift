@@ -48,6 +48,7 @@ final class WorkoutsListViewModel: ObservableObject {
                 case .workoutDeleted(let id): handleDelete(id: id)
                 case .premadeWorkoutAdded(let id): handleAdd(id: id, fromPremade: true)
                 case .workoutAdded(let id): handleAdd(id: id, fromPremade: false)
+                case .forceReload: fetchData()
                 case .workoutEdited: break
                 }
             }
@@ -64,6 +65,7 @@ final class WorkoutsListViewModel: ObservableObject {
                 let (data, state) = try await service.fetchScreen()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
+                sourceDebugId += 1
                 screenState = state
             } catch {
                 screenState = .error
@@ -74,7 +76,7 @@ final class WorkoutsListViewModel: ObservableObject {
     func handleAdd(id: String, fromPremade: Bool) {
         Task {
             do {
-                let (data, state) = try await service.fetchScreen()
+                let (data, state) = try await service.fetchAfterAction()
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
                 sourceDebugId += 1
@@ -85,15 +87,29 @@ final class WorkoutsListViewModel: ObservableObject {
                     return
                 }
                 source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
+                screenState = .offline
                 sourceDebugId += 1
             }
         }
     }
 
     func handleDelete(id: String) {
-        guard let newData = service.removeWorkoutCard(id: id) else { return }
-        source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
-        sourceDebugId += 1
+        Task {
+            do {
+                let (data, state) = try await service.fetchAfterAction()
+                source = DivViewSource(kind: .data(data), cardId: "WorkoutsCard")
+                modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
+                sourceDebugId += 1
+                screenState = state
+            } catch {
+                guard let newData = service.removeWorkoutCard(id: id) else {
+                    screenState = .error
+                    return
+                }
+                source = DivViewSource(kind: .data(newData), cardId: DivCardID(rawValue: "WorkoutsCard_\(UUID().uuidString)"))
+                sourceDebugId += 1
+            }
+        }
     }
 
     // MARK: - Published state

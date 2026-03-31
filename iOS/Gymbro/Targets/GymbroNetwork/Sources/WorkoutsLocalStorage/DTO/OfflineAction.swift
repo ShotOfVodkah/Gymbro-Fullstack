@@ -6,12 +6,12 @@ public enum OfflineActionDTO: Codable, Equatable {
     case addedWorkout(workout: WorkoutDTO)
     case editedWorkout(workout: WorkoutDTO)
     case deletedWorkout(id: String)
-    case completedWorkout(id: String)
+    case completedWorkout(id: String, exercises: [WorkoutExerciseRequest])
 
     private enum Kind: String, Codable {
         case premadeAdded, addedWorkout, editedWorkout, deletedWorkout, completedWorkout
     }
-    private enum CodingKeys: String, CodingKey { case kind, id, workout }
+    private enum CodingKeys: String, CodingKey { case kind, id, workout, exercises }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -27,7 +27,10 @@ public enum OfflineActionDTO: Codable, Equatable {
         case .deletedWorkout:
             self = .deletedWorkout(id: try c.decode(String.self, forKey: .id))
         case .completedWorkout:
-            self = .completedWorkout(id: try c.decode(String.self, forKey: .id))
+            self = .completedWorkout(
+                id: try c.decode(String.self, forKey: .id),
+                exercises: try c.decode([WorkoutExerciseRequest].self, forKey: .exercises)
+            )
         }
     }
 
@@ -51,9 +54,10 @@ public enum OfflineActionDTO: Codable, Equatable {
             try c.encode(Kind.deletedWorkout, forKey: .kind)
             try c.encode(id, forKey: .id)
 
-        case .completedWorkout(let id):
+        case .completedWorkout(let id, let exercises):
             try c.encode(Kind.completedWorkout, forKey: .kind)
             try c.encode(id, forKey: .id)
+            try c.encode(exercises, forKey: .exercises)
         }
     }
 }
