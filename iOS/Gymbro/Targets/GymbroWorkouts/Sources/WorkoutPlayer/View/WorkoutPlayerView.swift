@@ -314,11 +314,11 @@ extension WorkoutPlayerView {
         viewModel.currentExerciseIndex = index
     }
     
-    private func makeNextAction(for item: ExerciseItem) -> () -> Void {
+    private func makeNextAction(for item: ExerciseItem) -> (() -> Void)? {
         guard
             let idx = viewModel.exercises.firstIndex(where: { $0.id == item.id }),
             idx + 1 < viewModel.exercises.count
-        else { return {} }
+        else { return nil }
         return { withAnimation { scrolledExerciseId = viewModel.exercises[idx + 1].id } }
     }
 }
