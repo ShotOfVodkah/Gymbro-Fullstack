@@ -36,6 +36,7 @@ let mainAppTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+
 let networkTarget: ProjectDescription.Target = .target(
     name: "GymbroNetwork",
     destinations: .iOS,
