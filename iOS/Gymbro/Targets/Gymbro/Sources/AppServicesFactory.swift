@@ -51,6 +51,7 @@ final class AppServicesFactory {
             modelModifier: workoutsModelModifier
         )
         offlineSyncService.start()
+        WatchConnectivityService.shared.activate()
     }
 
     @MainActor
