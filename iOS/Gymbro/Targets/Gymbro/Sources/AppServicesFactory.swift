@@ -21,6 +21,8 @@ final class AppServicesFactory {
 
     private let offlineSyncService: OfflineSyncService
     private var screenFactories = ScreenFactories()
+    
+    private let watchConnectivityService: WatchConnectivityService
 
     init(
         router: AppRouter,
@@ -50,8 +52,10 @@ final class AppServicesFactory {
             networkClient: AppMicroservices.workouts,
             modelModifier: workoutsModelModifier
         )
+        self.watchConnectivityService = WatchConnectivityService(workoutsRepository: workoutsRepository)
+        
         offlineSyncService.start()
-        WatchConnectivityService.shared.activate()
+        watchConnectivityService.activate()
     }
 
     @MainActor

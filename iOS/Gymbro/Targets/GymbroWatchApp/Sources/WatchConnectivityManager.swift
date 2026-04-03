@@ -1,10 +1,9 @@
 import Foundation
 import WatchConnectivity
 
-//@Observable
 final class WatchConnectivityManager: NSObject {
 
-//    private(set) var workouts: [WatchWorkoutPayload] = []
+    private(set) var workouts: [WatchWorkoutPayload] = []
 
     override init() {
         super.init()
@@ -12,10 +11,10 @@ final class WatchConnectivityManager: NSObject {
         loadCachedWorkouts()
     }
 
-//    func submitSession(_ payload: WatchSessionPayload) {
-//        guard let data = try? JSONEncoder().encode(payload) else { return }
-//        WCSession.default.transferUserInfo(["session": data])
-//    }
+    func submitSession(_ payload: WatchSessionPayload) {
+        guard let data = try? JSONEncoder().encode(payload) else { return }
+        WCSession.default.transferUserInfo(["session": data])
+    }
 
     // MARK: - Private
 
@@ -31,16 +30,16 @@ final class WatchConnectivityManager: NSObject {
         let context = WCSession.default.receivedApplicationContext
         updateWorkouts(from: context)
     }
-
+    
     private func updateWorkouts(from context: [String: Any]) {
-        guard let data = context["workouts"] as? String else {
-//              let decoded = try? JSONDecoder().decode([WatchWorkoutPayload].self, from: data) else {
-//            let decoded = try? JSONDecoder().decode(String.self, from: data) else {
-            print(context["workouts"])
-            return
+        guard let data = context["workouts"] as? Data else { return }
+            
+        do {
+            let decoded = try JSONDecoder().decode([WatchWorkoutPayload].self, from: data)
+            workouts = decoded
+        } catch {
+            print("Failed to decode workouts: \(error)")
         }
-        print(data)
-//        workouts = decoded
     }
 }
 

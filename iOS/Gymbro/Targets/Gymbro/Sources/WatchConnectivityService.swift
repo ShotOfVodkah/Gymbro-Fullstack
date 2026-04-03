@@ -6,9 +6,11 @@ import GymbroTypes
 
 final class WatchConnectivityService: NSObject {
 
-    static let shared = WatchConnectivityService()
-
-    private override init() {}
+    init(
+        workoutsRepository: WorkoutsCacheRepository
+    ) {
+        self.workoutsRepository = workoutsRepository
+    }
 
     func activate() {
         guard WCSession.isSupported() else {
@@ -25,10 +27,12 @@ final class WatchConnectivityService: NSObject {
             print(WCSession.default.isPaired)
             return
         }
-//        let payloads = workouts.map { WatchWorkoutPayload(from: $0) }
-//        guard let data = try? JSONEncoder().encode(payloads) else { return }
-        try? WCSession.default.updateApplicationContext(["workouts": "data"])
+        let payloads = workouts.map { WatchWorkoutPayload(from: $0) }
+        guard let data = try? JSONEncoder().encode(payloads) else { return }
+        try? WCSession.default.updateApplicationContext(["workouts": data])
     }
+    
+    private let workoutsRepository: WorkoutsCacheRepository
 }
 
 // MARK: - WCSessionDelegate
@@ -44,7 +48,13 @@ extension WatchConnectivityService: WCSessionDelegate {
             return
         }
         Task {
-            guard let workouts = try? await AppMicroservices.workouts.fetchUserWorkouts() else { return }
+            let workouts: [Workout]
+            do {
+                workouts = try await AppMicroservices.workouts.fetchUserWorkouts()
+            } catch {
+                workouts = workoutsRepository.loadWorkouts(key: "user")
+            }
+            if workouts.isEmpty { return }
             syncWorkouts(workouts)
         }
     }
