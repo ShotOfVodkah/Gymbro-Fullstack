@@ -11,7 +11,7 @@ struct FeedsView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 20) {
                     FeedsTopBar(
-                        onPeopleTap: viewModel.didTapOpenFriens,
+                        onPeopleTap: viewModel.didTapOpenFriends,
                         onCalendarTap: viewModel.didTapCalendarButton
                     )
                     

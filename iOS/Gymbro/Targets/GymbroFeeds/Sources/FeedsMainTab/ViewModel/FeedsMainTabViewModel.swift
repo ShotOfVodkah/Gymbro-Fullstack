@@ -26,7 +26,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         loadMockData()
     }
     
-    func didTapOpenFriens() {
+    func didTapOpenFriends() {
         router.navigate(to: .feedsPeople)
     }
 
