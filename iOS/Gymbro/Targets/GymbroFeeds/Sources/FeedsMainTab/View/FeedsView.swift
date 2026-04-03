@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FeedsScreen: View {
+struct FeedsView: View {
     
     @ObservedObject var viewModel: FeedsMainTabViewModel
     
@@ -23,9 +23,9 @@ struct FeedsScreen: View {
                         onTap: viewModel.didTapCommunity(_:)
                     )
                     
-                    LazyVStack(spacing: 20) {
+                    LazyVStack(spacing: 15) {
                         ForEach(viewModel.posts) { post in
-                            FeedPostCardView(
+                            PostCardView(
                                 post: post,
                                 onTap: { viewModel.didTapPost(post) },
                                 onLikeTap: { viewModel.toggleLike(for: post.id) },
@@ -43,13 +43,6 @@ struct FeedsScreen: View {
                 }
                 .padding(.top, 8)
             }
-            
-            CreateFeedActionButton(
-                title: "Создать пост",
-                onTap: viewModel.didTapCreate
-            )
-            .padding(.horizontal, 16)
-            .padding(.bottom, 12)
         }
     }
     
@@ -65,8 +58,4 @@ struct FeedsScreen: View {
         )
         .ignoresSafeArea()
     }
-}
-
-#Preview {
-    FeedsScreen(viewModel: FeedsMainTabViewModel())
 }

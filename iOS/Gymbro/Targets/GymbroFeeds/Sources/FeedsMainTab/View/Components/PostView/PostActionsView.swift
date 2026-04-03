@@ -22,7 +22,7 @@ struct PostActionsView: View {
 
             Button(action: onCommentTap) {
                 HStack(spacing: 8) {
-                    Image(systemName: "bubble.right")
+                    Image(systemName: "bubble.right.fill")
                     Text("\(commentsCount)")
                 }
                 .font(.system(size: 16, weight: .semibold))
@@ -32,19 +32,5 @@ struct PostActionsView: View {
 
             Spacer()
         }
-    }
-}
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        PostActionsView(
-            likesCount: 24,
-            commentsCount: 5,
-            isLiked: true,
-            onLikeTap: {},
-            onCommentTap: {}
-        )
-        .padding()
     }
 }

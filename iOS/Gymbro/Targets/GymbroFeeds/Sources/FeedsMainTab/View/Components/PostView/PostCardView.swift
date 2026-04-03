@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FeedPostCardView: View {
+struct PostCardView: View {
     
     let post: FeedPost
     let onTap: () -> Void
@@ -18,7 +18,7 @@ struct FeedPostCardView: View {
 
             Button(action: onTap) {
                 feedImage(post.coverImageName)
-                    .frame(height: 220)
+                    .frame(height: 130)
                     .clipShape(RoundedRectangle(cornerRadius: 26))
             }
             .buttonStyle(.plain)
@@ -36,7 +36,7 @@ struct FeedPostCardView: View {
 
                 if let location = post.location {
                     HStack(spacing: 8) {
-                        Image(systemName: "location")
+                        Image(systemName: "location.fill")
                             .foregroundStyle(.gray)
                         Text(location)
                             .font(.system(size: 16, weight: .medium))
@@ -47,8 +47,9 @@ struct FeedPostCardView: View {
                 Text(post.description)
                     .font(.system(size: 17, weight: .medium))
                     .foregroundStyle(.white.opacity(0.95))
+                    .fixedSize(horizontal: false, vertical: true)
 
-                Text("Упражнения")
+                Text("Exercises")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
@@ -67,7 +68,7 @@ struct FeedPostCardView: View {
                         Button {
                             print("Mock: show all exercises")
                         } label: {
-                            Text("Показать все")
+                            Text("Show all")
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .frame(maxWidth: .infinity)
@@ -80,7 +81,7 @@ struct FeedPostCardView: View {
                 }
 
                 Divider()
-                    .overlay(Color.white.opacity(0.9))
+                    .overlay(Color.white.opacity(0.8))
 
                 PostActionsView(
                     likesCount: post.likesCount,
@@ -109,6 +110,7 @@ struct FeedPostCardView: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+        .opacity(0.7)
     }
 
     @ViewBuilder
@@ -121,7 +123,7 @@ struct FeedPostCardView: View {
             Rectangle()
                 .fill(
                     LinearGradient(
-                        colors: [Color.orange.opacity(0.6), Color.pink.opacity(0.5)],
+                        colors: [Color.gray.opacity(0.6), Color.appPurple.opacity(0.5)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -132,19 +134,5 @@ struct FeedPostCardView: View {
                         .foregroundStyle(.white.opacity(0.8))
                 )
         }
-    }
-}
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        FeedPostCardView(
-            post: FeedsMockData.posts[0],
-            onTap: {},
-            onLikeTap: {},
-            onCommentTap: {},
-            onExerciseTap: { _ in }
-        )
-        .padding()
     }
 }

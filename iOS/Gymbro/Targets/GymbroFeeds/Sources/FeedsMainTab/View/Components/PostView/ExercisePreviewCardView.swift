@@ -26,10 +26,6 @@ struct ExercisePreviewCardView: View {
                 }
                 
                 Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.white)
             }
             .padding(14)
             .background(
@@ -54,21 +50,5 @@ struct ExercisePreviewCardView: View {
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.white)
         }
-    }
-}
-
-#Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        ExercisePreviewCardView(
-            exercise: FeedExercise(
-                title: "Hip thrusts",
-                subtitle: "Reps x Sets",
-                imageName: "figure.walk"
-            ),
-            index: 1,
-            onTap: {}
-        )
-        .padding()
     }
 }

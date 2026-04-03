@@ -13,12 +13,10 @@ struct FeedsMainTabView: View {
         Group {
             switch viewModel.screenState {
             case .loading:
-                ProgressView()
-                    .tint(.white)
-                // сделать прогресс вью
+                FeedsViewStub()
                 
             case .loaded:
-                FeedsScreen(viewModel: viewModel)
+                FeedsView(viewModel: viewModel)
                 
             case .error:
                 VStack(alignment: .center) {
