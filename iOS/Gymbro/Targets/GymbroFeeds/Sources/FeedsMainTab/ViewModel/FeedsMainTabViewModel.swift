@@ -1,4 +1,5 @@
 import Foundation
+import GymbroNavigation
 
 @MainActor
 final class FeedsMainTabViewModel: ObservableObject {
@@ -14,7 +15,10 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var communities: [FeedCommunity] = []
     @Published var posts: [FeedPost] = []
     
-    public init() {
+    private let router: any Router
+    
+    init(router: any Router) {
+        self.router = router
         loadMockData()
     }
     
@@ -22,32 +26,36 @@ final class FeedsMainTabViewModel: ObservableObject {
         loadMockData()
     }
     
-    func didTapTopLeftButton() {
-        print("Mock: open friends")
+    func didTapOpenFriens() {
+        router.navigate(to: .feedsPeople)
     }
 
     func didTapCalendarButton() {
-        print("Mock: open calendar")
+        router.navigate(to: .feedsCalendar)
     }
 
     func didTapCommunity(_ community: FeedCommunity) {
-        print("Mock: open community \(community.title)")
+        router.navigate(to: .feedsCommunity(title: community.title))
     }
 
     func didTapPost(_ post: FeedPost) {
-        print("Mock: open post \(post.title)")
+        router.navigate(to: .feedsPost(title: post.title))
+    }
+
+    func didTapComments(for post: FeedPost) {
+        router.navigate(to: .feedsComments(title: post.title))
     }
 
     func didTapExercise(_ exercise: FeedExercise) {
-        print("Mock: open exercise \(exercise.title)")
+        router.navigate(to: .feedsExercise(title: exercise.title))
     }
 
     func didTapCreate() {
-        print("Mock: create content")
+        router.navigate(to: .feedsCreatePost)
     }
     
     func didTapCreateCommunity() {
-        print("Mock: create community")
+        router.navigate(to: .feedsCreateCommunity)
     }
     
     func toggleLike(for postID: UUID) {

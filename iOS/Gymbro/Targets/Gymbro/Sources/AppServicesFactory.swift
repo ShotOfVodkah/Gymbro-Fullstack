@@ -70,6 +70,24 @@ final class AppServicesFactory {
             makeWorkoutBuilderScreen()
         case .workoutBuilderForType(let type, let id):
             makeWorkoutBuilderForTypeScreen(type: type, workoutId: id)
+        
+            // feeds
+        case .feedsPeople:
+            FeedsMockDestinationView(title: "People", subtitle: "Mock people screen")
+        case .feedsCalendar:
+            FeedsMockDestinationView(title: "Calendar", subtitle: "Mock calendar screen")
+        case .feedsCreateCommunity:
+            FeedsMockDestinationView(title: "Create Community", subtitle: "Mock create community screen")
+        case .feedsCreatePost:
+            FeedsMockDestinationView(title: "Create Post", subtitle: "Mock create post screen")
+        case .feedsCommunity(let title):
+            FeedsMockDestinationView(title: title, subtitle: "Mock community screen")
+        case .feedsPost(let title):
+            FeedsMockDestinationView(title: title, subtitle: "Mock post details screen")
+        case .feedsComments(let title):
+            FeedsMockDestinationView(title: "Comments", subtitle: "Mock comments for \(title)")
+        case .feedsExercise(let title):
+            FeedsMockDestinationView(title: title, subtitle: "Mock exercise screen")
         }
     }
     
@@ -141,9 +159,11 @@ final class AppServicesFactory {
         )
     }
     
+    // Feeds
+    
     @MainActor
     func makeFeedsMainTab() -> some View {
-        screenFactories.feedsMainTabFactory.makeView()
+        screenFactories.feedsMainTabFactory.makeView(router: router)
     }
     
     @MainActor

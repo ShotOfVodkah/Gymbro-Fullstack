@@ -36,7 +36,3 @@ struct FeedsMainTabView: View {
     }
     @ObservedObject private var viewModel: FeedsMainTabViewModel
 }
-
-#Preview {
-    FeedsMainTabView(viewModel: FeedsMainTabViewModel())
-}

@@ -11,7 +11,7 @@ struct FeedsView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 20) {
                     FeedsTopBar(
-                        onPeopleTap: viewModel.didTapTopLeftButton,
+                        onPeopleTap: viewModel.didTapOpenFriens,
                         onCalendarTap: viewModel.didTapCalendarButton
                     )
                     
@@ -29,9 +29,7 @@ struct FeedsView: View {
                                 post: post,
                                 onTap: { viewModel.didTapPost(post) },
                                 onLikeTap: { viewModel.toggleLike(for: post.id) },
-                                onCommentTap: {
-                                    print("Mock: open comments for \(post.title)")
-                                },
+                                onCommentTap: { viewModel.didTapComments(for: post) },
                                 onExerciseTap: { exercise in
                                     viewModel.didTapExercise(exercise)
                                 }
