@@ -1,6 +1,5 @@
 import Foundation
 import SwiftUI
-
 import GymbroCommonUI
 
 
@@ -14,16 +13,20 @@ struct FeedsMainTabView: View {
         Group {
             switch viewModel.screenState {
             case .loading:
-                Text("loading")
+                ProgressView()
+                    .tint(.white)
+                // сделать прогресс вью
+                
             case .loaded:
-                Text("Feeds")
+                FeedsScreen(viewModel: viewModel)
+                
             case .error:
                 VStack(alignment: .center) {
                     Text("Something went wrong, oopsie...")
                         .font(.title3)
                         .foregroundStyle(Color.white)
                     AppButton("Refresh", size: .xl) {
-                        // TODO Refresh
+                        viewModel.reload()
                     }
                 }
                 .padding(.horizontal, 40)
@@ -33,7 +36,9 @@ struct FeedsMainTabView: View {
         .background(Color.black.ignoresSafeArea(.all))
         .ignoresSafeArea(.container, edges: .bottom)
     }
-    
     @ObservedObject private var viewModel: FeedsMainTabViewModel
 }
 
+#Preview {
+    FeedsMainTabView(viewModel: FeedsMainTabViewModel())
+}
