@@ -31,7 +31,8 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroTypes"),
         .target(name: "GymbroFeeds"),
         .target(name: "GymbroAuth"),
-        .target(name: "GymbroProfile")
+        .target(name: "GymbroProfile"),
+        .target(name: "GymBroWatch")
     ],
     settings: baseSettings()
 )
@@ -200,6 +201,25 @@ let profileTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+// watchOS
+
+let watchOSTarget: ProjectDescription.Target = .target(
+    name: "GymBroWatch",
+    destinations: .watchOS,
+    product: .app,
+    bundleId: "\(bundleId).watchkitapp",
+    deploymentTargets: .watchOS("9.0"),
+    infoPlist: InfoPlist.extendingDefault(with: [
+        "WKApplication": true,
+        "WKCompanionAppBundleIdentifier": "\(bundleId)",
+        
+        ]
+    ),
+    sources: ["\(basePath)/GymbroWatchApp/Sources/**"],
+    resources: ["\(basePath)/GymbroWatchApp/Resources/**"],
+    dependencies: []
+)
+
 // Project
 
 let project = Project(
@@ -214,7 +234,8 @@ let project = Project(
         typesTarget,
         feedsTarget,
         authTarget,
-        profileTarget
+        profileTarget,
+        watchOSTarget
     ]
 )
 

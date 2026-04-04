@@ -3,21 +3,16 @@ import GymbroCommonUI
 
 struct CardioTimerView: View {
 
-    let durationSeconds: Int
-    let accentColor: Color
-    let onNext: (() -> Void)?
-
-    @State private var timeRemaining: Int
-    @State private var isFinished = false
-
-    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
     init(durationSeconds: Int, accentColor: Color, onNext: (() -> Void)?) {
         self.durationSeconds = durationSeconds
         self.accentColor = accentColor
         self.onNext = onNext
         _timeRemaining = State(initialValue: durationSeconds)
     }
+    
+    let durationSeconds: Int
+    let accentColor: Color
+    let onNext: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -57,6 +52,10 @@ struct CardioTimerView: View {
             }
         }
     }
+    
+    @State private var timeRemaining: Int
+    @State private var isFinished = false
+    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private var progress: Double {
         guard durationSeconds > 0 else { return 0 }

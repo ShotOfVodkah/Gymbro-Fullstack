@@ -2,26 +2,14 @@ import SwiftUI
 
 struct WeightPickerView: View {
 
-    @Binding var weight: Double
-    let accentColor: Color
-
-    @State private var scrollIndex: Int?
-
-    private let step: Double = 2.5
-    private let maxKg: Double = 300.0
-    private let itemWidth: CGFloat = 64
-
-    private var itemCount: Int { Int(maxKg / step) + 1 }
-    private func kg(at index: Int) -> Double { Double(index) * step }
-    private func index(for kg: Double) -> Int {
-        max(0, min(Int(round(kg / step)), itemCount - 1))
-    }
-
     init(weight: Binding<Double>, accentColor: Color) {
         self._weight = weight
         self.accentColor = accentColor
         _scrollIndex = State(initialValue: max(0, min(Int(round(weight.wrappedValue / 2.5)), Int(300.0 / 2.5))))
     }
+    
+    @Binding var weight: Double
+    let accentColor: Color
 
     var body: some View {
         VStack(spacing: 10) {
@@ -77,6 +65,16 @@ struct WeightPickerView: View {
             }
             .frame(height: 44)
         }
+    }
+    
+    @State private var scrollIndex: Int?
+    private let step: Double = 2.5
+    private let maxKg: Double = 300.0
+    private let itemWidth: CGFloat = 64
+    private var itemCount: Int { Int(maxKg / step) + 1 }
+    private func kg(at index: Int) -> Double { Double(index) * step }
+    private func index(for kg: Double) -> Int {
+        max(0, min(Int(round(kg / step)), itemCount - 1))
     }
     
     private func formatKg(_ kg: Double) -> String {

@@ -1,5 +1,4 @@
 import Foundation
-import GymbroTypes
 
 public struct WorkoutExerciseRequest: Encodable, Decodable, Equatable {
     public let exerciseId: String
@@ -51,12 +50,36 @@ public struct CreateWorkoutRequest: Encodable {
     public let name: String
     public let type: WorkoutType
     public let exercises: [WorkoutExerciseRequest]
+    
+    public init(
+        id: String,
+        userId: String,
+        name: String,
+        type: WorkoutType,
+        exercises: [WorkoutExerciseRequest]
+    ) {
+        self.id = id
+        self.userId = userId
+        self.name = name
+        self.type = type
+        self.exercises = exercises
+    }
 }
 
 public struct UpdateWorkoutRequest: Encodable {
     public let name: String
     public let type: WorkoutType
     public let exercises: [WorkoutExerciseRequest]
+    
+    public init(
+        name: String,
+        type: WorkoutType,
+        exercises: [WorkoutExerciseRequest]
+    ) {
+        self.name = name
+        self.type = type
+        self.exercises = exercises
+    }
 }
 
 public struct CreateSessionRequest: Encodable {
@@ -65,4 +88,18 @@ public struct CreateSessionRequest: Encodable {
     public let workoutId: String
     public let completedAt: String
     public let exercises: [WorkoutExerciseRequest]
+    
+    public init(
+        id: String,
+        userId: String,
+        workoutId: String,
+        completedAt: String,
+        exercises: [WorkoutExerciseRequest]
+    ) {
+        self.id = id
+        self.userId = userId
+        self.workoutId = workoutId
+        self.completedAt = completedAt
+        self.exercises = exercises
+    }
 }

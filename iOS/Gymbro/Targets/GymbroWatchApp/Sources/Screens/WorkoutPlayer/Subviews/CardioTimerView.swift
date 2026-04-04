@@ -1,0 +1,62 @@
+import SwiftUI
+
+struct CardioTimerView: View {
+
+    init(durationSeconds: Int, accentColor: Color) {
+        self.durationSeconds = durationSeconds
+        self.accentColor = accentColor
+        _timeRemaining = State(initialValue: durationSeconds)
+    }
+    
+    let durationSeconds: Int
+    let accentColor: Color
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                Capsule()
+                    .stroke(accentColor.opacity(0.2), lineWidth: 8)
+                    .frame(width: 110, height: 50)
+
+                Capsule()
+                    .trim(from: 0, to: progress)
+                    .stroke(accentColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                    .frame(width: 50, height: 110)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.linear(duration: 1), value: progress)
+
+                Text(timeString)
+                    .font(.system(.title2, design: .rounded).weight(.bold))
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+            }
+            .transition(.scale(scale: 0.8).combined(with: .opacity))
+        }
+        .frame(height: 50)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .animation(.spring(duration: 0.35), value: isFinished)
+        .onReceive(ticker) { _ in
+            guard !isFinished else { return }
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                isFinished = true
+            }
+        }
+    }
+    
+    @State private var timeRemaining: Int
+    @State private var isFinished = false
+    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    private var progress: Double {
+        guard durationSeconds > 0 else { return 0 }
+        return Double(timeRemaining) / Double(durationSeconds)
+    }
+
+    private var timeString: String {
+        let m = timeRemaining / 60
+        let s = timeRemaining % 60
+        return String(format: "%02d:%02d", m, s)
+    }
+}
