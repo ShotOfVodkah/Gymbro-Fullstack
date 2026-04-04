@@ -23,8 +23,6 @@ final class WatchConnectivityService: NSObject {
     func syncWorkouts(_ workouts: [Workout]) {
         guard WCSession.default.activationState == .activated,
               WCSession.default.isPaired else {
-            print(WCSession.default.activationState)
-            print(WCSession.default.isPaired)
             return
         }
         let payloads = workouts.map { WatchWorkoutPayload(from: $0) }
@@ -34,8 +32,6 @@ final class WatchConnectivityService: NSObject {
     
     private let workoutsRepository: WorkoutsCacheRepository
 }
-
-// MARK: - WCSessionDelegate
 
 extension WatchConnectivityService: WCSessionDelegate {
 
@@ -76,9 +72,10 @@ extension WatchConnectivityService: WCSessionDelegate {
             )
         }
 
-        Task {
+        Task { @MainActor in
             try? await AppMicroservices.workouts.createSession(
                 workoutId: payload.workoutId,
+                completedAt: payload.completedAt,
                 exercises: exercises
             )
         }
@@ -89,37 +86,4 @@ extension WatchConnectivityService: WCSessionDelegate {
     func sessionDidDeactivate(_ session: WCSession) {
         WCSession.default.activate()
     }
-}
-
-// MARK: - Payload types (mirror of watch-side WatchPayloads)
-
-private struct WatchWorkoutPayload: Codable {
-    let id: String
-    let name: String
-    let type: WorkoutType
-    let exercises: [ExerciseItem]
-
-    init(from workout: Workout) {
-        id = workout.id
-        name = workout.name
-        type = workout.type
-        exercises = workout.exercises.map { ExerciseItem(from: $0) }
-    }
-}
-
-private struct WatchSessionPayload: Codable {
-    let workoutId: String
-    let completedAt: String
-    let exercises: [WatchExerciseResult]
-}
-
-private struct WatchExerciseResult: Codable {
-    let exerciseId: String
-    let sets: Int?
-    let reps: Int?
-    let weightKg: Double?
-    let durationMinutes: Int?
-    let pace: String?
-    let holdSeconds: Int?
-    let breathCount: Int?
 }

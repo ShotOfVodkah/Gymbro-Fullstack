@@ -181,12 +181,16 @@ public final class WorkoutsClient {
         )
     }
     
-    public func createSession(workoutId: String, exercises: [WorkoutExerciseRequest]) async throws {
+    public func createSession(
+        workoutId: String,
+        completedAt: String = ISO8601DateFormatter().string(from: Date()),
+        exercises: [WorkoutExerciseRequest]
+    ) async throws {
         let body = CreateSessionRequest(
             id: UUID().uuidString,
             userId: userId,
             workoutId: workoutId,
-            completedAt: ISO8601DateFormatter().string(from: Date()),
+            completedAt: completedAt,
             exercises: exercises
         )
         try await client.requestVoid(

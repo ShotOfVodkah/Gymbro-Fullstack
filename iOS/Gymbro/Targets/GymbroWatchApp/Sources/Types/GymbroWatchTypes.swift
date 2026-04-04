@@ -1,19 +1,19 @@
 import SwiftUI
 
-struct WatchWorkoutPayload: Codable {
+struct WatchWorkoutPayload: Codable, Hashable, Identifiable {
     let id: String
     let name: String
     let type: WorkoutType
     let exercises: [ExerciseItem]
 }
 
-struct WatchSessionPayload: Codable {
+struct WatchSessionPayload: Codable, Hashable {
     let workoutId: String
     let completedAt: String
     let exercises: [WatchExerciseResult]
 }
 
-struct WatchExerciseResult: Codable {
+struct WatchExerciseResult: Codable, Hashable {
     let exerciseId: String
     let sets: Int?
     let reps: Int?
@@ -22,24 +22,62 @@ struct WatchExerciseResult: Codable {
     let pace: String?
     let holdSeconds: Int?
     let breathCount: Int?
+    
+    init(
+        exerciseId: String,
+        sets: Int? = nil,
+        reps: Int? = nil,
+        weightKg: Double? = nil,
+        durationMinutes: Int? = nil,
+        pace: String? = nil,
+        holdSeconds: Int? = nil,
+        breathCount: Int? = nil
+    ) {
+        self.exerciseId = exerciseId
+        self.sets = sets
+        self.reps = reps
+        self.weightKg = weightKg
+        self.durationMinutes = durationMinutes
+        self.pace = pace
+        self.holdSeconds = holdSeconds
+        self.breathCount = breathCount
+    }
 }
 
-enum WorkoutType: String, Codable {
+enum WorkoutType: String, Codable, Hashable {
     case strength
     case cardio
     case yoga
+    
+    public var title: String {
+        switch self {
+        case .strength: return "Strength"
+        case .cardio: return "Cardio"
+        case .yoga: return "Yoga"
+        }
+    }
 }
 
-enum PaceType: String, Codable {
+enum PaceType: String, Codable, Hashable {
     case walk, jog, run, sprint, recovery
+    
+    public var title: String {
+        switch self {
+        case .walk: return "Walk"
+        case .jog: return "Jog"
+        case .run: return "Run"
+        case .sprint: return "Sprint"
+        case .recovery: return "Recovery"
+        }
+    }
 }
 
-enum MuscleGroup: String, Codable {
+enum MuscleGroup: String, Codable, Hashable {
     case chest, back, shoulders, biceps, triceps, legs, glutes, core
     case fullBody = "full_body"
 }
 
-protocol Exercise: Identifiable, Codable {
+protocol Exercise: Identifiable, Codable, Hashable {
     var id: String { get }
     var name: String { get }
     var muscleGroup: MuscleGroup { get }
@@ -49,25 +87,25 @@ struct StrengthExercise: Exercise {
     let id: String
     let name: String
     let muscleGroup: MuscleGroup
-    let defaultSets: Int?
-    let defaultReps: Int?
-    let defaultWeightKg: Double?
+    let sets: Int
+    let reps: Int
+    let weightKg: Double
 }
 
 struct CardioExercise: Exercise {
     let id: String
     let name: String
     let muscleGroup: MuscleGroup
-    let defaultDurationMinutes: Int?
-    let defaultPace: PaceType?
+    let durationMinutes: Int
+    let pace: PaceType
 }
 
 struct YogaExercise: Exercise {
     let id: String
     let name: String
     let muscleGroup: MuscleGroup
-    let defaultHoldSeconds: Int?
-    let defaultBreathCount: Int?
+    let holdSeconds: Int
+    let breathCount: Int
 }
 
 struct DefaultExercise: Exercise {
@@ -76,7 +114,7 @@ struct DefaultExercise: Exercise {
     let muscleGroup: MuscleGroup
 }
 
-enum ExerciseItem: Codable, Identifiable {
+enum ExerciseItem: Codable, Identifiable, Hashable {
     case strength(StrengthExercise)
     case cardio(CardioExercise)
     case yoga(YogaExercise)

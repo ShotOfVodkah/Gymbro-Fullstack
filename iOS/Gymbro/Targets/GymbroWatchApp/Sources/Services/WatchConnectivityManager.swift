@@ -1,9 +1,10 @@
 import Foundation
+import Combine
 import WatchConnectivity
 
-final class WatchConnectivityManager: NSObject {
+final class WatchConnectivityManager: NSObject, ObservableObject {
 
-    private(set) var workouts: [WatchWorkoutPayload] = []
+    @Published private(set) var workouts: [WatchWorkoutPayload] = []
 
     override init() {
         super.init()
@@ -12,16 +13,15 @@ final class WatchConnectivityManager: NSObject {
     }
 
     func submitSession(_ payload: WatchSessionPayload) {
-        guard let data = try? JSONEncoder().encode(payload) else { return }
+        guard WCSession.default.activationState == .activated,
+              let data = try? JSONEncoder().encode(payload) else { return }
         WCSession.default.transferUserInfo(["session": data])
     }
 
     // MARK: - Private
 
     private func activate() {
-        guard WCSession.isSupported() else {
-            return
-        }
+        guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
         WCSession.default.activate()
     }
@@ -30,10 +30,9 @@ final class WatchConnectivityManager: NSObject {
         let context = WCSession.default.receivedApplicationContext
         updateWorkouts(from: context)
     }
-    
+
     private func updateWorkouts(from context: [String: Any]) {
         guard let data = context["workouts"] as? Data else { return }
-            
         do {
             let decoded = try JSONDecoder().decode([WatchWorkoutPayload].self, from: data)
             workouts = decoded
