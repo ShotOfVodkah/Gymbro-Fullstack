@@ -2,8 +2,6 @@ import SwiftUI
 
 struct WorkoutDetailView: View {
 
-    @ObservedObject private var viewModel: WorkoutDetailViewModel
-
     init(viewModel: WorkoutDetailViewModel) {
         self.viewModel = viewModel
     }
@@ -13,10 +11,8 @@ struct WorkoutDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 typeLabel
 
-                Divider()
-
                 ForEach(viewModel.workout.exercises) { exercise in
-                    ExerciseRowView(exercise: exercise)
+                    ExerciseRowView(exercise: exercise, color: viewModel.workout.type.color)
                 }
 
                 NavigationLink {
@@ -25,51 +21,25 @@ struct WorkoutDetailView: View {
                     Label("Start", systemImage: "play.fill")
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .background(Color.appPurple)
+                .clipShape(Capsule())
                 .padding(.top, 4)
             }
             .padding(.horizontal, 4)
         }
         .navigationTitle(viewModel.workout.name)
     }
+    
+    @ObservedObject private var viewModel: WorkoutDetailViewModel
 
     private var typeLabel: some View {
-        Text(viewModel.workout.type.title)
-            .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(.tint.opacity(0.2), in: Capsule())
-            .foregroundStyle(.tint)
-    }
-}
-
-// MARK: - Exercise row
-
-private struct ExerciseRowView: View {
-
-    let exercise: ExerciseItem
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(exercise.name)
-                .font(.footnote.weight(.semibold))
-                .lineLimit(1)
-            Text(subtitle)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+        HStack(spacing: 2) {
+            Text(viewModel.workout.type.title)
+                .font(.caption)
+                .foregroundStyle(viewModel.workout.type.color)
         }
-    }
-
-    private var subtitle: String {
-        switch exercise {
-        case .strength(let e):
-            return "\(e.sets) sets × \(e.reps) reps · \(e.weightKg) kg"
-        case .cardio(let e):
-            return "\(e.durationMinutes) min · \(e.pace.title)"
-        case .yoga(let e):
-            return "\(e.holdSeconds)s hold · \(e.breathCount) breaths"
-        case .fallback:
-            return ""
-        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(viewModel.workout.type.color.opacity(0.2), in: Capsule())
     }
 }

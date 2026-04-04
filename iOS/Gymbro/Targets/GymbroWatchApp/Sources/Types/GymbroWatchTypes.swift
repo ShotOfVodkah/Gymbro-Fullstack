@@ -56,6 +56,22 @@ enum WorkoutType: String, Codable, Hashable {
         case .yoga: return "Yoga"
         }
     }
+    
+    public var image: String {
+        switch self {
+        case .strength: return "strength"
+        case .cardio: return "cardio"
+        case .yoga: return "yoga"
+        }
+    }
+    
+    public var color: Color {
+        switch self {
+        case .strength: return .strengthColor
+        case .cardio: return .cardioColor
+        case .yoga: return .yogaColor
+        }
+    }
 }
 
 enum PaceType: String, Codable, Hashable {

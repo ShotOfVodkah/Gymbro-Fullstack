@@ -2,13 +2,7 @@ import Foundation
 
 final class WorkoutPlayerViewModel: ObservableObject {
 
-    let workout: WatchWorkoutPayload
-    private let onSubmit: (WatchSessionPayload) -> Void
-
-    @Published private(set) var currentIndex: Int = 0
-    @Published private(set) var showFinishConfirmation: Bool = false
     @Published var completedResults: [WatchExerciseResult] = []
-
     @Published var sets: Int = 3
     @Published var reps: Int = 10
     @Published var weightKg: Double = 20.0
@@ -17,6 +11,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
     @Published var holdSeconds: Int = 30
     @Published var breathCount: Int = 5
 
+    let workout: WatchWorkoutPayload
     var currentExercise: ExerciseItem { workout.exercises[currentIndex] }
     var totalCount: Int { workout.exercises.count }
     var isLast: Bool { currentIndex == totalCount - 1 }
@@ -63,8 +58,11 @@ final class WorkoutPlayerViewModel: ObservableObject {
             return WatchExerciseResult(exerciseId: currentExercise.id)
         }
     }
+    
+    private let onSubmit: (WatchSessionPayload) -> Void
 
-    // MARK: - Private
+    @Published private(set) var currentIndex: Int = 0
+    @Published private(set) var showFinishConfirmation: Bool = false
 
     private func submitSession() {
         let payload = WatchSessionPayload(
@@ -84,15 +82,15 @@ final class WorkoutPlayerViewModel: ObservableObject {
     private func loadCurrentExercise() {
         switch currentExercise {
         case .strength(let e):
-            sets = e.sets ?? 0
-            reps = e.reps ?? 0
-            weightKg = e.weightKg ?? 0
+            sets = e.sets
+            reps = e.reps
+            weightKg = e.weightKg
         case .cardio(let e):
-            durationMinutes = e.durationMinutes ?? 0
+            durationMinutes = e.durationMinutes
             pace = e.pace ?? .jog
         case .yoga(let e):
-            holdSeconds = e.holdSeconds ?? 0
-            breathCount = e.breathCount ?? 0
+            holdSeconds = e.holdSeconds
+            breathCount = e.breathCount
         case .fallback:
             break
         }

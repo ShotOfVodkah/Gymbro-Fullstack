@@ -5,12 +5,6 @@ import GymbroTypes
 
 struct WorkoutPlayerExerciseSlideView: View {
 
-    let exercise: ExerciseItem
-    let onNext: (() -> Void)?
-    let onWeightChanged: ((Double) -> Void)?
-
-    @State private var selectedWeight: Double
-
     init(
         exercise: ExerciseItem,
         onNext: (() -> Void)?,
@@ -25,6 +19,10 @@ struct WorkoutPlayerExerciseSlideView: View {
             _selectedWeight = State(initialValue: 0)
         }
     }
+    
+    let exercise: ExerciseItem
+    let onNext: (() -> Void)?
+    let onWeightChanged: ((Double) -> Void)?
 
     var body: some View {
         VStack(spacing: 12) {
@@ -81,8 +79,8 @@ struct WorkoutPlayerExerciseSlideView: View {
             }
         }
     }
-
-    // MARK: - UI Components
+    
+    @State private var selectedWeight: Double
 
     @ViewBuilder
     private var header: some View {

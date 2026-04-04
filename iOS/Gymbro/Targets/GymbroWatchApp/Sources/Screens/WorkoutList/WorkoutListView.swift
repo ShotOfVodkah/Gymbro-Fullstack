@@ -2,8 +2,6 @@ import SwiftUI
 
 struct WorkoutListView: View {
 
-    @ObservedObject private var viewModel: WorkoutListViewModel
-
     init(viewModel: WorkoutListViewModel) {
         self.viewModel = viewModel
     }
@@ -32,7 +30,17 @@ struct WorkoutListView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                .padding(.leading, 10)
             }
+            .listRowBackground(
+                LinearGradient(
+                    colors: [.appDarkGray, workout.type.color],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .cornerRadius(10)
+            )
+            .listRowInsets(EdgeInsets())
         }
         .navigationDestination(for: WatchWorkoutPayload.self) { workout in
             WorkoutDetailView(
@@ -43,15 +51,17 @@ struct WorkoutListView: View {
             )
         }
     }
+    
+    @ObservedObject private var viewModel: WorkoutListViewModel
 
     private var emptyState: some View {
         VStack(spacing: 8) {
             Image(systemName: "iphone.and.arrow.forward")
                 .font(.system(size: 28))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appPurple)
             Text("Open Gymbro on iPhone to sync workouts")
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.appPurple)
                 .multilineTextAlignment(.center)
         }
         .padding()

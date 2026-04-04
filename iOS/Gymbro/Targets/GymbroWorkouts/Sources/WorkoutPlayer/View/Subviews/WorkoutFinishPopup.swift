@@ -3,11 +3,6 @@ import GymbroCommonUI
 
 struct WorkoutFinishPopup: View {
 
-    @Binding var isPresented: Bool
-    var onDone: () -> Void
-
-    @State private var opacity: Double = 0.0
-
     var body: some View {
         ZStack {
             if isPresented {
@@ -24,6 +19,9 @@ struct WorkoutFinishPopup: View {
             }
         }
     }
+    
+    @Binding var isPresented: Bool
+    var onDone: () -> Void
 
     private var popupCard: some View {
         VStack(spacing: 0) {
@@ -61,6 +59,8 @@ struct WorkoutFinishPopup: View {
         )
         .padding(.horizontal, 24)
     }
+    
+    @State private var opacity: Double = 0.0
 
     private static let mockFriends: [FriendActivity] = [
         FriendActivity(id: "1", name: "Alex R.", workoutName: "Chest Day"),

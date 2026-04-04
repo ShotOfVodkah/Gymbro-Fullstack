@@ -13,18 +13,17 @@ struct WorkoutPlayerView: View {
         VStack(spacing: 8) {
             progressHeader
 
-            Divider()
-
-            exerciseContent
+            ExerciseInfoView(
+                exercise: viewModel.currentExercise,
+                color: viewModel.workout.type.color
+            )
 
             Spacer()
 
             actionButton
         }
         .padding(.horizontal, 4)
-        .navigationTitle("\(viewModel.currentIndex + 1)/\(viewModel.totalCount)")
-        .navigationBarBackButtonHidden(true)
-        .overlay(alignment: .topLeading) { backButton }
+        .navigationTitle(viewModel.workout.name)
         .overlay {
             if viewModel.showFinishConfirmation {
                 confirmationOverlay
@@ -43,107 +42,22 @@ struct WorkoutPlayerView: View {
 
     private var progressHeader: some View {
         ProgressView(value: Double(viewModel.currentIndex + 1), total: Double(viewModel.totalCount))
-            .tint(.green)
+            .tint(
+                viewModel.currentIndex + 1 == viewModel.totalCount
+                ? .green
+                : viewModel.workout.type.color
+            )
             .padding(.top, 4)
+            .animation(.linear(duration: 0.5), value: viewModel.currentIndex)
     }
-
-    private var backButton: some View {
-        Button {
-            dismiss()
-        } label: {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 14, weight: .semibold))
-        }
-        .buttonStyle(.plain)
-        .padding(.leading, 2)
-        .padding(.top, 2)
-    }
-
-    @ViewBuilder
-    private var exerciseContent: some View {
-        let exercise = viewModel.currentExercise
-
-        VStack(alignment: .leading, spacing: 6) {
-            Text(exercise.name)
-                .font(.headline)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
-
-            switch exercise {
-            case .strength:
-                strengthControls
-            case .cardio:
-                EmptyView()
-            case .yoga:
-                yogaControls
-            case .fallback:
-                EmptyView()
-            }
-        }
-    }
-
-    private var strengthControls: some View {
-        VStack(spacing: 4) {
-            stepper(label: "Sets", value: $viewModel.sets, range: 1...20)
-            stepper(label: "Reps", value: $viewModel.reps, range: 1...100)
-            weightStepper
-        }
-    }
-
-    private var weightStepper: some View {
-        HStack {
-            Text("Weight")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Button { viewModel.weightKg = max(0, viewModel.weightKg - 2.5) } label: {
-                Image(systemName: "minus")
-            }
-            .buttonStyle(.plain)
-            Text("\(viewModel.weightKg, specifier: "%.1f")")
-                .font(.caption.monospacedDigit())
-                .frame(minWidth: 36)
-            Button { viewModel.weightKg += 2.5 } label: {
-                Image(systemName: "plus")
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    private var yogaControls: some View {
-        VStack(spacing: 4) {
-            stepper(label: "Hold (s)", value: $viewModel.holdSeconds, range: 1...300)
-            stepper(label: "Breaths", value: $viewModel.breathCount, range: 1...50)
-        }
-    }
-
-    private func stepper(label: String, value: Binding<Int>, range: ClosedRange<Int>) -> some View {
-        HStack {
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Button { value.wrappedValue = max(range.lowerBound, value.wrappedValue - 1) } label: {
-                Image(systemName: "minus")
-            }
-            .buttonStyle(.plain)
-            Text("\(value.wrappedValue)")
-                .font(.caption.monospacedDigit())
-                .frame(minWidth: 28)
-            Button { value.wrappedValue = min(range.upperBound, value.wrappedValue + 1) } label: {
-                Image(systemName: "plus")
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
+    
     private var actionButton: some View {
         Button(action: { viewModel.advanceOrFinish() }) {
             Text(viewModel.isLast ? "Finish" : "Next")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
-        .tint(viewModel.isLast ? .green : .blue)
+        .tint(viewModel.isLast ? .appPurple : viewModel.workout.type.color)
     }
 
     private var confirmationOverlay: some View {
