@@ -20,7 +20,7 @@ struct CommunityBubbleView: View {
                         .frame(width: 82, height: 82)
                         .overlay(circleContent)
 
-                    if community.isGroup {
+                    if community.kind == .joinedGroup {
                         Circle()
                             .fill(Color.appPurple)
                             .frame(width: 25, height: 25)

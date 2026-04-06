@@ -31,7 +31,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
 
     func didTapCalendarButton() {
-        router.navigate(to: .feedsCalendar)
+        router.navigate(to: .feedsCalendar(context: .mine))
     }
 
     func didTapCommunity(_ community: FeedCommunity) {
@@ -49,13 +49,57 @@ final class FeedsMainTabViewModel: ObservableObject {
     func didTapExercise(_ exercise: FeedExercise) {
         router.navigate(to: .feedsExercise(title: exercise.title))
     }
-
-    func didTapCreate() {
-        router.navigate(to: .feedsCreatePost)
-    }
     
     func didTapCreateCommunity() {
         router.navigate(to: .feedsCreateCommunity)
+    }
+    
+    var shouldShowCommunities: Bool {
+        selectedTab != .forYou
+    }
+    
+    var visibleCommunities: [FeedCommunity] {
+        switch selectedTab {
+        case .forYou:
+            return []
+            
+        case .friends:
+            return communities.filter {
+                $0.kind == .directPerson || $0.kind == .joinedGroup
+            }
+            
+        case .personal:
+            return communities.filter {
+                $0.kind == .directPerson
+            }
+            
+        case .group:
+            return communities.filter {
+                $0.kind == .joinedGroup
+            }
+        }
+    }
+    
+    var visiblePosts: [FeedPost] {
+        switch selectedTab {
+        case .forYou:
+            return posts
+            
+        case .friends:
+            return posts.filter {
+                $0.kind == .friend || ($0.kind == .group && $0.isFromJoinedCommunity)
+            }
+            
+        case .personal:
+            return posts.filter {
+                $0.kind == .friend
+            }
+            
+        case .group:
+            return posts.filter {
+                $0.kind == .group && $0.isFromJoinedCommunity
+            }
+        }
     }
     
     func toggleLike(for postID: UUID) {

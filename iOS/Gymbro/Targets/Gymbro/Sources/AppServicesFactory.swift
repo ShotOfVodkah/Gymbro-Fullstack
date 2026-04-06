@@ -74,13 +74,14 @@ final class AppServicesFactory {
             // feeds
         case .feedsPeople:
             makeFeedsPeopleScreen()
+        case .feedsCalendar(let context):
+            makeFeedsCalendarScreen(context: context)
+            
         case .feedsProfile(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
         case .feedsPersonMessage(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock message screen")
-            
-        case .feedsCalendar:
-            FeedsMockDestinationView(title: "Calendar", subtitle: "Mock calendar screen")
+        
         case .feedsCreateCommunity:
             FeedsMockDestinationView(title: "Create Community", subtitle: "Mock create community screen")
         case .feedsCreatePost:
@@ -176,6 +177,14 @@ final class AppServicesFactory {
         screenFactories.feedsPeopleFactory.makeView(router: router)
     }
     
+    @MainActor
+    func makeFeedsCalendarScreen(context: CalendarContext) -> some View {
+        screenFactories.feedsCalendarFactory.makeView(
+            input: CalendarScreenInput(context: context),
+            router: router
+        )
+    }
+    
     // Profile
     
     @MainActor
@@ -198,6 +207,7 @@ private struct ScreenFactories {
     
     lazy var feedsMainTabFactory = FeedsMainTabFactoryImpl()
     lazy var feedsPeopleFactory = FeedsPeopleFactoryImpl()
+    lazy var feedsCalendarFactory = FeedsCalendarFactoryImpl()
     
     // Profile factories
     

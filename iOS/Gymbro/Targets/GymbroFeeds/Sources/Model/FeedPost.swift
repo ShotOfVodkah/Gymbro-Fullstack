@@ -16,6 +16,8 @@ struct FeedPost: Identifiable, Hashable {
     var likesCount: Int
     var commentsCount: Int
     var isLiked: Bool
+    let kind: FeedPostKind
+    let isFromJoinedCommunity: Bool
 
     init(
         id: UUID = UUID(),
@@ -32,7 +34,9 @@ struct FeedPost: Identifiable, Hashable {
         exercises: [FeedExercise],
         likesCount: Int,
         commentsCount: Int,
-        isLiked: Bool
+        isLiked: Bool,
+        kind: FeedPostKind,
+        isFromJoinedCommunity: Bool
     ) {
         self.id = id
         self.authorName = authorName
@@ -49,5 +53,13 @@ struct FeedPost: Identifiable, Hashable {
         self.likesCount = likesCount
         self.commentsCount = commentsCount
         self.isLiked = isLiked
+        self.kind = kind
+        self.isFromJoinedCommunity = isFromJoinedCommunity
     }
+}
+
+enum FeedPostKind: Hashable {
+    case personal
+    case friend
+    case group
 }

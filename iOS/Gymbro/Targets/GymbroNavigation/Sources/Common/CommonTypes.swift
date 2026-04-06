@@ -17,8 +17,8 @@ public enum NavigationRoute: Hashable {
     case feedsPeople
     case feedsProfile(title: String)
     case feedsPersonMessage(title: String)
+    case feedsCalendar(context: CalendarContext)
     
-    case feedsCalendar
     case feedsCreateCommunity
     case feedsCreatePost
     case feedsCommunity(title: String)
@@ -27,6 +27,13 @@ public enum NavigationRoute: Hashable {
     case feedsExercise(title: String)
     
     // другие маршруты
+}
+
+public enum CalendarContext: Hashable {
+    case mine
+    case person(personID: String, personName: String)
+    case directChat(chatID: String, participantIDs: [String], initialPersonID: String?)
+    case groupChat(chatID: String, groupID: String, initialPersonID: String?)
 }
 
 public protocol Router: ObservableObject {

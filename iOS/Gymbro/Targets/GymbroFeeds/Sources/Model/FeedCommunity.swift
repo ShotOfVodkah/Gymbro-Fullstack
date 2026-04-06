@@ -5,19 +5,24 @@ struct FeedCommunity: Identifiable, Hashable {
     let title: String
     let icon: String
     let isSystemImage: Bool
-    let isGroup: Bool
+    let kind: FeedCommunityKind
 
     init(
         id: UUID = UUID(),
         title: String,
         icon: String,
         isSystemImage: Bool = false,
-        isGroup: Bool = false,
+        kind: FeedCommunityKind,
     ) {
         self.id = id
         self.title = title
         self.icon = icon
         self.isSystemImage = isSystemImage
-        self.isGroup = isGroup
+        self.kind = kind
     }
+}
+
+enum FeedCommunityKind: Hashable {
+    case directPerson
+    case joinedGroup
 }
