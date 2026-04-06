@@ -7,7 +7,6 @@ struct PersonDetailsSheet: View {
     let onFollowTap: () -> Void
     let onViewProfileTap: () -> Void
     let onViewMessageTap: () -> Void
-    let onOpenChatTap: () -> Void
     
     var body: some View {
         GeometryReader { proxy in

@@ -117,11 +117,6 @@ final class FeedsPeopleViewModel: ObservableObject {
         router.navigate(to: .feedsPersonMessage(title: person.name))
     }
     
-    func didTapOpenChat(for person: PersonItem) {
-        selectedPerson = nil
-        router.navigate(to: .feedsPersonChat(title: person.name))
-    }
-    
     var filteredFriends: [PersonItem] {
         filter(people: friends)
     }

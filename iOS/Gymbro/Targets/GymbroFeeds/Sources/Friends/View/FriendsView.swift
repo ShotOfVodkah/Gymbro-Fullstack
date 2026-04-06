@@ -36,8 +36,7 @@ struct FeedsPeopleView: View {
                 person: person,
                 onFollowTap: { viewModel.toggleFollow(for: person.id) },
                 onViewProfileTap: { viewModel.didTapViewProfile(for: person) },
-                onViewMessageTap: { viewModel.didTapViewMessage(for: person) },
-                onOpenChatTap: { viewModel.didTapOpenChat(for: person) }
+                onViewMessageTap: { viewModel.didTapViewMessage(for: person) }
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
