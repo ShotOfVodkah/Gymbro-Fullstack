@@ -15,7 +15,7 @@ public struct FeedsMockDestinationView: View {
             LinearGradient(
                 colors: [
                     Color.black,
-                    Color(red: 12/255, green: 18/255, blue: 36/255),
+                    Color(red: 12.0/255.0, green: 18.0/255.0, blue: 36.0/255.0),
                     Color.black
                 ],
                 startPoint: .top,

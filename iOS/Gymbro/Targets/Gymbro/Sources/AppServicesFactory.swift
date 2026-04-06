@@ -76,8 +76,8 @@ final class AppServicesFactory {
             makeFeedsPeopleScreen()
         case .feedsProfile(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
-        case .feedsPersonWorkouts(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock workouts screen")
+        case .feedsPersonMessage(let title):
+            FeedsMockDestinationView(title: title, subtitle: "Mock message screen")
         case .feedsPersonChat(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock chats screen")
             

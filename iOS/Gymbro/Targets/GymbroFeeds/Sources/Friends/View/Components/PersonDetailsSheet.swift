@@ -6,7 +6,7 @@ struct PersonDetailsSheet: View {
     let person: PersonItem
     let onFollowTap: () -> Void
     let onViewProfileTap: () -> Void
-    let onViewWorkoutsTap: () -> Void
+    let onViewMessageTap: () -> Void
     let onOpenChatTap: () -> Void
     
     var body: some View {
@@ -93,7 +93,7 @@ struct PersonDetailsSheet: View {
                 AppButton(
                     "Message",
                     size: .l,
-                    action: onViewWorkoutsTap,
+                    action: onViewMessageTap,
                     wrapContent: false
                 )
             }

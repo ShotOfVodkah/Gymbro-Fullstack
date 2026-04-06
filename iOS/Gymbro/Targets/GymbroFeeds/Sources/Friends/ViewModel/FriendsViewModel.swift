@@ -112,9 +112,9 @@ final class FeedsPeopleViewModel: ObservableObject {
         router.navigate(to: .feedsProfile(title: person.name))
     }
     
-    func didTapViewWorkouts(for person: PersonItem) {
+    func didTapViewMessage(for person: PersonItem) {
         selectedPerson = nil
-        router.navigate(to: .feedsPersonWorkouts(title: person.name))
+        router.navigate(to: .feedsPersonMessage(title: person.name))
     }
     
     func didTapOpenChat(for person: PersonItem) {

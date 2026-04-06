@@ -36,11 +36,12 @@ struct FeedsPeopleView: View {
                 person: person,
                 onFollowTap: { viewModel.toggleFollow(for: person.id) },
                 onViewProfileTap: { viewModel.didTapViewProfile(for: person) },
-                onViewWorkoutsTap: { viewModel.didTapViewWorkouts(for: person) },
+                onViewMessageTap: { viewModel.didTapViewMessage(for: person) },
                 onOpenChatTap: { viewModel.didTapOpenChat(for: person) }
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
+            .presentationBackground(.clear)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
@@ -84,6 +85,7 @@ struct FeedsPeopleView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
     
     private var header: some View {
@@ -115,7 +117,7 @@ struct FeedsPeopleView: View {
         LinearGradient(
             colors: [
                 Color.black,
-                Color(red: 12/255, green: 18/255, blue: 36/255),
+                Color(red: 12.0/255.0, green: 18.0/255.0, blue: 36.0/255.0),
                 Color.black
             ],
             startPoint: .top,
