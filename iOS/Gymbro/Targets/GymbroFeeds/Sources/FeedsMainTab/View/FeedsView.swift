@@ -36,6 +36,14 @@ struct FeedsMainTabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
+        .sheet(isPresented: $viewModel.isShowingChatCreation, onDismiss: {
+            viewModel.resetChatCreationState()
+        }) {
+            ChatCreationSheet(viewModel: viewModel)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.clear)
+        }
     }
     
     private var contentView: some View {

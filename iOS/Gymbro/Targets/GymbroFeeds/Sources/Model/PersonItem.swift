@@ -35,4 +35,19 @@ struct PersonItem: Identifiable, Hashable {
         self.badge = badge
         self.workoutsThisMonth = workoutsThisMonth
     }
+    
+    func toggledFollow() -> PersonItem {
+        PersonItem(
+            id: id,
+            name: name,
+            username: username,
+            status: status,
+            subtitle: subtitle,
+            avatarSystemName: avatarSystemName,
+            isFollowing: !isFollowing,
+            isCurrentFriend: isCurrentFriend,
+            badge: badge,
+            workoutsThisMonth: workoutsThisMonth
+        )
+    }
 }

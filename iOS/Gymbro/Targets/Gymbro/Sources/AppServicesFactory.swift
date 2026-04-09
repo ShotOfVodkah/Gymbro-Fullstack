@@ -77,17 +77,13 @@ final class AppServicesFactory {
         case .feedsCalendar(let context):
             makeFeedsCalendarScreen(context: context)
             
+            // change
         case .feedsProfile(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
-        case .feedsPersonMessage(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock message screen")
+        case .feedsChat(let input):
+            FeedsMockDestinationView(title: input.title, subtitle: input.isDirect ? "Mock direct chat screen" : "Mock group chat screen")
         
-        case .feedsCreateCommunity:
-            FeedsMockDestinationView(title: "Create Community", subtitle: "Mock create community screen")
-        case .feedsCreatePost:
-            FeedsMockDestinationView(title: "Create Post", subtitle: "Mock create post screen")
-        case .feedsCommunity(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock community screen")
+            
         case .feedsPost(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock post details screen")
         case .feedsComments(let title):

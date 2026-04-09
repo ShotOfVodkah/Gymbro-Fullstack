@@ -16,12 +16,9 @@ public enum NavigationRoute: Hashable {
     
     case feedsPeople
     case feedsProfile(title: String)
-    case feedsPersonMessage(title: String)
     case feedsCalendar(context: CalendarContext)
+    case feedsChat(input: ChatSessionInput)
     
-    case feedsCreateCommunity
-    case feedsCreatePost
-    case feedsCommunity(title: String)
     case feedsPost(title: String)
     case feedsComments(title: String)
     case feedsExercise(title: String)

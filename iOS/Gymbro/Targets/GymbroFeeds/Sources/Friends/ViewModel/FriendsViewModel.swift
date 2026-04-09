@@ -66,35 +66,13 @@ final class FeedsPeopleViewModel: ObservableObject {
     
     func toggleFollow(for personID: UUID) {
         if let index = friends.firstIndex(where: { $0.id == personID }) {
-            friends[index] = PersonItem(
-                id: friends[index].id,
-                name: friends[index].name,
-                username: friends[index].username,
-                status: friends[index].status,
-                subtitle: friends[index].subtitle,
-                avatarSystemName: friends[index].avatarSystemName,
-                isFollowing: !friends[index].isFollowing,
-                isCurrentFriend: friends[index].isCurrentFriend,
-                badge: friends[index].badge,
-                workoutsThisMonth: friends[index].workoutsThisMonth
-            )
+            friends[index] = friends[index].toggledFollow()
             syncSelectedPerson(id: personID)
             return
         }
         
         if let index = discoverPeople.firstIndex(where: { $0.id == personID }) {
-            discoverPeople[index] = PersonItem(
-                id: discoverPeople[index].id,
-                name: discoverPeople[index].name,
-                username: discoverPeople[index].username,
-                status: discoverPeople[index].status,
-                subtitle: discoverPeople[index].subtitle,
-                avatarSystemName: discoverPeople[index].avatarSystemName,
-                isFollowing: !discoverPeople[index].isFollowing,
-                isCurrentFriend: discoverPeople[index].isCurrentFriend,
-                badge: discoverPeople[index].badge,
-                workoutsThisMonth: discoverPeople[index].workoutsThisMonth
-            )
+            discoverPeople[index] = discoverPeople[index].toggledFollow()
             syncSelectedPerson(id: personID)
         }
     }
@@ -114,7 +92,8 @@ final class FeedsPeopleViewModel: ObservableObject {
     
     func didTapViewMessage(for person: PersonItem) {
         selectedPerson = nil
-        router.navigate(to: .feedsPersonMessage(title: person.name))
+        print("navigate to chat")
+//        router.navigate(to: .feedsPersonMessage(title: person.name))
     }
     
     var filteredFriends: [PersonItem] {
