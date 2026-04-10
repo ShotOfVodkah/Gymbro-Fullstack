@@ -1,19 +1,4 @@
 #!/usr/bin/env python3
-"""
-Offline one-time script: merge the LoRA adapter into the base model,
-save as HuggingFace checkpoint, then guide through GGUF conversion.
-
-The LoRA was trained on unsloth/Qwen2.5-7B-Instruct-bnb-4bit (4-bit).
-For GGUF conversion we load the full-precision Qwen2.5-7B-Instruct base,
-apply the same LoRA delta weights on top, and merge — this is the standard
-approach and produces a clean float16 checkpoint suitable for quantisation.
-
-Requirements (run in the hf-venv or any env with these packages):
-    pip install torch transformers peft accelerate safetensors huggingface_hub
-
-Usage:
-    python merge_and_convert.py [--out-dir ./workout_merged_model]
-"""
 
 from __future__ import annotations
 
@@ -27,8 +12,8 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-REPO_ROOT = Path(__file__).resolve().parents[3]          # Gymbro-Fullstack/Backend
-AI_SERVICE = Path(__file__).resolve().parents[1]          # services/ai_service
+REPO_ROOT = Path(__file__).resolve().parents[3] 
+AI_SERVICE = Path(__file__).resolve().parents[1] 
 LORA_PATH = AI_SERVICE / "workout_lora_model"
 BASE_MODEL = os.getenv("BASE_MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct")
 HF_CACHE = os.getenv("HF_HOME", str(Path.home() / ".cache" / "huggingface"))
