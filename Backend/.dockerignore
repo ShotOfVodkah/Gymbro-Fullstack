@@ -1,0 +1,10 @@
+services/ai_service/workout_f16.gguf
+services/ai_service/workout_merged_model/
+services/ai_service/workout_lora_model/
+services/ai_service/scripts/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.venv/
+**/venv/
+**/vendor/

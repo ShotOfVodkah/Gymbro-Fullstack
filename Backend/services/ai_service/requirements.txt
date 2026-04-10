@@ -1,17 +1,7 @@
 fastapi==0.115.12
 uvicorn[standard]==0.34.0
 pydantic==2.11.2
-# PyTorch CPU-only build — much smaller image, no CUDA needed on Mac/Docker
-# torchvision is not needed (NLP/text generation only)
-torch==2.6.0+cpu ; sys_platform != "darwin"
-torch==2.6.0 ; sys_platform == "darwin"
-# HuggingFace stack
-transformers==4.51.1
-peft==0.15.1
-accelerate==1.6.0
-safetensors==0.5.3
-huggingface_hub[hf_xet]==0.30.1
-tokenizers==0.21.1
-sentencepiece==0.2.0
 # JSON schema validation
 jsonschema==4.23.0
+# GGUF inference — compiled with OpenBLAS in the Dockerfile for CPU performance
+llama-cpp-python==0.3.8

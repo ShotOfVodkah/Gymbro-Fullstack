@@ -105,16 +105,11 @@ services:
       dockerfile: deploy/ai.Dockerfile
     container_name: ai_service
     environment:
-      BASE_MODEL_NAME: "Qwen/Qwen2.5-7B-Instruct"
-      HF_HOME: "/root/.cache/huggingface"
-      TRANSFORMERS_VERBOSITY: "info"
-      HF_HUB_DISABLE_PROGRESS_BARS: "0"
-    volumes:
-      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+      LLAMA_N_THREADS: "4"
     expose:
       - "8085"
-    # Model loading on CPU is memory-intensive; set shm_size for torch
-    shm_size: "2gb"
+    mem_limit: "8g"
+    memswap_limit: "8g"
 
   gateway:
     build:
