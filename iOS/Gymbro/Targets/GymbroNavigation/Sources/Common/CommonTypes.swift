@@ -13,7 +13,20 @@ public enum NavigationRoute: Hashable {
     case workoutPlayer(id: String)
     case workoutBuilder
     case workoutBuilderForType(type: String?, workoutId: String?)
+    
+    case feedsPeople
+    case feedsProfile(title: String)
+    case feedsCalendar(context: CalendarContext)
+    case feedsChat(input: ChatSessionInput)
+    
     // другие маршруты
+}
+
+public enum CalendarContext: Hashable {
+    case mine
+    case person(personID: String, personName: String)
+    case directChat(chatID: String, participantIDs: [String], initialPersonID: String?)
+    case groupChat(chatID: String, groupID: String, initialPersonID: String?)
 }
 
 public protocol Router: ObservableObject {

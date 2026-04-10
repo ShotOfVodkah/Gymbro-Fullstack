@@ -7,6 +7,7 @@ import GymbroNetwork
 import GymbroNavigation
 import GymbroFeeds
 import GymbroProfile
+import GymbroTypes
 
 final class AppServicesFactory {
     let router: AppRouter
@@ -70,6 +71,18 @@ final class AppServicesFactory {
             makeWorkoutBuilderScreen()
         case .workoutBuilderForType(let type, let id):
             makeWorkoutBuilderForTypeScreen(type: type, workoutId: id)
+        
+            // feeds
+        case .feedsPeople:
+            makeFeedsPeopleScreen()
+        case .feedsCalendar(let context):
+            makeFeedsCalendarScreen(context: context)
+        case .feedsChat(let input):
+            makeFeedsChatScreen(input: input)
+            
+            // change
+        case .feedsProfile(let title):
+            FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
         }
     }
     
@@ -141,10 +154,35 @@ final class AppServicesFactory {
         )
     }
     
+    // Feeds
+    
     @MainActor
     func makeFeedsMainTab() -> some View {
-        screenFactories.feedsMainTabFactory.makeView()
+        screenFactories.feedsMainTabFactory.makeView(router: router)
     }
+    
+    @MainActor
+    func makeFeedsPeopleScreen() -> some View {
+        screenFactories.feedsPeopleFactory.makeView(router: router)
+    }
+    
+    @MainActor
+    func makeFeedsCalendarScreen(context: CalendarContext) -> some View {
+        screenFactories.feedsCalendarFactory.makeView(
+            input: CalendarScreenInput(context: context),
+            router: router
+        )
+    }
+    
+    @MainActor
+    func makeFeedsChatScreen(input: ChatSessionInput) -> some View {
+        screenFactories.feedsChatFactory.makeView(
+            input: input,
+            router: router
+        )
+    }
+    
+    // Profile
     
     @MainActor
     func makeProfileMainTab() -> some View {
@@ -165,6 +203,9 @@ private struct ScreenFactories {
     // Feeds factories
     
     lazy var feedsMainTabFactory = FeedsMainTabFactoryImpl()
+    lazy var feedsPeopleFactory = FeedsPeopleFactoryImpl()
+    lazy var feedsCalendarFactory = FeedsCalendarFactoryImpl()
+    lazy var feedsChatFactory = FeedsChatFactoryImpl()
     
     // Profile factories
     
