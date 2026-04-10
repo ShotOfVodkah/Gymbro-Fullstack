@@ -89,6 +89,8 @@ final class AppServicesFactory {
             makeWorkoutBuilderScreen()
         case .workoutBuilderForType(let type, let id):
             makeWorkoutBuilderForTypeScreen(type: type, workoutId: id)
+        case .workoutGenerator:
+            makeWorkoutGeneratorScreen()
         
             // feeds
         case .feedsPeople:
@@ -180,6 +182,16 @@ final class AppServicesFactory {
     // Feeds
     
     @MainActor
+    func makeWorkoutGeneratorScreen() -> some View {
+        screenFactories.workoutGeneratorFactory.makeView(
+            router: router,
+            modelModifier: workoutsModelModifier,
+            workoutsRepository: workoutsRepository,
+            client: AppMicroservices.workouts
+        )
+    }
+    
+    @MainActor
     func makeFeedsMainTab() -> some View {
         screenFactories.feedsMainTabFactory.makeView(router: router, analytics: analytics)
     }
@@ -224,6 +236,7 @@ private struct ScreenFactories {
     lazy var workoutPlayerFactory = WorkoutPlayerFactoryImpl()
     lazy var workoutBuilderFactory = WorkoutBuilderFactoryImpl()
     lazy var workoutBuilderForTypeFactory = WorkoutBuilderForTypeFactoryImpl()
+    lazy var workoutGeneratorFactory = WorkoutGeneratorFactoryImpl()
     
     // Feeds factories
     

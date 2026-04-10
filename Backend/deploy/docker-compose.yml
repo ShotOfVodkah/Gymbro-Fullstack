@@ -99,6 +99,22 @@ services:
       - postgres_profile
     expose:
       - "8084"
+  ai_service:
+    build:
+      context: ..
+      dockerfile: deploy/ai.Dockerfile
+    container_name: ai_service
+    environment:
+      BASE_MODEL_NAME: "Qwen/Qwen2.5-7B-Instruct"
+      HF_HOME: "/root/.cache/huggingface"
+      TRANSFORMERS_VERBOSITY: "info"
+      HF_HUB_DISABLE_PROGRESS_BARS: "0"
+    volumes:
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+    expose:
+      - "8085"
+    # Model loading on CPU is memory-intensive; set shm_size for torch
+    shm_size: "2gb"
 
   gateway:
     build:
@@ -110,11 +126,13 @@ services:
       WORKOUTS_URL: "http://workouts_service:8082"
       FEEDS_URL: "http://feeds_service:8083"
       PROFILE_URL: "http://profile_service:8084"
+      AI_URL: "http://ai_service:8085"
     depends_on:
       - auth_service
       - workouts_service
       - feeds_service
       - profile_service
+      - ai_service
     ports:
       - "8080:8080"
 
