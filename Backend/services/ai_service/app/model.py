@@ -74,7 +74,7 @@ def generate(messages: list[dict], max_retries: int = 2) -> dict:
 
         response = model.create_chat_completion(
             messages=messages,
-            max_tokens=256,
+            max_tokens=512,
             temperature=0.0,
         )
 
