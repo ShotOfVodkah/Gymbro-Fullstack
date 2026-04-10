@@ -70,7 +70,8 @@ struct FeedsMainTabView: View {
                     ForEach(viewModel.visiblePosts) { post in
                         PostCardView(
                             post: post,
-                            onTap: { viewModel.didTapPost(post) },
+                            onAuthorTap: { viewModel.didTapAuthor(post) },
+//                            onTap: { viewModel.didTapPost(post) },
                             onLikeTap: { viewModel.toggleLike(for: post.id) },
                             onCommentTap: { viewModel.didTapComments(for: post) },
                             onExerciseTap: { exercise in

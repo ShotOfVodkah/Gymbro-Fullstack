@@ -41,6 +41,10 @@ final class FeedsMainTabViewModel: ObservableObject {
         router.navigate(to: .feedsCalendar(context: .mine))
     }
     
+    func didTapAuthor(_ post: FeedPost) {
+        router.navigate(to: .feedsProfile(title: post.authorName))
+    }
+    
     var shouldShowCommunities: Bool {
         selectedTab != .forYou
     }
@@ -216,16 +220,13 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
 
-    func didTapPost(_ post: FeedPost) {
-        router.navigate(to: .feedsPost(title: post.title))
-    }
-
     func didTapComments(for post: FeedPost) {
-        router.navigate(to: .feedsComments(title: post.title))
+        print("open comments")
+//        router.navigate(to: .feedsComments(title: post.title))
     }
 
     func didTapExercise(_ exercise: FeedExercise) {
-        router.navigate(to: .feedsExercise(title: exercise.title))
+        print("workout info")
     }
 
     func toggleLike(for postID: UUID) {

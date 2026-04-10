@@ -16,6 +16,8 @@ final class FeedsCalendarViewModel: ObservableObject {
     @Published var selectedPerson: CalendarPerson?
     @Published var availablePeople: [CalendarPerson] = []
     @Published var days: [CalendarDayItem] = []
+    @Published var selectedDayForActions: CalendarDayItem?
+    @Published var isShowingDayWorkoutChoices: Bool = false
     
     private let input: CalendarScreenInput
     private let router: any Router
@@ -50,11 +52,38 @@ final class FeedsCalendarViewModel: ObservableObject {
         rebuildCalendar()
     }
     
+    func openMyWorkoutFromSelectedDay() {
+        guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
+        print("workout info")
+    }
+
+    func openPartnerWorkoutFromSelectedDay() {
+        guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
+        print("workout info")
+    }
+
+    func clearDayWorkoutChoices() {
+        selectedDayForActions = nil
+    }
+    
     func didTapDay(_ day: CalendarDayItem) {
-        print("перенаправление на воркаут инфо")
-        //        guard day.hasWorkout, let workoutID = day.workoutID else { return }
-        //        router.navigate(to: .feedsPost(title: "Workout \(workoutID)"))
-        //        перенаправление на воркаут инфо
+        let hasMy = day.myWorkoutID != nil
+        let hasPartner = day.partnerWorkoutID != nil
+        
+        if hasMy && hasPartner {
+            selectedDayForActions = day
+            isShowingDayWorkoutChoices = true
+            return
+        }
+        
+        if let partnerWorkoutID = day.partnerWorkoutID {
+            print("workout info")
+            return
+        }
+        
+        if let myWorkoutID = day.myWorkoutID {
+            print("workout info")
+        }
     }
     
     private var monthFormatter: DateFormatter {
@@ -62,16 +91,63 @@ final class FeedsCalendarViewModel: ObservableObject {
         formatter.dateFormat = "LLLL yyyy"
         return formatter
     }
+    
+    private func currentMyWorkoutMap() -> [Date: String] {
+        switch input.context {
+        case .mine, .directChat, .groupChat:
+            return FeedsCalendarMockData.workoutsByPerson["me"] ?? [:]
+        case .person:
+            return [:]
+        }
+    }
+    
+//    private func currentSelectedPersonWorkoutMap() -> [Date: String] {
+//        guard let selectedPerson else { return [:] }
+//        
+//        switch input.context {
+//        case .mine:
+//            return [:]
+//            
+//        case .person:
+//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+//            
+//        case .directChat:
+//            if selectedPerson.id == "me" {
+//                return [:]
+//            }
+//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+//            
+//        case .groupChat:
+//            if selectedPerson.id == "me" {
+//                return [:]
+//            }
+//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+//        }
+//    }
+    
+    private func currentSelectedPersonWorkoutMap() -> [Date: String] {
+        guard let selectedPerson else { return [:] }
+        
+        switch input.context {
+        case .mine:
+            return [:]
+            
+        case .person:
+            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+            
+        case .directChat, .groupChat:
+            if selectedPerson.id == "me" {
+                return [:]
+            }
+            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+        }
+    }
 
     private func rebuildCalendar() {
         monthTitle = monthFormatter.string(from: currentMonthDate)
-
-        guard let selectedPerson else {
-            days = []
-            return
-        }
         
-        let workoutMap = FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+        let myWorkoutMap = currentMyWorkoutMap()
+        let selectedPersonWorkoutMap = currentSelectedPersonWorkoutMap()
         
         guard let monthInterval = calendar.dateInterval(of: .month, for: currentMonthDate),
               let firstWeekInterval = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start),
@@ -91,15 +167,19 @@ final class FeedsCalendarViewModel: ObservableObject {
             let isToday = calendar.isDateInToday(cursor)
             
             let normalizedDate = calendar.startOfDay(for: cursor)
-            let workoutID = workoutMap[normalizedDate]
+            
+            let myWorkoutID = myWorkoutMap[normalizedDate]
+            let partnerWorkoutID = selectedPersonWorkoutMap[normalizedDate]
             
             result.append(
                 CalendarDayItem(
                     date: normalizedDate,
                     dayNumber: dayNumber,
                     isInCurrentMonth: isInCurrentMonth,
-                    hasWorkout: workoutID != nil,
-                    workoutID: workoutID,
+                    hasMyWorkout: myWorkoutID != nil,
+                    myWorkoutID: myWorkoutID,
+                    hasPartnerWorkout: partnerWorkoutID != nil,
+                    partnerWorkoutID: partnerWorkoutID,
                     isToday: isToday,
                     isSelected: false
                 )

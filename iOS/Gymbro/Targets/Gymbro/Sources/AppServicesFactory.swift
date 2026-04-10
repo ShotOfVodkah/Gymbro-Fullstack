@@ -83,14 +83,6 @@ final class AppServicesFactory {
             // change
         case .feedsProfile(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
-
-            // new
-        case .feedsPost(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock post details screen")
-        case .feedsComments(let title):
-            FeedsMockDestinationView(title: "Comments", subtitle: "Mock comments for \(title)")
-        case .feedsExercise(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock exercise screen")
         }
     }
     

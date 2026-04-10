@@ -15,23 +15,37 @@ struct CalendarDayCellView: View {
                             .stroke(borderColor, lineWidth: borderWidth)
                     )
                 
-                Text("\(day.dayNumber)")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(textColor)
+                VStack(spacing: 4) {
+                    Text("\(day.dayNumber)")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(textColor)
+                    
+                    HStack(spacing: 4) {
+                        if day.hasMyWorkout {
+                            Circle()
+                                .fill(Color.appPurple)
+                                .frame(width: 6, height: 6)
+                        }
+                        
+                        if day.hasPartnerWorkout {
+                            Circle()
+                                .fill(Color.blue.opacity(0.9))
+                                .frame(width: 6, height: 6)
+                        }
+                    }
+                    .frame(height: 8)
+                }
             }
             .frame(height: 42)
             .opacity(day.isInCurrentMonth ? 1 : 0.22)
         }
         .buttonStyle(.plain)
-        .disabled(!day.hasWorkout)
+        .disabled(!day.hasMyWorkout && !day.hasPartnerWorkout)
     }
     
     private var backgroundColor: Color {
         if day.isSelected {
-            return Color.appPurple.opacity(0.75)
-        }
-        if day.hasWorkout {
-            return Color.appPurple.opacity(0.45)
+            return Color.white.opacity(0.10)
         }
         return Color.white.opacity(0.04)
     }
@@ -53,6 +67,9 @@ struct CalendarDayCellView: View {
     }
     
     private var textColor: Color {
-        day.hasWorkout || day.isSelected ? .white : .white.opacity(0.8)
+        if day.hasMyWorkout || day.hasPartnerWorkout || day.isSelected {
+            return .white
+        }
+        return .white.opacity(0.8)
     }
 }

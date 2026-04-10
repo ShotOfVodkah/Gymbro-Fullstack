@@ -5,6 +5,7 @@ struct PostHeaderView: View {
     let avatar: String
     let authorName: String
     let postedAt: String
+    let onAuthorTap: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
@@ -24,9 +25,12 @@ struct PostHeaderView: View {
                 )
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(authorName)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+                Button(action: onAuthorTap) {
+                    Text(authorName)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
 
                 Text(postedAt)
                     .font(.system(size: 14, weight: .medium))
@@ -34,16 +38,6 @@ struct PostHeaderView: View {
             }
 
             Spacer()
-
-            Button {
-                print("Mock: post menu")
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(8)
-            }
-            .buttonStyle(.plain)
         }
     }
 }

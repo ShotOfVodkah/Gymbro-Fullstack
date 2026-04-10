@@ -71,9 +71,10 @@ final class ChatViewModel: ObservableObject {
         case .direct(let person):
             router.navigate(
                 to: .feedsCalendar(
-                    context: .person(
-                        personID: person.id,
-                        personName: person.name
+                    context: .directChat(
+                        chatID: input.chatID ?? input.title,
+                        participantIDs: [person.id],
+                        initialPersonID: person.id
                     )
                 )
             )
@@ -92,7 +93,6 @@ final class ChatViewModel: ObservableObject {
     
     func didTapWorkoutMessage(_ message: ChatMessage) {
         guard case .workout(let workoutID, _, _, _, _) = message.kind else { return }
-//        router.navigate(to: .feedsPost(title: "Workout \(workoutID)"))
         print("workout info")
     }
     

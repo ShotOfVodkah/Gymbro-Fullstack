@@ -33,6 +33,27 @@ struct FeedsCalendarView: View {
                 }
             }
         }
+        .confirmationDialog(
+            "Choose workout",
+            isPresented: $viewModel.isShowingDayWorkoutChoices,
+            titleVisibility: .visible
+        ) {
+            if viewModel.selectedDayForActions?.myWorkoutID != nil {
+                Button("My workout") {
+                    viewModel.openMyWorkoutFromSelectedDay()
+                }
+            }
+            
+            if viewModel.selectedDayForActions?.partnerWorkoutID != nil {
+                Button("Chat partner workout") {
+                    viewModel.openPartnerWorkoutFromSelectedDay()
+                }
+            }
+            
+            Button("Cancel", role: .cancel) {
+                viewModel.clearDayWorkoutChoices()
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .toolbarBackground(.hidden, for: .navigationBar)

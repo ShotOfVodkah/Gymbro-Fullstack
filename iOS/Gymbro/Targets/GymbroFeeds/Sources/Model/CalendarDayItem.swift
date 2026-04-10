@@ -5,8 +5,13 @@ struct CalendarDayItem: Identifiable, Hashable {
     let date: Date
     let dayNumber: Int
     let isInCurrentMonth: Bool
-    let hasWorkout: Bool
-    let workoutID: String?
+    
+    let hasMyWorkout: Bool
+    let myWorkoutID: String?
+    
+    let hasPartnerWorkout: Bool
+    let partnerWorkoutID: String?
+    
     let isToday: Bool
     let isSelected: Bool
     
@@ -15,8 +20,10 @@ struct CalendarDayItem: Identifiable, Hashable {
         date: Date,
         dayNumber: Int,
         isInCurrentMonth: Bool,
-        hasWorkout: Bool,
-        workoutID: String? = nil,
+        hasMyWorkout: Bool = false,
+        myWorkoutID: String? = nil,
+        hasPartnerWorkout: Bool = false,
+        partnerWorkoutID: String? = nil,
         isToday: Bool = false,
         isSelected: Bool = false
     ) {
@@ -24,8 +31,10 @@ struct CalendarDayItem: Identifiable, Hashable {
         self.date = date
         self.dayNumber = dayNumber
         self.isInCurrentMonth = isInCurrentMonth
-        self.hasWorkout = hasWorkout
-        self.workoutID = workoutID
+        self.hasMyWorkout = hasMyWorkout
+        self.myWorkoutID = myWorkoutID
+        self.hasPartnerWorkout = hasPartnerWorkout
+        self.partnerWorkoutID = partnerWorkoutID
         self.isToday = isToday
         self.isSelected = isSelected
     }

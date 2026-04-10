@@ -46,6 +46,7 @@ enum FeedsCalendarMockData {
         
         FeedsPeopleMockData.alex.id.uuidString: [
             mockDate(day: 2): "alex_w1",
+            mockDate(day: 6): "alex_w4",
             mockDate(day: 8): "alex_w2",
             mockDate(day: 17): "alex_w3"
         ],

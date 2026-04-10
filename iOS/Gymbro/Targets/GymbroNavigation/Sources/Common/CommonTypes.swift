@@ -19,11 +19,6 @@ public enum NavigationRoute: Hashable {
     case feedsCalendar(context: CalendarContext)
     case feedsChat(input: ChatSessionInput)
     
-    // change
-    case feedsPost(title: String)
-    case feedsComments(title: String)
-    case feedsExercise(title: String)
-    
     // другие маршруты
 }
 

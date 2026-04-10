@@ -3,7 +3,8 @@ import SwiftUI
 struct PostCardView: View {
     
     let post: FeedPost
-    let onTap: () -> Void
+    let onAuthorTap: () -> Void
+//    let onTap: () -> Void
     let onLikeTap: () -> Void
     let onCommentTap: () -> Void
     let onExerciseTap: (FeedExercise) -> Void
@@ -13,15 +14,16 @@ struct PostCardView: View {
             PostHeaderView(
                 avatar: post.authorAvatar,
                 authorName: post.authorName,
-                postedAt: post.postedAt
+                postedAt: post.postedAt,
+                onAuthorTap: onAuthorTap
             )
 
-            Button(action: onTap) {
-                feedImage(post.coverImageName)
-                    .frame(height: 130)
-                    .clipShape(RoundedRectangle(cornerRadius: 26))
-            }
-            .buttonStyle(.plain)
+//            Button(action: onTap) {
+//                feedImage(post.coverImageName)
+//                    .frame(height: 130)
+//                    .clipShape(RoundedRectangle(cornerRadius: 26))
+//            }
+//            .buttonStyle(.plain)
 
             VStack(alignment: .leading, spacing: 14) {
                 Text(post.title)
@@ -113,26 +115,26 @@ struct PostCardView: View {
         .opacity(0.7)
     }
 
-    @ViewBuilder
-    private func feedImage(_ name: String) -> some View {
-        if UIImage(named: name) != nil {
-            Image(name)
-                .resizable()
-                .scaledToFill()
-        } else {
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color.gray.opacity(0.6), Color.appPurple.opacity(0.5)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    Image(systemName: "photo")
-                        .font(.system(size: 34))
-                        .foregroundStyle(.white.opacity(0.8))
-                )
-        }
-    }
+//    @ViewBuilder
+//    private func feedImage(_ name: String) -> some View {
+//        if UIImage(named: name) != nil {
+//            Image(name)
+//                .resizable()
+//                .scaledToFill()
+//        } else {
+//            Rectangle()
+//                .fill(
+//                    LinearGradient(
+//                        colors: [Color.gray.opacity(0.6), Color.appPurple.opacity(0.5)],
+//                        startPoint: .topLeading,
+//                        endPoint: .bottomTrailing
+//                    )
+//                )
+//                .overlay(
+//                    Image(systemName: "photo")
+//                        .font(.system(size: 34))
+//                        .foregroundStyle(.white.opacity(0.8))
+//                )
+//        }
+//    }
 }
