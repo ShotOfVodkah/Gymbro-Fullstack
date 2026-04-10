@@ -32,6 +32,7 @@ public final class AppMicroservices {
                     let tokens = try await refreshAuthService.refresh(refreshToken: refreshToken)
                     storage.accessToken = tokens.access_token
                     storage.refreshToken = tokens.refresh_token
+                    storage.userId = JWTClaimsParser.userId(fromAccessToken: tokens.access_token)
                     
                     print("Token refresh successful")
                     return true

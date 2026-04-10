@@ -16,15 +16,14 @@ public final class SessionManager: ObservableObject {
     }
     
     private func restoreSession() {
-//        let hasAccess = AppMicroservices.tokens.accessToken != nil
         let hasRefresh = AppMicroservices.tokens.refreshToken != nil
-//        isAuthenticated = hasAccess || hasRefresh
         isAuthenticated = hasRefresh
     }
     
     func setSession(tokens: TokenResponse) {
         AppMicroservices.tokens.accessToken = tokens.access_token
         AppMicroservices.tokens.refreshToken = tokens.refresh_token
+        AppMicroservices.tokens.userId = JWTClaimsParser.userId(fromAccessToken: tokens.access_token)
         isAuthenticated = true
     }
     

@@ -24,6 +24,7 @@ public final class WorkoutsClient {
     }
 
     public func fetchUserWorkouts() async throws -> [Workout] {
+        let userId = try requireUserId()
         let queryItems: [URLQueryItem] = [
             URLQueryItem(name: "userId", value: userId)
         ]
@@ -32,7 +33,7 @@ public final class WorkoutsClient {
             path: "workouts/",
             queryItems: queryItems,
             body: Optional<EmptyBody>.none,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: [WorkoutDTO].self
         )
         return dtos.map { $0.toWorkout() }
@@ -54,6 +55,7 @@ public final class WorkoutsClient {
     }
 
     public func createWorkout(_ workout: Workout) async throws -> Workout {
+        let userId = try requireUserId()
         let body = CreateWorkoutRequest(
             id: workout.id,
             userId: userId,
@@ -65,7 +67,7 @@ public final class WorkoutsClient {
             method: .POST,
             path: "workouts/",
             body: body,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: WorkoutDTO.self
         )
         return dto.toWorkout()
@@ -81,7 +83,7 @@ public final class WorkoutsClient {
             method: .PUT,
             path: "workouts/\(workout.id)",
             body: body,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: WorkoutDTO.self
         )
         return dto.toWorkout()
@@ -92,7 +94,7 @@ public final class WorkoutsClient {
             method: .GET,
             path: "workouts/\(id)",
             body: Optional<EmptyBody>.none,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: WorkoutDTO.self
         )
             
@@ -100,6 +102,7 @@ public final class WorkoutsClient {
     }
     
     public func fetchWorkoutsList() async throws -> Data {
+        let userId = try requireUserId()
         let queryItems: [URLQueryItem] = [
             URLQueryItem(name: "userId", value: userId)
         ]
@@ -109,7 +112,7 @@ public final class WorkoutsClient {
             path: "workoutsList",
             queryItems: queryItems,
             body: Optional<EmptyBody>.none,
-            requiresAuth: false
+            requiresAuth: true
         )
     }
     
@@ -186,6 +189,7 @@ public final class WorkoutsClient {
         completedAt: String = ISO8601DateFormatter().string(from: Date()),
         exercises: [WorkoutExerciseRequest]
     ) async throws {
+        let userId = try requireUserId()
         let body = CreateSessionRequest(
             id: UUID().uuidString,
             userId: userId,
@@ -197,7 +201,7 @@ public final class WorkoutsClient {
             method: .POST,
             path: "sessions",
             body: body,
-            requiresAuth: false
+            requiresAuth: true
         )
     }
 
@@ -206,18 +210,19 @@ public final class WorkoutsClient {
             method: .DELETE,
             path: "workouts/\(id)",
             body: Optional<EmptyBody>.none,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: DeleteWorkoutResponse.self
         )
     }
 
     public func addPremadeWorkout(premadeId: String) async throws {
+        let userId = try requireUserId()
         let body = AddPremadeWorkoutRequest(userId: userId, premadeId: premadeId)
         let dto = try await client.request(
             method: .POST,
             path: "workouts/copy-premade",
             body: body,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: WorkoutDTO.self
         )
     }
@@ -233,7 +238,12 @@ public final class WorkoutsClient {
     }
 
     private let client: NetworkClient
-    private let userId: String = "user-42"
+    private func requireUserId() throws -> String {
+        guard let userId = AppMicroservices.tokens.userId, !userId.isEmpty else {
+            throw NetworkError.unauthorized
+        }
+        return userId
+    }
     
 }
 

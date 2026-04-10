@@ -195,7 +195,10 @@ public final class NetworkClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
-        if requiresAuth, let token = tokenProvider?(), !token.isEmpty {
+        if requiresAuth {
+            guard let token = tokenProvider?(), !token.isEmpty else {
+                throw NetworkError.unauthorized
+            }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         

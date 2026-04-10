@@ -4,6 +4,7 @@ import Security
 public protocol TokenStorage: AnyObject {
     var accessToken: String? { get set }
     var refreshToken: String? { get set }
+    var userId: String? { get set }
     func clear()
 }
 
@@ -11,6 +12,7 @@ public final class KeychainTokenStorage: TokenStorage {
     private enum Key {
         static let accessToken = "gymbro.accessToken"
         static let refreshToken = "gymbro.refreshToken"
+        static let userId = "gymbro.userId"
     }
 
     private let service = "com.gymbro.auth"
@@ -42,6 +44,18 @@ public final class KeychainTokenStorage: TokenStorage {
     public func clear() {
         delete(for: Key.accessToken)
         delete(for: Key.refreshToken)
+        delete(for: Key.userId)
+    }
+
+    public var userId: String? {
+        get { read(for: Key.userId) }
+        set {
+            if let newValue {
+                save(newValue, for: Key.userId)
+            } else {
+                delete(for: Key.userId)
+            }
+        }
     }
 
     private func save(_ value: String, for account: String) {
