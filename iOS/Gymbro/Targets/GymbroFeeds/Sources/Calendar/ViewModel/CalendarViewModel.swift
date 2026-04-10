@@ -65,7 +65,7 @@ final class FeedsCalendarViewModel: ObservableObject {
 
     private func rebuildCalendar() {
         monthTitle = monthFormatter.string(from: currentMonthDate)
-        
+
         guard let selectedPerson else {
             days = []
             return

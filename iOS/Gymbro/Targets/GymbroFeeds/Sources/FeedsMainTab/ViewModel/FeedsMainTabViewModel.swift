@@ -91,8 +91,6 @@ final class FeedsMainTabViewModel: ObservableObject {
         filteredChatCreationPeople(searchText: groupChatSearchText)
     }
     
-    // chat creation
-    
     private func resetChatCreationDraft() {
         chatCreationDraft = ChatCreationDraft()
     }
@@ -142,8 +140,6 @@ final class FeedsMainTabViewModel: ObservableObject {
         loadChatCreationPeopleIfNeeded()
         chatCreationStep = .createGroup
     }
-    
-    // end creation
     
     func goBackInChatCreationFlow() {
         switch chatCreationStep {
@@ -210,8 +206,14 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
 
     func didTapCommunity(_ community: FeedCommunity) {
-        print("route to chat")
-//        router.navigate(to: .feedsCommunity(title: community.title))
+        switch community.kind {
+        case .directPerson:
+            guard let person = community.participants.first else { return }
+            openChat(title: person.name, participants: [person])
+            
+        case .joinedGroup:
+            openChat(title: community.title, participants: community.participants)
+        }
     }
 
     func didTapPost(_ post: FeedPost) {

@@ -7,6 +7,7 @@ import GymbroNetwork
 import GymbroNavigation
 import GymbroFeeds
 import GymbroProfile
+import GymbroTypes
 
 final class AppServicesFactory {
     let router: AppRouter
@@ -76,14 +77,14 @@ final class AppServicesFactory {
             makeFeedsPeopleScreen()
         case .feedsCalendar(let context):
             makeFeedsCalendarScreen(context: context)
+        case .feedsChat(let input):
+            makeFeedsChatScreen(input: input)
             
             // change
         case .feedsProfile(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
-        case .feedsChat(let input):
-            FeedsMockDestinationView(title: input.title, subtitle: input.isDirect ? "Mock direct chat screen" : "Mock group chat screen")
-        
-            
+
+            // new
         case .feedsPost(let title):
             FeedsMockDestinationView(title: title, subtitle: "Mock post details screen")
         case .feedsComments(let title):
@@ -181,6 +182,14 @@ final class AppServicesFactory {
         )
     }
     
+    @MainActor
+    func makeFeedsChatScreen(input: ChatSessionInput) -> some View {
+        screenFactories.feedsChatFactory.makeView(
+            input: input,
+            router: router
+        )
+    }
+    
     // Profile
     
     @MainActor
@@ -204,6 +213,7 @@ private struct ScreenFactories {
     lazy var feedsMainTabFactory = FeedsMainTabFactoryImpl()
     lazy var feedsPeopleFactory = FeedsPeopleFactoryImpl()
     lazy var feedsCalendarFactory = FeedsCalendarFactoryImpl()
+    lazy var feedsChatFactory = FeedsChatFactoryImpl()
     
     // Profile factories
     

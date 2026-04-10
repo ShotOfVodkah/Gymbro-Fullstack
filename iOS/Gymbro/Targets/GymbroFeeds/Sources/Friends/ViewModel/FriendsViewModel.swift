@@ -1,6 +1,7 @@
 import SwiftUI
 import Foundation
 import GymbroNavigation
+import GymbroTypes
 
 @MainActor
 final class FeedsPeopleViewModel: ObservableObject {
@@ -92,8 +93,11 @@ final class FeedsPeopleViewModel: ObservableObject {
     
     func didTapViewMessage(for person: PersonItem) {
         selectedPerson = nil
-        print("navigate to chat")
-//        router.navigate(to: .feedsPersonMessage(title: person.name))
+        let input = ChatSessionInput(
+            title: person.name,
+            participants: [ChatParticipant(id: person.id.uuidString, name: person.name, avatarSystemName: person.avatarSystemName)]
+        )
+        router.navigate(to: .feedsChat(input: input))
     }
     
     var filteredFriends: [PersonItem] {

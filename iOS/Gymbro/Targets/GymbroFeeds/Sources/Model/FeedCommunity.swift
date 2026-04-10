@@ -6,6 +6,7 @@ struct FeedCommunity: Identifiable, Hashable {
     let icon: String
     let isSystemImage: Bool
     let kind: FeedCommunityKind
+    let participants: [PersonItem]
 
     init(
         id: UUID = UUID(),
@@ -13,12 +14,14 @@ struct FeedCommunity: Identifiable, Hashable {
         icon: String,
         isSystemImage: Bool = false,
         kind: FeedCommunityKind,
+        participants: [PersonItem] = []
     ) {
         self.id = id
         self.title = title
         self.icon = icon
         self.isSystemImage = isSystemImage
         self.kind = kind
+        self.participants = participants
     }
 }
 
