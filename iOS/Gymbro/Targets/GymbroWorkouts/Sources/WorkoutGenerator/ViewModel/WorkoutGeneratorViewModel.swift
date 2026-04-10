@@ -19,28 +19,60 @@ final class WorkoutGeneratorViewModel: ObservableObject {
     }
 
     // MARK: - Actions
-    
+
     func exit() {
         router.pop()
     }
     
+    func dismiss() {
+        generated = nil
+        screenState = .loaded
+    }
+
+    func toggleInjury(_ injury: Injury) {
+        if selectedInjuries.contains(injury) {
+            selectedInjuries.remove(injury)
+        } else {
+            selectedInjuries.insert(injury)
+        }
+    }
+
     func generateWorkout() async {
+        guard !prompt.isEmpty else {
+            showAlert = true
+            return
+        }
+        screenState = .loading
+        generated = nil
         do {
-            let (workout, screenState) = try await service.generate(
-                prompt: "Нужна кардио тренировка на 20 минут, начинающий уровень",
-                injuries: []
+            let (workout, state) = try await service.generate(
+                prompt: prompt,
+                injuries: Array(selectedInjuries)
             )
-            self.screenState = screenState
+            self.screenState = state
             self.generated = workout
         } catch {
             screenState = .error
         }
     }
     
+    func saveWorkout() {
+        guard let generated else { return }
+        Task {
+            await service.saveWorkout(generated)
+            modelModifier.events.send(.workoutAdded(id: generated.id))
+            self.generated = nil
+            router.popToRoot()
+        }
+    }
+
     // MARK: - Published state
 
+    @Published var prompt: String = ""
+    @Published var selectedInjuries: Set<Injury> = []
     @Published var screenState: ScreenState = .loaded
     @Published var generated: Workout?
+    @Published var showAlert: Bool = false
 
     private let router: any Router
     private let service: any WorkoutGeneratorService

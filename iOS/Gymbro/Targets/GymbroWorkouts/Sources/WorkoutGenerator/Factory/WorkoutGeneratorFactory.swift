@@ -12,13 +12,15 @@ public final class WorkoutGeneratorFactoryImpl {
     public func makeView(
         router: any Router,
         modelModifier: WorkoutsModelModifier,
+        actionsRepository: OfflineActionsRepository,
         workoutsRepository: WorkoutsCacheRepository,
         client: WorkoutsClient
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutGeneratorServiceImpl(
                 client: client,
-                workoutsRepository: workoutsRepository
+                workoutsRepository: workoutsRepository,
+                actionsRepository: actionsRepository
             )
             let viewModel = WorkoutGeneratorViewModel(
                 modelModifier: modelModifier,

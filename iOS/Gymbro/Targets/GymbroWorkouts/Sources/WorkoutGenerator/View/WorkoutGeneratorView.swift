@@ -11,20 +11,34 @@ struct WorkoutGeneratorView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            TopGradientBackground()
-            
+            VStack {
+                TopGradientBackground()
+                
+                Spacer()
+                
+                TopGradientBackground()
+                    .rotationEffect(Angle(degrees: 180))
+            }
+            .ignoresSafeArea(.all)
+
             content
-            
-            Button {
-                viewModel.exit()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.white)
-                    .imageScale(.large)
+
+            HStack {
+                Button {
+                    viewModel.exit()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
+                        .imageScale(.large)
+                }
+                .padding(.leading, 16)
+                
+                Text("Generate Workout")
+                    .font(.system(.title, design: .rounded).weight(.bold))
+                    .foregroundStyle(.white)
             }
             .padding(.leading, 16)
-
         }
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
@@ -32,32 +46,94 @@ struct WorkoutGeneratorView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
     }
-    
+
     private var content: some View {
-        VStack {
-            AppButton("generate", action: {
-                Task {
-                    await viewModel.generateWorkout()
-                }
-            })
+        VStack(alignment: .leading, spacing: 24) {
+            AppTextField(
+                title: "Describe your workout",
+                placeholder: "",
+                text: $viewModel.prompt
+            )
             
-            if let workout = viewModel.generated {
-                Text(workout.name)
-                    .foregroundStyle(.white)
+            if viewModel.screenState == .loaded && viewModel.generated == nil {
+                VStack(alignment: .leading, spacing: 24) {
+                    injuriesSection
+
+                    AppButton("Generate", size: .l, action: {
+                        Task { await viewModel.generateWorkout() }
+                    }, wrapContent: false)
+                }
+            } else {
+                resultSection
+                    .frame(height: 500)
+            }
+        }
+        .customAlert(
+            isPresented: $viewModel.showAlert,
+            data: CustomAlertData(
+                message: "Fill in the prompt before generating",
+                primaryButton: AppButton(
+                    "Okay",
+                    action: { viewModel.showAlert = false }
+                )
+            )
+        )
+        .padding(.horizontal, 16)
+        .animation(.easeInOut, value: viewModel.screenState == .loaded && viewModel.generated == nil)
+        .frame(maxHeight: .infinity, alignment: .center)
+    }
+
+    private var injuriesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Injuries and conditions")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.6))
+
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: 8
+            ) {
+                ForEach(Injury.allCases, id: \.codingValue) { injury in
+                    InjuryToggleChip(
+                        label: injury.stringValue,
+                        isSelected: viewModel.selectedInjuries.contains(injury),
+                        action: { viewModel.toggleInjury(injury) }
+                    )
+                }
             }
         }
     }
 
-    @ObservedObject private var viewModel: WorkoutGeneratorViewModel
-}
-
-extension ExerciseItem {
-    fileprivate var accentColor: Color {
-        switch self {
-        case .strength: return Color.strengthColor
-        case .cardio: return Color.cardioColor
-        case .yoga: return Color.yogaColor
-        case .fallback: return Color.appPurple
+    @ViewBuilder
+    private var resultSection: some View {
+        switch viewModel.screenState {
+        case .loading:
+            WorkoutLoadingCard()
+        case .loaded:
+            if let workout = viewModel.generated {
+                WorkoutResultCard(
+                    workout: workout,
+                    dismissAction: viewModel.dismiss,
+                    saveAction: viewModel.saveWorkout
+                )
+            }
+        case .error:
+            VStack {
+                Text("Looks like there is an error generating. Make sure the prompt is correct.")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                
+                AppButton(
+                    "Okay",
+                    action: viewModel.dismiss
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+        case .offline:
+            EmptyView()
         }
     }
+
+    @ObservedObject private var viewModel: WorkoutGeneratorViewModel
 }

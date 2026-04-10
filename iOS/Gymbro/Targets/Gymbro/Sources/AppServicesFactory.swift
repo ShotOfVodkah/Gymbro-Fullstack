@@ -186,6 +186,7 @@ final class AppServicesFactory {
         screenFactories.workoutGeneratorFactory.makeView(
             router: router,
             modelModifier: workoutsModelModifier,
+            actionsRepository: actionsRepository,
             workoutsRepository: workoutsRepository,
             client: AppMicroservices.workouts
         )

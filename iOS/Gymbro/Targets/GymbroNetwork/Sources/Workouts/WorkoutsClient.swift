@@ -128,6 +128,7 @@ public final class WorkoutsClient {
             path: "ai/generate",
             body: requestBody,
             requiresAuth: false,
+            timeoutInterval: 600,
             responseType: WorkoutDTO.self
         )
         

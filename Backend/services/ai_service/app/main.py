@@ -16,6 +16,9 @@ from app.catalog import is_safe_for_injuries, lookup
 from app.prompt import build_messages
 from app.validation import validate_input
 
+import random
+from typing import Optional, Dict, Tuple
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -62,11 +65,28 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Gymbro AI Service", lifespan=lifespan)
 
+WEIGHT_RANGES: Dict[str, Tuple[int, int]] = {
+    "bench_press": (40, 100),
+    "squat": (50, 120),
+    "deadlift": (60, 140),
+    "shoulder_press": (20, 60),
+    "bicep_curl": (8, 25),
+    "triceps_extension": (10, 30),
+    "pull_up": (0, 20),
+    "push_up": (0, 0),
+    "lunge": (10, 40),
+    "leg_press": (80, 200),
+}
+
+def _get_random_weight(exercise_id: str, default_min: int = 5, default_max: int = 50) -> int:
+    if exercise_id in WEIGHT_RANGES:
+        min_w, max_w = WEIGHT_RANGES[exercise_id]
+        if min_w == max_w == 0:
+            return 0
+        return random.randint(min_w, max_w)
+    return random.randint(default_min, default_max)
+
 def _map_exercise(ai_ex: dict, injuries: list[str]) -> Optional[ExerciseResponse]:
-    """
-    Convert a single AI-output exercise (snake_case) to ExerciseResponse.
-    Returns None if the exercise_id is not in the catalog or is contraindicated.
-    """
     ex_id: str = ai_ex.get("exercise_id", "")
     catalog_entry = lookup(ex_id)
     if catalog_entry is None:
@@ -77,6 +97,15 @@ def _map_exercise(ai_ex: dict, injuries: list[str]) -> Optional[ExerciseResponse
         logger.warning("Skipping contraindicated exercise: %s (injuries=%s)", ex_id, injuries)
         return None
 
+    weight_kg = ai_ex.get("weight_kg")
+    
+    if catalog_entry.get("type") == "strength" and weight_kg is None:
+        weight_kg = _get_random_weight(ex_id)
+        logger.info("Generated random weight for %s: %d kg", ex_id, weight_kg)
+        
+        if weight_kg == 0:
+            logger.info("Exercise %s is bodyweight only", ex_id)
+
     return ExerciseResponse(
         id=ex_id,
         name=catalog_entry["name"],
@@ -84,7 +113,7 @@ def _map_exercise(ai_ex: dict, injuries: list[str]) -> Optional[ExerciseResponse
         muscleGroup=catalog_entry["muscleGroup"],
         sets=ai_ex.get("sets"),
         reps=ai_ex.get("reps"),
-        weightKg=ai_ex.get("weight_kg"),
+        weightKg=weight_kg,
         durationMinutes=ai_ex.get("duration_minutes"),
         pace=ai_ex.get("pace"),
         holdSeconds=ai_ex.get("hold_seconds"),
