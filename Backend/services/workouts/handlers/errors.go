@@ -16,3 +16,8 @@ func badRequest(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write([]byte(`{"error": "плохой запрос"}`))
 }
+
+func unauthorized(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusUnauthorized)
+	w.Write([]byte(`{"error": "не авторизован"}`))
+}

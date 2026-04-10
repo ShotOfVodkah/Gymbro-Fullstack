@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -23,18 +24,33 @@ type mockWorkoutStore struct {
 }
 
 func (m *mockWorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
+	if m.getByID == nil {
+		return nil, store.ErrNotFound
+	}
 	return m.getByID(id)
 }
 func (m *mockWorkoutStore) ListWorkoutsByUserID(userID string) ([]types.Workout, error) {
+	if m.listBy == nil {
+		return []types.Workout{}, nil
+	}
 	return m.listBy(userID)
 }
 func (m *mockWorkoutStore) InsertWorkout(input *types.WorkoutInput) error {
+	if m.insert == nil {
+		return nil
+	}
 	return m.insert(input)
 }
 func (m *mockWorkoutStore) UpdateWorkout(id string, input *types.WorkoutInput) error {
+	if m.update == nil {
+		return nil
+	}
 	return m.update(id, input)
 }
 func (m *mockWorkoutStore) DeleteWorkout(id string) error {
+	if m.delete == nil {
+		return nil
+	}
 	return m.delete(id)
 }
 
@@ -53,6 +69,7 @@ func doRequest(h http.Handler, method, path string, body any) *httptest.Response
 		json.NewEncoder(&buf).Encode(body)
 	}
 	req := httptest.NewRequest(method, path, &buf)
+	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "u1"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	return rr
@@ -110,7 +127,7 @@ func TestListWorkoutsByUser_OK(t *testing.T) {
 		},
 	})
 
-	rr := doRequest(h, http.MethodGet, "/workouts?userId=u1", nil)
+	rr := doRequest(h, http.MethodGet, "/workouts", nil)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 	var got []types.Workout
@@ -118,11 +135,12 @@ func TestListWorkoutsByUser_OK(t *testing.T) {
 	assert.Len(t, got, 2)
 }
 
-func TestListWorkoutsByUser_MissingUserId(t *testing.T) {
+func TestListWorkoutsByUser_UnauthorizedWithoutContext(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
-
-	rr := doRequest(h, http.MethodGet, "/workouts", nil)
-	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	req := httptest.NewRequest(http.MethodGet, "/workouts", nil)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	assert.Equal(t, http.StatusUnauthorized, rr.Code)
 }
 
 func TestListWorkoutsByUser_InternalError(t *testing.T) {
@@ -132,7 +150,7 @@ func TestListWorkoutsByUser_InternalError(t *testing.T) {
 		},
 	})
 
-	rr := doRequest(h, http.MethodGet, "/workouts?userId=u1", nil)
+	rr := doRequest(h, http.MethodGet, "/workouts", nil)
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
@@ -174,6 +192,7 @@ func TestCreateWorkout_OK(t *testing.T) {
 func TestCreateWorkout_BadJSON(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 	req := httptest.NewRequest(http.MethodPost, "/workouts", bytes.NewBufferString("{bad json"))
+	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "u1"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -229,6 +248,9 @@ func TestUpdateWorkout_MissingFields(t *testing.T) {
 
 func TestUpdateWorkout_NotFound(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) {
+			return &types.Workout{ID: "missing", UserID: "u1", Name: "Old", Type: types.WorkoutTypeCardio}, nil
+		},
 		update: func(id string, inp *types.WorkoutInput) error {
 			return store.ErrNotFound
 		},
@@ -240,6 +262,9 @@ func TestUpdateWorkout_NotFound(t *testing.T) {
 
 func TestUpdateWorkout_InternalError(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) {
+			return &types.Workout{ID: "w1", UserID: "u1", Name: "Old", Type: types.WorkoutTypeCardio}, nil
+		},
 		update: func(id string, inp *types.WorkoutInput) error {
 			return errors.New("db down")
 		},
@@ -251,6 +276,9 @@ func TestUpdateWorkout_InternalError(t *testing.T) {
 
 func TestDeleteWorkout_OK(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) {
+			return &types.Workout{ID: "w1", UserID: "u1", Name: "X", Type: types.WorkoutTypeCardio}, nil
+		},
 		delete: func(id string) error {
 			assert.Equal(t, "w1", id)
 			return nil
@@ -268,7 +296,7 @@ func TestDeleteWorkout_OK(t *testing.T) {
 
 func TestDeleteWorkout_NotFound(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		delete: func(id string) error { return store.ErrNotFound },
+		getByID: func(id string) (*types.Workout, error) { return nil, store.ErrNotFound },
 	})
 
 	rr := doRequest(h, http.MethodDelete, "/workouts/missing", nil)
@@ -277,6 +305,9 @@ func TestDeleteWorkout_NotFound(t *testing.T) {
 
 func TestDeleteWorkout_InternalError(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
+		getByID: func(id string) (*types.Workout, error) {
+			return &types.Workout{ID: "w1", UserID: "u1", Name: "X", Type: types.WorkoutTypeCardio}, nil
+		},
 		delete: func(id string) error { return errors.New("db down") },
 	})
 
@@ -318,8 +349,13 @@ func TestCopyPremadeWorkout_OK(t *testing.T) {
 		},
 	})
 
-	body := copyPremadeRequest{UserID: "user-42", PremadeID: "premade-1"}
-	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+	reqBody := copyPremadeRequest{PremadeID: "premade-1"}
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(reqBody)
+	req := httptest.NewRequest(http.MethodPost, "/workouts/copy-premade", &buf)
+	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "user-42"))
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusCreated, rr.Code)
 
@@ -344,25 +380,29 @@ func TestCopyPremadeWorkout_PremadeNotFound(t *testing.T) {
 		},
 	})
 
-	body := copyPremadeRequest{UserID: "user-42", PremadeID: "premade-999"}
+	body := copyPremadeRequest{PremadeID: "premade-999"}
 	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
 
 	assert.Equal(t, http.StatusNotFound, rr.Code)
 }
 
-func TestCopyPremadeWorkout_BadRequest_MissingUserID(t *testing.T) {
+func TestCopyPremadeWorkout_UnauthorizedWithoutContext(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 
-	body := copyPremadeRequest{UserID: "", PremadeID: "premade-1"}
-	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
+	reqBody := copyPremadeRequest{PremadeID: "premade-1"}
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(reqBody)
+	req := httptest.NewRequest(http.MethodPost, "/workouts/copy-premade", &buf)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
 
-	assert.Equal(t, http.StatusBadRequest, rr.Code)
+	assert.Equal(t, http.StatusUnauthorized, rr.Code)
 }
 
 func TestCopyPremadeWorkout_BadRequest_MissingPremadeID(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 
-	body := copyPremadeRequest{UserID: "user-42", PremadeID: ""}
+	body := copyPremadeRequest{PremadeID: ""}
 	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
 
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -372,6 +412,7 @@ func TestCopyPremadeWorkout_BadJSON(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 
 	req := httptest.NewRequest(http.MethodPost, "/workouts/copy-premade", bytes.NewBufferString("{bad json"))
+	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "u1"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 
@@ -388,7 +429,7 @@ func TestCopyPremadeWorkout_InsertError(t *testing.T) {
 		insert:  func(input *types.WorkoutInput) error { return errors.New("db down") },
 	})
 
-	body := copyPremadeRequest{UserID: "user-42", PremadeID: "premade-1"}
+	body := copyPremadeRequest{PremadeID: "premade-1"}
 	rr := doRequest(h, http.MethodPost, "/workouts/copy-premade", body)
 
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)

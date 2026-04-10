@@ -19,7 +19,6 @@ func newID() string {
 }
 
 type copyPremadeRequest struct {
-	UserID    string `json:"userId"`
 	PremadeID string `json:"premadeId"`
 }
 
@@ -75,6 +74,12 @@ func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *workoutHandler) GetWorkoutByID(w http.ResponseWriter, r *http.Request, id string) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
 	workout, err := h.workoutStore.GetWorkoutByID(id)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
@@ -84,13 +89,17 @@ func (h *workoutHandler) GetWorkoutByID(w http.ResponseWriter, r *http.Request, 
 		internalServerError(w, r)
 		return
 	}
+	if workout.UserID != userID {
+		unauthorized(w, r)
+		return
+	}
 	json.NewEncoder(w).Encode(workout)
 }
 
 func (h *workoutHandler) ListWorkoutsByUser(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("userId")
-	if userID == "" {
-		badRequest(w, r)
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
 		return
 	}
 	workouts, err := h.workoutStore.ListWorkoutsByUserID(userID)
@@ -102,15 +111,22 @@ func (h *workoutHandler) ListWorkoutsByUser(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *workoutHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
 	var input types.WorkoutInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		badRequest(w, r)
 		return
 	}
-	if input.ID == "" || input.UserID == "" || input.Name == "" || input.Type == "" {
+	if input.ID == "" || input.Name == "" || input.Type == "" {
 		badRequest(w, r)
 		return
 	}
+	input.UserID = userID
 	if err := h.workoutStore.InsertWorkout(&input); err != nil {
 		internalServerError(w, r)
 		return
@@ -125,6 +141,12 @@ func (h *workoutHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, id string) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
 	var input types.WorkoutInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		badRequest(w, r)
@@ -132,6 +154,19 @@ func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, i
 	}
 	if input.Name == "" || input.Type == "" {
 		badRequest(w, r)
+		return
+	}
+	current, err := h.workoutStore.GetWorkoutByID(id)
+	if errors.Is(err, store.ErrNotFound) {
+		notFound(w, r)
+		return
+	}
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+	if current.UserID != userID {
+		unauthorized(w, r)
 		return
 	}
 	if err := h.workoutStore.UpdateWorkout(id, &input); err != nil {
@@ -151,6 +186,26 @@ func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, i
 }
 
 func (h *workoutHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request, id string) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
+	current, err := h.workoutStore.GetWorkoutByID(id)
+	if errors.Is(err, store.ErrNotFound) {
+		notFound(w, r)
+		return
+	}
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+	if current.UserID != userID {
+		unauthorized(w, r)
+		return
+	}
+
 	if err := h.workoutStore.DeleteWorkout(id); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			notFound(w, r)
@@ -163,12 +218,18 @@ func (h *workoutHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request, i
 }
 
 func (h *workoutHandler) CopyPremadeWorkout(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
 	var req copyPremadeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		badRequest(w, r)
 		return
 	}
-	if req.UserID == "" || req.PremadeID == "" {
+	if req.PremadeID == "" {
 		badRequest(w, r)
 		return
 	}
@@ -200,7 +261,7 @@ func (h *workoutHandler) CopyPremadeWorkout(w http.ResponseWriter, r *http.Reque
 	newID := newID()
 	input := types.WorkoutInput{
 		ID:        newID,
-		UserID:    req.UserID,
+		UserID:    userID,
 		Name:      premade.Name,
 		Type:      premade.Type,
 		Exercises: exercises,
