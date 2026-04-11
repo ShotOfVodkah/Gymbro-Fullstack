@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ec659672-f87a-4888-82da-60822f8ecba3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroNetwork/Sources/Auth/TokenRefreshCoordinator.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/deploy/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/deploy/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/feeds/cmd/feedserver/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/feeds/cmd/feedserver/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/feeds/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/feeds/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/feeds/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/feeds/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/workouts/cmd/workoutserver/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/workouts/cmd/workoutserver/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/workouts/handlers/workouts.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/workouts/handlers/workouts.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/workouts/handlers/workouts_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/workouts/handlers/workouts_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Backend/services/workouts/store/storeWorkouts.go" beforeDir="false" afterPath="$PROJECT_DIR$/../Backend/services/workouts/store/storeWorkouts.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/FeedsMainTab/View/Components/PostView/PostCardView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/FeedsMainTab/View/Components/PostView/PostCardView.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/FeedsMainTab/View/FeedsView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/FeedsMainTab/View/FeedsView.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/FeedsMainTab/ViewModel/FeedsMainTabViewModel.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/FeedsMainTab/ViewModel/FeedsMainTabViewModel.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/Mock/MockFeed.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroFeeds/Sources/Mock/MockFeed.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroNetwork/Sources/AppMicroservices.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroNetwork/Sources/AppMicroservices.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroNetwork/Sources/Feeds/FeedsClient.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroNetwork/Sources/Feeds/FeedsClient.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroTypes/Sources/FeedTypes/FeedsMainTab/FeedPost.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroTypes/Sources/FeedTypes/FeedsMainTab/FeedPost.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroTypes/Sources/FeedTypes/FeedsMainTab/FeedsModels.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../iOS/Gymbro/Targets/GymbroTypes/Sources/FeedTypes/FeedsMainTab/FeedsModels.swift" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/backend">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="divkit-demo" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 3
+}]]></component>
+  <component name="ProjectId" id="3CE4EIrI3ixgdvJ6f3E8WUa2J7m" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "gritsaenko-06-feeds-backend"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ec659672-f87a-4888-82da-60822f8ecba3" name="Changes" comment="" />
+      <created>1775937281080</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775937281080</updated>
+    </task>
+    <servers />
+  </component>
+</project>

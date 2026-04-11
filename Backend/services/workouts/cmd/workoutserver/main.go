@@ -31,6 +31,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/workouts/", authMiddleware(workoutH))
 	mux.Handle("/workouts", authMiddleware(workoutH))
+	mux.Handle("/internal/workouts/preview/batch", workoutH)
 	mux.Handle("/exercises", exerciseH)
 	mux.Handle("/sessions", authMiddleware(sessionH))
 	mux.Handle("/sessions/", authMiddleware(sessionH))

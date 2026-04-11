@@ -1,4 +1,5 @@
 import Foundation
+import GymbroNetwork
 import GymbroNavigation
 import GymbroTypes
 
@@ -32,13 +33,15 @@ final class FeedsMainTabViewModel: ObservableObject {
     init(router: any Router, analytics: any AnalyticsService) {
         self.router = router
         self.analytics = analytics
-        loadMockData()
+        reload()
         analytics.track(.screenViewed(screen: .feedsMain))
     }
     
     func reload() {
-        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsMain.rawValue))
-        loadMockData()
+        Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsMain.rawValue))
+            await loadFeed()
+        }
     }
     
     func didTapOpenFriends() {
@@ -257,9 +260,20 @@ final class FeedsMainTabViewModel: ObservableObject {
         analytics.track(.feedsPostLiked(postId: postID.uuidString, isLiked: posts[index].isLiked))
     }
     
-    private func loadMockData() {
-        communities = FeedsMockData.communities
-        posts = FeedsMockData.posts
-        screenState = .loaded
+    private func loadFeed() async {
+        screenState = .loading
+        
+        do {
+            let response = try await AppMicroservices.feeds.fetchFeed()
+            posts = response.map(FeedPost.init(response:))
+            
+            // Пока communities оставляем моками
+            communities = FeedsMockData.communities
+            
+            screenState = .loaded
+        } catch {
+            print("Failed to load feed:", error)
+            screenState = .error
+        }
     }
 }

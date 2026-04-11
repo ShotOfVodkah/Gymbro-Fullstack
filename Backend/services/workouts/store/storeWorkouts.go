@@ -17,6 +17,7 @@ type WorkoutStorer interface {
 	InsertWorkout(input *types.WorkoutInput) error
 	UpdateWorkout(id string, input *types.WorkoutInput) error
 	DeleteWorkout(id string) error
+	GetWorkoutPreviewsByIDs(ids []string) ([]types.WorkoutPreviewItem, error)
 }
 
 type WorkoutStore struct {
@@ -62,6 +63,30 @@ func rowToExercise(r workoutExerciseRow) types.Exercise {
 		HoldSeconds:     r.HoldSeconds,
 		BreathCount:     r.BreathCount,
 	}
+}
+
+type workoutPreviewRow struct {
+	ID              string `db:"id"`
+	Title           string `db:"title"`
+	Category        string `db:"category"`
+	DurationMinutes int    `db:"duration_minutes"`
+	ExerciseCount   int    `db:"exercise_count"`
+}
+
+type workoutPreviewExerciseRow struct {
+	WorkoutID       string   `db:"workout_id"`
+	ExerciseID      string   `db:"exercise_id"`
+	Name            string   `db:"name"`
+	Type            string   `db:"type"`
+	MuscleGroup     string   `db:"muscle_group"`
+	Position        int      `db:"position"`
+	Sets            *int     `db:"sets"`
+	Reps            *int     `db:"reps"`
+	WeightKg        *float64 `db:"weight_kg"`
+	DurationMinutes *int     `db:"duration_minutes"`
+	Pace            *string  `db:"pace"`
+	HoldSeconds     *int     `db:"hold_seconds"`
+	BreathCount     *int     `db:"breath_count"`
 }
 
 const exerciseJoinQuery = `
@@ -226,4 +251,98 @@ func (ws *WorkoutStore) DeleteWorkout(id string) error {
 		return ErrNotFound
 	}
 	return nil
+}
+
+func (ws *WorkoutStore) GetWorkoutPreviewsByIDs(ids []string) ([]types.WorkoutPreviewItem, error) {
+	if len(ids) == 0 {
+		return []types.WorkoutPreviewItem{}, nil
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT
+			w.id,
+			w.name AS title,
+			w.type AS category,
+			COALESCE(SUM(COALESCE(we.duration_minutes, 0)), 0) AS duration_minutes,
+			COUNT(we.exercise_id) AS exercise_count
+		FROM workouts w
+		LEFT JOIN workout_exercises we ON we.workout_id = w.id
+		WHERE w.id IN (?)
+		GROUP BY w.id, w.name, w.type
+	`, ids)
+	if err != nil {
+		return nil, fmt.Errorf("GetWorkoutPreviewsByIDs build main query: %w", err)
+	}
+	query = ws.db.Rebind(query)
+
+	var previewRows []workoutPreviewRow
+	if err := ws.db.Select(&previewRows, query, args...); err != nil {
+		return nil, fmt.Errorf("GetWorkoutPreviewsByIDs select previews: %w", err)
+	}
+
+	exQuery, exArgs, err := sqlx.In(`
+		SELECT
+			we.workout_id,
+			we.exercise_id,
+			e.name,
+			e.type,
+			e.muscle_group,
+			we.position,
+			we.sets,
+			we.reps,
+			we.weight_kg,
+			we.duration_minutes,
+			we.pace,
+			we.hold_seconds,
+			we.breath_count
+		FROM workout_exercises we
+		JOIN exercises e ON e.id = we.exercise_id
+		WHERE we.workout_id IN (?)
+		ORDER BY we.workout_id, we.position
+	`, ids)
+	if err != nil {
+		return nil, fmt.Errorf("GetWorkoutPreviewsByIDs build exercises query: %w", err)
+	}
+	exQuery = ws.db.Rebind(exQuery)
+
+	var exRows []workoutPreviewExerciseRow
+	if err := ws.db.Select(&exRows, exQuery, exArgs...); err != nil {
+		return nil, fmt.Errorf("GetWorkoutPreviewsByIDs select exercises: %w", err)
+	}
+
+	exMap := make(map[string][]types.WorkoutPreviewExercise)
+	for _, row := range exRows {
+		current := exMap[row.WorkoutID]
+		if len(current) >= 2 {
+			continue
+		}
+
+		exMap[row.WorkoutID] = append(current, types.WorkoutPreviewExercise{
+			ID:              row.ExerciseID,
+			Name:            row.Name,
+			Type:            row.Type,
+			MuscleGroup:     row.MuscleGroup,
+			Sets:            row.Sets,
+			Reps:            row.Reps,
+			WeightKg:        row.WeightKg,
+			DurationMinutes: row.DurationMinutes,
+			Pace:            row.Pace,
+			HoldSeconds:     row.HoldSeconds,
+			BreathCount:     row.BreathCount,
+		})
+	}
+
+	items := make([]types.WorkoutPreviewItem, 0, len(previewRows))
+	for _, row := range previewRows {
+		items = append(items, types.WorkoutPreviewItem{
+			ID:               row.ID,
+			Title:            row.Title,
+			Category:         row.Category,
+			DurationMinutes:  row.DurationMinutes,
+			ExerciseCount:    row.ExerciseCount,
+			ExercisesPreview: exMap[row.ID],
+		})
+	}
+
+	return items, nil
 }

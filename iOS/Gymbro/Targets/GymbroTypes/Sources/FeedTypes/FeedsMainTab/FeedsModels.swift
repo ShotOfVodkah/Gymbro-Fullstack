@@ -11,15 +11,30 @@ struct FeedCommunityPreviewResponse: Decodable {
     let title: String
 }
 
+struct FeedWorkoutExercisePreviewResponse: Decodable {
+    let id: String
+    let name: String
+    let type: String
+    let muscleGroup: String
+    let sets: Int?
+    let reps: Int?
+    let weightKg: Double?
+    let durationMinutes: Int?
+    let pace: String?
+    let holdSeconds: Int?
+    let breathCount: Int?
+}
+
 struct FeedWorkoutPreviewResponse: Decodable {
     let id: String
     let title: String
     let category: String
     let duration_minutes: Int
-    let cover_image_url: String?
+    let exercise_count: Int
+    let exercises_preview: [FeedWorkoutExercisePreviewResponse]
 }
 
-struct FeedPostItemResponse: Decodable {
+public struct FeedPostItemResponse: Decodable {
     let id: String
     let author: FeedAuthorPreviewResponse
     let community: FeedCommunityPreviewResponse?

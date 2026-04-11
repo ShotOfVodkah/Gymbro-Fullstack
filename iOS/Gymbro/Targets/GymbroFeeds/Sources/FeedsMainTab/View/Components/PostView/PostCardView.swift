@@ -67,7 +67,7 @@ struct PostCardView: View {
                         }
                     }
 
-                    if post.exercises.count > 2 {
+                    if post.totalExercisesCount > 2 {
                         Button {
                             print("Mock: show all exercises")
                         } label: {

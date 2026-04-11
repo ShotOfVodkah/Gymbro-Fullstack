@@ -73,6 +73,7 @@ services:
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres_feeds:5432/gymbro_feeds?sslmode=disable"
       JWT_SECRET: "supersecret_noone_will_get_out"
+      WORKOUTS_SERVICE_URL: "http://workouts_service:8082"
       PGHOST: postgres_feeds
       PGPORT: 5432
     depends_on:

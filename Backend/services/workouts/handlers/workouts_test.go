@@ -21,6 +21,7 @@ type mockWorkoutStore struct {
 	insert  func(input *types.WorkoutInput) error
 	update  func(id string, input *types.WorkoutInput) error
 	delete  func(id string) error
+	previewByIDs func(ids []string) ([]types.WorkoutPreviewItem, error)
 }
 
 func (m *mockWorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
@@ -461,4 +462,11 @@ func TestServeHTTP_UnsupportedMethodOnByID(t *testing.T) {
 
 	rr := doRequest(h, http.MethodPatch, "/workouts/w1", nil)
 	assert.Equal(t, http.StatusNotFound, rr.Code)
+}
+
+func (m *mockWorkoutStore) GetWorkoutPreviewsByIDs(ids []string) ([]types.WorkoutPreviewItem, error) {
+	if m.previewByIDs == nil {
+		return []types.WorkoutPreviewItem{}, nil
+	}
+	return m.previewByIDs(ids)
 }

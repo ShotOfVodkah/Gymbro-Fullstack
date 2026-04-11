@@ -31,6 +31,7 @@ struct FeedsMainTabView: View {
                         }
                     }
                     .padding(.horizontal, 40)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
             }
         }
