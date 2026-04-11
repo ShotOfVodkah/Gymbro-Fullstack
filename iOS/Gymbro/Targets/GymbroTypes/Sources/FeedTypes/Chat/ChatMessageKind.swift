@@ -1,6 +1,6 @@
 import Foundation
 
-enum ChatMessageKind: Hashable {
+public enum ChatMessageKind: Hashable {
     case text(String)
     case workout(
         workoutID: String,

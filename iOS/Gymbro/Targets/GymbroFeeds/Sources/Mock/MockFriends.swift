@@ -1,5 +1,6 @@
 import Foundation
 import GymbroNavigation
+import GymbroTypes
 
 enum FeedsPeopleMockData {
     

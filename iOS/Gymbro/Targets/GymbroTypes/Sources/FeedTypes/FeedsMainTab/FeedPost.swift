@@ -1,26 +1,25 @@
 import Foundation
-import GymbroTypes
 
-struct FeedPost: Identifiable, Hashable {
-    let id: UUID
-    let authorName: String
-    let authorAvatar: String
-    let postedAt: String
-    let title: String
-    let coverImageName: String
-    let category: String
-    let duration: String
-    let timeAgo: String
-    let location: String?
-    let description: String
-    let exercises: [ExerciseItem]
-    var likesCount: Int
-    var commentsCount: Int
-    var isLiked: Bool
-    let kind: FeedPostKind
-    let isFromJoinedCommunity: Bool
+public struct FeedPost: Identifiable, Hashable {
+    public let id: UUID
+    public let authorName: String
+    public let authorAvatar: String
+    public let postedAt: String
+    public let title: String
+    public let coverImageName: String
+    public let category: String
+    public let duration: String
+    public let timeAgo: String
+    public let location: String?
+    public let description: String
+    public let exercises: [ExerciseItem]
+    public var likesCount: Int
+    public var commentsCount: Int
+    public var isLiked: Bool
+    public let kind: FeedPostKind
+    public let isFromJoinedCommunity: Bool
     
-    init(
+    public init(
         id: UUID = UUID(),
         authorName: String,
         authorAvatar: String,
@@ -58,16 +57,16 @@ struct FeedPost: Identifiable, Hashable {
         self.isFromJoinedCommunity = isFromJoinedCommunity
     }
     
-    static func == (lhs: FeedPost, rhs: FeedPost) -> Bool {
+    public static func == (lhs: FeedPost, rhs: FeedPost) -> Bool {
         lhs.id == rhs.id
     }
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 }
 
-enum FeedPostKind: Hashable {
+public enum FeedPostKind: Hashable {
     case personal
     case friend
     case group

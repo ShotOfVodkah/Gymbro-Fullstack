@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroTypes
 
 struct ChatTextMessageBubbleView: View {
     

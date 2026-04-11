@@ -1,5 +1,6 @@
 import SwiftUI
 import GymbroCommonUI
+import GymbroTypes
 
 struct PersonDetailsSheet: View {
     

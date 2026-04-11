@@ -1,18 +1,18 @@
 import Foundation
 
-struct PersonItem: Identifiable, Hashable {
-    let id: UUID
-    let name: String
-    let username: String
-    let status: String
-    let subtitle: String
-    let avatarSystemName: String
-    let isFollowing: Bool
-    let isCurrentFriend: Bool
-    let badge: String?
-    let workoutsThisMonth: Int
+public struct PersonItem: Identifiable, Hashable {
+    public let id: UUID
+    public let name: String
+    public let username: String
+    public let status: String
+    public let subtitle: String
+    public let avatarSystemName: String
+    public let isFollowing: Bool
+    public let isCurrentFriend: Bool
+    public let badge: String?
+    public let workoutsThisMonth: Int
     
-    init(
+    public init(
         id: UUID = UUID(),
         name: String,
         username: String,
@@ -36,7 +36,7 @@ struct PersonItem: Identifiable, Hashable {
         self.workoutsThisMonth = workoutsThisMonth
     }
     
-    func toggledFollow() -> PersonItem {
+    public func toggledFollow() -> PersonItem {
         PersonItem(
             id: id,
             name: name,

@@ -1,14 +1,14 @@
 import Foundation
 
-struct FeedCommunity: Identifiable, Hashable {
-    let id: UUID
-    let title: String
-    let icon: String
-    let isSystemImage: Bool
-    let kind: FeedCommunityKind
-    let participants: [PersonItem]
+public struct FeedCommunity: Identifiable, Hashable {
+    public let id: UUID
+    public let title: String
+    public let icon: String
+    public let isSystemImage: Bool
+    public let kind: FeedCommunityKind
+    public let participants: [PersonItem]
 
-    init(
+    public init(
         id: UUID = UUID(),
         title: String,
         icon: String,
@@ -25,7 +25,7 @@ struct FeedCommunity: Identifiable, Hashable {
     }
 }
 
-enum FeedCommunityKind: Hashable {
+public enum FeedCommunityKind: Hashable {
     case directPerson
     case joinedGroup
 }

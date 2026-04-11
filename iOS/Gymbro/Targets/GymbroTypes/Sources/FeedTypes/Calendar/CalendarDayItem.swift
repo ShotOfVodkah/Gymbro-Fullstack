@@ -1,21 +1,21 @@
 import Foundation
 
-struct CalendarDayItem: Identifiable, Hashable {
-    let id: UUID
-    let date: Date
-    let dayNumber: Int
-    let isInCurrentMonth: Bool
+public struct CalendarDayItem: Identifiable, Hashable {
+    public let id: UUID
+    public let date: Date
+    public let dayNumber: Int
+    public let isInCurrentMonth: Bool
     
-    let hasMyWorkout: Bool
-    let myWorkoutID: String?
+    public let hasMyWorkout: Bool
+    public let myWorkoutID: String?
     
-    let hasPartnerWorkout: Bool
-    let partnerWorkoutID: String?
+    public let hasPartnerWorkout: Bool
+    public let partnerWorkoutID: String?
     
-    let isToday: Bool
-    let isSelected: Bool
+    public let isToday: Bool
+    public let isSelected: Bool
     
-    init(
+    public init(
         id: UUID = UUID(),
         date: Date,
         dayNumber: Int,
