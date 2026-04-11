@@ -32,6 +32,7 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroFeeds"),
         .target(name: "GymbroAuth"),
         .target(name: "GymbroProfile"),
+        .target(name: "GymbroAnalytics"),
         .target(name: "GymBroWatch")
     ],
     settings: baseSettings()
@@ -201,6 +202,25 @@ let profileTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let analyticsTarget: ProjectDescription.Target = .target(
+    name: "GymbroAnalytics",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).analytics",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroAnalytics/Sources/**"],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
 // watchOS
 
 let watchOSTarget: ProjectDescription.Target = .target(
@@ -235,6 +255,7 @@ let project = Project(
         feedsTarget,
         authTarget,
         profileTarget,
+        analyticsTarget,
         watchOSTarget
     ]
 )

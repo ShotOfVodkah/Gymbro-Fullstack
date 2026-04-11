@@ -20,13 +20,17 @@ final class FeedsPeopleViewModel: ObservableObject {
     @Published var selectedPerson: PersonItem?
     
     private let router: any Router
-    
-    init(router: any Router) {
+    private let analytics: any AnalyticsService
+
+    init(router: any Router, analytics: any AnalyticsService) {
         self.router = router
+        self.analytics = analytics
         loadMockData()
+        analytics.track(.screenViewed(screen: .feedsPeople))
     }
     
     func reload() {
+        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsPeople.rawValue))
         loadMockData()
     }
     
@@ -37,6 +41,7 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     func didSelectTab(_ tab: PeopleTab) {
+        analytics.track(.peopleSegmentSelected(segment: tab.rawValue))
         withAnimation(.easeInOut(duration: 0.25)) {
             selectedTab = tab
         }
@@ -59,6 +64,7 @@ final class FeedsPeopleViewModel: ObservableObject {
     
     func didTapPerson(_ person: PersonItem) {
         selectedPerson = person
+        analytics.track(.peoplePersonOpened(personId: person.id.uuidString))
     }
     
     func dismissPersonSheet() {
@@ -69,12 +75,14 @@ final class FeedsPeopleViewModel: ObservableObject {
         if let index = friends.firstIndex(where: { $0.id == personID }) {
             friends[index] = friends[index].toggledFollow()
             syncSelectedPerson(id: personID)
+            analytics.track(.peopleFollowToggled(personId: personID.uuidString, isFollowing: friends[index].isFollowing))
             return
         }
         
         if let index = discoverPeople.firstIndex(where: { $0.id == personID }) {
             discoverPeople[index] = discoverPeople[index].toggledFollow()
             syncSelectedPerson(id: personID)
+            analytics.track(.peopleFollowToggled(personId: personID.uuidString, isFollowing: discoverPeople[index].isFollowing))
         }
     }
     
@@ -87,11 +95,13 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     func didTapViewProfile(for person: PersonItem) {
+        analytics.track(.peopleProfileOpened(personId: person.id.uuidString))
         selectedPerson = nil
         router.navigate(to: .feedsProfile(title: person.name))
     }
     
     func didTapViewMessage(for person: PersonItem) {
+        analytics.track(.peopleMessageOpened(personId: person.id.uuidString))
         selectedPerson = nil
         let input = ChatSessionInput(
             title: person.name,

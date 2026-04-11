@@ -29,11 +29,13 @@ final class WorkoutsListViewModel: ObservableObject {
     init(
         service: any WorkoutsListService,
         router: any Router,
-        modelModifier: WorkoutsModelModifier
+        modelModifier: WorkoutsModelModifier,
+        analytics: any AnalyticsService
     ) {
         self.service = service
         self.router = router
         self.modelModifier = modelModifier
+        self.analytics = analytics
 
         let handler = WorkoutsDivUrlHandler { [weak self] link in
             self?.handle(link: link)
@@ -54,10 +56,16 @@ final class WorkoutsListViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        analytics.track(.screenViewed(screen: .workoutList))
         fetchData()
     }
 
     // MARK: - Actions
+
+    func reload() {
+        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.workoutList.rawValue))
+        fetchData()
+    }
 
     func fetchData() {
         Task {
@@ -68,12 +76,16 @@ final class WorkoutsListViewModel: ObservableObject {
                 sourceDebugId += 1
                 screenState = state
             } catch {
+                analytics.track(.errorOccurred(screen: AnalyticsScreen.workoutList.rawValue, message: error.localizedDescription))
                 screenState = .error
             }
         }
     }
 
     func handleAdd(id: String, fromPremade: Bool) {
+        if fromPremade {
+            analytics.track(.workoutPremadeAdded(workoutId: id, workoutName: ""))
+        }
         Task {
             do {
                 let (data, state) = try await service.fetchAfterAction()
@@ -128,6 +140,7 @@ final class WorkoutsListViewModel: ObservableObject {
     private let service: any WorkoutsListService
     private let modelModifier: WorkoutsModelModifier
     private let router: any Router
+    private let analytics: any AnalyticsService
 
     private func handle(link: WorkoutsNavigationLink) {
         switch link {

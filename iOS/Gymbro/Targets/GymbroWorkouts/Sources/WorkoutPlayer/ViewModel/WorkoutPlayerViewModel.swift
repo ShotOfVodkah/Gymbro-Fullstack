@@ -12,12 +12,14 @@ final class WorkoutPlayerViewModel: ObservableObject {
         id: String,
         router: any Router,
         modelModifier: WorkoutsModelModifier,
-        service: any WorkoutPlayerService
+        service: any WorkoutPlayerService,
+        analytics: any AnalyticsService
     ) {
         self.workoutId = id
         self.router = router
         self.service = service
         self.modelModifier = modelModifier
+        self.analytics = analytics
         
         modelModifier.events
             .sink { [weak self] event in
@@ -30,6 +32,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        analytics.track(.screenViewed(screen: .workoutPlayer))
         Task { await loadWorkout() }
     }
 
@@ -49,6 +52,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
                 break
             }
         } catch {
+            analytics.track(.errorOccurred(screen: AnalyticsScreen.workoutPlayer.rawValue, message: error.localizedDescription))
             screenState = .error
         }
     }
@@ -71,6 +75,8 @@ final class WorkoutPlayerViewModel: ObservableObject {
         let id = workoutId
         let name = workoutName
         let type = workoutType
+        let exerciseCount = exercises.count
+        let startTime = workoutStartTime
         Task {
             await service.submitSession(
                 workoutId: id,
@@ -79,6 +85,12 @@ final class WorkoutPlayerViewModel: ObservableObject {
                 exercises: exercises,
                 weightUpdates: weightUpdates
             )
+            let durationSeconds = Int(Date().timeIntervalSince(startTime))
+            analytics.track(.workoutCompleted(
+                workoutId: id,
+                durationSeconds: durationSeconds,
+                exerciseCount: exerciseCount
+            ))
             isSubmitting = false
             showFinishPopup = false
             modelModifier.events.send(.workoutEdited(id: id))
@@ -138,8 +150,10 @@ final class WorkoutPlayerViewModel: ObservableObject {
     private(set) var weightUpdates: [String: Double] = [:]
 
     let workoutId: String
+    private let workoutStartTime = Date()
     private let router: any Router
     private let service: any WorkoutPlayerService
     private let modelModifier: WorkoutsModelModifier
+    private let analytics: any AnalyticsService
     private var cancellables = Set<AnyCancellable>()
 }

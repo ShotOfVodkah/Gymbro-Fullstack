@@ -12,7 +12,11 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     @Published var screenState: ScreenState = .loading
-    @Published var selectedTab: FeedTab = .forYou
+    @Published var selectedTab: FeedTab = .forYou {
+        didSet {
+            analytics.track(.feedsTabSelected(tab: selectedTab.rawValue))
+        }
+    }
     @Published var communities: [FeedCommunity] = []
     @Published var posts: [FeedPost] = []
     @Published var isShowingChatCreation: Bool = false
@@ -23,13 +27,17 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var chatCreationPeople: [PersonItem] = []
     
     private let router: any Router
-    
-    init(router: any Router) {
+    private let analytics: any AnalyticsService
+
+    init(router: any Router, analytics: any AnalyticsService) {
         self.router = router
+        self.analytics = analytics
         loadMockData()
+        analytics.track(.screenViewed(screen: .feedsMain))
     }
     
     func reload() {
+        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsMain.rawValue))
         loadMockData()
     }
     
@@ -42,6 +50,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     func didTapAuthor(_ post: FeedPost) {
+        analytics.track(.feedsPostAuthorTapped(postId: post.id.uuidString))
         router.navigate(to: .feedsProfile(title: post.authorName))
     }
     
@@ -116,12 +125,14 @@ final class FeedsMainTabViewModel: ObservableObject {
         chatCreationStep = .chooseType
         chatCreationPeople = FeedsPeopleMockData.friends + FeedsPeopleMockData.discover
         isShowingChatCreation = true
+        analytics.track(.feedsChatCreationOpened)
     }
     
     func dismissChatCreation() {
         isShowingChatCreation = false
         resetChatCreationDraft()
         chatCreationStep = .chooseType
+        analytics.track(.feedsChatCreationDismissed)
     }
     
     func resetChatCreationState() {
@@ -136,6 +147,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         directChatSearchText = ""
         loadChatCreationPeopleIfNeeded()
         chatCreationStep = .chooseDirectPerson
+        analytics.track(.feedsChatTypeSelected(type: "direct"))
     }
 
     func didChooseGroupChat() {
@@ -143,6 +155,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         groupChatSearchText = ""
         loadChatCreationPeopleIfNeeded()
         chatCreationStep = .createGroup
+        analytics.track(.feedsChatTypeSelected(type: "group"))
     }
     
     func goBackInChatCreationFlow() {
@@ -174,6 +187,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func didSelectDirectPerson(_ person: PersonItem) {
         chatCreationDraft.selectedDirectPerson = person
+        analytics.track(.feedsDirectChatPersonSelected(personId: person.id.uuidString))
         openChat(title: person.name, participants: [person])
     }
     
@@ -183,6 +197,10 @@ final class FeedsMainTabViewModel: ObservableObject {
         } else {
             chatCreationDraft.selectedGroupMembers.append(person)
         }
+        analytics.track(.feedsGroupMemberToggled(
+            personId: person.id.uuidString,
+            selectedCount: chatCreationDraft.selectedGroupMembers.count
+        ))
     }
     
     func updateGroupName(_ name: String) {
@@ -198,6 +216,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func createGroupChat() {
         guard canCreateGroupChat else { return }
+        analytics.track(.feedsGroupChatCreated(memberCount: chatCreationDraft.selectedGroupMembers.count))
         openChat(
             title: chatCreationDraft.groupName,
             participants: chatCreationDraft.selectedGroupMembers
@@ -210,6 +229,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
 
     func didTapCommunity(_ community: FeedCommunity) {
+        analytics.track(.feedsCommunityOpened(communityId: community.id.uuidString))
         switch community.kind {
         case .directPerson:
             guard let person = community.participants.first else { return }
@@ -221,6 +241,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
 
     func didTapComments(for post: FeedPost) {
+        analytics.track(.feedsPostCommentTapped(postId: post.id.uuidString))
         print("open comments")
 //        router.navigate(to: .feedsComments(title: post.title))
     }
@@ -233,6 +254,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         guard let index = posts.firstIndex(where: { $0.id == postID }) else { return }
         posts[index].isLiked.toggle()
         posts[index].likesCount += posts[index].isLiked ? 1 : -1
+        analytics.track(.feedsPostLiked(postId: postID.uuidString, isLiked: posts[index].isLiked))
     }
     
     private func loadMockData() {

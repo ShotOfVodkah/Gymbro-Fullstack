@@ -12,12 +12,13 @@ public final class FeedsChatFactoryImpl {
     @MainActor
     public func makeView(
         input: ChatSessionInput,
-        router: any Router
+        router: any Router,
+        analytics: any AnalyticsService
     ) -> some View {
         if let cached = viewModelCache[input] {
             return ChatView(viewModel: cached)
         } else {
-            let viewModel = ChatViewModel(input: input, router: router)
+            let viewModel = ChatViewModel(input: input, router: router, analytics: analytics)
             viewModelCache[input] = viewModel
             return ChatView(viewModel: viewModel)
         }
