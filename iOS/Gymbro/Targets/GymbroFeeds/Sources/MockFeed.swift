@@ -1,4 +1,5 @@
 import Foundation
+import GymbroTypes
 
 enum FeedsMockData {
     
@@ -92,9 +93,27 @@ enum FeedsMockData {
             location: "Gorky Park, Moscow",
             description: "Great run today! The weather was perfect and the pace felt really smooth.",
             exercises: [
-                FeedExercise(title: "Warm-up Walk", subtitle: "5 min", imageName: "figure.walk"),
-                FeedExercise(title: "Light Jog", subtitle: "30 min", imageName: "figure.run"),
-                FeedExercise(title: "Cool-down Walk", subtitle: "10 min", imageName: "figure.walk")
+                .cardio(CardioExercise(
+                    id: "alex_run_1",
+                    name: "Warm-up Walk",
+                    muscleGroup: .legs,
+                    durationMinutes: 5,
+                    pace: .walk
+                )),
+                .cardio(CardioExercise(
+                    id: "alex_run_2",
+                    name: "Light Jog",
+                    muscleGroup: .legs,
+                    durationMinutes: 30,
+                    pace: .jog
+                )),
+                .cardio(CardioExercise(
+                    id: "alex_run_3",
+                    name: "Cool-down Walk",
+                    muscleGroup: .legs,
+                    durationMinutes: 10,
+                    pace: .walk
+                ))
             ],
             likesCount: 24,
             commentsCount: 5,
@@ -115,8 +134,20 @@ enum FeedsMockData {
             location: nil,
             description: "Did a short recovery session today focusing on stretching, breathing, and lower back mobility.",
             exercises: [
-                FeedExercise(title: "Breathing Warm-up", subtitle: "5 min", imageName: "lungs.fill"),
-                FeedExercise(title: "Back Stretch Flow", subtitle: "15 min", imageName: "figure.cooldown")
+                .yoga(YogaExercise(
+                    id: "maria_yoga_1",
+                    name: "Breathing Warm-up",
+                    muscleGroup: .core,
+                    holdSeconds: 60,
+                    breathCount: 5
+                )),
+                .yoga(YogaExercise(
+                    id: "maria_yoga_2",
+                    name: "Back Stretch Flow",
+                    muscleGroup: .back,
+                    holdSeconds: 180,
+                    breathCount: 15
+                ))
             ],
             likesCount: 18,
             commentsCount: 3,
@@ -137,10 +168,35 @@ enum FeedsMockData {
             location: "GymBro Studio",
             description: "Focused on slower tempo and cleaner bench press mechanics today.",
             exercises: [
-                FeedExercise(title: "Band Warm-up", subtitle: "7 min", imageName: "figure.strengthtraining.functional"),
-                FeedExercise(title: "Bench Press", subtitle: "4 x 8", imageName: "dumbbell.fill"),
-                FeedExercise(title: "Incline Dumbbell Press", subtitle: "3 x 10", imageName: "dumbbell"),
-                FeedExercise(title: "Cable Fly", subtitle: "3 x 12", imageName: "bolt.heart")
+                .fallback(DefaultExercise(
+                    id: "coach_upper_1",
+                    name: "Band Warm-up",
+                    muscleGroup: .shoulders
+                )),
+                .strength(StrengthExercise(
+                    id: "coach_upper_2",
+                    name: "Bench Press",
+                    muscleGroup: .chest,
+                    sets: 4,
+                    reps: 8,
+                    weightKg: 70
+                )),
+                .strength(StrengthExercise(
+                    id: "coach_upper_3",
+                    name: "Incline Dumbbell Press",
+                    muscleGroup: .chest,
+                    sets: 3,
+                    reps: 10,
+                    weightKg: 24
+                )),
+                .strength(StrengthExercise(
+                    id: "coach_upper_4",
+                    name: "Cable Fly",
+                    muscleGroup: .chest,
+                    sets: 3,
+                    reps: 12,
+                    weightKg: 18
+                ))
             ],
             likesCount: 31,
             commentsCount: 8,
@@ -161,9 +217,23 @@ enum FeedsMockData {
             location: nil,
             description: "Low-intensity walk plus short core work. Perfect reset day.",
             exercises: [
-                FeedExercise(title: "Brisk Walk", subtitle: "15 min", imageName: "figure.walk"),
-                FeedExercise(title: "Dead Bug", subtitle: "3 x 12", imageName: "figure.core.training"),
-                FeedExercise(title: "Plank Hold", subtitle: "3 x 40 sec", imageName: "figure.strengthtraining.functional")
+                .cardio(CardioExercise(
+                    id: "lena_reset_1",
+                    name: "Brisk Walk",
+                    muscleGroup: .legs,
+                    durationMinutes: 15,
+                    pace: .walk
+                )),
+                .fallback(DefaultExercise(
+                    id: "lena_reset_2",
+                    name: "Dead Bug",
+                    muscleGroup: .core
+                )),
+                .fallback(DefaultExercise(
+                    id: "lena_reset_3",
+                    name: "Plank Hold",
+                    muscleGroup: .core
+                ))
             ],
             likesCount: 14,
             commentsCount: 2,
@@ -186,10 +256,32 @@ enum FeedsMockData {
             location: "GymBro Arena",
             description: "Strong group session today. Everyone finished the full push block together.",
             exercises: [
-                FeedExercise(title: "Dynamic Warm-up", subtitle: "8 min", imageName: "figure.strengthtraining.functional"),
-                FeedExercise(title: "Bench Press", subtitle: "5 x 5", imageName: "dumbbell.fill"),
-                FeedExercise(title: "Shoulder Press", subtitle: "4 x 8", imageName: "figure.strengthtraining.traditional"),
-                FeedExercise(title: "Triceps Burnout", subtitle: "3 rounds", imageName: "flame.fill")
+                .fallback(DefaultExercise(
+                    id: "gymsquad_push_1",
+                    name: "Dynamic Warm-up",
+                    muscleGroup: .fullBody
+                )),
+                .strength(StrengthExercise(
+                    id: "gymsquad_push_2",
+                    name: "Bench Press",
+                    muscleGroup: .chest,
+                    sets: 5,
+                    reps: 5,
+                    weightKg: 75
+                )),
+                .strength(StrengthExercise(
+                    id: "gymsquad_push_3",
+                    name: "Shoulder Press",
+                    muscleGroup: .shoulders,
+                    sets: 4,
+                    reps: 8,
+                    weightKg: 40
+                )),
+                .fallback(DefaultExercise(
+                    id: "gymsquad_push_4",
+                    name: "Triceps Burnout",
+                    muscleGroup: .triceps
+                ))
             ],
             likesCount: 42,
             commentsCount: 11,
@@ -210,9 +302,27 @@ enum FeedsMockData {
             location: "River Track",
             description: "Interval session with the club. Fast repeats, short recovery, great energy.",
             exercises: [
-                FeedExercise(title: "Warm-up Jog", subtitle: "10 min", imageName: "figure.run"),
-                FeedExercise(title: "6 x 400m Intervals", subtitle: "Main set", imageName: "speedometer"),
-                FeedExercise(title: "Cooldown Walk", subtitle: "8 min", imageName: "figure.walk")
+                .cardio(CardioExercise(
+                    id: "runclub_1",
+                    name: "Warm-up Jog",
+                    muscleGroup: .legs,
+                    durationMinutes: 10,
+                    pace: .jog
+                )),
+                .cardio(CardioExercise(
+                    id: "runclub_2",
+                    name: "6 x 400m Intervals",
+                    muscleGroup: .legs,
+                    durationMinutes: 32,
+                    pace: .run
+                )),
+                .cardio(CardioExercise(
+                    id: "runclub_3",
+                    name: "Cooldown Walk",
+                    muscleGroup: .legs,
+                    durationMinutes: 8,
+                    pace: .walk
+                ))
             ],
             likesCount: 27,
             commentsCount: 6,
@@ -233,9 +343,27 @@ enum FeedsMockData {
             location: nil,
             description: "Short group flow focused on hips, hamstrings, and posture after desk work.",
             exercises: [
-                FeedExercise(title: "Hip Openers", subtitle: "6 min", imageName: "figure.flexibility"),
-                FeedExercise(title: "Hamstring Stretch", subtitle: "6 min", imageName: "figure.cooldown"),
-                FeedExercise(title: "Spine Rotation", subtitle: "8 min", imageName: "arrow.triangle.2.circlepath")
+                .yoga(YogaExercise(
+                    id: "mobility_1",
+                    name: "Hip Openers",
+                    muscleGroup: .glutes,
+                    holdSeconds: 120,
+                    breathCount: 8
+                )),
+                .yoga(YogaExercise(
+                    id: "mobility_2",
+                    name: "Hamstring Stretch",
+                    muscleGroup: .legs,
+                    holdSeconds: 120,
+                    breathCount: 8
+                )),
+                .yoga(YogaExercise(
+                    id: "mobility_3",
+                    name: "Spine Rotation",
+                    muscleGroup: .back,
+                    holdSeconds: 150,
+                    breathCount: 10
+                ))
             ],
             likesCount: 19,
             commentsCount: 4,
@@ -256,9 +384,27 @@ enum FeedsMockData {
             location: "Uetliberg Trail",
             description: "Steep climbs, amazing weather, and one very dramatic group photo at the top.",
             exercises: [
-                FeedExercise(title: "Climb Section", subtitle: "45 min", imageName: "figure.hiking"),
-                FeedExercise(title: "Pace Walk", subtitle: "35 min", imageName: "figure.walk"),
-                FeedExercise(title: "Descent Control", subtitle: "25 min", imageName: "figure.walk.motion")
+                .cardio(CardioExercise(
+                    id: "hike_1",
+                    name: "Climb Section",
+                    muscleGroup: .legs,
+                    durationMinutes: 45,
+                    pace: .run
+                )),
+                .cardio(CardioExercise(
+                    id: "hike_2",
+                    name: "Pace Walk",
+                    muscleGroup: .legs,
+                    durationMinutes: 35,
+                    pace: .walk
+                )),
+                .cardio(CardioExercise(
+                    id: "hike_3",
+                    name: "Descent Control",
+                    muscleGroup: .legs,
+                    durationMinutes: 25,
+                    pace: .recovery
+                ))
             ],
             likesCount: 35,
             commentsCount: 9,
@@ -281,10 +427,37 @@ enum FeedsMockData {
             location: "GymBro Club",
             description: "Hit a new personal best on squats today. Felt stable, strong, and finally confident at the bottom.",
             exercises: [
-                FeedExercise(title: "Cycling Warm-up", subtitle: "8 min", imageName: "bicycle"),
-                FeedExercise(title: "Barbell Squat", subtitle: "5 x 5", imageName: "dumbbell.fill"),
-                FeedExercise(title: "Romanian Deadlift", subtitle: "4 x 8", imageName: "figure.strengthtraining.traditional"),
-                FeedExercise(title: "Walking Lunges", subtitle: "3 x 12", imageName: "figure.walk")
+                .cardio(CardioExercise(
+                    id: "me_legs_1",
+                    name: "Cycling Warm-up",
+                    muscleGroup: .legs,
+                    durationMinutes: 8,
+                    pace: .recovery
+                )),
+                .strength(StrengthExercise(
+                    id: "me_legs_2",
+                    name: "Barbell Squat",
+                    muscleGroup: .legs,
+                    sets: 5,
+                    reps: 5,
+                    weightKg: 90
+                )),
+                .strength(StrengthExercise(
+                    id: "me_legs_3",
+                    name: "Romanian Deadlift",
+                    muscleGroup: .glutes,
+                    sets: 4,
+                    reps: 8,
+                    weightKg: 70
+                )),
+                .strength(StrengthExercise(
+                    id: "me_legs_4",
+                    name: "Walking Lunges",
+                    muscleGroup: .legs,
+                    sets: 3,
+                    reps: 12,
+                    weightKg: 18
+                ))
             ],
             likesCount: 52,
             commentsCount: 13,
@@ -305,9 +478,21 @@ enum FeedsMockData {
             location: nil,
             description: "Short and effective. Just enough to wake up the core without frying the whole body.",
             exercises: [
-                FeedExercise(title: "Dead Bug", subtitle: "3 x 12", imageName: "figure.core.training"),
-                FeedExercise(title: "Plank", subtitle: "3 x 45 sec", imageName: "figure.strengthtraining.functional"),
-                FeedExercise(title: "Toe Taps", subtitle: "3 x 20", imageName: "figure.mixed.cardio")
+                .fallback(DefaultExercise(
+                    id: "me_core_1",
+                    name: "Dead Bug",
+                    muscleGroup: .core
+                )),
+                .fallback(DefaultExercise(
+                    id: "me_core_2",
+                    name: "Plank",
+                    muscleGroup: .core
+                )),
+                .fallback(DefaultExercise(
+                    id: "me_core_3",
+                    name: "Toe Taps",
+                    muscleGroup: .core
+                ))
             ],
             likesCount: 16,
             commentsCount: 2,
@@ -328,8 +513,20 @@ enum FeedsMockData {
             location: "Home trainer",
             description: "Very light recovery ride just to get the legs moving and loosen up after strength training.",
             exercises: [
-                FeedExercise(title: "Easy Spin", subtitle: "25 min", imageName: "bicycle"),
-                FeedExercise(title: "Cadence Drill", subtitle: "10 min", imageName: "speedometer")
+                .cardio(CardioExercise(
+                    id: "me_cycle_1",
+                    name: "Easy Spin",
+                    muscleGroup: .legs,
+                    durationMinutes: 25,
+                    pace: .recovery
+                )),
+                .cardio(CardioExercise(
+                    id: "me_cycle_2",
+                    name: "Cadence Drill",
+                    muscleGroup: .legs,
+                    durationMinutes: 10,
+                    pace: .jog
+                ))
             ],
             likesCount: 11,
             commentsCount: 1,

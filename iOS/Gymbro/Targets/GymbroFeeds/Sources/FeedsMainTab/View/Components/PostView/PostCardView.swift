@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroTypes
 
 struct PostCardView: View {
     
@@ -7,7 +8,7 @@ struct PostCardView: View {
 //    let onTap: () -> Void
     let onLikeTap: () -> Void
     let onCommentTap: () -> Void
-    let onExerciseTap: (FeedExercise) -> Void
+    let onExerciseTap: (ExerciseItem) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {

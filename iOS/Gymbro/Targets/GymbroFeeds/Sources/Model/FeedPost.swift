@@ -1,4 +1,5 @@
 import Foundation
+import GymbroTypes
 
 struct FeedPost: Identifiable, Hashable {
     let id: UUID
@@ -12,13 +13,13 @@ struct FeedPost: Identifiable, Hashable {
     let timeAgo: String
     let location: String?
     let description: String
-    let exercises: [FeedExercise]
+    let exercises: [ExerciseItem]
     var likesCount: Int
     var commentsCount: Int
     var isLiked: Bool
     let kind: FeedPostKind
     let isFromJoinedCommunity: Bool
-
+    
     init(
         id: UUID = UUID(),
         authorName: String,
@@ -31,7 +32,7 @@ struct FeedPost: Identifiable, Hashable {
         timeAgo: String,
         location: String?,
         description: String,
-        exercises: [FeedExercise],
+        exercises: [ExerciseItem],
         likesCount: Int,
         commentsCount: Int,
         isLiked: Bool,
@@ -55,6 +56,14 @@ struct FeedPost: Identifiable, Hashable {
         self.isLiked = isLiked
         self.kind = kind
         self.isFromJoinedCommunity = isFromJoinedCommunity
+    }
+    
+    static func == (lhs: FeedPost, rhs: FeedPost) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

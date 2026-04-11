@@ -6,7 +6,12 @@ import GymbroNetwork
 public final class SessionManager: ObservableObject {
     
     public static let shared = SessionManager()
+    
     @Published public private(set) var isAuthenticated: Bool = false
+    
+    public var currentUserId: String? {
+        AppMicroservices.tokens.userId
+    }
     
     private init() {
         AuthEvents.onSessionExpired = { [weak self] in
@@ -18,6 +23,11 @@ public final class SessionManager: ObservableObject {
     private func restoreSession() {
         let hasRefresh = AppMicroservices.tokens.refreshToken != nil
         isAuthenticated = hasRefresh
+        
+        if AppMicroservices.tokens.userId == nil,
+           let accessToken = AppMicroservices.tokens.accessToken {
+            AppMicroservices.tokens.userId = JWTClaimsParser.userId(fromAccessToken: accessToken)
+        }
     }
     
     func setSession(tokens: TokenResponse) {

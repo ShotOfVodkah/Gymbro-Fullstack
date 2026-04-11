@@ -7,7 +7,7 @@ require (
 	github.com/lib/pq v1.11.2
 )
 
-require github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+require github.com/dgrijalva/jwt-go v3.2.0+incompatible
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -246,7 +246,7 @@ final class FeedsMainTabViewModel: ObservableObject {
 //        router.navigate(to: .feedsComments(title: post.title))
     }
 
-    func didTapExercise(_ exercise: FeedExercise) {
+    func didTapExercise(_ exercise: ExerciseItem) {
         print("workout info")
     }
 

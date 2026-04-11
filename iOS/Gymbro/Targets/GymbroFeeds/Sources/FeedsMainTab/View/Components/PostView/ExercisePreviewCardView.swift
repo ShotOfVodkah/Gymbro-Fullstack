@@ -1,8 +1,9 @@
 import SwiftUI
+import GymbroTypes
 
 struct ExercisePreviewCardView: View {
     
-    let exercise: FeedExercise
+    let exercise: ExerciseItem
     let index: Int
     let onTap: () -> Void
     
@@ -23,6 +24,11 @@ struct ExercisePreviewCardView: View {
                     Text(exercise.subtitle)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(.white.opacity(0.6))
+                    
+                    HStack(spacing: 6) {
+                        ExerciseMetaTagView(text: exercise.typeTitle, color: exercise.accentColor)
+                        ExerciseMetaTagView(text: exercise.muscleGroupTitle, color: exercise.accentColor)
+                    }
                 }
                 
                 Spacer()
