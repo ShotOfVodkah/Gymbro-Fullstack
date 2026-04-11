@@ -29,6 +29,15 @@ func NewSessionHandler(db *sqlx.DB) *sessionHandler {
 func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
+	if r.URL.Path == "/sessions/preview/batch" {
+		if r.Method == http.MethodPost {
+			h.GetSessionPreviewBatch(w, r)
+		} else {
+			notFound(w, r)
+		}
+		return
+	}
+
 	if m := reSessionByID.FindStringSubmatch(r.URL.Path); m != nil {
 		if r.Method == http.MethodGet {
 			h.GetSessionByID(w, r, m[1])
@@ -51,6 +60,31 @@ func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	notFound(w, r)
+}
+
+func (h *sessionHandler) GetSessionPreviewBatch(w http.ResponseWriter, r *http.Request) {
+	var req types.SessionPreviewBatchRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		badRequest(w, r)
+		return
+	}
+
+	if len(req.IDs) == 0 {
+		json.NewEncoder(w).Encode(types.SessionPreviewBatchResponse{
+			Items: []types.SessionPreviewItem{},
+		})
+		return
+	}
+
+	items, err := h.sessionStore.GetSessionPreviewsByIDs(req.IDs)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	json.NewEncoder(w).Encode(types.SessionPreviewBatchResponse{
+		Items: items,
+	})
 }
 
 func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, id string) {

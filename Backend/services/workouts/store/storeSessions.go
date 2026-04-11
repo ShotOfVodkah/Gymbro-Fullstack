@@ -19,12 +19,12 @@ func NewSessionStore(db *sqlx.DB) SessionStore {
 }
 
 type sessionRow struct {
-	ID          string     `db:"id"`
-	UserID      string     `db:"user_id"`
-	WorkoutID   *string    `db:"workout_id"`
-	WorkoutName string     `db:"workout_name"`
-	WorkoutType string     `db:"workout_type"`
-	CompletedAt time.Time  `db:"completed_at"`
+	ID          string    `db:"id"`
+	UserID      string    `db:"user_id"`
+	WorkoutID   *string   `db:"workout_id"`
+	WorkoutName string    `db:"workout_name"`
+	WorkoutType string    `db:"workout_type"`
+	CompletedAt time.Time `db:"completed_at"`
 }
 
 type sessionExerciseRow struct {
@@ -39,6 +39,30 @@ type sessionExerciseRow struct {
 	Pace            *string  `db:"pace"`
 	HoldSeconds     *int     `db:"hold_seconds"`
 	BreathCount     *int     `db:"breath_count"`
+}
+
+type sessionPreviewRow struct {
+	ID              string `db:"id"`
+	Title           string `db:"title"`
+	Category        string `db:"category"`
+	DurationMinutes int    `db:"duration_minutes"`
+	ExerciseCount   int    `db:"exercise_count"`
+}
+
+type sessionPreviewExerciseRow struct {
+	SessionID        string   `db:"session_id"`
+	ExerciseID       *string  `db:"exercise_id"`
+	ExerciseName     string   `db:"exercise_name"`
+	ExerciseType     string   `db:"exercise_type"`
+	MuscleGroup      string   `db:"muscle_group"`
+	Position         int      `db:"position"`
+	Sets             *int     `db:"sets"`
+	Reps             *int     `db:"reps"`
+	WeightKg         *float64 `db:"weight_kg"`
+	DurationMinutes  *int     `db:"duration_minutes"`
+	Pace             *string  `db:"pace"`
+	HoldSeconds      *int     `db:"hold_seconds"`
+	BreathCount      *int     `db:"breath_count"`
 }
 
 func rowToSession(row sessionRow, exercises []types.SessionExercise) types.WorkoutSession {
@@ -198,4 +222,102 @@ func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
 	}
 
 	return tx.Commit()
+}
+
+func (ss *SessionStore) GetSessionPreviewsByIDs(ids []string) ([]types.SessionPreviewItem, error) {
+	if len(ids) == 0 {
+		return []types.SessionPreviewItem{}, nil
+	}
+
+	query, args, err := sqlx.In(`
+		SELECT
+			ws.id,
+			ws.workout_name AS title,
+			ws.workout_type AS category,
+			COALESCE(SUM(COALESCE(se.duration_minutes, 0)), 0) AS duration_minutes,
+			COUNT(se.id) AS exercise_count
+		FROM workout_sessions ws
+		LEFT JOIN session_exercises se ON se.session_id = ws.id
+		WHERE ws.id IN (?)
+		GROUP BY ws.id, ws.workout_name, ws.workout_type
+	`, ids)
+	if err != nil {
+		return nil, fmt.Errorf("GetSessionPreviewsByIDs build main query: %w", err)
+	}
+	query = ss.db.Rebind(query)
+
+	var previewRows []sessionPreviewRow
+	if err := ss.db.Select(&previewRows, query, args...); err != nil {
+		return nil, fmt.Errorf("GetSessionPreviewsByIDs select previews: %w", err)
+	}
+
+	exQuery, exArgs, err := sqlx.In(`
+		SELECT
+			se.session_id,
+			se.exercise_id,
+			se.exercise_name,
+			se.exercise_type,
+			se.muscle_group,
+			se.position,
+			se.sets,
+			se.reps,
+			se.weight_kg,
+			se.duration_minutes,
+			se.pace,
+			se.hold_seconds,
+			se.breath_count
+		FROM session_exercises se
+		WHERE se.session_id IN (?)
+		ORDER BY se.session_id, se.position
+	`, ids)
+	if err != nil {
+		return nil, fmt.Errorf("GetSessionPreviewsByIDs build exercises query: %w", err)
+	}
+	exQuery = ss.db.Rebind(exQuery)
+
+	var exRows []sessionPreviewExerciseRow
+	if err := ss.db.Select(&exRows, exQuery, exArgs...); err != nil {
+		return nil, fmt.Errorf("GetSessionPreviewsByIDs select exercises: %w", err)
+	}
+
+	exMap := make(map[string][]types.SessionPreviewExercise)
+	for _, row := range exRows {
+		current := exMap[row.SessionID]
+		if len(current) >= 2 {
+			continue
+		}
+
+		exerciseID := ""
+		if row.ExerciseID != nil {
+			exerciseID = *row.ExerciseID
+		}
+
+		exMap[row.SessionID] = append(current, types.SessionPreviewExercise{
+			ID:              exerciseID,
+			Name:            row.ExerciseName,
+			Type:            row.ExerciseType,
+			MuscleGroup:     row.MuscleGroup,
+			Sets:            row.Sets,
+			Reps:            row.Reps,
+			WeightKg:        row.WeightKg,
+			DurationMinutes: row.DurationMinutes,
+			Pace:            row.Pace,
+			HoldSeconds:     row.HoldSeconds,
+			BreathCount:     row.BreathCount,
+		})
+	}
+
+	items := make([]types.SessionPreviewItem, 0, len(previewRows))
+	for _, row := range previewRows {
+		items = append(items, types.SessionPreviewItem{
+			ID:               row.ID,
+			Title:            row.Title,
+			Category:         row.Category,
+			DurationMinutes:  row.DurationMinutes,
+			ExerciseCount:    row.ExerciseCount,
+			ExercisesPreview: exMap[row.ID],
+		})
+	}
+
+	return items, nil
 }

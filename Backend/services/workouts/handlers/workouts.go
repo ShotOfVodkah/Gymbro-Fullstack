@@ -35,15 +35,6 @@ func NewWorkoutHandler(s store.WorkoutStorer) *workoutHandler {
 func (h *workoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	if r.URL.Path == "/internal/workouts/preview/batch" {
-		if r.Method == http.MethodPost {
-			h.GetWorkoutPreviewBatch(w, r)
-		} else {
-			notFound(w, r)
-		}
-		return
-	}
-
 	if r.URL.Path == "/workouts/copy-premade" {
 		if r.Method == http.MethodPost {
 			h.CopyPremadeWorkout(w, r)
@@ -289,29 +280,4 @@ func (h *workoutHandler) CopyPremadeWorkout(w http.ResponseWriter, r *http.Reque
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(workout)
-}
-
-func (h *workoutHandler) GetWorkoutPreviewBatch(w http.ResponseWriter, r *http.Request) {
-	var req types.WorkoutPreviewBatchRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		badRequest(w, r)
-		return
-	}
-
-	if len(req.IDs) == 0 {
-		json.NewEncoder(w).Encode(types.WorkoutPreviewBatchResponse{
-			Items: []types.WorkoutPreviewItem{},
-		})
-		return
-	}
-
-	items, err := h.workoutStore.GetWorkoutPreviewsByIDs(req.IDs)
-	if err != nil {
-		internalServerError(w, r)
-		return
-	}
-
-	json.NewEncoder(w).Encode(types.WorkoutPreviewBatchResponse{
-		Items: items,
-	})
 }

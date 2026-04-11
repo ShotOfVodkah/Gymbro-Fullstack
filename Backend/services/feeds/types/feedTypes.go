@@ -7,7 +7,7 @@ type FeedPostRow struct {
 	AuthorID              string    `db:"author_id"`
 	CommunityID           *string   `db:"community_id"`
 	CommunityTitle        *string   `db:"community_title"`
-	WorkoutID             *string   `db:"workout_id"`
+	SessionID             *string   `db:"session_id"`
 	Kind                  string    `db:"kind"`
 	Description           string    `db:"description"`
 	Location              *string   `db:"location"`
@@ -67,11 +67,11 @@ type FeedPostItemResponse struct {
 	IsFromJoinedCommunity bool                  `json:"is_from_joined_community"`
 }
 
-type WorkoutPreviewBatchRequest struct {
+type SessionPreviewBatchRequest struct {
 	IDs []string `json:"ids"`
 }
 
-type WorkoutPreviewExercise struct {
+type SessionPreviewExercise struct {
 	ID              string   `json:"id"`
 	Name            string   `json:"name"`
 	Type            string   `json:"type"`
@@ -85,15 +85,15 @@ type WorkoutPreviewExercise struct {
 	BreathCount     *int     `json:"breathCount,omitempty"`
 }
 
-type WorkoutPreviewItem struct {
+type SessionPreviewItem struct {
 	ID               string                   `json:"id"`
 	Title            string                   `json:"title"`
 	Category         string                   `json:"category"`
 	DurationMinutes  int                      `json:"duration_minutes"`
 	ExerciseCount    int                      `json:"exercise_count"`
-	ExercisesPreview []WorkoutPreviewExercise `json:"exercises_preview"`
+	ExercisesPreview []SessionPreviewExercise `json:"exercises_preview"`
 }
 
-type WorkoutPreviewBatchResponse struct {
-	Items []WorkoutPreviewItem `json:"items"`
+type SessionPreviewBatchResponse struct {
+	Items []SessionPreviewItem `json:"items"`
 }

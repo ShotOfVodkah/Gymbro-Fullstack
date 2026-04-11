@@ -22,7 +22,7 @@ func (fs *FeedStore) ListFeedPostsForUser(userID int) ([]types.FeedPostRow, erro
 			p.author_id,
 			p.community_id,
 			c.title AS community_title,
-			p.workout_id,
+			p.session_id,
 			p.kind,
 			p.description,
 			p.location,
@@ -33,7 +33,7 @@ func (fs *FeedStore) ListFeedPostsForUser(userID int) ([]types.FeedPostRow, erro
 				SELECT 1
 				FROM post_reactions pr2
 				WHERE pr2.post_id = p.id
-				AND pr2.user_id = $1
+				  AND pr2.user_id = $1
 			) AS is_liked,
 			CASE
 				WHEN p.community_id IS NOT NULL THEN true

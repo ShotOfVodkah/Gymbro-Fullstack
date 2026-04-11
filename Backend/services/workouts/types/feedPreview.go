@@ -1,6 +1,6 @@
 package types
 
-type WorkoutPreviewExercise struct {
+type SessionPreviewExercise struct {
 	ID              string   `json:"id"`
 	Name            string   `json:"name"`
 	Type            string   `json:"type"`
@@ -14,19 +14,19 @@ type WorkoutPreviewExercise struct {
 	BreathCount     *int     `json:"breathCount,omitempty"`
 }
 
-type WorkoutPreviewItem struct {
-	ID               string                   `json:"id"`
-	Title            string                   `json:"title"`
-	Category         string                   `json:"category"`
-	DurationMinutes  int                      `json:"duration_minutes"`
-	ExerciseCount    int                      `json:"exercise_count"`
-	ExercisesPreview []WorkoutPreviewExercise `json:"exercises_preview"`
+type SessionPreviewItem struct {
+	ID               string                  `json:"id"`
+	Title            string                  `json:"title"`
+	Category         string                  `json:"category"`
+	DurationMinutes  int                     `json:"duration_minutes"`
+	ExerciseCount    int                     `json:"exercise_count"`
+	ExercisesPreview []SessionPreviewExercise `json:"exercises_preview"`
 }
 
-type WorkoutPreviewBatchRequest struct {
+type SessionPreviewBatchRequest struct {
 	IDs []string `json:"ids"`
 }
 
-type WorkoutPreviewBatchResponse struct {
-	Items []WorkoutPreviewItem `json:"items"`
+type SessionPreviewBatchResponse struct {
+	Items []SessionPreviewItem `json:"items"`
 }

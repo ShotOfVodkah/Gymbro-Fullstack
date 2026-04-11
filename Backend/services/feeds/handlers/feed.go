@@ -44,11 +44,10 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workoutIDs := uniqueWorkoutIDs(rows)
-
-	workoutMap, err := h.workoutsClient.FetchWorkoutPreviews(r.Context(), workoutIDs)
+	sessionIDs := uniqueSessionIDs(rows)
+	sessionMap, err := h.workoutsClient.FetchSessionPreviews(r.Context(), sessionIDs)
 	if err != nil {
-		http.Error(w, "failed to fetch workout previews", http.StatusInternalServerError)
+		http.Error(w, "failed to fetch session previews", http.StatusInternalServerError)
 		return
 	}
 
@@ -83,15 +82,15 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if row.WorkoutID != nil {
-			if preview, ok := workoutMap[*row.WorkoutID]; ok {
+		if row.SessionID != nil {
+			if preview, ok := sessionMap[*row.SessionID]; ok {
 				item.Workout = &types.FeedWorkoutPreview{
 					ID:               preview.ID,
 					Title:            preview.Title,
 					Category:         preview.Category,
 					DurationMinutes:  preview.DurationMinutes,
 					ExerciseCount:    preview.ExerciseCount,
-					ExercisesPreview: mapWorkoutExercises(preview.ExercisesPreview),
+					ExercisesPreview: mapSessionExercises(preview.ExercisesPreview),
 				}
 			}
 		}
@@ -103,25 +102,25 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-func uniqueWorkoutIDs(rows []types.FeedPostRow) []string {
+func uniqueSessionIDs(rows []types.FeedPostRow) []string {
 	seen := make(map[string]struct{})
 	out := make([]string, 0)
 
 	for _, row := range rows {
-		if row.WorkoutID == nil || *row.WorkoutID == "" {
+		if row.SessionID == nil || *row.SessionID == "" {
 			continue
 		}
-		if _, ok := seen[*row.WorkoutID]; ok {
+		if _, ok := seen[*row.SessionID]; ok {
 			continue
 		}
-		seen[*row.WorkoutID] = struct{}{}
-		out = append(out, *row.WorkoutID)
+		seen[*row.SessionID] = struct{}{}
+		out = append(out, *row.SessionID)
 	}
 
 	return out
 }
 
-func mapWorkoutExercises(items []types.WorkoutPreviewExercise) []types.FeedWorkoutExercisePreview {
+func mapSessionExercises(items []types.SessionPreviewExercise) []types.FeedWorkoutExercisePreview {
 	result := make([]types.FeedWorkoutExercisePreview, 0, len(items))
 	for _, item := range items {
 		result = append(result, types.FeedWorkoutExercisePreview{
