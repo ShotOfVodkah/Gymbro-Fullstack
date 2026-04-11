@@ -1,5 +1,6 @@
 import Foundation
 import GymbroAuth
+import GymbroTypes
 
 @MainActor
 final class ProfileMainTabViewModel: ObservableObject {
@@ -12,9 +13,13 @@ final class ProfileMainTabViewModel: ObservableObject {
     
     @Published var screenState: ScreenState = .loading
     @Published var isLoggingOut: Bool = false
-    
-    public init() {
+
+    private let analytics: any AnalyticsService
+
+    public init(analytics: any AnalyticsService) {
+        self.analytics = analytics
         screenState = .loaded
+        analytics.track(.screenViewed(screen: .profile))
     }
     
     func logout() {
@@ -23,6 +28,7 @@ final class ProfileMainTabViewModel: ObservableObject {
         
         Task {
             await SessionManager.shared.logout()
+            analytics.track(.userLoggedOut)
             isLoggingOut = false
         }
     }

@@ -1,0 +1,71 @@
+import Foundation
+import GymbroTypes
+import GymbroNetwork
+
+public final class AnalyticsServiceImpl: AnalyticsService {
+    private let client: AnalyticsClient
+    private let sessionId: String
+    private let lock = NSLock()
+    private var _userId: String?
+    private var _buffer: [AnalyticsEventDTO] = []
+    private let bufferLimit = 20
+    private var flushTask: Task<Void, Never>?
+
+    public init(client: AnalyticsClient, userId: String? = nil) {
+        self.client = client
+        self.sessionId = UUID().uuidString
+        self._userId = userId
+        schedulePeriodicFlush()
+    }
+
+    public func setUserId(_ userId: String?) {
+        lock.withLock { _userId = userId }
+    }
+
+    public func track(_ event: AnalyticsEvent) {
+        let (sessionId, userId) = lock.withLock { (self.sessionId, self._userId) }
+        let dto = event.toDTO(sessionId: sessionId, userId: userId)
+        let shouldFlush = lock.withLock { () -> Bool in
+            _buffer.append(dto)
+            return _buffer.count >= bufferLimit
+        }
+        if shouldFlush {
+            flush()
+        }
+    }
+
+    public func flush() {
+        let batch = lock.withLock { () -> [AnalyticsEventDTO] in
+            guard !_buffer.isEmpty else { return [] }
+            let b = _buffer
+            _buffer = []
+            return b
+        }
+        guard !batch.isEmpty else { return }
+        Task {
+            await send(batch)
+        }
+    }
+
+    private func send(_ batch: [AnalyticsEventDTO]) async {
+        do {
+            try await client.sendBatch(batch)
+        } catch {
+            lock.withLock { _buffer.insert(contentsOf: batch, at: 0) }
+        }
+    }
+
+    private func schedulePeriodicFlush() {
+        flushTask?.cancel()
+        flushTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 30_000_000_000)
+                self?.flush()
+            }
+        }
+    }
+
+    deinit {
+        flushTask?.cancel()
+    }
+}

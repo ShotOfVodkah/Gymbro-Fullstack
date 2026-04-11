@@ -21,11 +21,14 @@ final class ChatViewModel: ObservableObject {
     
     let input: ChatSessionInput
     private let router: any Router
-    
-    init(input: ChatSessionInput, router: any Router) {
+    private let analytics: any AnalyticsService
+
+    init(input: ChatSessionInput, router: any Router, analytics: any AnalyticsService) {
         self.input = input
         self.router = router
+        self.analytics = analytics
         loadMockData()
+        analytics.track(.screenViewed(screen: .feedsChat))
     }
     
     var title: String {
@@ -50,6 +53,7 @@ final class ChatViewModel: ObservableObject {
     }
     
     func reload() {
+        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsChat.rawValue))
         loadMockData()
     }
     
@@ -63,6 +67,7 @@ final class ChatViewModel: ObservableObject {
             router.navigate(to: .feedsProfile(title: person.name))
         case .group:
             isShowingGroupInfo = true
+            analytics.track(.chatGroupInfoOpened)
         }
     }
     
@@ -93,6 +98,7 @@ final class ChatViewModel: ObservableObject {
     
     func didTapWorkoutMessage(_ message: ChatMessage) {
         guard case .workout(let workoutID, _, _, _, _) = message.kind else { return }
+        analytics.track(.chatWorkoutMessageTapped(workoutId: workoutID))
         print("workout info")
     }
     
@@ -103,6 +109,7 @@ final class ChatViewModel: ObservableObject {
     
     func addQuickReaction(_ emoji: String) {
         guard let message = selectedMessageForQuickReaction else { return }
+        analytics.track(.chatReactionAdded(emoji: emoji))
         toggleReaction(emoji, for: message.id)
         hideQuickReactionPicker()
     }
@@ -113,6 +120,7 @@ final class ChatViewModel: ObservableObject {
     }
     
     func toggleReaction(_ emoji: String, for messageID: UUID) {
+        analytics.track(.chatReactionToggled(emoji: emoji))
         guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
         
         var message = messages[index]
@@ -167,6 +175,7 @@ final class ChatViewModel: ObservableObject {
             )
         )
         
+        analytics.track(.chatMessageSent(isGroup: isGroup))
         draftText = ""
     }
     
@@ -174,12 +183,14 @@ final class ChatViewModel: ObservableObject {
         guard var groupInfo else { return }
         groupInfo.participants.append(contentsOf: people)
         self.groupInfo = groupInfo
+        analytics.track(.chatGroupPeopleAdded(count: people.count))
     }
     
     func removePersonFromGroup(_ personID: String) {
         guard var groupInfo else { return }
         groupInfo.participants.removeAll { $0.id == personID }
         self.groupInfo = groupInfo
+        analytics.track(.chatGroupParticipantRemoved)
     }
     
     func updateGroupInfo(title: String, description: String) {
@@ -187,9 +198,11 @@ final class ChatViewModel: ObservableObject {
         groupInfo.title = title
         groupInfo.description = description
         self.groupInfo = groupInfo
+        analytics.track(.chatGroupInfoSaved)
     }
     
     func deleteGroup() {
+        analytics.track(.chatGroupDeleted)
         router.pop()
     }
     

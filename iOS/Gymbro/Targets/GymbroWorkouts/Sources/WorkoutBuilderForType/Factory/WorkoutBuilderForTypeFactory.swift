@@ -3,6 +3,7 @@ import SwiftUI
 
 import GymbroNetwork
 import GymbroNavigation
+import GymbroTypes
 
 public final class WorkoutBuilderForTypeFactoryImpl {
 
@@ -19,7 +20,8 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         modelModifier: WorkoutsModelModifier,
         сlient: WorkoutsClient,
         type: String?,
-        workoutId: String?
+        workoutId: String?,
+        analytics: any AnalyticsService
     ) -> some View {
         guard let viewModelCache, typeCache == type, idCache == workoutId else {
             let service = WorkoutBuilderForTypeServiceImpl(
@@ -35,7 +37,8 @@ public final class WorkoutBuilderForTypeFactoryImpl {
                 router: router,
                 modelModifier: modelModifier,
                 type: type,
-                workoutId: workoutId
+                workoutId: workoutId,
+                analytics: analytics
             )
             viewModelCache = viewModel
             typeCache = type

@@ -3,6 +3,7 @@ import SwiftUI
 
 import GymbroNetwork
 import GymbroNavigation
+import GymbroTypes
 
 public final class FeedsMainTabFactoryImpl {
 
@@ -11,9 +12,9 @@ public final class FeedsMainTabFactoryImpl {
     public init() {}
 
     @MainActor
-    public func makeView(router: any Router) -> some View {
+    public func makeView(router: any Router, analytics: any AnalyticsService) -> some View {
         guard let viewModelCache else {
-            let viewModel = FeedsMainTabViewModel(router: router)
+            let viewModel = FeedsMainTabViewModel(router: router, analytics: analytics)
             self.viewModelCache = viewModel
             return FeedsMainTabView(viewModel: viewModel)
         }

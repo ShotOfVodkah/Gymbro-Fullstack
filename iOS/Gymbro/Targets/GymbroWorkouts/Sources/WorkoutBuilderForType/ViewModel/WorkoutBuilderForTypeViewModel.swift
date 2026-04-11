@@ -19,11 +19,13 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         router: any Router,
         modelModifier: WorkoutsModelModifier,
         type: String?,
-        workoutId: String?
+        workoutId: String?,
+        analytics: any AnalyticsService
     ) {
         self.service = service
         self.router = router
         self.modelModifier = modelModifier
+        self.analytics = analytics
 
         
 
@@ -65,6 +67,8 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+
+        analytics.track(.screenViewed(screen: .workoutBuilderForType))
     }
 
     // MARK: - Actions
@@ -82,6 +86,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
                 screenState = state
             } catch {
+                analytics.track(.errorOccurred(screen: AnalyticsScreen.workoutBuilderForType.rawValue, message: error.localizedDescription))
                 screenState = .error
             }
         }
@@ -111,6 +116,11 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
             switch screenMode {
             case .create:
                 await service.saveWorkout(workout)
+                analytics.track(.workoutCreated(
+                    workoutId: workoutId,
+                    exerciseCount: exercises.count,
+                    workoutType: workout.type.title
+                ))
                 modelModifier.events.send(.workoutAdded(id: workoutId))
                 router.popToRoot()
             case .edit:
@@ -141,6 +151,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
     private let service: any WorkoutBuilderForTypeService
     private let modelModifier: WorkoutsModelModifier
     private let router: any Router
+    private let analytics: any AnalyticsService
 
     private func handle(link: WorkoutBuilderForTypeNavigationLink) {
         switch link {

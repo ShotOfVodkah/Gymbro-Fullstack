@@ -6,6 +6,7 @@ import GymbroNavigation
 import GymbroNetwork
 import GymbroCommonUI
 import GymbroAuth
+import GymbroAnalytics
 
 @main
 struct GymbroApp: App {
@@ -75,7 +76,7 @@ struct GymbroApp: App {
                 .ignoresSafeArea(.container, edges: .bottom)
             }
             .fullScreenCover(isPresented: authBinding) {
-                AuthView()
+                AuthView(analytics: appServicesFactory.analytics)
             }
         }
         .modelContainer(modelContainer)

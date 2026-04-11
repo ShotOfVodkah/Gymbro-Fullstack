@@ -1,11 +1,14 @@
 import SwiftUI
 import GymbroCommonUI
+import GymbroTypes
 
 
 public struct AuthView: View {
-    @StateObject private var vm = AuthViewModel()
-    
-    public init() {}
+    @StateObject private var vm: AuthViewModel
+
+    public init(analytics: any AnalyticsService) {
+        _vm = StateObject(wrappedValue: AuthViewModel(analytics: analytics))
+    }
     
     public var body: some View {
         ZStack {

@@ -1,5 +1,6 @@
 import Foundation
 import GymbroNavigation
+import GymbroTypes
 
 @MainActor
 final class FeedsCalendarViewModel: ObservableObject {
@@ -21,15 +22,21 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     private let input: CalendarScreenInput
     private let router: any Router
+    private let analytics: any AnalyticsService
     private let calendar = Calendar.current
-    
-    init(input: CalendarScreenInput, router: any Router) {
+
+    init(input: CalendarScreenInput, router: any Router, analytics: any AnalyticsService) {
         self.input = input
         self.router = router
+        self.analytics = analytics
         loadMockData()
+        analytics.track(.screenViewed(screen: .feedsCalendar))
     }
     
-    func reload() { loadMockData() }
+    func reload() {
+        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
+        loadMockData()
+    }
     
     func didTapBack() {
         router.pop()
@@ -38,27 +45,32 @@ final class FeedsCalendarViewModel: ObservableObject {
     func didTapPreviousMonth() {
         guard let previous = Calendar.current.date(byAdding: .month, value: -1, to: currentMonthDate) else { return }
         currentMonthDate = previous
+        analytics.track(.calendarMonthChanged(direction: "prev"))
         rebuildCalendar()
     }
     
     func didTapNextMonth() {
         guard let next = Calendar.current.date(byAdding: .month, value: 1, to: currentMonthDate) else { return }
         currentMonthDate = next
+        analytics.track(.calendarMonthChanged(direction: "next"))
         rebuildCalendar()
     }
     
     func didSelectPerson(_ person: CalendarPerson) {
         selectedPerson = person
+        analytics.track(.calendarPersonSelected(personId: person.id))
         rebuildCalendar()
     }
     
     func openMyWorkoutFromSelectedDay() {
-        guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
+        guard selectedDayForActions?.myWorkoutID != nil else { return }
+        analytics.track(.calendarMyWorkoutOpened)
         print("workout info")
     }
 
     func openPartnerWorkoutFromSelectedDay() {
-        guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
+        guard selectedDayForActions?.partnerWorkoutID != nil else { return }
+        analytics.track(.calendarPartnerWorkoutOpened)
         print("workout info")
     }
 
@@ -69,7 +81,9 @@ final class FeedsCalendarViewModel: ObservableObject {
     func didTapDay(_ day: CalendarDayItem) {
         let hasMy = day.myWorkoutID != nil
         let hasPartner = day.partnerWorkoutID != nil
-        
+
+        analytics.track(.calendarDayTapped(hasMyWorkout: hasMy, hasPartnerWorkout: hasPartner))
+
         if hasMy && hasPartner {
             selectedDayForActions = day
             isShowingDayWorkoutChoices = true
@@ -77,11 +91,13 @@ final class FeedsCalendarViewModel: ObservableObject {
         }
         
         if let partnerWorkoutID = day.partnerWorkoutID {
+            analytics.track(.calendarPartnerWorkoutOpened)
             print("workout info")
             return
         }
         
         if let myWorkoutID = day.myWorkoutID {
+            analytics.track(.calendarMyWorkoutOpened)
             print("workout info")
         }
     }

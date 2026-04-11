@@ -1,6 +1,7 @@
 import SwiftUI
 import GymbroCommonUI
 import GymbroNetwork
+import GymbroTypes
 
 @MainActor
 final class AuthViewModel: ObservableObject {
@@ -17,6 +18,12 @@ final class AuthViewModel: ObservableObject {
     
     @Published var isAlertPresented: Bool = false
     @Published var alertData: CustomAlertData = .init()
+
+    private let analytics: any AnalyticsService
+
+    init(analytics: any AnalyticsService) {
+        self.analytics = analytics
+    }
     
     func openLegal(_ type: LegalDocType) {
         legalSheetType = type
@@ -81,7 +88,8 @@ final class AuthViewModel: ObservableObject {
         )
         
         SessionManager.shared.setSession(tokens: tokens)
-        
+        analytics.track(.userLoggedIn)
+
         print("saved access =", AppMicroservices.tokens.accessToken ?? "nil")
         print("saved refresh =", AppMicroservices.tokens.refreshToken ?? "nil")
     }
@@ -93,7 +101,8 @@ final class AuthViewModel: ObservableObject {
             role: role
         )
         print("created user =", user.email)
-        
+        analytics.track(.userRegistered)
+
         try await login(email: email, password: password)
     }
     

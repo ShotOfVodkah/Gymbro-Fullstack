@@ -3,6 +3,7 @@ import SwiftUI
 
 import GymbroNavigation
 import GymbroNetwork
+import GymbroTypes
 
 public final class WorkoutPlayerFactoryImpl {
 
@@ -15,7 +16,8 @@ public final class WorkoutPlayerFactoryImpl {
         modelModifier: WorkoutsModelModifier,
         workoutsRepository: WorkoutsCacheRepository,
         actionsRepository: OfflineActionsRepository,
-        client: WorkoutsClient
+        client: WorkoutsClient,
+        analytics: any AnalyticsService
     ) -> some View {
         guard let viewModelCache, id == idCache else {
             let service = WorkoutPlayerServiceImpl(
@@ -23,7 +25,13 @@ public final class WorkoutPlayerFactoryImpl {
                 workoutsRepository: workoutsRepository,
                 actionsRepository: actionsRepository
             )
-            let viewModel = WorkoutPlayerViewModel(id: id, router: router, modelModifier: modelModifier, service: service)
+            let viewModel = WorkoutPlayerViewModel(
+                id: id,
+                router: router,
+                modelModifier: modelModifier,
+                service: service,
+                analytics: analytics
+            )
             viewModelCache = viewModel
             idCache = id
             return WorkoutPlayerView(viewModel: viewModel)

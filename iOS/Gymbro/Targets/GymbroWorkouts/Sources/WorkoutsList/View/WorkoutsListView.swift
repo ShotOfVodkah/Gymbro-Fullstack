@@ -29,7 +29,7 @@ struct WorkoutsListView: View {
                         .font(.title3)
                         .foregroundStyle(Color.white)
                     AppButton("Refresh", size: .xl) {
-                        viewModel.fetchData()
+                        viewModel.reload()
                     }
                 }
                 .padding(.horizontal, 40)

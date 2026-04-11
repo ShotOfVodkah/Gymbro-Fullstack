@@ -3,6 +3,7 @@ import SwiftUI
 
 import GymbroNetwork
 import GymbroNavigation
+import GymbroTypes
 
 public final class WorkoutsListFactoryImpl {
 
@@ -16,7 +17,8 @@ public final class WorkoutsListFactoryImpl {
         exercisesRepository: ExercisesRepository,
         modelModifier: WorkoutsModelModifier,
         client: WorkoutsClient,
-        localMapper: WorkoutsLocalMapper
+        localMapper: WorkoutsLocalMapper,
+        analytics: any AnalyticsService
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutsListServiceImpl(
@@ -29,7 +31,8 @@ public final class WorkoutsListFactoryImpl {
             let viewModel = WorkoutsListViewModel(
                 service: service,
                 router: router,
-                modelModifier: modelModifier
+                modelModifier: modelModifier,
+                analytics: analytics
             )
             viewModelCache = viewModel
             return WorkoutsListView(viewModel: viewModel)

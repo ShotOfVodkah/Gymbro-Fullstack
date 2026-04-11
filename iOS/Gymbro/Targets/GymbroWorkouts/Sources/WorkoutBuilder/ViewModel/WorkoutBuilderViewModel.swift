@@ -12,11 +12,13 @@ final class WorkoutBuilderViewModel: ObservableObject {
     init(
         service: any WorkoutBuilderService,
         router: any Router,
-        modelModifier: WorkoutsModelModifier
+        modelModifier: WorkoutsModelModifier,
+        analytics: any AnalyticsService
     ) {
         self.service = service
         self.router = router
         self.modelModifier = modelModifier
+        self.analytics = analytics
 
         let handler = WorkoutBuilderTitleDivUrlHandler { [weak self] link in
             self?.handle(link: link)
@@ -33,6 +35,7 @@ final class WorkoutBuilderViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        analytics.track(.screenViewed(screen: .workoutBuilder))
         fetchData()
     }
 
@@ -46,6 +49,7 @@ final class WorkoutBuilderViewModel: ObservableObject {
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
                 screenState = state
             } catch {
+                analytics.track(.errorOccurred(screen: AnalyticsScreen.workoutBuilder.rawValue, message: error.localizedDescription))
                 screenState = .error
             }
         }
@@ -78,6 +82,7 @@ final class WorkoutBuilderViewModel: ObservableObject {
     private let service: any WorkoutBuilderService
     private let modelModifier: WorkoutsModelModifier
     private let router: any Router
+    private let analytics: any AnalyticsService
 
     private func handle(link: WorkoutBuilderTitleNavigationLink) {
         switch link {
