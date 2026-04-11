@@ -264,11 +264,14 @@ final class FeedsMainTabViewModel: ObservableObject {
         screenState = .loading
         
         do {
-            let response = try await AppMicroservices.feeds.fetchFeed()
-            posts = response.map(FeedPost.init(response:))
+            async let feedResponse = AppMicroservices.feeds.fetchFeed()
+            async let communitiesResponse = AppMicroservices.feeds.fetchCommunities()
             
-            // Пока communities оставляем моками
-            communities = FeedsMockData.communities
+            let postsResult = try await feedResponse
+            let communitiesResult = try await communitiesResponse
+            
+            posts = postsResult.map(FeedPost.init(response:))
+            communities = communitiesResult.map(FeedCommunity.init(response:))
             
             screenState = .loaded
         } catch {

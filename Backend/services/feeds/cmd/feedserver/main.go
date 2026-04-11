@@ -44,6 +44,9 @@ func main() {
 	mux.Handle("/feed", authMiddleware(feedH))
 	mux.Handle("/feed/", authMiddleware(feedH))
 
+	mux.Handle("/communities", authMiddleware(feedH))
+	mux.Handle("/communities/", authMiddleware(feedH))
+
 	log.Println("feeds service listening on :8083")
 	log.Fatal(http.ListenAndServe(":8083", mux))
 }

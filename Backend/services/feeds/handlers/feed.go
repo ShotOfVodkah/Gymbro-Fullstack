@@ -26,6 +26,9 @@ func (h *FeedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && r.URL.Path == "/feed":
 		h.GetFeed(w, r)
 		return
+	case r.Method == http.MethodGet && r.URL.Path == "/communities":
+		h.GetCommunities(w, r)
+		return
 	default:
 		http.NotFound(w, r)
 	}
@@ -102,6 +105,35 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+func (h *FeedHandler) GetCommunities(w http.ResponseWriter, r *http.Request) {
+	claims, ok := GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	rows, err := h.store.ListCommunitiesForUser(claims.UserID)
+	if err != nil {
+		http.Error(w, "failed to load communities", http.StatusInternalServerError)
+		return
+	}
+
+	resp := make([]types.FeedCommunityItemResponse, 0, len(rows))
+	for _, row := range rows {
+		resp = append(resp, types.FeedCommunityItemResponse{
+			ID:            row.ID,
+			Title:         row.Title,
+			Kind:          row.Kind,
+			Icon:          mapCommunityIcon(row.Kind),
+			IsSystemImage: true,
+			MembersCount:  row.MembersCount,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 func uniqueSessionIDs(rows []types.FeedPostRow) []string {
 	seen := make(map[string]struct{})
 	out := make([]string, 0)
@@ -138,4 +170,15 @@ func mapSessionExercises(items []types.SessionPreviewExercise) []types.FeedWorko
 		})
 	}
 	return result
+}
+
+func mapCommunityIcon(kind string) string {
+	switch kind {
+	case "direct":
+		return "person.fill"
+	case "joined_group":
+		return "person.3.fill"
+	default:
+		return "person.3.fill"
+	}
 }

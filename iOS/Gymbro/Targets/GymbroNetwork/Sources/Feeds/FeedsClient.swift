@@ -21,6 +21,16 @@ public final class FeedsClient {
         )
     }
     
+    public func fetchCommunities() async throws -> [FeedCommunityItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "communities",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [FeedCommunityItemResponse].self
+        )
+    }
+    
     private func requireUserId() throws -> String {
         guard let userId = AppMicroservices.tokens.userId, !userId.isEmpty else {
             throw NetworkError.unauthorized

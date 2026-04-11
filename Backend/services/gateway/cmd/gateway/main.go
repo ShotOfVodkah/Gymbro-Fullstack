@@ -48,6 +48,7 @@ func main() {
 		{Prefix: "/sessions", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
 
 		{Prefix: "/feed", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/communities", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
 	}
 
 	mux := http.NewServeMux()

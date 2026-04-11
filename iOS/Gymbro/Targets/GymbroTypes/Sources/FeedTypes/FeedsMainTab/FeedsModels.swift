@@ -48,3 +48,12 @@ public struct FeedPostItemResponse: Decodable {
     let kind: String
     let is_from_joined_community: Bool
 }
+
+public struct FeedCommunityItemResponse: Decodable {
+    let id: String
+    let title: String
+    let kind: String
+    let icon: String
+    let is_system_image: Bool
+    let members_count: Int
+}

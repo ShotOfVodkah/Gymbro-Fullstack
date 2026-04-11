@@ -53,3 +53,29 @@ func (fs *FeedStore) ListFeedPostsForUser(userID int) ([]types.FeedPostRow, erro
 
 	return rows, nil
 }
+
+func (fs *FeedStore) ListCommunitiesForUser(userID int) ([]types.FeedCommunityRow, error) {
+	query := `
+		SELECT
+			c.id,
+			c.title,
+			c.kind,
+			COUNT(cm2.id) AS members_count
+		FROM communities c
+		JOIN community_members cm
+			ON cm.community_id = c.id
+		LEFT JOIN community_members cm2
+			ON cm2.community_id = c.id
+		WHERE cm.user_id = $1
+		GROUP BY c.id, c.title, c.kind
+		ORDER BY c.title
+	`
+
+	var rows []types.FeedCommunityRow
+	err := fs.db.Select(&rows, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("ListCommunitiesForUser: %w", err)
+	}
+
+	return rows, nil
+}

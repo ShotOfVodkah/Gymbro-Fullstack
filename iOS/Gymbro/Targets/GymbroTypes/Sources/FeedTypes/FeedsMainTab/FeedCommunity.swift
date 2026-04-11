@@ -29,3 +29,23 @@ public enum FeedCommunityKind: Hashable {
     case directPerson
     case joinedGroup
 }
+
+extension FeedCommunity {
+    public init(response: FeedCommunityItemResponse) {
+        self.id = UUID(uuidString: response.id) ?? UUID()
+        self.title = response.title
+        self.icon = response.icon
+        self.isSystemImage = response.is_system_image
+        self.kind = Self.mapKind(response.kind)
+        self.participants = []
+    }
+
+    private static func mapKind(_ rawValue: String) -> FeedCommunityKind {
+        switch rawValue {
+        case "direct":
+            return .directPerson
+        default:
+            return .joinedGroup
+        }
+    }
+}
