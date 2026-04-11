@@ -15,3 +15,11 @@ public struct CalendarPerson: Identifiable, Hashable {
         self.avatarSystemName = avatarSystemName
     }
 }
+
+extension CalendarPerson {
+    public init(response: CalendarPersonResponse) {
+        self.id = response.id
+        self.name = response.name
+        self.avatarSystemName = response.avatar_system_name
+    }
+}

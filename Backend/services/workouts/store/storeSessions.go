@@ -321,3 +321,22 @@ func (ss *SessionStore) GetSessionPreviewsByIDs(ids []string) ([]types.SessionPr
 
 	return items, nil
 }
+
+func (ss *SessionStore) ListCalendarSessionsByUserAndMonth(userID string, month string) ([]types.CalendarWorkoutDayResponse, error) {
+	query := `
+		SELECT
+			TO_CHAR(completed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS date,
+			id AS workout_id
+		FROM workout_sessions
+		WHERE user_id = $1
+		  AND TO_CHAR(completed_at AT TIME ZONE 'UTC', 'YYYY-MM') = $2
+		ORDER BY completed_at
+	`
+
+	var items []types.CalendarWorkoutDayResponse
+	if err := ss.db.Select(&items, query, userID, month); err != nil {
+		return nil, fmt.Errorf("ListCalendarSessionsByUserAndMonth: %w", err)
+	}
+
+	return items, nil
+}

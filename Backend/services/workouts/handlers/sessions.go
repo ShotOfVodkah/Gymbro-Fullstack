@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"time"
+	"log"
 
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
@@ -32,6 +33,15 @@ func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/sessions/preview/batch" {
 		if r.Method == http.MethodPost {
 			h.GetSessionPreviewBatch(w, r)
+		} else {
+			notFound(w, r)
+		}
+		return
+	}
+
+	if r.URL.Path == "/sessions/calendar" {
+		if r.Method == http.MethodGet {
+			h.GetCalendarSessions(w, r)
 		} else {
 			notFound(w, r)
 		}
@@ -85,6 +95,25 @@ func (h *sessionHandler) GetSessionPreviewBatch(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(types.SessionPreviewBatchResponse{
 		Items: items,
 	})
+}
+
+func (h *sessionHandler) GetCalendarSessions(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("user_id")
+	month := r.URL.Query().Get("month")
+
+	if userID == "" || month == "" {
+		badRequest(w, r)
+		return
+	}
+
+	items, err := h.sessionStore.ListCalendarSessionsByUserAndMonth(userID, month)
+	if err != nil {
+		log.Println("GetCalendarSessions error:", err)
+		internalServerError(w, r)
+		return
+	}
+
+	json.NewEncoder(w).Encode(items)
 }
 
 func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, id string) {

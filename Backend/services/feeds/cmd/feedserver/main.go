@@ -24,6 +24,11 @@ func main() {
 		log.Fatal("WORKOUTS_SERVICE_URL is not set")
 	}
 
+	profileBaseURL := os.Getenv("PROFILE_SERVICE_URL")
+	if profileBaseURL == "" {
+		log.Fatal("PROFILE_SERVICE_URL is not set")
+	}
+
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		log.Fatal("DATABASE_URL is not set")
@@ -34,18 +39,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	feedStore := store.NewFeedStore(db)
 	workoutsClient := clients.NewWorkoutsClient(workoutsBaseURL)
+	workoutsCalendarClient := clients.NewWorkoutsCalendarClient(workoutsBaseURL)
+	profileClient := clients.NewProfileClient(profileBaseURL)
+
+	feedStore := store.NewFeedStore(db)
+	calendarStore := store.NewCalendarStore(db)
 
 	feedH := handlers.NewFeedHandler(feedStore, workoutsClient)
+	calendarH := handlers.NewCalendarHandler(calendarStore, profileClient, workoutsCalendarClient)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	mux := http.NewServeMux()
+	
 	mux.Handle("/feed", authMiddleware(feedH))
 	mux.Handle("/feed/", authMiddleware(feedH))
 
 	mux.Handle("/communities", authMiddleware(feedH))
 	mux.Handle("/communities/", authMiddleware(feedH))
+
+	mux.Handle("/calendar/people", authMiddleware(calendarH))
+	mux.Handle("/calendar/month", authMiddleware(calendarH))
 
 	log.Println("feeds service listening on :8083")
 	log.Fatal(http.ListenAndServe(":8083", mux))

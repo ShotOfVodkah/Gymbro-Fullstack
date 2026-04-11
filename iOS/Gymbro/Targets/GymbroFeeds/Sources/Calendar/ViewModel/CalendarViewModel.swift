@@ -1,6 +1,7 @@
 import Foundation
 import GymbroNavigation
 import GymbroTypes
+import GymbroNetwork
 
 @MainActor
 final class FeedsCalendarViewModel: ObservableObject {
@@ -28,14 +29,15 @@ final class FeedsCalendarViewModel: ObservableObject {
     init(input: CalendarScreenInput, router: any Router, analytics: any AnalyticsService) {
         self.input = input
         self.router = router
-        self.analytics = analytics
-        loadMockData()
+        reload()
         analytics.track(.screenViewed(screen: .feedsCalendar))
     }
     
     func reload() {
-        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
-        loadMockData()
+        Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
+            await loadCalendar()
+        }
     }
     
     func didTapBack() {
@@ -46,32 +48,40 @@ final class FeedsCalendarViewModel: ObservableObject {
         guard let previous = Calendar.current.date(byAdding: .month, value: -1, to: currentMonthDate) else { return }
         currentMonthDate = previous
         analytics.track(.calendarMonthChanged(direction: "prev"))
-        rebuildCalendar()
+        Task {
+            await reloadMonthOnly()
+        }
     }
     
     func didTapNextMonth() {
         guard let next = Calendar.current.date(byAdding: .month, value: 1, to: currentMonthDate) else { return }
         currentMonthDate = next
         analytics.track(.calendarMonthChanged(direction: "next"))
-        rebuildCalendar()
+        Task {
+            await reloadMonthOnly()
+        }
     }
     
     func didSelectPerson(_ person: CalendarPerson) {
         selectedPerson = person
         analytics.track(.calendarPersonSelected(personId: person.id))
-        rebuildCalendar()
+        Task {
+            await reloadMonthOnly()
+        }
     }
     
     func openMyWorkoutFromSelectedDay() {
-        guard selectedDayForActions?.myWorkoutID != nil else { return }
+        guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
+        print("open my workout:", workoutID)
         analytics.track(.calendarMyWorkoutOpened)
-        print("workout info")
+//        router.navigate(to: .workoutInfo(id: workoutID))
     }
 
     func openPartnerWorkoutFromSelectedDay() {
-        guard selectedDayForActions?.partnerWorkoutID != nil else { return }
+        guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
+        print("open partner workout:", workoutID)
         analytics.track(.calendarPartnerWorkoutOpened)
-        print("workout info")
+//        router.navigate(to: .workoutInfo(id: workoutID))
     }
 
     func clearDayWorkoutChoices() {
@@ -92,13 +102,15 @@ final class FeedsCalendarViewModel: ObservableObject {
         
         if let partnerWorkoutID = day.partnerWorkoutID {
             analytics.track(.calendarPartnerWorkoutOpened)
-            print("workout info")
+            print("open partner workout:", partnerWorkoutID)
+//            router.navigate(to: .workoutInfo(id: partnerWorkoutID))
             return
         }
         
         if let myWorkoutID = day.myWorkoutID {
             analytics.track(.calendarMyWorkoutOpened)
-            print("workout info")
+            print("open my workout:", myWorkoutID)
+//            router.navigate(to: .workoutInfo(id: myWorkoutID))
         }
     }
     
@@ -108,63 +120,91 @@ final class FeedsCalendarViewModel: ObservableObject {
         return formatter
     }
     
-    private func currentMyWorkoutMap() -> [Date: String] {
-        switch input.context {
-        case .mine, .directChat, .groupChat:
-            return FeedsCalendarMockData.workoutsByPerson["me"] ?? [:]
-        case .person:
-            return [:]
+    private func loadCalendar() async {
+        screenState = .loading
+        
+        do {
+            let peopleResponse = try await AppMicroservices.feeds.fetchCalendarPeople(context: input.context)
+            availablePeople = peopleResponse.map(CalendarPerson.init(response:))
+            
+            selectedPerson = resolveInitialSelectedPerson(from: availablePeople)
+            
+            try await loadMonthData()
+            screenState = .loaded
+        } catch {
+            print("Failed to load calendar:", error)
+            screenState = .error
         }
     }
     
-//    private func currentSelectedPersonWorkoutMap() -> [Date: String] {
-//        guard let selectedPerson else { return [:] }
-//        
-//        switch input.context {
-//        case .mine:
-//            return [:]
-//            
-//        case .person:
-//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
-//            
-//        case .directChat:
-//            if selectedPerson.id == "me" {
-//                return [:]
-//            }
-//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
-//            
-//        case .groupChat:
-//            if selectedPerson.id == "me" {
-//                return [:]
-//            }
-//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
-//        }
-//    }
+    private func reloadMonthOnly() async {
+        do {
+            try await loadMonthData()
+            screenState = .loaded
+        } catch {
+            print("Failed to reload calendar month:", error)
+            screenState = .error
+        }
+    }
     
-    private func currentSelectedPersonWorkoutMap() -> [Date: String] {
-        guard let selectedPerson else { return [:] }
-        
+    private func resolveInitialSelectedPerson(from people: [CalendarPerson]) -> CalendarPerson? {
         switch input.context {
         case .mine:
-            return [:]
+            return people.first
             
-        case .person:
-            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+        case .person(let personID, _):
+            return people.first(where: { $0.id == personID }) ?? people.first
             
-        case .directChat, .groupChat:
-            if selectedPerson.id == "me" {
-                return [:]
+        case .directChat(_, _, let initialPersonID):
+            if let initialPersonID {
+                return people.first(where: { $0.id == initialPersonID }) ?? people.first
             }
-            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+            return people.first
+            
+        case .groupChat(_, _, let initialPersonID):
+            if let initialPersonID {
+                return people.first(where: { $0.id == initialPersonID }) ?? people.first
+            }
+            return people.first
         }
     }
-
-    private func rebuildCalendar() {
+    
+    private func loadMonthData() async throws {
         monthTitle = monthFormatter.string(from: currentMonthDate)
         
-        let myWorkoutMap = currentMyWorkoutMap()
-        let selectedPersonWorkoutMap = currentSelectedPersonWorkoutMap()
+        let response = try await AppMicroservices.feeds.fetchCalendarMonth(
+            context: input.context,
+            month: currentMonthDate,
+            selectedPersonID: selectedPerson?.id
+        )
         
+        let myWorkoutMap = makeWorkoutMap(from: response.my_workouts)
+        let partnerWorkoutMap = makeWorkoutMap(from: response.partner_workouts)
+        
+        rebuildCalendar(
+            myWorkoutMap: myWorkoutMap,
+            selectedPersonWorkoutMap: partnerWorkoutMap
+        )
+    }
+    
+    private func makeWorkoutMap(from items: [CalendarWorkoutDayResponse]) -> [Date: String] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
+        var result: [Date: String] = [:]
+        for item in items {
+            guard let date = formatter.date(from: item.date) else { continue }
+            let normalizedDate = calendar.startOfDay(for: date)
+            result[normalizedDate] = item.workout_id
+        }
+        return result
+    }
+
+    private func rebuildCalendar(
+        myWorkoutMap: [Date: String],
+        selectedPersonWorkoutMap: [Date: String]
+    ) {
         guard let monthInterval = calendar.dateInterval(of: .month, for: currentMonthDate),
               let firstWeekInterval = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start),
               let lastDayOfMonth = calendar.date(byAdding: .day, value: -1, to: monthInterval.end),
@@ -206,30 +246,5 @@ final class FeedsCalendarViewModel: ObservableObject {
         }
         
         days = result
-    }
-    
-    private func loadMockData() {
-        switch input.context {
-        case .mine:
-            availablePeople = [FeedsCalendarMockData.people[0]]
-            selectedPerson = availablePeople.first
-            
-        case .person(let personID, let personName):
-            availablePeople = [
-                CalendarPerson(id: personID, name: personName, avatarSystemName: "person.fill")
-            ]
-            selectedPerson = availablePeople.first
-            
-        case .directChat(_, let participantIDs, let initialPersonID):
-            availablePeople = FeedsCalendarMockData.people.filter { participantIDs.contains($0.id) }
-            selectedPerson = availablePeople.first(where: { $0.id == initialPersonID }) ?? availablePeople.first
-            
-        case .groupChat(_, _, let initialPersonID):
-            availablePeople = FeedsCalendarMockData.people
-            selectedPerson = availablePeople.first(where: { $0.id == initialPersonID }) ?? availablePeople.first
-        }
-        
-        rebuildCalendar()
-        screenState = .loaded
     }
 }
