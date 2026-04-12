@@ -18,21 +18,29 @@ final class ChatViewModel: ObservableObject {
     @Published var groupInfo: ChatGroupInfo?
     @Published var selectedMessageForQuickReaction: ChatMessage?
     @Published var isShowingQuickReactionPicker: Bool = false
+    @Published var availablePeopleToAdd: [ChatParticipant] = []
     
     let input: ChatSessionInput
     private let router: any Router
+    private let service: any ChatService
     private let analytics: any AnalyticsService
-
-    init(input: ChatSessionInput, router: any Router, analytics: any AnalyticsService) {
+    
+    init(
+        input: ChatSessionInput,
+        router: any Router,
+        service: any ChatService,
+        analytics: any AnalyticsService
+    ) {
         self.input = input
         self.router = router
+        self.service = service
         self.analytics = analytics
-        loadMockData()
+        reload()
         analytics.track(.screenViewed(screen: .feedsChat))
     }
     
     var title: String {
-        input.title
+        groupInfo?.title ?? input.title
     }
     
     var isDirect: Bool {
@@ -53,8 +61,29 @@ final class ChatViewModel: ObservableObject {
     }
     
     func reload() {
-        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsChat.rawValue))
-        loadMockData()
+        Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsChat.rawValue))
+            await loadChat()
+        }
+    }
+    
+    private func loadChat() async {
+        guard let chatID = input.chatID else {
+            screenState = .error
+            return
+        }
+        
+        screenState = .loading
+        
+        do {
+            let result = try await service.fetchScreen(chatID: chatID)
+            messages = result.messages
+            groupInfo = result.groupInfo
+            screenState = .loaded
+        } catch {
+            print("Failed to load chat:", error)
+            screenState = .error
+        }
     }
     
     func didTapBack() {
@@ -66,29 +95,33 @@ final class ChatViewModel: ObservableObject {
         case .direct(let person):
             router.navigate(to: .feedsProfile(title: person.name))
         case .group:
+            loadAvailablePeopleToAdd()
             isShowingGroupInfo = true
             analytics.track(.chatGroupInfoOpened)
         }
     }
     
     func didTapCalendar() {
+        guard let chatID = input.chatID else { return }
+        
         switch input.presentationStyle {
         case .direct(let person):
             router.navigate(
                 to: .feedsCalendar(
                     context: .directChat(
-                        chatID: input.chatID ?? input.title,
+                        chatID: chatID,
                         participantIDs: [person.id],
                         initialPersonID: person.id
                     )
                 )
             )
+            
         case .group:
             router.navigate(
                 to: .feedsCalendar(
                     context: .groupChat(
-                        chatID: input.chatID ?? input.title,
-                        groupID: input.title,
+                        chatID: chatID,
+                        groupID: chatID,
                         initialPersonID: nil
                     )
                 )
@@ -97,9 +130,9 @@ final class ChatViewModel: ObservableObject {
     }
     
     func didTapWorkoutMessage(_ message: ChatMessage) {
-        guard case .workout(let workoutID, _, _, _, _) = message.kind else { return }
+        guard case .workout(let sessionID, _, _, _, _) = message.kind else { return }
         analytics.track(.chatWorkoutMessageTapped(workoutId: workoutID))
-        print("workout info")
+        print("open workout:", sessionID)
     }
     
     func didLongPressMessage(_ message: ChatMessage) {
@@ -119,91 +152,98 @@ final class ChatViewModel: ObservableObject {
         selectedMessageForQuickReaction = nil
     }
     
-    func toggleReaction(_ emoji: String, for messageID: UUID) {
-        analytics.track(.chatReactionToggled(emoji: emoji))
-        guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
-        
-        var message = messages[index]
-        
-        if let reactionIndex = message.reactions.firstIndex(where: { $0.emoji == emoji }) {
-            let reaction = message.reactions[reactionIndex]
-            
-            if reaction.isSelectedByMe {
-                let newCount = reaction.count - 1
-                
-                if newCount <= 0 {
-                    message.reactions.remove(at: reactionIndex)
-                } else {
-                    message.reactions[reactionIndex] = ChatReaction(
-                        emoji: reaction.emoji,
-                        count: newCount,
-                        isSelectedByMe: false
-                    )
-                }
-            } else {
-                message.reactions[reactionIndex] = ChatReaction(
-                    emoji: reaction.emoji,
-                    count: reaction.count + 1,
-                    isSelectedByMe: true
-                )
+    func toggleReaction(_ emoji: String, for messageID: String) {
+        Task {
+            do {
+                let updatedReactions = try await service.toggleReaction(messageID: messageID, emoji: emoji)
+                guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
+                messages[index].reactions = updatedReactions
+            } catch {
+                print("Failed to toggle reaction:", error)
             }
-        } else {
-            message.reactions.append(
-                ChatReaction(
-                    emoji: emoji,
-                    count: 1,
-                    isSelectedByMe: true
-                )
-            )
         }
-        
-        messages[index] = message
     }
     
     func sendMessage() {
         let text = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
+        guard !text.isEmpty, let chatID = input.chatID else { return }
         
-        messages.append(
-            ChatMessage(
-                senderID: "me",
-                senderName: "You",
-                senderAvatarSystemName: "person.crop.circle.fill",
-                sentAt: Date(),
-                isMine: true,
-                kind: .text(text)
-            )
-        )
-        
-        analytics.track(.chatMessageSent(isGroup: isGroup))
-        draftText = ""
+        Task {
+            do {
+                let message = try await service.sendText(chatID: chatID, text: text)
+                messages.append(message)
+                analytics.track(.chatMessageSent(isGroup: isGroup))
+                draftText = ""
+            } catch {
+                print("Failed to send message:", error)
+            }
+        }
     }
     
     func addPeopleToGroup(_ people: [ChatParticipant]) {
-        guard var groupInfo else { return }
-        groupInfo.participants.append(contentsOf: people)
-        self.groupInfo = groupInfo
-        analytics.track(.chatGroupPeopleAdded(count: people.count))
+        guard let chatID = input.chatID else { return }
+        
+        Task {
+            do {
+                let updated = try await service.addPeople(
+                    chatID: chatID,
+                    userIDs: people.map(\.id)
+                )
+                groupInfo = updated
+                analytics.track(.chatGroupPeopleAdded(count: people.count))
+            } catch {
+                print("Failed to add people to group:", error)
+            }
+        }
     }
     
     func removePersonFromGroup(_ personID: String) {
-        guard var groupInfo else { return }
-        groupInfo.participants.removeAll { $0.id == personID }
-        self.groupInfo = groupInfo
-        analytics.track(.chatGroupParticipantRemoved)
+        guard let chatID = input.chatID else { return }
+        
+        Task {
+            do {
+                let updated = try await service.removePerson(
+                    chatID: chatID,
+                    userID: personID
+                )
+                groupInfo = updated
+                analytics.track(.chatGroupParticipantRemoved)
+            } catch {
+                print("Failed to remove person from group:", error)
+            }
+        }
     }
     
     func updateGroupInfo(title: String, description: String) {
-        guard var groupInfo else { return }
-        groupInfo.title = title
-        groupInfo.description = description
-        self.groupInfo = groupInfo
-        analytics.track(.chatGroupInfoSaved)
+        guard let chatID = input.chatID else { return }
+        
+        Task {
+            do {
+                let updated = try await service.updateGroup(
+                    chatID: chatID,
+                    title: title,
+                    description: description
+                )
+                groupInfo = updated
+                analytics.track(.chatGroupInfoSaved)
+            } catch {
+                print("Failed to update group info:", error)
+            }
+        }
     }
     
     func deleteGroup() {
-        analytics.track(.chatGroupDeleted)
-        router.pop()
+        guard let chatID = input.chatID else { return }
+        
+        Task {
+            do {
+                try await service.deleteGroup(chatID: chatID)
+                analytics.track(.chatGroupDeleted)
+                router.pop()
+            } catch {
+                print("Failed to delete group:", error)
+            }
+        }
     }
     
     var messageSections: [ChatMessageDateSection] {
@@ -235,11 +275,14 @@ final class ChatViewModel: ObservableObject {
         }
     }
     
-    private func loadMockData() {
-        messages = ChatMockData.messages(for: input)
-        if input.isGroup {
-            groupInfo = ChatMockData.groupInfo(for: input)
+    func loadAvailablePeopleToAdd() {
+        Task {
+            do {
+                availablePeopleToAdd = try await service.fetchAvailablePeopleToAdd()
+            } catch {
+                print("Failed to load available people for group:", error)
+                availablePeopleToAdd = []
+            }
         }
-        screenState = .loaded
     }
 }

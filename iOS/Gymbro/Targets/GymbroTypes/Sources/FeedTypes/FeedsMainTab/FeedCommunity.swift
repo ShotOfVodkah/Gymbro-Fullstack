@@ -1,7 +1,7 @@
 import Foundation
 
 public struct FeedCommunity: Identifiable, Hashable {
-    public let id: UUID
+    public let id: String
     public let title: String
     public let icon: String
     public let isSystemImage: Bool
@@ -9,7 +9,7 @@ public struct FeedCommunity: Identifiable, Hashable {
     public let participants: [PersonItem]
 
     public init(
-        id: UUID = UUID(),
+        id: String,
         title: String,
         icon: String,
         isSystemImage: Bool = false,
@@ -32,7 +32,7 @@ public enum FeedCommunityKind: Hashable {
 
 extension FeedCommunity {
     public init(response: FeedCommunityItemResponse) {
-        self.id = UUID(uuidString: response.id) ?? UUID()
+        self.id = response.id
         self.title = response.title
         self.icon = response.icon
         self.isSystemImage = response.is_system_image

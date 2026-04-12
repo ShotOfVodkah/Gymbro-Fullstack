@@ -11,3 +11,13 @@ public struct ChatParticipant: Hashable, Identifiable {
         self.avatarSystemName = avatarSystemName
     }
 }
+
+extension ChatParticipant {
+    public init(response: ChatParticipantResponse) {
+        self.init(
+            id: response.id,
+            name: response.name,
+            avatarSystemName: response.avatar_system_name
+        )
+    }
+}

@@ -15,3 +15,13 @@ public struct ChatGroupInfo: Hashable {
         self.participants = participants
     }
 }
+
+extension ChatGroupInfo {
+    public init(response: ChatRoomResponse) {
+        self.init(
+            title: response.title ?? "Group",
+            description: response.description ?? "",
+            participants: response.participants.map(ChatParticipant.init(response:))
+        )
+    }
+}

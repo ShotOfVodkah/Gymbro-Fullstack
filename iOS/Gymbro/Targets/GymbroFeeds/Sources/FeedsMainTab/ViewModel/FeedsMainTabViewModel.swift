@@ -117,8 +117,10 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
 
     private func loadChatCreationPeopleIfNeeded() {
-        if chatCreationPeople.isEmpty {
-            chatCreationPeople = FeedsPeopleMockData.friends + FeedsPeopleMockData.discover
+        guard chatCreationPeople.isEmpty else { return }
+        
+        Task {
+            await loadChatCreationPeople()
         }
     }
     
@@ -126,9 +128,11 @@ final class FeedsMainTabViewModel: ObservableObject {
         resetChatCreationDraft()
         resetChatCreationSearch()
         chatCreationStep = .chooseType
-        chatCreationPeople = FeedsPeopleMockData.friends + FeedsPeopleMockData.discover
         isShowingChatCreation = true
         analytics.track(.feedsChatCreationOpened)
+        Task {
+            await loadChatCreationPeople()
+        }
     }
     
     func dismissChatCreation() {
@@ -179,13 +183,29 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     private func openChat(title: String, participants: [PersonItem]) {
-        let input = ChatSessionInput(
-            title: title,
-            participants: participants.map(makeParticipant(from:))
-        )
-        
-        isShowingChatCreation = false
-        router.navigate(to: .feedsChat(input: input))
+        Task {
+            do {
+                let input: ChatSessionInput
+                
+                if participants.count == 2, let person = participants.first {
+                    let room = try await AppMicroservices.feeds.createDirectChat(participantID: person.id)
+                    input = ChatSessionInput(response: room)
+                } else {
+                    let room = try await AppMicroservices.feeds.createGroupChat(
+                        title: title,
+                        description: "",
+                        participantIDs: participants.map(\.id)
+                    )
+                    input = ChatSessionInput(response: room)
+                }
+                
+                isShowingChatCreation = false
+                resetChatCreationState()
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to open chat:", error)
+            }
+        }
     }
     
     func didSelectDirectPerson(_ person: PersonItem) {
@@ -233,14 +253,13 @@ final class FeedsMainTabViewModel: ObservableObject {
 
     func didTapCommunity(_ community: FeedCommunity) {
         analytics.track(.feedsCommunityOpened(communityId: community.id.uuidString))
-        switch community.kind {
-        case .directPerson:
-            guard let person = community.participants.first else { return }
-            openChat(title: person.name, participants: [person])
-            
-        case .joinedGroup:
-            openChat(title: community.title, participants: community.participants)
-        }
+        let input = ChatSessionInput(
+            chatID: community.id,
+            title: community.title,
+            participants: community.participants.map(makeParticipant(from:))
+        )
+        
+        router.navigate(to: .feedsChat(input: input))
     }
 
     func didTapComments(for post: FeedPost) {
@@ -278,5 +297,36 @@ final class FeedsMainTabViewModel: ObservableObject {
             print("Failed to load feed:", error)
             screenState = .error
         }
+    }
+    
+    private func loadChatCreationPeople() async {
+        do {
+            async let friendsResponse = AppMicroservices.feeds.fetchFriends()
+            async let followingResponse = AppMicroservices.feeds.fetchFollowing()
+            async let discoverResponse = AppMicroservices.feeds.fetchDiscoverPeople()
+            
+            let friends = try await friendsResponse.map(PersonItem.init(response:))
+            let following = try await followingResponse.map(PersonItem.init(response:))
+            let discover = try await discoverResponse.map(PersonItem.init(response:))
+            
+            let combined = friends + following + discover
+            chatCreationPeople = uniquePeople(combined)
+        } catch {
+            print("Failed to load chat creation people:", error)
+            chatCreationPeople = []
+        }
+    }
+    
+    private func uniquePeople(_ people: [PersonItem]) -> [PersonItem] {
+        var seen = Set<String>()
+        var result: [PersonItem] = []
+        
+        for person in people {
+            if seen.contains(person.id) { continue }
+            seen.insert(person.id)
+            result.append(person)
+        }
+        
+        return result
     }
 }

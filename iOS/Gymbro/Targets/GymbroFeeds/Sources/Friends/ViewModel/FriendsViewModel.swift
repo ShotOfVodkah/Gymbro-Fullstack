@@ -133,17 +133,15 @@ final class FeedsPeopleViewModel: ObservableObject {
     func didTapViewMessage(for person: PersonItem) {
         analytics.track(.peopleMessageOpened(personId: person.id.uuidString))
         selectedPerson = nil
-        let input = ChatSessionInput(
-            title: person.name,
-            participants: [
-                ChatParticipant(
-                    id: person.id,
-                    name: person.name,
-                    avatarSystemName: person.avatarSystemName
-                )
-            ]
-        )
-        router.navigate(to: .feedsChat(input: input))
+        
+        Task {
+            do {
+                let input = try await service.openDirectChat(with: person)
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to create direct chat:", error)
+            }
+        }
     }
     
     var filteredFriends: [PersonItem] {
