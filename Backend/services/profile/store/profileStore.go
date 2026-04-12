@@ -53,3 +53,16 @@ func (ps *ProfileStore) ListByUserIDs(ids []int) ([]types.Profile, error) {
 	}
 	return profiles, nil
 }
+
+func (ps *ProfileStore) ListAll() ([]types.Profile, error) {
+	var profiles []types.Profile
+	err := ps.db.Select(&profiles, `
+		SELECT user_id, name, username, status, subtitle, avatar_system_name, badge, workouts_this_month
+		FROM profiles
+		ORDER BY user_id
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("ListAll: %w", err)
+	}
+	return profiles, nil
+}

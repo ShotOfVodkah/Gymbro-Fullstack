@@ -48,7 +48,7 @@ struct PersonRowView: View {
                         .font(.system(size: 14, weight: .medium))
                         .foregroundStyle(.white.opacity(0.7))
                     
-                    Text(person.username)
+                    Text("@\(person.username)")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.gray)
                 }

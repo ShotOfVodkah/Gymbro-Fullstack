@@ -1,7 +1,7 @@
 import Foundation
 
 public struct PersonItem: Identifiable, Hashable {
-    public let id: UUID
+    public let id: String
     public let name: String
     public let username: String
     public let status: String
@@ -13,7 +13,7 @@ public struct PersonItem: Identifiable, Hashable {
     public let workoutsThisMonth: Int
     
     public init(
-        id: UUID = UUID(),
+        id: String,
         name: String,
         username: String,
         status: String,
@@ -36,7 +36,7 @@ public struct PersonItem: Identifiable, Hashable {
         self.workoutsThisMonth = workoutsThisMonth
     }
     
-    public func toggledFollow() -> PersonItem {
+    public func toggledFollow(isCurrentFriend: Bool? = nil) -> PersonItem {
         PersonItem(
             id: id,
             name: name,
@@ -45,9 +45,24 @@ public struct PersonItem: Identifiable, Hashable {
             subtitle: subtitle,
             avatarSystemName: avatarSystemName,
             isFollowing: !isFollowing,
-            isCurrentFriend: isCurrentFriend,
+            isCurrentFriend: isCurrentFriend ?? self.isCurrentFriend,
             badge: badge,
             workoutsThisMonth: workoutsThisMonth
         )
+    }
+}
+
+extension PersonItem {
+    public init(response: PersonItemResponse) {
+        self.id = response.id
+        self.name = response.name
+        self.username = response.username
+        self.status = response.status
+        self.subtitle = response.subtitle
+        self.avatarSystemName = response.avatar_system_name
+        self.isFollowing = response.is_following
+        self.isCurrentFriend = response.is_current_friend
+        self.badge = response.badge
+        self.workoutsThisMonth = response.workouts_this_month
     }
 }

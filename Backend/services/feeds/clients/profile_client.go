@@ -83,3 +83,32 @@ func (c *ProfileClient) FetchProfilesBatch(ctx context.Context, ids []int) (map[
 
 	return result, nil
 }
+
+func (c *ProfileClient) FetchAllProfiles(ctx context.Context) (map[int]ProfilePreview, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/profiles", nil)
+	if err != nil {
+		return nil, fmt.Errorf("create profiles request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("call profile service: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("profile service returned status %d", resp.StatusCode)
+	}
+
+	var items []ProfilePreview
+	if err := json.NewDecoder(resp.Body).Decode(&items); err != nil {
+		return nil, fmt.Errorf("decode profiles response: %w", err)
+	}
+
+	result := make(map[int]ProfilePreview, len(items))
+	for _, item := range items {
+		result[item.UserID] = item
+	}
+
+	return result, nil
+}

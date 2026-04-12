@@ -17,7 +17,7 @@ struct DirectChatSelectionStep: View {
                             person: person,
                             onTap: { viewModel.didSelectDirectPerson(person) },
                             onFollowTap: {
-                                viewModel.toggleFollowInChatCreation(for: person.id)
+//                                viewModel.toggleFollowInChatCreation(for: person.id)
                             }
                         )
                     }

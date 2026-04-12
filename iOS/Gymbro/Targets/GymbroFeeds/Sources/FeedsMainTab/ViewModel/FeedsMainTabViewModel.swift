@@ -172,7 +172,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     private func makeParticipant(from person: PersonItem) -> ChatParticipant {
         ChatParticipant(
-            id: person.id.uuidString,
+            id: person.id,
             name: person.name,
             avatarSystemName: person.avatarSystemName
         )
@@ -226,7 +226,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         )
     }
 
-    func toggleFollowInChatCreation(for personID: UUID) {
+    func toggleFollowInChatCreation(for personID: String) {
         guard let index = chatCreationPeople.firstIndex(where: { $0.id == personID }) else { return }
         chatCreationPeople[index] = chatCreationPeople[index].toggledFollow()
     }

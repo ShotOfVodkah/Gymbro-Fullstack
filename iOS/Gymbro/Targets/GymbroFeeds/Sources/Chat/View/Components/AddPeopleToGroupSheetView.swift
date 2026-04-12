@@ -15,7 +15,7 @@ struct AddPeopleToGroupSheetView: View {
     private var allPeople: [ChatParticipant] {
         (FeedsPeopleMockData.friends + FeedsPeopleMockData.discover).map {
             ChatParticipant(
-                id: $0.id.uuidString,
+                id: $0.id,
                 name: $0.name,
                 avatarSystemName: $0.avatarSystemName
             )

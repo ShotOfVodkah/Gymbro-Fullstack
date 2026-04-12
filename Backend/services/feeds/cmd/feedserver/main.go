@@ -45,13 +45,15 @@ func main() {
 
 	feedStore := store.NewFeedStore(db)
 	calendarStore := store.NewCalendarStore(db)
+	peopleStore := store.NewPeopleStore(db)
 
-	feedH := handlers.NewFeedHandler(feedStore, workoutsClient)
+	feedH := handlers.NewFeedHandler(feedStore, workoutsClient, profileClient)
 	calendarH := handlers.NewCalendarHandler(calendarStore, profileClient, workoutsCalendarClient)
+	peopleH := handlers.NewPeopleHandler(peopleStore, profileClient)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	mux := http.NewServeMux()
-	
+
 	mux.Handle("/feed", authMiddleware(feedH))
 	mux.Handle("/feed/", authMiddleware(feedH))
 
@@ -60,6 +62,11 @@ func main() {
 
 	mux.Handle("/calendar/people", authMiddleware(calendarH))
 	mux.Handle("/calendar/month", authMiddleware(calendarH))
+
+	mux.Handle("/people/friends", authMiddleware(peopleH))
+	mux.Handle("/people/following", authMiddleware(peopleH))
+	mux.Handle("/people/discover", authMiddleware(peopleH))
+	mux.Handle("/people/", authMiddleware(peopleH))
 
 	log.Println("feeds service listening on :8083")
 	log.Fatal(http.ListenAndServe(":8083", mux))

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
@@ -12,12 +13,14 @@ import (
 type FeedHandler struct {
 	store          store.FeedStore
 	workoutsClient *clients.WorkoutsClient
+	profileClient  *clients.ProfileClient
 }
 
-func NewFeedHandler(store store.FeedStore, workoutsClient *clients.WorkoutsClient) *FeedHandler {
+func NewFeedHandler(store store.FeedStore, workoutsClient *clients.WorkoutsClient, profileClient *clients.ProfileClient) *FeedHandler {
 	return &FeedHandler{
 		store:          store,
 		workoutsClient: workoutsClient,
+		profileClient:  profileClient,
 	}
 }
 
@@ -54,14 +57,31 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	authorIDs := uniqueAuthorIDs(rows)
+	profilesMap, err := h.profileClient.FetchProfilesBatch(r.Context(), authorIDs)
+	if err != nil {
+		http.Error(w, "failed to fetch author profiles", http.StatusInternalServerError)
+		return
+	}
+
 	resp := make([]types.FeedPostItemResponse, 0, len(rows))
 	for _, row := range rows {
+		authorName := "Unknown user"
+		authorAvatar := "person.circle"
+
+		authorIDInt, err := strconv.Atoi(row.AuthorID)
+		if err == nil {
+			if profile, ok := profilesMap[authorIDInt]; ok {
+				authorName = profile.Name
+				authorAvatar = profile.AvatarSystemName
+			}
+		}
 		item := types.FeedPostItemResponse{
 			ID: row.ID,
 			Author: types.FeedAuthorPreview{
 				ID:        row.AuthorID,
-				Name:      "Unknown user",
-				AvatarURL: "person.circle",
+				Name:      authorName,
+				AvatarURL: authorAvatar,
 			},
 			Description:           row.Description,
 			Location:              row.Location,
@@ -147,6 +167,27 @@ func uniqueSessionIDs(rows []types.FeedPostRow) []string {
 		}
 		seen[*row.SessionID] = struct{}{}
 		out = append(out, *row.SessionID)
+	}
+
+	return out
+}
+
+func uniqueAuthorIDs(rows []types.FeedPostRow) []int {
+	seen := make(map[int]struct{})
+	out := make([]int, 0)
+
+	for _, row := range rows {
+		authorID, err := strconv.Atoi(row.AuthorID)
+		if err != nil {
+			continue
+		}
+
+		if _, ok := seen[authorID]; ok {
+			continue
+		}
+
+		seen[authorID] = struct{}{}
+		out = append(out, authorID)
 	}
 
 	return out

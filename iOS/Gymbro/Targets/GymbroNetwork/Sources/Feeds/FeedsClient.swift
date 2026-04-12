@@ -63,6 +63,72 @@ public final class FeedsClient {
         )
     }
     
+    public func fetchFriends() async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/friends",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
+    public func fetchFollowing() async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/following",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
+    public func fetchDiscoverPeople(query: String? = nil) async throws -> [PersonItemResponse] {
+        let queryItems: [URLQueryItem]? = {
+            guard let query, !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return nil
+            }
+            return [URLQueryItem(name: "q", value: query)]
+        }()
+
+        return try await client.request(
+            method: .GET,
+            path: "people/discover",
+            queryItems: queryItems,
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
+    public func fetchPerson(id: String) async throws -> PersonItemResponse {
+        try await client.request(
+            method: .GET,
+            path: "people/\(id)",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: PersonItemResponse.self
+        )
+    }
+
+    public func followPerson(id: String) async throws {
+        try await client.requestVoid(
+            method: .POST,
+            path: "people/\(id)/follow",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true
+        )
+    }
+
+    public func unfollowPerson(id: String) async throws {
+        try await client.requestVoid(
+            method: .DELETE,
+            path: "people/\(id)/follow",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true
+        )
+    }
+    
     private func requireUserId() throws -> String {
         guard let userId = AppMicroservices.tokens.userId, !userId.isEmpty else {
             throw NetworkError.unauthorized

@@ -33,6 +33,15 @@ func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Path == "/profiles" {
+		if r.Method == http.MethodGet {
+			h.ListProfiles(w, r)
+			return
+		}
+		notFound(w, r)
+		return
+	}
+
 	if m := reProfileByID.FindStringSubmatch(r.URL.Path); m != nil {
 		if r.Method == http.MethodGet {
 			h.GetProfileByID(w, r, m[1])
@@ -83,5 +92,14 @@ func (h *ProfileHandler) GetProfilesBatch(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	json.NewEncoder(w).Encode(profiles)
+}
+
+func (h *ProfileHandler) ListProfiles(w http.ResponseWriter, r *http.Request) {
+	profiles, err := h.store.ListAll()
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
 	json.NewEncoder(w).Encode(profiles)
 }
