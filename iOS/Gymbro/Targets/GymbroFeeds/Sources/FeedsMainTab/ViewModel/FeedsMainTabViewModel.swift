@@ -182,25 +182,25 @@ final class FeedsMainTabViewModel: ObservableObject {
         )
     }
     
-    private func openChat(title: String, participants: [PersonItem]) {
+    private func openDirectChat(with person: PersonItem) {
         Task {
             do {
-                let input: ChatSessionInput
-                
-                if participants.count == 2, let person = participants.first {
-                    let room = try await AppMicroservices.feeds.createDirectChat(participantID: person.id)
-                    input = ChatSessionInput(response: room)
-                } else {
-                    let room = try await AppMicroservices.feeds.createGroupChat(
-                        title: title,
-                        description: "",
-                        participantIDs: participants.map(\.id)
-                    )
-                    input = ChatSessionInput(response: room)
-                }
+                let room = try await AppMicroservices.feeds.createDirectChat(participantID: person.id)
+                let input = ChatSessionInput(response: room)
                 
                 isShowingChatCreation = false
-                resetChatCreationState()
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to create direct chat:", error)
+            }
+        }
+    }
+
+    private func openExistingChat(communityID: String) {
+        Task {
+            do {
+                let room = try await AppMicroservices.feeds.fetchChat(id: communityID)
+                let input = ChatSessionInput(response: room)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to open chat:", error)
@@ -208,10 +208,28 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
     
+    private func openCreatedGroupChat(title: String, participants: [PersonItem]) {
+        Task {
+            do {
+                let room = try await AppMicroservices.feeds.createGroupChat(
+                    title: title,
+                    description: "",
+                    participantIDs: participants.map(\.id)
+                )
+                
+                let input = ChatSessionInput(response: room)
+                isShowingChatCreation = false
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to create group chat:", error)
+            }
+        }
+    }
+    
     func didSelectDirectPerson(_ person: PersonItem) {
         chatCreationDraft.selectedDirectPerson = person
         analytics.track(.feedsDirectChatPersonSelected(personId: person.id.uuidString))
-        openChat(title: person.name, participants: [person])
+        openDirectChat(with: person)
     }
     
     func toggleGroupMember(_ person: PersonItem) {
@@ -240,7 +258,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     func createGroupChat() {
         guard canCreateGroupChat else { return }
         analytics.track(.feedsGroupChatCreated(memberCount: chatCreationDraft.selectedGroupMembers.count))
-        openChat(
+        openCreatedGroupChat(
             title: chatCreationDraft.groupName,
             participants: chatCreationDraft.selectedGroupMembers
         )
@@ -253,13 +271,7 @@ final class FeedsMainTabViewModel: ObservableObject {
 
     func didTapCommunity(_ community: FeedCommunity) {
         analytics.track(.feedsCommunityOpened(communityId: community.id.uuidString))
-        let input = ChatSessionInput(
-            chatID: community.id,
-            title: community.title,
-            participants: community.participants.map(makeParticipant(from:))
-        )
-        
-        router.navigate(to: .feedsChat(input: input))
+        openExistingChat(communityID: community.id)
     }
 
     func didTapComments(for post: FeedPost) {

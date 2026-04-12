@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 public final class FeedsCalendarFactoryImpl {
@@ -18,7 +19,13 @@ public final class FeedsCalendarFactoryImpl {
         if let cached = viewModelCache[input] {
             return FeedsCalendarView(viewModel: cached)
         } else {
-            let viewModel = FeedsCalendarViewModel(input: input, router: router, analytics: analytics)
+            let service = FeedsCalendarServiceImpl(client: AppMicroservices.feeds)
+            let viewModel = FeedsCalendarViewModel(
+                input: input,
+                router: router,
+                service: service,
+                analytics: analytics
+            )
             viewModelCache[input] = viewModel
             return FeedsCalendarView(viewModel: viewModel)
         }

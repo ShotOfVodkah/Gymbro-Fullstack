@@ -36,7 +36,7 @@ extension FeedCommunity {
         self.title = response.title
         self.icon = response.icon
         self.isSystemImage = response.is_system_image
-        self.kind = Self.mapKind(response.kind)
+        self.kind = response.kind == "direct" ? .directPerson : .joinedGroup
         self.participants = []
     }
 

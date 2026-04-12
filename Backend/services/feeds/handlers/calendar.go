@@ -204,6 +204,13 @@ func (h *CalendarHandler) GetCalendarMonth(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if myWorkouts == nil {
+    	myWorkouts = []types.CalendarWorkoutDayResponse{}
+	}
+	if partnerWorkouts == nil {
+		partnerWorkouts = []types.CalendarWorkoutDayResponse{}
+	}
+
 	resp := types.CalendarMonthResponse{
 		Month:           month,
 		MyWorkouts:      myWorkouts,

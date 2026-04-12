@@ -136,7 +136,7 @@ final class FeedsPeopleViewModel: ObservableObject {
         
         Task {
             do {
-                let input = try await service.openDirectChat(with: person)
+                let input = try await service.createDirectChat(with: person.id)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to create direct chat:", error)

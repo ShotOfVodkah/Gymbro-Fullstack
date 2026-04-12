@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -87,7 +86,6 @@ func (h *ChatHandler) CreateDirectChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req types.CreateDirectChatRequest
-	log.Printf("CreateDirectChat called: userID=%d participantID_raw=%s", claims.UserID, req.ParticipantID)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -107,7 +105,6 @@ func (h *ChatHandler) CreateDirectChat(w http.ResponseWriter, r *http.Request) {
 	community, err := h.chatStore.FindDirectCommunityBetweenUsers(claims.UserID, participantID)
 	if err != nil && !errors.Is(err, store.ErrNotFound) {
 		http.Error(w, "failed to find direct chat", http.StatusInternalServerError)
-		log.Printf("CreateDirectChat find result: community=%v err=%v isNotFound=%v", community, err, errors.Is(err, store.ErrNotFound))
 		return
 	}
 

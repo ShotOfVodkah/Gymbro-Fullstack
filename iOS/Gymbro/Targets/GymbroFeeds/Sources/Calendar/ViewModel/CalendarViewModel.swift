@@ -1,7 +1,6 @@
 import Foundation
 import GymbroNavigation
 import GymbroTypes
-import GymbroNetwork
 
 @MainActor
 final class FeedsCalendarViewModel: ObservableObject {
@@ -23,12 +22,18 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     private let input: CalendarScreenInput
     private let router: any Router
+    private let service: any FeedsCalendarService
     private let analytics: any AnalyticsService
     private let calendar = Calendar.current
-
-    init(input: CalendarScreenInput, router: any Router, analytics: any AnalyticsService) {
+    
+    init(
+        input: CalendarScreenInput,
+        router: any Router,
+        service: any FeedsCalendarService
+    ) {
         self.input = input
         self.router = router
+        self.service = service
         reload()
         analytics.track(.screenViewed(screen: .feedsCalendar))
     }
@@ -74,14 +79,12 @@ final class FeedsCalendarViewModel: ObservableObject {
         guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
         print("open my workout:", workoutID)
         analytics.track(.calendarMyWorkoutOpened)
-//        router.navigate(to: .workoutInfo(id: workoutID))
     }
 
     func openPartnerWorkoutFromSelectedDay() {
         guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
         print("open partner workout:", workoutID)
         analytics.track(.calendarPartnerWorkoutOpened)
-//        router.navigate(to: .workoutInfo(id: workoutID))
     }
 
     func clearDayWorkoutChoices() {
@@ -103,33 +106,33 @@ final class FeedsCalendarViewModel: ObservableObject {
         if let partnerWorkoutID = day.partnerWorkoutID {
             analytics.track(.calendarPartnerWorkoutOpened)
             print("open partner workout:", partnerWorkoutID)
-//            router.navigate(to: .workoutInfo(id: partnerWorkoutID))
             return
         }
         
         if let myWorkoutID = day.myWorkoutID {
             analytics.track(.calendarMyWorkoutOpened)
             print("open my workout:", myWorkoutID)
-//            router.navigate(to: .workoutInfo(id: myWorkoutID))
         }
-    }
-    
-    private var monthFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "LLLL yyyy"
-        return formatter
     }
     
     private func loadCalendar() async {
         screenState = .loading
         
         do {
-            let peopleResponse = try await AppMicroservices.feeds.fetchCalendarPeople(context: input.context)
-            availablePeople = peopleResponse.map(CalendarPerson.init(response:))
+            let data = try await service.fetchInitialScreen(
+                input: input,
+                month: currentMonthDate
+            )
             
-            selectedPerson = resolveInitialSelectedPerson(from: availablePeople)
+            availablePeople = data.people
+            selectedPerson = data.selectedPerson
+            monthTitle = data.monthData.monthTitle
             
-            try await loadMonthData()
+            rebuildCalendar(
+                myWorkoutMap: data.monthData.myWorkoutMap,
+                selectedPersonWorkoutMap: data.monthData.partnerWorkoutMap
+            )
+            
             screenState = .loaded
         } catch {
             print("Failed to load calendar:", error)
@@ -139,66 +142,24 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     private func reloadMonthOnly() async {
         do {
-            try await loadMonthData()
+            let monthData = try await service.fetchMonth(
+                input: input,
+                month: currentMonthDate,
+                selectedPersonID: selectedPerson?.id
+            )
+            
+            monthTitle = monthData.monthTitle
+            
+            rebuildCalendar(
+                myWorkoutMap: monthData.myWorkoutMap,
+                selectedPersonWorkoutMap: monthData.partnerWorkoutMap
+            )
+            
             screenState = .loaded
         } catch {
             print("Failed to reload calendar month:", error)
             screenState = .error
         }
-    }
-    
-    private func resolveInitialSelectedPerson(from people: [CalendarPerson]) -> CalendarPerson? {
-        switch input.context {
-        case .mine:
-            return people.first
-            
-        case .person(let personID, _):
-            return people.first(where: { $0.id == personID }) ?? people.first
-            
-        case .directChat(_, _, let initialPersonID):
-            if let initialPersonID {
-                return people.first(where: { $0.id == initialPersonID }) ?? people.first
-            }
-            return people.first
-            
-        case .groupChat(_, _, let initialPersonID):
-            if let initialPersonID {
-                return people.first(where: { $0.id == initialPersonID }) ?? people.first
-            }
-            return people.first
-        }
-    }
-    
-    private func loadMonthData() async throws {
-        monthTitle = monthFormatter.string(from: currentMonthDate)
-        
-        let response = try await AppMicroservices.feeds.fetchCalendarMonth(
-            context: input.context,
-            month: currentMonthDate,
-            selectedPersonID: selectedPerson?.id
-        )
-        
-        let myWorkoutMap = makeWorkoutMap(from: response.my_workouts)
-        let partnerWorkoutMap = makeWorkoutMap(from: response.partner_workouts)
-        
-        rebuildCalendar(
-            myWorkoutMap: myWorkoutMap,
-            selectedPersonWorkoutMap: partnerWorkoutMap
-        )
-    }
-    
-    private func makeWorkoutMap(from items: [CalendarWorkoutDayResponse]) -> [Date: String] {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        
-        var result: [Date: String] = [:]
-        for item in items {
-            guard let date = formatter.date(from: item.date) else { continue }
-            let normalizedDate = calendar.startOfDay(for: date)
-            result[normalizedDate] = item.workout_id
-        }
-        return result
     }
 
     private func rebuildCalendar(

@@ -6,7 +6,7 @@ protocol FeedsPeopleService {
     func fetchScreen() async throws -> FeedsPeopleScreenData
     func fetchPerson(id: String) async throws -> PersonItem
     func toggleFollow(for person: PersonItem) async throws
-    func openDirectChat(with person: PersonItem) async throws -> ChatSessionInput
+    func createDirectChat(with personID: String) async throws -> ChatSessionInput
 }
 
 struct FeedsPeopleScreenData {
@@ -55,8 +55,8 @@ final class FeedsPeopleServiceImpl: FeedsPeopleService {
         }
     }
     
-    func openDirectChat(with person: PersonItem) async throws -> ChatSessionInput {
-        let room = try await client.createDirectChat(participantID: person.id)
+    func createDirectChat(with personID: String) async throws -> ChatSessionInput {
+        let room = try await client.createDirectChat(participantID: personID)
         return ChatSessionInput(response: room)
     }
     

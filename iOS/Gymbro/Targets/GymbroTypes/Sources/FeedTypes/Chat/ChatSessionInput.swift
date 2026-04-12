@@ -1,51 +1,66 @@
 import Foundation
 
+public enum ChatKind: String, Hashable {
+    case direct
+    case joinedGroup = "joined_group"
+}
+
 public struct ChatSessionInput: Hashable {
     public let chatID: String?
     public let title: String
     public let participants: [ChatParticipant]
+    public let kind: ChatKind
     
     public init(
         chatID: String? = nil,
         title: String,
-        participants: [ChatParticipant]
+        participants: [ChatParticipant],
+        kind: ChatKind
     ) {
         self.chatID = chatID
         self.title = title
         self.participants = participants
+        self.kind = kind
     }
     
     public var presentationStyle: ChatPresentationStyle {
-        if participants.count == 2, let person = participants.first {
-            return .direct(person: person)
-        } else {
+        switch kind {
+        case .direct:
+            let otherParticipant = participants.first
+                ?? ChatParticipant(id: "", name: title, avatarSystemName: "person.circle.fill")
+            return .direct(person: otherParticipant)
+            
+        case .joinedGroup:
             return .group(members: participants)
         }
     }
     
     public var isDirect: Bool {
-        participants.count == 2
+        kind == .direct
     }
     
     public var isGroup: Bool {
-        participants.count > 2
+        kind == .joinedGroup
     }
 }
 
 extension ChatSessionInput {
     public init(response: ChatRoomResponse) {
+        let participants = response.participants.map(ChatParticipant.init(response:))
+        let kind: ChatKind = response.kind == "direct" ? .direct : .joinedGroup
+        
+        let resolvedTitle: String = {
+            if let title = response.title, !title.isEmpty {
+                return title
+            }
+            return kind == .direct ? "Direct chat" : "Group chat"
+        }()
+        
         self.init(
             chatID: response.id,
-            title: response.title ?? defaultChatTitle(from: response),
-            participants: response.participants.map(ChatParticipant.init(response:))
+            title: resolvedTitle,
+            participants: participants,
+            kind: kind
         )
-    }
-}
-
-private func defaultChatTitle(from response: ChatRoomResponse) -> String {
-    if response.kind == "direct" {
-        return response.participants.first?.name ?? "Chat"
-    } else {
-        return response.title ?? "Group"
     }
 }
