@@ -17,7 +17,7 @@ public final class WorkoutsClient {
             path: "workouts/",
             queryItems: queryItems,
             body: Optional<EmptyBody>.none,
-            requiresAuth: false,
+            requiresAuth: true,
             responseType: [WorkoutDTO].self
         )
         return dtos.map { $0.toWorkout() }
@@ -132,7 +132,7 @@ public final class WorkoutsClient {
             base: URL(string: "http://localhost:8090"),
             path: "workoutBuilderTitle",
             body: Optional<EmptyBody>.none,
-            requiresAuth: false
+            requiresAuth: true
         )
     }
 
@@ -169,7 +169,7 @@ public final class WorkoutsClient {
             path: "workoutBuilderSheet",
             queryItems: [URLQueryItem(name: "id", value: id)],
             body: Optional<EmptyBody>.none,
-            requiresAuth: false
+            requiresAuth: true
         )
     }
 
@@ -180,7 +180,7 @@ public final class WorkoutsClient {
             path: "workoutInfo",
             queryItems: [URLQueryItem(name: "id", value: id)],
             body: Optional<EmptyBody>.none,
-            requiresAuth: false
+            requiresAuth: true
         )
     }
     

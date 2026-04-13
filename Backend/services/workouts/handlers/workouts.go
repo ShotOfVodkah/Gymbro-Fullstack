@@ -102,7 +102,11 @@ func (h *workoutHandler) ListWorkoutsByUser(w http.ResponseWriter, r *http.Reque
 		unauthorized(w, r)
 		return
 	}
-	workouts, err := h.workoutStore.ListWorkoutsByUserID(userID)
+	listFor := userID
+	if r.URL.Query().Get("userId") == "premade" {
+		listFor = "premade"
+	}
+	workouts, err := h.workoutStore.ListWorkoutsByUserID(listFor)
 	if err != nil {
 		internalServerError(w, r)
 		return

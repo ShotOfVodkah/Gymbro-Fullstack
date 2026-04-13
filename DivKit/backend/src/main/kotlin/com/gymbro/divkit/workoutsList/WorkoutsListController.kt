@@ -1,6 +1,7 @@
 package com.gymbro.divkit.workoutsList
 
 import com.gymbro.divkit.WorkoutType
+import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
 import divkit.dsl.Divan
 import divkit.dsl.data
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/workoutsList")
@@ -19,9 +22,15 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
 
     @GetMapping
     fun getWorkouts(
-        @RequestParam(defaultValue = "1") userId: String
+        @RequestParam userId: String,
+        request: HttpServletRequest
     ): ResponseEntity<Divan> {
-        val workouts = backendClient.getWorkoutsByUserId(userId).map { dto ->
+        val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
+        if (userId != jwtUserId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
+        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
+        val workouts = backendClient.getWorkouts(authorization = authorization).map { dto ->
             WorkoutItem(
                 id = dto.id,
                 name = dto.name,

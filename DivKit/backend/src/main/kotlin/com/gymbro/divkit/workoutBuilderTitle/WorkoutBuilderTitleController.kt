@@ -10,14 +10,18 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/workoutBuilderTitle")
 class WorkoutBuilerTitleController(private val backendClient: GymbroBackendClient) {
 
     @GetMapping
-    fun getWorkoutInfo(): ResponseEntity<Divan> {
-        val workouts = backendClient.getWorkoutsByUserId("premade").map { it.toDomain() }
+    fun getWorkoutInfo(request: HttpServletRequest): ResponseEntity<Divan> {
+        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
+        val workouts = backendClient.getWorkouts(authorization = authorization, premadeCatalog = true)
+            .map { it.toDomain() }
 
         return ResponseEntity(
             divan {

@@ -135,6 +135,28 @@ func TestListWorkoutsByUser_OK(t *testing.T) {
 	assert.Len(t, got, 2)
 }
 
+func TestListWorkoutsByUser_PremadeQuery(t *testing.T) {
+	workouts := []types.Workout{
+		{ID: "premade-1", UserID: "premade", Name: "P", Type: types.WorkoutTypeStrength, Exercises: []types.Exercise{}},
+	}
+	h := newHandler(&mockWorkoutStore{
+		listBy: func(userID string) ([]types.Workout, error) {
+			assert.Equal(t, "premade", userID)
+			return workouts, nil
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/workouts/?userId=premade", nil)
+	req = req.WithContext(context.WithValue(req.Context(), testUserIDKey{}, "u1"))
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+	var got []types.Workout
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
+	assert.Len(t, got, 1)
+}
+
 func TestListWorkoutsByUser_UnauthorizedWithoutContext(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 	req := httptest.NewRequest(http.MethodGet, "/workouts", nil)

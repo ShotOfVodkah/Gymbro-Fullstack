@@ -2,6 +2,8 @@ package com.gymbro.divkit.client
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
@@ -12,20 +14,27 @@ class GymbroBackendClient(
     @Value("\${gymbro.backend.url}") private val backendUrl: String
 ) {
 
-    fun getWorkoutsByUserId(userId: String): List<WorkoutDto> {
-        val url = "$backendUrl/workouts/?userId=$userId"
+    fun getWorkouts(authorization: String, premadeCatalog: Boolean = false): List<WorkoutDto> {
+        val url = if (premadeCatalog) "$backendUrl/workouts/?userId=premade" else "$backendUrl/workouts/"
+        val entity = HttpEntity<Void>(headers(authorization))
         return restTemplate.exchange(
             url,
             HttpMethod.GET,
-            null,
+            entity,
             object : ParameterizedTypeReference<List<WorkoutDto>>() {}
         ).body ?: emptyList()
     }
 
-    fun getWorkout(id: String): WorkoutDto? {
+    fun getWorkout(id: String, authorization: String): WorkoutDto? {
         return try {
-            restTemplate.getForObject("$backendUrl/workouts/$id", WorkoutDto::class.java)
-        } catch (ex: Exception) {
+            val entity = HttpEntity<Void>(headers(authorization))
+            restTemplate.exchange(
+                "$backendUrl/workouts/$id",
+                HttpMethod.GET,
+                entity,
+                WorkoutDto::class.java
+            ).body
+        } catch (_: Exception) {
             null
         }
     }
@@ -38,5 +47,11 @@ class GymbroBackendClient(
             null,
             object : ParameterizedTypeReference<List<ExerciseCatalogDto>>() {}
         ).body ?: emptyList()
+    }
+
+    private fun headers(authorization: String): HttpHeaders {
+        val h = HttpHeaders()
+        h[HttpHeaders.AUTHORIZATION] = listOf(authorization)
+        return h
     }
 }
