@@ -1,5 +1,4 @@
+import os
 
-import sys
-from unittest.mock import MagicMock
-
-sys.modules["llama_cpp"] = MagicMock()
+if not os.environ.get("JWT_SECRET", "").strip():
+    os.environ["JWT_SECRET"] = "test-jwt-secret-for-ci"

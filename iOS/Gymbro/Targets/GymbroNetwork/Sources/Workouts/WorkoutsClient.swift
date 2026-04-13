@@ -117,6 +117,7 @@ public final class WorkoutsClient {
     }
     
     public func generateWorkout(prompt: String, injuries: [Injury]) async throws -> Workout {
+        let userId = try requireUserId()
         let requestBody = GenerateWorkoutRequest(
             user_input: prompt,
             injuries: injuries.map { $0.codingValue },
@@ -127,7 +128,7 @@ public final class WorkoutsClient {
             method: .POST,
             path: "ai/generate",
             body: requestBody,
-            requiresAuth: false,
+            requiresAuth: true,
             timeoutInterval: 600,
             responseType: WorkoutDTO.self
         )

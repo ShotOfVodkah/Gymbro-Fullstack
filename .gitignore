@@ -74,14 +74,11 @@ venv/
 env/
 *.egg
 
-# --- ML model artifacts (generated, too large for git) ---
-# Intermediate merged HF checkpoint (~14 GB) — produced by merge_and_convert.py
 Backend/services/ai_service/workout_merged_model/
-# Intermediate GGUF f16 (~14 GB) — produced by merge_and_convert.py
 Backend/services/ai_service/workout_f16.gguf
-# Final quantised GGUF (~4.1 GB) — produced by merge_and_convert.py, baked into Docker image
-# Generate with: python Backend/services/ai_service/scripts/merge_and_convert.py
 Backend/services/ai_service/workout_q4km.gguf
+
+DivKit/.idea/
 
 # --- Go ---
 Backend/services/**/vendor/

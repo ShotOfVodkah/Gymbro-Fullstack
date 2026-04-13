@@ -23,6 +23,6 @@ COPY services/ai_service/workout_q4km.gguf ./workout_q4km.gguf
 
 ENV PYTHONUNBUFFERED=1
 
-EXPOSE 8083
+EXPOSE 8085
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8083"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8085"]

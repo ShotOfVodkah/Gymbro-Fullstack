@@ -105,6 +105,7 @@ services:
       dockerfile: deploy/ai.Dockerfile
     container_name: ai_service
     environment:
+      JWT_SECRET: "supersecret_noone_will_get_out"
       LLAMA_N_THREADS: "4"
     expose:
       - "8085"

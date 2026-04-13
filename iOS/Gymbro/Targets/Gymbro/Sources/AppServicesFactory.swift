@@ -188,7 +188,8 @@ final class AppServicesFactory {
             modelModifier: workoutsModelModifier,
             actionsRepository: actionsRepository,
             workoutsRepository: workoutsRepository,
-            client: AppMicroservices.workouts
+            client: AppMicroservices.workouts,
+            analytics: analytics
         )
     }
     

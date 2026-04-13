@@ -11,11 +11,14 @@ final class WorkoutGeneratorViewModel: ObservableObject {
     init(
         modelModifier: WorkoutsModelModifier,
         router: any Router,
-        service: any WorkoutGeneratorService
+        service: any WorkoutGeneratorService,
+        analytics: any AnalyticsService
     ) {
         self.service = service
         self.router = router
         self.modelModifier = modelModifier
+        self.analytics = analytics
+        analytics.track(.screenViewed(screen: .workoutGenerator))
     }
 
     // MARK: - Actions
@@ -49,9 +52,11 @@ final class WorkoutGeneratorViewModel: ObservableObject {
                 prompt: prompt,
                 injuries: Array(selectedInjuries)
             )
+            analytics.track(.workoutGenerated(promptLength: prompt.count, exerciseCount: workout.exercises.count))
             self.screenState = state
             self.generated = workout
         } catch {
+            print(error)
             screenState = .error
         }
     }
@@ -74,6 +79,7 @@ final class WorkoutGeneratorViewModel: ObservableObject {
     @Published var generated: Workout?
     @Published var showAlert: Bool = false
 
+    private let analytics: any AnalyticsService
     private let router: any Router
     private let service: any WorkoutGeneratorService
     private let modelModifier: WorkoutsModelModifier

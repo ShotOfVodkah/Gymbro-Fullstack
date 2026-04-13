@@ -5,19 +5,19 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional, Tuple
 
 import jsonschema
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from app import model as ai_model
+from app.auth import get_authenticated_user_id, require_jwt_secret
 from app.catalog import is_safe_for_injuries, lookup
 from app.prompt import build_messages
 from app.validation import validate_input
 
 import random
-from typing import Optional, Dict, Tuple
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,6 +55,7 @@ class WorkoutResponse(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    require_jwt_secret()
     logger.info("Warming up model…")
     try:
         ai_model.get_model()
@@ -131,7 +132,13 @@ def _validate_schema(data: dict) -> None:
         )
 
 @app.post("/ai/generate", response_model=WorkoutResponse)
-async def generate_workout(req: GenerateRequest) -> WorkoutResponse:
+async def generate_workout(
+    req: GenerateRequest,
+    jwt_user_id: str = Depends(get_authenticated_user_id),
+) -> WorkoutResponse:
+    if req.user_id != jwt_user_id:
+        raise HTTPException(status_code=403, detail="forbidden")
+
     validate_input(req.user_input, req.injuries)
 
     messages = build_messages(req.user_input, req.injuries)
@@ -158,7 +165,7 @@ async def generate_workout(req: GenerateRequest) -> WorkoutResponse:
 
     return WorkoutResponse(
         id=str(uuid.uuid4()),
-        userId=req.user_id,
+        userId=jwt_user_id,
         name=ai_data["workout_name"],
         type=ai_data["type"],
         exercises=exercises,

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 
+import GymbroTypes
 import GymbroNavigation
 import GymbroNetwork
 
@@ -14,7 +15,8 @@ public final class WorkoutGeneratorFactoryImpl {
         modelModifier: WorkoutsModelModifier,
         actionsRepository: OfflineActionsRepository,
         workoutsRepository: WorkoutsCacheRepository,
-        client: WorkoutsClient
+        client: WorkoutsClient,
+        analytics: any AnalyticsService
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutGeneratorServiceImpl(
@@ -25,7 +27,8 @@ public final class WorkoutGeneratorFactoryImpl {
             let viewModel = WorkoutGeneratorViewModel(
                 modelModifier: modelModifier,
                 router: router,
-                service: service
+                service: service,
+                analytics: analytics
             )
             viewModelCache = viewModel
             return WorkoutGeneratorView(viewModel: viewModel)
