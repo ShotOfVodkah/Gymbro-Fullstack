@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
@@ -43,7 +44,7 @@ func (h *CalendarHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CalendarHandler) GetCalendarPeople(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -142,7 +143,7 @@ func (h *CalendarHandler) GetCalendarPeople(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *CalendarHandler) GetCalendarMonth(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return

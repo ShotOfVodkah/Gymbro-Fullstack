@@ -4,14 +4,16 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/alexandra-gritsaenko/gymbro-auth/service"
 	"github.com/alexandra-gritsaenko/gymbro-auth/store"
 	"github.com/alexandra-gritsaenko/gymbro-auth/types"
+	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexedwards/argon2id"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jmoiron/sqlx"
-	"net/http"
-	"time"
 )
 
 type authHandler struct {
@@ -126,10 +128,10 @@ func (h *authHandler) Token(w http.ResponseWriter, r *http.Request) {
 	rand.Read(sessionBytes)
 	sessionID := hex.EncodeToString(sessionBytes)
 
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, CustomClaims{
-		UserID: user.ID,
-		Email:  user.Email,
-		Role:   user.Role,
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, authmw.Claims{
+		UserID:    user.ID,
+		Email:     user.Email,
+		Role:      user.Role,
 		SessionID: sessionID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(15 * time.Minute).Unix(), // 15 minutes
@@ -183,10 +185,10 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newAccess := jwt.NewWithClaims(jwt.SigningMethodHS256, CustomClaims{
-		UserID: user.ID,
-		Email:  user.Email,
-		Role:   user.Role,
+	newAccess := jwt.NewWithClaims(jwt.SigningMethodHS256, authmw.Claims{
+		UserID:    user.ID,
+		Email:     user.Email,
+		Role:      user.Role,
 		SessionID: sessionID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(15 * time.Minute).Unix(),
@@ -213,17 +215,13 @@ func (h *authHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	sessionIDVal := r.Context().Value(ContextSessionIDKey)
-	if sessionIDVal == nil {
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok || claims.SessionID == "" {
 		unauthorized(w, r)
 		return
 	}
 
-	sessionID, ok := sessionIDVal.(string)
-	if !ok {
-		unauthorized(w, r)
-		return
-	}
+	sessionID := claims.SessionID
 
 	if err := h.refreshStore.DeleteBySessionID(sessionID); err != nil {
 		internalServerError(w, r)

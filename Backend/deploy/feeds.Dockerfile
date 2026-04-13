@@ -1,10 +1,11 @@
 # ---------- build stage ----------
-FROM golang:1.25 as build
+FROM golang:1.25 AS build
 
 WORKDIR /app
 
-COPY services/feeds/go.mod services/feeds/go.sum ./
-RUN go mod download
+COPY pkg/authmw ./pkg/authmw
+COPY services/feeds/go.mod services/feeds/go.sum ./services/feeds/
+RUN cd services/feeds && go mod download
 COPY services/feeds ./services/feeds
 RUN cd services/feeds && go build -o /bin/feedserver ./cmd/feedserver
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest

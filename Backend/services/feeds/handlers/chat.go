@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
@@ -79,7 +80,7 @@ func (h *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) CreateDirectChat(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -134,7 +135,7 @@ func (h *ChatHandler) CreateDirectChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) CreateGroupChat(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -191,7 +192,7 @@ func (h *ChatHandler) CreateGroupChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -228,7 +229,7 @@ func (h *ChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) UpdateChat(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -288,7 +289,7 @@ func (h *ChatHandler) UpdateChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) DeleteChat(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -334,7 +335,7 @@ func (h *ChatHandler) DeleteChat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) AddChatMembers(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -394,7 +395,7 @@ func (h *ChatHandler) AddChatMembers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) RemoveChatMember(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -454,7 +455,7 @@ func (h *ChatHandler) RemoveChatMember(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) GetChatMessages(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -493,7 +494,7 @@ func (h *ChatHandler) GetChatMessages(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) SendChatMessage(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -565,7 +566,7 @@ func (h *ChatHandler) SendChatMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ChatHandler) ToggleMessageReaction(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return

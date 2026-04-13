@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gymbro_auth
-    ports:
-      - "5432:5432"
     volumes:
       - pg_auth_data:/var/lib/postgresql/data
 
@@ -33,8 +31,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gymbro_workouts
-    ports:
-      - "5433:5432"
     volumes:
       - pg_workouts_data:/var/lib/postgresql/data
 
@@ -60,8 +56,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gymbro_feeds
-    ports:
-      - "5434:5432"
     volumes:
       - pg_feeds_data:/var/lib/postgresql/data
 
@@ -81,6 +75,30 @@ services:
       - postgres_feeds
     expose:
       - "8083"
+  
+  postgres_profile:
+    image: postgres:14
+    container_name: postgres_profile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_profile
+    volumes:
+      - pg_profile_data:/var/lib/postgresql/data
+
+  profile_service:
+    build:
+      context: ..
+      dockerfile: deploy/profile.Dockerfile
+    container_name: profile_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_profile:5432/gymbro_profile?sslmode=disable"
+      PGHOST: postgres_profile
+      PGPORT: 5432
+    depends_on:
+      - postgres_profile
+    expose:
+      - "8084"
 
   gateway:
     build:
@@ -99,32 +117,6 @@ services:
       - profile_service
     ports:
       - "8080:8080"
-
-  postgres_profile:
-    image: postgres:14
-    container_name: postgres_profile
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gymbro_profile
-    ports:
-      - "5435:5432"
-    volumes:
-      - pg_profile_data:/var/lib/postgresql/data
-
-  profile_service:
-    build:
-      context: ..
-      dockerfile: deploy/profile.Dockerfile
-    container_name: profile_service
-    environment:
-      DATABASE_URL: "postgres://postgres:postgres@postgres_profile:5432/gymbro_profile?sslmode=disable"
-      PGHOST: postgres_profile
-      PGPORT: 5432
-    depends_on:
-      - postgres_profile
-    expose:
-      - "8084"
 
 volumes:
   pg_auth_data:

@@ -69,7 +69,7 @@ func doRequest(h http.Handler, method, path string, body any) *httptest.Response
 		json.NewEncoder(&buf).Encode(body)
 	}
 	req := httptest.NewRequest(method, path, &buf)
-	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "u1"))
+	req = req.WithContext(context.WithValue(req.Context(), testUserIDKey{}, "u1"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	return rr
@@ -192,7 +192,7 @@ func TestCreateWorkout_OK(t *testing.T) {
 func TestCreateWorkout_BadJSON(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 	req := httptest.NewRequest(http.MethodPost, "/workouts", bytes.NewBufferString("{bad json"))
-	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "u1"))
+	req = req.WithContext(context.WithValue(req.Context(), testUserIDKey{}, "u1"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -353,7 +353,7 @@ func TestCopyPremadeWorkout_OK(t *testing.T) {
 	var buf bytes.Buffer
 	json.NewEncoder(&buf).Encode(reqBody)
 	req := httptest.NewRequest(http.MethodPost, "/workouts/copy-premade", &buf)
-	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "user-42"))
+	req = req.WithContext(context.WithValue(req.Context(), testUserIDKey{}, "user-42"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 
@@ -412,7 +412,7 @@ func TestCopyPremadeWorkout_BadJSON(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{})
 
 	req := httptest.NewRequest(http.MethodPost, "/workouts/copy-premade", bytes.NewBufferString("{bad json"))
-	req = req.WithContext(context.WithValue(req.Context(), ContextUserIDKey, "u1"))
+	req = req.WithContext(context.WithValue(req.Context(), testUserIDKey{}, "u1"))
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 

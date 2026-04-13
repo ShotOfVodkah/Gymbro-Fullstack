@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
@@ -52,7 +53,7 @@ func (h *PeopleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeopleHandler) GetFriends(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -75,7 +76,7 @@ func (h *PeopleHandler) GetFriends(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeopleHandler) GetFollowing(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -98,7 +99,7 @@ func (h *PeopleHandler) GetFollowing(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeopleHandler) GetDiscover(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -157,7 +158,7 @@ func (h *PeopleHandler) GetDiscover(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeopleHandler) GetPerson(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -185,7 +186,7 @@ func (h *PeopleHandler) GetPerson(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeopleHandler) FollowPerson(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -211,7 +212,7 @@ func (h *PeopleHandler) FollowPerson(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PeopleHandler) UnfollowPerson(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
@@ -56,7 +57,7 @@ func (h *FeedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -146,7 +147,7 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FeedHandler) GetCommunities(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -239,7 +240,7 @@ func (h *FeedHandler) GetPostComments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FeedHandler) CreatePostComment(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -290,7 +291,7 @@ func (h *FeedHandler) CreatePostComment(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *FeedHandler) LikePost(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -328,7 +329,7 @@ func (h *FeedHandler) LikePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *FeedHandler) UnlikePost(w http.ResponseWriter, r *http.Request) {
-	claims, ok := GetClaims(r.Context())
+	claims, ok := authmw.GetClaims(r.Context())
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
