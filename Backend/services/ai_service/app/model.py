@@ -6,9 +6,10 @@ import os
 import re
 import threading
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from llama_cpp import Llama
+if TYPE_CHECKING:
+    from llama_cpp import Llama
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,8 @@ _model: Optional[Llama] = None
 
 
 def _load_model() -> Llama:
+    from llama_cpp import Llama
+
     logger.info("Loading GGUF model from %s…", _GGUF_PATH)
     if not _GGUF_PATH.exists():
         raise FileNotFoundError(
