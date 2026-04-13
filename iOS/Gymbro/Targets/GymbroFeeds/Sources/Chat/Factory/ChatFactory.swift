@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 public final class FeedsChatFactoryImpl {
@@ -18,7 +19,13 @@ public final class FeedsChatFactoryImpl {
         if let cached = viewModelCache[input] {
             return ChatView(viewModel: cached)
         } else {
-            let viewModel = ChatViewModel(input: input, router: router, analytics: analytics)
+            let service = ChatServiceImpl(client: AppMicroservices.feeds)
+            let viewModel = ChatViewModel(
+                input: input,
+                router: router,
+                service: service,
+                analytics: analytics
+            )
             viewModelCache[input] = viewModel
             return ChatView(viewModel: viewModel)
         }

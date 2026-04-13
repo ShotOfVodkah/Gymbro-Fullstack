@@ -64,6 +64,30 @@ func rowToExercise(r workoutExerciseRow) types.Exercise {
 	}
 }
 
+type workoutPreviewRow struct {
+	ID              string `db:"id"`
+	Title           string `db:"title"`
+	Category        string `db:"category"`
+	DurationMinutes int    `db:"duration_minutes"`
+	ExerciseCount   int    `db:"exercise_count"`
+}
+
+type workoutPreviewExerciseRow struct {
+	WorkoutID       string   `db:"workout_id"`
+	ExerciseID      string   `db:"exercise_id"`
+	Name            string   `db:"name"`
+	Type            string   `db:"type"`
+	MuscleGroup     string   `db:"muscle_group"`
+	Position        int      `db:"position"`
+	Sets            *int     `db:"sets"`
+	Reps            *int     `db:"reps"`
+	WeightKg        *float64 `db:"weight_kg"`
+	DurationMinutes *int     `db:"duration_minutes"`
+	Pace            *string  `db:"pace"`
+	HoldSeconds     *int     `db:"hold_seconds"`
+	BreathCount     *int     `db:"breath_count"`
+}
+
 const exerciseJoinQuery = `
 	SELECT
 		we.exercise_id,

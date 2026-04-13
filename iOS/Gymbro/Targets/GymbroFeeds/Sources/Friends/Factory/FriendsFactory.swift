@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import GymbroNavigation
 import GymbroTypes
+import GymbroNetwork
 
 public final class FeedsPeopleFactoryImpl {
     
@@ -12,7 +13,12 @@ public final class FeedsPeopleFactoryImpl {
     @MainActor
     public func makeView(router: any Router, analytics: any AnalyticsService) -> some View {
         guard let viewModelCache else {
-            let viewModel = FeedsPeopleViewModel(router: router, analytics: analytics)
+            let service = FeedsPeopleServiceImpl(client: AppMicroservices.feeds)
+            let viewModel = FeedsPeopleViewModel(
+                router: router,
+                service: service,
+                 analytics: analytics
+            )
             self.viewModelCache = viewModel
             return FeedsPeopleView(viewModel: viewModel)
         }

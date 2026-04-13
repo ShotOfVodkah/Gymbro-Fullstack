@@ -40,5 +40,9 @@ public final class WorkoutsListFactoryImpl {
         return WorkoutsListView(viewModel: viewModelCache)
     }
 
+    public func resetViewModelCache() {
+        viewModelCache = nil
+    }
+
     private var viewModelCache: WorkoutsListViewModel?
 }

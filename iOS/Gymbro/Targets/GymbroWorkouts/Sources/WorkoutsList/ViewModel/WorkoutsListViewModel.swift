@@ -55,17 +55,11 @@ final class WorkoutsListViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-
         analytics.track(.screenViewed(screen: .workoutList))
         fetchData()
     }
 
     // MARK: - Actions
-
-    func reload() {
-        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.workoutList.rawValue))
-        fetchData()
-    }
 
     func fetchData() {
         Task {

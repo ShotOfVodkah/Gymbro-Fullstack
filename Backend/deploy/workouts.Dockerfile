@@ -1,10 +1,11 @@
 # ---------- build stage ----------
-FROM golang:1.25 as build
+FROM golang:1.25 AS build
 
 WORKDIR /app
 
-COPY services/workouts/go.mod services/workouts/go.sum ./
-RUN go mod download
+COPY pkg/authmw ./pkg/authmw
+COPY services/workouts/go.mod services/workouts/go.sum ./services/workouts/
+RUN cd services/workouts && go mod download
 COPY services/workouts ./services/workouts
 RUN cd services/workouts && go build -o /bin/workoutserver ./cmd/workoutserver
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest

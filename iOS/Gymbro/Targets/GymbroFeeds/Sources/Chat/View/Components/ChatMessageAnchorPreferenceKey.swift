@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct ChatMessageAnchorPreferenceKey: PreferenceKey {
-    static var defaultValue: [UUID: Anchor<CGRect>] = [:]
+    static var defaultValue: [String: Anchor<CGRect>] = [:]
     
-    static func reduce(value: inout [UUID: Anchor<CGRect>], nextValue: () -> [UUID: Anchor<CGRect>]) {
+    static func reduce(value: inout [String: Anchor<CGRect>], nextValue: () -> [String: Anchor<CGRect>]) {
         value.merge(nextValue(), uniquingKeysWith: { $1 })
     }
 }

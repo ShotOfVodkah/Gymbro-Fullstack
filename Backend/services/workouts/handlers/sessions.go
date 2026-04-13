@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"time"
+	"log"
 
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
@@ -16,16 +17,36 @@ var reSessionByID = regexp.MustCompile(`^/sessions/([^/]+)$`)
 
 type sessionHandler struct {
 	sessionStore store.SessionStore
+	workoutStore store.WorkoutStorer
 }
 
 func NewSessionHandler(db *sqlx.DB) *sessionHandler {
 	return &sessionHandler{
 		sessionStore: store.NewSessionStore(db),
+		workoutStore: store.NewWorkoutStore(db),
 	}
 }
 
 func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	if r.URL.Path == "/sessions/preview/batch" {
+		if r.Method == http.MethodPost {
+			h.GetSessionPreviewBatch(w, r)
+		} else {
+			notFound(w, r)
+		}
+		return
+	}
+
+	if r.URL.Path == "/sessions/calendar" {
+		if r.Method == http.MethodGet {
+			h.GetCalendarSessions(w, r)
+		} else {
+			notFound(w, r)
+		}
+		return
+	}
 
 	if m := reSessionByID.FindStringSubmatch(r.URL.Path); m != nil {
 		if r.Method == http.MethodGet {
@@ -51,7 +72,57 @@ func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	notFound(w, r)
 }
 
+func (h *sessionHandler) GetSessionPreviewBatch(w http.ResponseWriter, r *http.Request) {
+	var req types.SessionPreviewBatchRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		badRequest(w, r)
+		return
+	}
+
+	if len(req.IDs) == 0 {
+		json.NewEncoder(w).Encode(types.SessionPreviewBatchResponse{
+			Items: []types.SessionPreviewItem{},
+		})
+		return
+	}
+
+	items, err := h.sessionStore.GetSessionPreviewsByIDs(req.IDs)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	json.NewEncoder(w).Encode(types.SessionPreviewBatchResponse{
+		Items: items,
+	})
+}
+
+func (h *sessionHandler) GetCalendarSessions(w http.ResponseWriter, r *http.Request) {
+	userID := r.URL.Query().Get("user_id")
+	month := r.URL.Query().Get("month")
+
+	if userID == "" || month == "" {
+		badRequest(w, r)
+		return
+	}
+
+	items, err := h.sessionStore.ListCalendarSessionsByUserAndMonth(userID, month)
+	if err != nil {
+		log.Println("GetCalendarSessions error:", err)
+		internalServerError(w, r)
+		return
+	}
+
+	json.NewEncoder(w).Encode(items)
+}
+
 func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, id string) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
 	session, err := h.sessionStore.GetSessionByID(id)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
@@ -61,13 +132,17 @@ func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, 
 		internalServerError(w, r)
 		return
 	}
+	if session.UserID != userID {
+		unauthorized(w, r)
+		return
+	}
 	json.NewEncoder(w).Encode(session)
 }
 
 func (h *sessionHandler) ListSessionsByUser(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("userId")
-	if userID == "" {
-		badRequest(w, r)
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
 		return
 	}
 
@@ -98,13 +173,34 @@ func (h *sessionHandler) ListSessionsByUser(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
 	var input types.SessionInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		badRequest(w, r)
 		return
 	}
-	if input.ID == "" || input.UserID == "" || input.WorkoutID == "" {
+	if input.ID == "" || input.WorkoutID == "" {
 		badRequest(w, r)
+		return
+	}
+	input.UserID = userID
+
+	workout, err := h.workoutStore.GetWorkoutByID(input.WorkoutID)
+	if errors.Is(err, store.ErrNotFound) {
+		notFound(w, r)
+		return
+	}
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+	if workout.UserID != userID {
+		unauthorized(w, r)
 		return
 	}
 

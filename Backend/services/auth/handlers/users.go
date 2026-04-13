@@ -6,12 +6,13 @@ import (
 	"regexp"
 
 	"github.com/alexandra-gritsaenko/gymbro-auth/service"
+	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/jmoiron/sqlx"
 )
 
 var (
-	listUsersRe  = regexp.MustCompile(`^\/users[\/]*$`)
-	getUserRe    = regexp.MustCompile(`^/users/([^/]+)$`)
+	listUsersRe = regexp.MustCompile(`^\/users[\/]*$`)
+	getUserRe   = regexp.MustCompile(`^/users/([^/]+)$`)
 )
 
 type userHandler struct {
@@ -41,12 +42,12 @@ func (h *userHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *userHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	roleVal := r.Context().Value(ContextRoleKey)
-	if roleVal == nil {
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
 		unauthorized(w, r)
 		return
 	}
-	role := roleVal.(string)
+	role := claims.Role
 
 	if role != "admin" {
 		unauthorized(w, r)
@@ -83,14 +84,13 @@ func (h *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	requestEmail := matches[1]
-	emailVal := r.Context().Value(ContextEmailKey)
-	roleVal := r.Context().Value(ContextRoleKey)
-	if emailVal == nil || roleVal == nil {
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
 		unauthorized(w, r)
 		return
 	}
-	currentUserEmail := emailVal.(string)
-	role := roleVal.(string)
+	currentUserEmail := claims.Email
+	role := claims.Role
 
 	if role != "admin" && requestEmail != currentUserEmail {
 		unauthorized(w, r)

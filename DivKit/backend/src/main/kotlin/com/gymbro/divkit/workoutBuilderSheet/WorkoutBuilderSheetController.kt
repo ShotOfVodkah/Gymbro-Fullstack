@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/workoutBuilderSheet")
@@ -19,9 +21,11 @@ class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClie
 
     @GetMapping
     fun getWorkoutInfo(
-        @RequestParam(defaultValue = "1") id: String
+        @RequestParam(defaultValue = "1") id: String,
+        request: HttpServletRequest
     ): ResponseEntity<Divan> {
-        val workout = backendClient.getWorkout(id)?.toDomain()
+        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
+        val workout = backendClient.getWorkout(id, authorization)?.toDomain()
 
         if (workout == null) {
             return ResponseEntity(

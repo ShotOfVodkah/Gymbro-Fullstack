@@ -9,6 +9,7 @@ struct GroupInfoSheetView: View {
     @State private var isShowingAddPeopleSheet = false
     
     let info: ChatGroupInfo
+    let allPeople: [ChatParticipant]
     let onUpdate: (String, String) -> Void
     let onDelete: () -> Void
     let onRemovePerson: (String) -> Void
@@ -16,12 +17,14 @@ struct GroupInfoSheetView: View {
     
     init(
         info: ChatGroupInfo,
+        allPeople: [ChatParticipant],
         onUpdate: @escaping (String, String) -> Void,
         onDelete: @escaping () -> Void,
         onRemovePerson: @escaping (String) -> Void,
         onAddPeople: @escaping ([ChatParticipant]) -> Void
     ) {
         self.info = info
+        self.allPeople = allPeople
         self.onUpdate = onUpdate
         self.onDelete = onDelete
         self.onRemovePerson = onRemovePerson
@@ -92,10 +95,9 @@ struct GroupInfoSheetView: View {
         }
         .sheet(isPresented: $isShowingAddPeopleSheet) {
             AddPeopleToGroupSheetView(
+                allPeople: allPeople,
                 existingParticipantIDs: Set(info.participants.map(\.id)),
-                onAdd: { people in
-                    onAddPeople(people)
-                }
+                onAdd: { people in onAddPeople(people) }
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)

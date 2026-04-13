@@ -22,20 +22,29 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     private let input: CalendarScreenInput
     private let router: any Router
+    private let service: any FeedsCalendarService
     private let analytics: any AnalyticsService
     private let calendar = Calendar.current
-
-    init(input: CalendarScreenInput, router: any Router, analytics: any AnalyticsService) {
+    
+    init(
+        input: CalendarScreenInput,
+        router: any Router,
+        service: any FeedsCalendarService,
+        analytics: any AnalyticsService
+    ) {
         self.input = input
         self.router = router
         self.analytics = analytics
-        loadMockData()
+        self.service = service
+        reload()
         analytics.track(.screenViewed(screen: .feedsCalendar))
     }
     
     func reload() {
-        analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
-        loadMockData()
+        Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
+            await loadCalendar()
+        }
     }
     
     func didTapBack() {
@@ -46,32 +55,38 @@ final class FeedsCalendarViewModel: ObservableObject {
         guard let previous = Calendar.current.date(byAdding: .month, value: -1, to: currentMonthDate) else { return }
         currentMonthDate = previous
         analytics.track(.calendarMonthChanged(direction: "prev"))
-        rebuildCalendar()
+        Task {
+            await reloadMonthOnly()
+        }
     }
     
     func didTapNextMonth() {
         guard let next = Calendar.current.date(byAdding: .month, value: 1, to: currentMonthDate) else { return }
         currentMonthDate = next
         analytics.track(.calendarMonthChanged(direction: "next"))
-        rebuildCalendar()
+        Task {
+            await reloadMonthOnly()
+        }
     }
     
     func didSelectPerson(_ person: CalendarPerson) {
         selectedPerson = person
         analytics.track(.calendarPersonSelected(personId: person.id))
-        rebuildCalendar()
+        Task {
+            await reloadMonthOnly()
+        }
     }
     
     func openMyWorkoutFromSelectedDay() {
-        guard selectedDayForActions?.myWorkoutID != nil else { return }
+        guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
+        print("open my workout:", workoutID)
         analytics.track(.calendarMyWorkoutOpened)
-        print("workout info")
     }
 
     func openPartnerWorkoutFromSelectedDay() {
-        guard selectedDayForActions?.partnerWorkoutID != nil else { return }
+        guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
+        print("open partner workout:", workoutID)
         analytics.track(.calendarPartnerWorkoutOpened)
-        print("workout info")
     }
 
     func clearDayWorkoutChoices() {
@@ -92,79 +107,67 @@ final class FeedsCalendarViewModel: ObservableObject {
         
         if let partnerWorkoutID = day.partnerWorkoutID {
             analytics.track(.calendarPartnerWorkoutOpened)
-            print("workout info")
+            print("open partner workout:", partnerWorkoutID)
             return
         }
         
         if let myWorkoutID = day.myWorkoutID {
             analytics.track(.calendarMyWorkoutOpened)
-            print("workout info")
+            print("open my workout:", myWorkoutID)
         }
     }
     
-    private var monthFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "LLLL yyyy"
-        return formatter
-    }
-    
-    private func currentMyWorkoutMap() -> [Date: String] {
-        switch input.context {
-        case .mine, .directChat, .groupChat:
-            return FeedsCalendarMockData.workoutsByPerson["me"] ?? [:]
-        case .person:
-            return [:]
-        }
-    }
-    
-//    private func currentSelectedPersonWorkoutMap() -> [Date: String] {
-//        guard let selectedPerson else { return [:] }
-//        
-//        switch input.context {
-//        case .mine:
-//            return [:]
-//            
-//        case .person:
-//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
-//            
-//        case .directChat:
-//            if selectedPerson.id == "me" {
-//                return [:]
-//            }
-//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
-//            
-//        case .groupChat:
-//            if selectedPerson.id == "me" {
-//                return [:]
-//            }
-//            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
-//        }
-//    }
-    
-    private func currentSelectedPersonWorkoutMap() -> [Date: String] {
-        guard let selectedPerson else { return [:] }
+    private func loadCalendar() async {
+        screenState = .loading
         
-        switch input.context {
-        case .mine:
-            return [:]
+        do {
+            let data = try await service.fetchInitialScreen(
+                input: input,
+                month: currentMonthDate
+            )
             
-        case .person:
-            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+            availablePeople = data.people
+            selectedPerson = data.selectedPerson
+            monthTitle = data.monthData.monthTitle
             
-        case .directChat, .groupChat:
-            if selectedPerson.id == "me" {
-                return [:]
-            }
-            return FeedsCalendarMockData.workoutsByPerson[selectedPerson.id] ?? [:]
+            rebuildCalendar(
+                myWorkoutMap: data.monthData.myWorkoutMap,
+                selectedPersonWorkoutMap: data.monthData.partnerWorkoutMap
+            )
+            
+            screenState = .loaded
+        } catch {
+            print("Failed to load calendar:", error)
+            screenState = .error
+        }
+    }
+    
+    private func reloadMonthOnly() async {
+        do {
+            let monthData = try await service.fetchMonth(
+                input: input,
+                month: currentMonthDate,
+                selectedPersonID: selectedPerson?.id
+            )
+            
+            monthTitle = monthData.monthTitle
+            
+            rebuildCalendar(
+                myWorkoutMap: monthData.myWorkoutMap,
+                selectedPersonWorkoutMap: monthData.partnerWorkoutMap
+            )
+            
+            screenState = .loaded
+        } catch {
+            print("Failed to reload calendar month:", error)
+            screenState = .error
         }
     }
 
-    private func rebuildCalendar() {
-        monthTitle = monthFormatter.string(from: currentMonthDate)
-        
-        let myWorkoutMap = currentMyWorkoutMap()
-        let selectedPersonWorkoutMap = currentSelectedPersonWorkoutMap()
-        
+    private func rebuildCalendar(
+        myWorkoutMap: [Date: String],
+        selectedPersonWorkoutMap: [Date: String]
+    ) {
         guard let monthInterval = calendar.dateInterval(of: .month, for: currentMonthDate),
               let firstWeekInterval = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start),
               let lastDayOfMonth = calendar.date(byAdding: .day, value: -1, to: monthInterval.end),
@@ -206,30 +209,5 @@ final class FeedsCalendarViewModel: ObservableObject {
         }
         
         days = result
-    }
-    
-    private func loadMockData() {
-        switch input.context {
-        case .mine:
-            availablePeople = [FeedsCalendarMockData.people[0]]
-            selectedPerson = availablePeople.first
-            
-        case .person(let personID, let personName):
-            availablePeople = [
-                CalendarPerson(id: personID, name: personName, avatarSystemName: "person.fill")
-            ]
-            selectedPerson = availablePeople.first
-            
-        case .directChat(_, let participantIDs, let initialPersonID):
-            availablePeople = FeedsCalendarMockData.people.filter { participantIDs.contains($0.id) }
-            selectedPerson = availablePeople.first(where: { $0.id == initialPersonID }) ?? availablePeople.first
-            
-        case .groupChat(_, _, let initialPersonID):
-            availablePeople = FeedsCalendarMockData.people
-            selectedPerson = availablePeople.first(where: { $0.id == initialPersonID }) ?? availablePeople.first
-        }
-        
-        rebuildCalendar()
-        screenState = .loaded
     }
 }

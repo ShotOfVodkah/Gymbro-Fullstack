@@ -16,28 +16,48 @@ final class FeedsPeopleViewModel: ObservableObject {
     @Published var selectedTab: PeopleTab = .friends
     @Published var searchText: String = ""
     @Published var friends: [PersonItem] = []
+    @Published var followingPeople: [PersonItem] = []
     @Published var discoverPeople: [PersonItem] = []
     @Published var selectedPerson: PersonItem?
     
     private let router: any Router
+    private let service: any FeedsPeopleService
     private let analytics: any AnalyticsService
-
-    init(router: any Router, analytics: any AnalyticsService) {
+    
+    init(
+        router: any Router,
+        service: any FeedsPeopleService,
+        analytics: any AnalyticsService
+    ) {
         self.router = router
         self.analytics = analytics
-        loadMockData()
+        self.service = service
+        reload()
         analytics.track(.screenViewed(screen: .feedsPeople))
     }
     
     func reload() {
         analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsPeople.rawValue))
-        loadMockData()
+        Task {
+            await loadPeople()
+        }
     }
     
-    private func loadMockData() {
-        friends = FeedsPeopleMockData.friends
-        discoverPeople = FeedsPeopleMockData.discover
-        screenState = .loaded
+    private func loadPeople() async {
+        screenState = .loading
+        
+        do {
+            let result = try await service.fetchScreen()
+            
+            friends = result.friends
+            followingPeople = result.following
+            discoverPeople = result.discover
+            
+            screenState = .loaded
+        } catch {
+            print("Failed to load people:", error)
+            screenState = .error
+        }
     }
     
     func didSelectTab(_ tab: PeopleTab) {
@@ -51,67 +71,87 @@ final class FeedsPeopleViewModel: ObservableObject {
         switch selectedTab {
         case .friends:
             return [
-                ("Your friends", filteredFriends),
+                ("Friends", filteredFriends),
+                ("Following", filteredFollowingPeople),
+                ("Discover", filteredDiscoverPeople)
+            ]
+        case .following:
+            return [
+                ("Following", filteredFollowingPeople),
+                ("Friends", filteredFriends),
                 ("Discover", filteredDiscoverPeople)
             ]
         case .discover:
             return [
                 ("Discover", filteredDiscoverPeople),
-                ("Your friends", filteredFriends)
+                ("Following", filteredFollowingPeople),
+                ("Friends", filteredFriends)
             ]
         }
     }
     
     func didTapPerson(_ person: PersonItem) {
-        selectedPerson = person
-        analytics.track(.peoplePersonOpened(personId: person.id.uuidString))
+        Task {
+            do {
+                selectedPerson = try await service.fetchPerson(id: person.id)
+            } catch {
+                print("Failed to load person:", error)
+                selectedPerson = person
+            }
+            analytics.track(.peoplePersonOpened(personId: person.id))
+        }
     }
     
     func dismissPersonSheet() {
         selectedPerson = nil
     }
     
-    func toggleFollow(for personID: UUID) {
-        if let index = friends.firstIndex(where: { $0.id == personID }) {
-            friends[index] = friends[index].toggledFollow()
-            syncSelectedPerson(id: personID)
-            analytics.track(.peopleFollowToggled(personId: personID.uuidString, isFollowing: friends[index].isFollowing))
-            return
-        }
-        
-        if let index = discoverPeople.firstIndex(where: { $0.id == personID }) {
-            discoverPeople[index] = discoverPeople[index].toggledFollow()
-            syncSelectedPerson(id: personID)
-            analytics.track(.peopleFollowToggled(personId: personID.uuidString, isFollowing: discoverPeople[index].isFollowing))
+    func toggleFollow(for personID: String) {
+        Task {
+            do {
+                guard let person = allPeople.first(where: { $0.id == personID }) else { return }
+                try await service.toggleFollow(for: person)
+                await loadPeople()
+                
+                if selectedPerson?.id == personID {
+                    selectedPerson = allPeople.first(where: { $0.id == personID })
+                }
+            } catch {
+                print("Failed to toggle follow:", error)
+            }
         }
     }
     
-    private func syncSelectedPerson(id: UUID) {
-        guard selectedPerson?.id == id else { return }
-        
-        if let updated = (friends + discoverPeople).first(where: { $0.id == id }) {
-            selectedPerson = updated
-        }
+    private var allPeople: [PersonItem] {
+        friends + followingPeople + discoverPeople
     }
     
     func didTapViewProfile(for person: PersonItem) {
-        analytics.track(.peopleProfileOpened(personId: person.id.uuidString))
+        analytics.track(.peopleProfileOpened(personId: person.id))
         selectedPerson = nil
         router.navigate(to: .feedsProfile(title: person.name))
     }
     
     func didTapViewMessage(for person: PersonItem) {
-        analytics.track(.peopleMessageOpened(personId: person.id.uuidString))
+        analytics.track(.peopleMessageOpened(personId: person.id))
         selectedPerson = nil
-        let input = ChatSessionInput(
-            title: person.name,
-            participants: [ChatParticipant(id: person.id.uuidString, name: person.name, avatarSystemName: person.avatarSystemName)]
-        )
-        router.navigate(to: .feedsChat(input: input))
+        
+        Task {
+            do {
+                let input = try await service.createDirectChat(with: person.id)
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to create direct chat:", error)
+            }
+        }
     }
     
     var filteredFriends: [PersonItem] {
         filter(people: friends)
+    }
+    
+    var filteredFollowingPeople: [PersonItem] {
+        filter(people: followingPeople)
     }
     
     var filteredDiscoverPeople: [PersonItem] {

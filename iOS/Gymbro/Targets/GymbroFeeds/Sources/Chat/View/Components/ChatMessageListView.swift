@@ -1,12 +1,13 @@
 import SwiftUI
+import GymbroTypes
 
 struct ChatMessageListView: View {
     
     let sections: [ChatMessageDateSection]
-    let selectedMessageID: UUID?
+    let selectedMessageID: String?
     let isShowingQuickReactionPicker: Bool
     let onWorkoutTap: (ChatMessage) -> Void
-    let onReactionTap: (String, UUID) -> Void
+    let onReactionTap: (String, String) -> Void
     let onLongPress: (ChatMessage) -> Void
     let onQuickReactionTap: (String) -> Void
     let onDismissQuickReaction: () -> Void

@@ -40,4 +40,8 @@ public final class ExercisesRepository {
 
         save(type: type, items: current)
     }
+
+    public func clearAll() {
+        try? dataSource.deleteAll()
+    }
 }

@@ -6,8 +6,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gymbro_auth
-    ports:
-      - "5432:5432"
     volumes:
       - pg_auth_data:/var/lib/postgresql/data
 
@@ -33,8 +31,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: gymbro_workouts
-    ports:
-      - "5433:5432"
     volumes:
       - pg_workouts_data:/var/lib/postgresql/data
 
@@ -45,12 +41,64 @@ services:
     container_name: workouts_service
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres_workouts:5432/gymbro_workouts?sslmode=disable"
+      JWT_SECRET: "supersecret_noone_will_get_out"
       PGHOST: postgres_workouts
       PGPORT: 5432
     depends_on:
       - postgres_workouts
     expose:
       - "8082"
+
+  postgres_feeds:
+    image: postgres:14
+    container_name: postgres_feeds
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_feeds
+    volumes:
+      - pg_feeds_data:/var/lib/postgresql/data
+
+  feeds_service:
+    build:
+      context: ..
+      dockerfile: deploy/feeds.Dockerfile
+    container_name: feeds_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_feeds:5432/gymbro_feeds?sslmode=disable"
+      JWT_SECRET: "supersecret_noone_will_get_out"
+      WORKOUTS_SERVICE_URL: "http://workouts_service:8082"
+      PROFILE_SERVICE_URL: "http://profile_service:8084"
+      PGHOST: postgres_feeds
+      PGPORT: 5432
+    depends_on:
+      - postgres_feeds
+    expose:
+      - "8083"
+  
+  postgres_profile:
+    image: postgres:14
+    container_name: postgres_profile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_profile
+    volumes:
+      - pg_profile_data:/var/lib/postgresql/data
+
+  profile_service:
+    build:
+      context: ..
+      dockerfile: deploy/profile.Dockerfile
+    container_name: profile_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_profile:5432/gymbro_profile?sslmode=disable"
+      PGHOST: postgres_profile
+      PGPORT: 5432
+    depends_on:
+      - postgres_profile
+    expose:
+      - "8084"
 
   gateway:
     build:
@@ -60,12 +108,18 @@ services:
     environment:
       AUTH_URL: "http://auth_service:8081"
       WORKOUTS_URL: "http://workouts_service:8082"
+      FEEDS_URL: "http://feeds_service:8083"
+      PROFILE_URL: "http://profile_service:8084"
     depends_on:
       - auth_service
       - workouts_service
+      - feeds_service
+      - profile_service
     ports:
       - "8080:8080"
 
 volumes:
   pg_auth_data:
   pg_workouts_data:
+  pg_feeds_data:
+  pg_profile_data:

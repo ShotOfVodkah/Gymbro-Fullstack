@@ -5,6 +5,7 @@ import SwiftData
 public protocol DivCacheDataSource {
     func load(key: String) throws -> Data?
     func save(key: String, data: Data) throws
+    func deleteAll() throws
 }
 
 
@@ -34,6 +35,13 @@ public final class WorkoutsDivCacheDataSource: DivCacheDataSource {
         } else {
             context.insert(DivJsonCache(key: key, jsonData: data))
         }
+        try context.save()
+    }
+
+    public func deleteAll() throws {
+        let descriptor = FetchDescriptor<DivJsonCache>()
+        let items = try context.fetch(descriptor)
+        items.forEach { context.delete($0) }
         try context.save()
     }
 }

@@ -4,6 +4,7 @@ import SwiftData
 public protocol ExercisesCacheDataSource {
     func load(key: String) throws -> Data?
     func save(key: String, data: Data) throws
+    func deleteAll() throws
 }
 
 public final class ExercisesSwiftDataSource: ExercisesCacheDataSource {
@@ -30,6 +31,13 @@ public final class ExercisesSwiftDataSource: ExercisesCacheDataSource {
         } else {
             context.insert(ExercisesCache(key: key, jsonData: data))
         }
+        try context.save()
+    }
+
+    public func deleteAll() throws {
+        let descriptor = FetchDescriptor<ExercisesCache>()
+        let items = try context.fetch(descriptor)
+        items.forEach { context.delete($0) }
         try context.save()
     }
 }

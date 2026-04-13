@@ -42,9 +42,20 @@ func main() {
 	routes := []Route{
 		{Prefix: "/auth", EnvKey: "AUTH_URL", Default: "http://auth_service:8081"},
 		{Prefix: "/users", EnvKey: "AUTH_URL", Default: "http://auth_service:8081"},
+
 		{Prefix: "/workouts", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
 		{Prefix: "/exercises", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
 		{Prefix: "/sessions", EnvKey: "WORKOUTS_URL", Default: "http://workouts_service:8082"},
+
+		{Prefix: "/feed", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/communities", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/calendar", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/people", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/chats", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/messages", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/posts", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+
+		{Prefix: "/profiles", EnvKey: "PROFILE_URL", Default: "http://profile_service:8084"},
 	}
 
 	mux := http.NewServeMux()

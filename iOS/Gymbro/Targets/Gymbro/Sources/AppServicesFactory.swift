@@ -25,6 +25,7 @@ final class AppServicesFactory {
 
     private let offlineSyncService: OfflineSyncService
     private var screenFactories = ScreenFactories()
+    private var didStartOfflineSync = false
     
     private let watchConnectivityService: WatchConnectivityService
 
@@ -57,12 +58,23 @@ final class AppServicesFactory {
             modelModifier: workoutsModelModifier
         )
         self.watchConnectivityService = WatchConnectivityService(workoutsRepository: workoutsRepository)
-
         let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
         self.analytics = AnalyticsServiceImpl(client: analyticsClient)
-
-        offlineSyncService.start()
         watchConnectivityService.activate()
+    }
+
+    func startOfflineSyncIfNeeded() {
+        guard !didStartOfflineSync else { return }
+        didStartOfflineSync = true
+        offlineSyncService.start()
+    }
+
+    func clearAllLocalStoresOnLogout() {
+        divLocalRepository.clearAll()
+        workoutsRepository.clearAll()
+        exercisesRepository.clearAll()
+        actionsRepository.clearAllActions()
+        screenFactories.workoutsListFactory.resetViewModelCache()
     }
 
     @MainActor

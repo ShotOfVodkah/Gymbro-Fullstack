@@ -105,7 +105,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         }
 
         let exercises = selectedExercises.map { $0.exercise }
-        guard !exercises.isEmpty else {
+        guard !exercises.isEmpty, !name.isEmpty else {
             showAlert.toggle()
             return
         }

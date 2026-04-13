@@ -35,6 +35,7 @@ struct ChatView: View {
             if let groupInfo = viewModel.groupInfo {
                 GroupInfoSheetView(
                     info: groupInfo,
+                    allPeople: viewModel.availablePeopleToAdd,
                     onUpdate: viewModel.updateGroupInfo(title:description:),
                     onDelete: viewModel.deleteGroup,
                     onRemovePerson: viewModel.removePersonFromGroup(_:),

@@ -1,10 +1,11 @@
 # ---------- build stage ----------
-FROM golang:1.25 as build
+FROM golang:1.25 AS build
 
 WORKDIR /app
 
-COPY services/auth/go.mod services/auth/go.sum ./
-RUN go mod download
+COPY pkg/authmw ./pkg/authmw
+COPY services/auth/go.mod services/auth/go.sum ./services/auth/
+RUN cd services/auth && go mod download
 COPY services/auth ./services/auth
 RUN cd services/auth && go build -o /bin/authserver ./cmd/authserver
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest

@@ -3,24 +3,14 @@ import GymbroCommonUI
 import GymbroTypes
 
 struct AddPeopleToGroupSheetView: View {
-    
     @Environment(\.dismiss) private var dismiss
     
     @State private var searchText: String = ""
     @State private var selectedIDs: Set<String> = []
     
+    let allPeople: [ChatParticipant]
     let existingParticipantIDs: Set<String>
     let onAdd: ([ChatParticipant]) -> Void
-    
-    private var allPeople: [ChatParticipant] {
-        (FeedsPeopleMockData.friends + FeedsPeopleMockData.discover).map {
-            ChatParticipant(
-                id: $0.id.uuidString,
-                name: $0.name,
-                avatarSystemName: $0.avatarSystemName
-            )
-        }
-    }
     
     private var filteredPeople: [ChatParticipant] {
         let available = allPeople.filter { !existingParticipantIDs.contains($0.id) }

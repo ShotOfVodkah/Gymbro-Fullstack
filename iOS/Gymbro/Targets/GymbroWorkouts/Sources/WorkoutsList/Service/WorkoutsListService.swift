@@ -35,6 +35,7 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
             divLocalRepository.save(key: "workoutInfoTemplate", data: templates)
             return (data, .loaded)
         } catch {
+            print(error)
             guard let data = divLocalRepository.load(key: "workoutsList") else {
                 throw WorkoutsServiceError.noData
             }
@@ -84,7 +85,6 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     private func seedInitialData() async throws {
         let workouts = try await networkClient.fetchUserWorkouts()
         workoutsRepository.saveWorkouts(key: "user", workouts: workouts)
-
         for workoutType in [WorkoutType.strength, .cardio, .yoga] {
             let exercises = try await networkClient.fetchExercises(type: workoutType)
             exercisesRepository.save(

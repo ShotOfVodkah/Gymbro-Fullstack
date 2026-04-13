@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroTypes
 
 struct ChatWorkoutMessageCardView: View {
     
@@ -47,15 +48,6 @@ struct ChatWorkoutMessageCardView: View {
     private var workoutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Circle()
-                    .fill(Color.appPurple.opacity(0.8))
-                    .frame(width: 42, height: 42)
-                    .overlay(
-                        Image(systemName: "figure.strengthtraining.traditional")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.white)
-                    )
-                
                 VStack(alignment: .leading, spacing: 4) {
                     Text(workoutTitle)
                         .font(.system(size: 17, weight: .bold))
@@ -64,17 +56,16 @@ struct ChatWorkoutMessageCardView: View {
                     Text(workoutSubtitle)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundStyle(.white.opacity(0.68))
+                    HStack(spacing: 8) {
+                        tag(workoutCategory)
+                        tag(workoutDuration)
+                        Spacer()
+                        Text("Tap for more info")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.68))
+                    }
                 }
             }
-            HStack(spacing: 8) {
-                tag(workoutCategory)
-                tag(workoutDuration)
-                Spacer()
-                Text("Tap for more info")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.68))
-            }
-            
         }
         .padding(16)
         .background(Color.white.opacity(0.07))

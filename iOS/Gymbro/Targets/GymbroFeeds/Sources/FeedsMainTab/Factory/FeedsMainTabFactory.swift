@@ -14,10 +14,16 @@ public final class FeedsMainTabFactoryImpl {
     @MainActor
     public func makeView(router: any Router, analytics: any AnalyticsService) -> some View {
         guard let viewModelCache else {
-            let viewModel = FeedsMainTabViewModel(router: router, analytics: analytics)
+            let service = FeedsMainTabServiceImpl(client: AppMicroservices.feeds)
+            let viewModel = FeedsMainTabViewModel(
+                router: router,
+                service: service,
+                analytics: analytics
+            )
             self.viewModelCache = viewModel
             return FeedsMainTabView(viewModel: viewModel)
         }
+        
         return FeedsMainTabView(viewModel: viewModelCache)
     }
 }

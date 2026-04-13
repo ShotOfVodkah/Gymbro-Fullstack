@@ -22,13 +22,6 @@ public enum NavigationRoute: Hashable {
     // другие маршруты
 }
 
-public enum CalendarContext: Hashable {
-    case mine
-    case person(personID: String, personName: String)
-    case directChat(chatID: String, participantIDs: [String], initialPersonID: String?)
-    case groupChat(chatID: String, groupID: String, initialPersonID: String?)
-}
-
 public protocol Router: ObservableObject {
     func navigate(to route: NavigationRoute)
     func pop()

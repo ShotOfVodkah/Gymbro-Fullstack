@@ -31,6 +31,7 @@ struct FeedsMainTabView: View {
                         }
                     }
                     .padding(.horizontal, 40)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
             }
         }
@@ -43,6 +44,20 @@ struct FeedsMainTabView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
                 .presentationBackground(.clear)
+        }
+        .sheet(isPresented: $viewModel.isShowingCommentsSheet, onDismiss: {
+            viewModel.dismissCommentsSheet()
+        }) {
+            FeedCommentsSheetView(
+                post: viewModel.selectedPostForComments,
+                comments: viewModel.comments,
+                draftText: $viewModel.commentsDraftText,
+                isLoading: viewModel.isCommentsLoading,
+                onSendTap: viewModel.sendComment
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(.clear)
         }
     }
     
@@ -66,12 +81,11 @@ struct FeedsMainTabView: View {
                     CreateCommunityButtonView(onTap: viewModel.didTapCreateCommunity)
                 }
                 
-                LazyVStack(spacing: 15) {                    
+                LazyVStack(spacing: 15) {
                     ForEach(viewModel.visiblePosts) { post in
                         PostCardView(
                             post: post,
                             onAuthorTap: { viewModel.didTapAuthor(post) },
-//                            onTap: { viewModel.didTapPost(post) },
                             onLikeTap: { viewModel.toggleLike(for: post.id) },
                             onCommentTap: { viewModel.didTapComments(for: post) },
                             onExerciseTap: { exercise in
@@ -91,7 +105,7 @@ struct FeedsMainTabView: View {
         LinearGradient(
             colors: [
                 Color.black,
-                Color(red: 12.0/255.0, green: 18.0/255.0, blue: 36.0/255.0),
+                Color(red: 12.0 / 255.0, green: 18.0 / 255.0, blue: 36.0 / 255.0),
                 Color.black
             ],
             startPoint: .top,
