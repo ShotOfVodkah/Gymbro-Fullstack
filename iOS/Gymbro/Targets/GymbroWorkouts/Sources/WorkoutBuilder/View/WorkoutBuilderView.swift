@@ -55,6 +55,15 @@ struct WorkoutBuilderView: View {
            PremadeWorkoutSheet(model: model)
                 .presentationDetents([.fraction(0.7)])
         }
+        .customAlert(
+            isPresented: $viewModel.showAlert,
+            data: CustomAlertData(
+                message: "Workout generator is unavailable in offline mode.",
+                primaryButton: AppButton("Okay", action: {
+                    viewModel.showAlert = false
+                })
+            )
+        )
         .toolbar(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
         .interactiveDismissDisabled(false)

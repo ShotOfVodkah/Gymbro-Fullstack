@@ -78,6 +78,7 @@ public final class NetworkClient {
         queryItems: [URLQueryItem]? = nil,
         body: Body? = nil,
         requiresAuth: Bool = true,
+        timeoutInterval: TimeInterval = 60,
         responseType: Response.Type
     ) async throws -> Response {
         let request = try buildRequest(
@@ -86,7 +87,8 @@ public final class NetworkClient {
             path: path,
             queryItems: queryItems,
             body: body,
-            requiresAuth: requiresAuth
+            requiresAuth: requiresAuth,
+            timeoutInterval: timeoutInterval
         )
         
         let (data, _) = try await performWithAutoRefresh(
@@ -174,7 +176,8 @@ public final class NetworkClient {
         path: String,
         queryItems: [URLQueryItem]? = nil,
         body: Body? = nil,
-        requiresAuth: Bool
+        requiresAuth: Bool,
+        timeoutInterval: TimeInterval = 60
     ) throws -> URLRequest {
         let cleanPath = path.hasPrefix("/") ? String(path.dropFirst()) : path
         var url = (base ?? baseURL).appendingPathComponent(cleanPath)
@@ -190,7 +193,7 @@ public final class NetworkClient {
             url = finalURL
         }
         
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutInterval)
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")

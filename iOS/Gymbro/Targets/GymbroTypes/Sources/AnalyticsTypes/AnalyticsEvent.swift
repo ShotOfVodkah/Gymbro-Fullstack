@@ -60,6 +60,7 @@ public enum AnalyticsScreen: String {
     case workoutBuilderForType
     case workoutInfo
     case workoutPlayer
+    case workoutGenerator
     case feedsMain
     case feedsPeople
     case feedsChat

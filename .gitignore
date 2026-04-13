@@ -60,3 +60,31 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+*.egg
+
+Backend/services/ai_service/workout_merged_model/
+Backend/services/ai_service/workout_f16.gguf
+Backend/services/ai_service/workout_q4km.gguf
+
+DivKit/.idea/
+
+# --- Go ---
+Backend/services/**/vendor/
+
+# --- Env files ---
+.env
+.env.*
+!.env.example
+*.envrc

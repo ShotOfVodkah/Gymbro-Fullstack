@@ -103,3 +103,19 @@ public struct CreateSessionRequest: Encodable {
         self.exercises = exercises
     }
 }
+
+public struct GenerateWorkoutRequest: Encodable {
+    public let user_input: String
+    public let injuries: [String]
+    public let user_id: String
+    
+    public init(
+        user_input: String,
+        injuries: [String],
+        user_id: String
+    ) {
+        self.user_input = user_input
+        self.injuries = injuries
+        self.user_id = user_id
+    }
+}

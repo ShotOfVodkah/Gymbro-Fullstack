@@ -1,0 +1,8 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+pydantic==2.11.2
+PyJWT==2.9.0
+# JSON schema validation
+jsonschema==4.23.0
+# GGUF inference — compiled with OpenBLAS in the Dockerfile for CPU performance
+llama-cpp-python==0.3.8

@@ -72,6 +72,7 @@ final class WorkoutBuilderViewModel: ObservableObject {
     // MARK: - Published state
 
     @Published var screenState: ScreenState = .loading
+    @Published var showAlert: Bool = false
     @Published var source: DivViewSource? = nil
     @Published var sheetModel: PremadeWorkoutSheet.Model? = nil
     @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
@@ -87,7 +88,11 @@ final class WorkoutBuilderViewModel: ObservableObject {
     private func handle(link: WorkoutBuilderTitleNavigationLink) {
         switch link {
         case .openAI:
-            print("stub")
+            guard screenState != .offline else {
+                showAlert = true
+                return
+            }
+            router.navigate(to: .workoutGenerator)
         case .openBuilder(let type):
             router.navigate(to: .workoutBuilderForType(type: type, workoutId: nil))
         case .openPremade(let id):
