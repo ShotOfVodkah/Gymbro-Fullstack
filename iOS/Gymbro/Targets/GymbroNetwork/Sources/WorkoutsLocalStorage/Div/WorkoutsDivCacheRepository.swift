@@ -17,6 +17,10 @@ public final class DivCacheRepository {
     public func save(key: String, data: Data) {
         try? dataSource.save(key: key, data: data)
     }
+
+    public func clearAll() {
+        try? dataSource.deleteAll()
+    }
 }
 
 

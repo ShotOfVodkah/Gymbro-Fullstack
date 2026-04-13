@@ -34,6 +34,10 @@ public final class OfflineActionsRepository {
     public func delete(entityId: String) { try? ds.delete(id: entityId) }
     public func clearSent() { try? ds.clearSent() }
 
+    public func clearAllActions() {
+        try? ds.clearAll()
+    }
+
     private func pendingActionsOnly() -> [OfflineActionDTO] {
         guard let entities = try? ds.fetchAllPending() else { return [] }
         return entities.compactMap { try? decoder.decode(OfflineActionDTO.self, from: $0.payload) }

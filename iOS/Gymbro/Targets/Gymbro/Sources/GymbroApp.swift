@@ -17,13 +17,6 @@ struct GymbroApp: App {
     @StateObject private var session = SessionManager.shared
     private let appServicesFactory: AppServicesFactory
     
-    private var authBinding: Binding<Bool> {
-        Binding(
-            get: { !session.isAuthenticated },
-            set: { _ in }
-        )
-    }
-    
     init() {
         let r = AppRouter()
         let container: ModelContainer = {
@@ -42,41 +35,57 @@ struct GymbroApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack(path: $router.path) {
-                ZStack(alignment: .bottom) {
-                    Group {
-                        switch tab {
-                        case .workouts:
-                            appServicesFactory.makeWorkoutsScreen()
-                                .navigationDestination(for: NavigationRoute.self) { route in
-                                    appServicesFactory.makeDestinationView(for: route)
+            Group {
+                if session.isAuthenticated {
+                    NavigationStack(path: $router.path) {
+                        ZStack(alignment: .bottom) {
+                            Group {
+                                switch tab {
+                                case .workouts:
+                                    appServicesFactory.makeWorkoutsScreen()
+                                        .navigationDestination(for: NavigationRoute.self) { route in
+                                            appServicesFactory.makeDestinationView(for: route)
+                                        }
+                                case .feeds:
+                                    appServicesFactory.makeFeedsMainTab()
+                                        .navigationDestination(for: NavigationRoute.self) { route in
+                                            appServicesFactory.makeDestinationView(for: route)
+                                        }
+                                case .profile:
+                                    appServicesFactory.makeProfileMainTab()
+                                        .navigationDestination(for: NavigationRoute.self) { route in
+                                            appServicesFactory.makeDestinationView(for: route)
+                                        }
+                                case .challenge:
+                                    Text("Challenges")
+                                case .perks:
+                                    Text("Perks")
                                 }
-                        case .feeds:
-                            appServicesFactory.makeFeedsMainTab()
-                                .navigationDestination(for: NavigationRoute.self) { route in
-                                    appServicesFactory.makeDestinationView(for: route)
-                                }
-                        case .profile:
-                            appServicesFactory.makeProfileMainTab()
-                                .navigationDestination(for: NavigationRoute.self) { route in
-                                    appServicesFactory.makeDestinationView(for: route)
-                                }
-                        case .challenge:
-                            Text("Challenges")
-                        case .perks:
-                            Text("Perks")
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            
+                            AppTabBar(selected: $tab)
+                                .padding(.horizontal, 10)
+                                .padding(.bottom, 10)
                         }
+                        .ignoresSafeArea(.container, edges: .bottom)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    
-                    AppTabBar(selected: $tab)
-                        .padding(.horizontal, 10)
-                        .padding(.bottom, 10)
+                } else {
+                    AuthView(analytics: appServicesFactory.analytics)
                 }
-                .ignoresSafeArea(.container, edges: .bottom)
             }
-            .fullScreenCover(isPresented: authBinding) {
-                AuthView(analytics: appServicesFactory.analytics)
+            .onAppear {
+                if session.isAuthenticated {
+                    appServicesFactory.startOfflineSyncIfNeeded()
+                }
+            }
+            .onChange(of: session.isAuthenticated) { _, authenticated in
+                if authenticated {
+                    appServicesFactory.startOfflineSyncIfNeeded()
+                } else {
+                    appServicesFactory.clearAllLocalStoresOnLogout()
+                    router.popToRoot()
+                }
             }
         }
         .modelContainer(modelContainer)

@@ -35,6 +35,9 @@ struct WorkoutsListView: View {
                 .padding(.horizontal, 40)
             }
         }
+        .task {
+            viewModel.loadIfNeeded()
+        }
         .sheet(item: $viewModel.streakModel, onDismiss: {
             viewModel.streakModel = nil
         }) { model in

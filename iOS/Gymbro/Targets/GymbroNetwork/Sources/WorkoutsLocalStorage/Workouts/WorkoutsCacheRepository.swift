@@ -44,4 +44,8 @@ public final class WorkoutsCacheRepository {
         let current = loadWorkouts(key: key).filter { $0.id != workoutId }
         saveWorkouts(key: key, workouts: current)
     }
+
+    public func clearAll() {
+        try? dataSource.deleteAll()
+    }
 }

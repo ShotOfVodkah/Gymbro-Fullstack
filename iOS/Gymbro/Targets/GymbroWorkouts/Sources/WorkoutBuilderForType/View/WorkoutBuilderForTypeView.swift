@@ -59,7 +59,7 @@ struct WorkoutBuilderForTypeView: View {
         .customAlert(
             isPresented: $viewModel.showAlert,
             data: CustomAlertData(
-                message: "So empty here... Make sure to add some exercises before saving!",
+                message: "So empty here... Make sure to add some exercises and name your workout before saving!",
                 primaryButton: AppButton("Okay", action: { viewModel.showAlert.toggle() })
             )
         )
