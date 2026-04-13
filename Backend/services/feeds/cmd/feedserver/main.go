@@ -58,9 +58,10 @@ func main() {
 
 	mux.Handle("/feed", authMiddleware(feedH))
 	mux.Handle("/feed/", authMiddleware(feedH))
-
 	mux.Handle("/communities", authMiddleware(feedH))
 	mux.Handle("/communities/", authMiddleware(feedH))
+	mux.Handle("/posts", authMiddleware(feedH))
+	mux.Handle("/posts/", authMiddleware(feedH))
 
 	mux.Handle("/calendar/people", authMiddleware(calendarH))
 	mux.Handle("/calendar/month", authMiddleware(calendarH))

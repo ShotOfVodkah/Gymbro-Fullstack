@@ -19,7 +19,7 @@ func (fs *FeedStore) ListFeedPostsForUser(userID int) ([]types.FeedPostRow, erro
 	query := `
 		SELECT
 			p.id,
-			p.author_id,
+			p.author_id::text AS author_id,
 			p.community_id,
 			c.title AS community_title,
 			p.session_id,
@@ -27,27 +27,57 @@ func (fs *FeedStore) ListFeedPostsForUser(userID int) ([]types.FeedPostRow, erro
 			p.description,
 			p.location,
 			p.created_at,
-			COALESCE((SELECT COUNT(*) FROM post_reactions pr WHERE pr.post_id = p.id), 0) AS likes_count,
-			COALESCE((SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id), 0) AS comments_count,
+			COALESCE((
+				SELECT COUNT(*)
+				FROM post_reactions pr
+				WHERE pr.post_id = p.id
+			), 0) AS likes_count,
+			COALESCE((
+				SELECT COUNT(*)
+				FROM post_comments pc
+				WHERE pc.post_id = p.id
+			), 0) AS comments_count,
 			EXISTS(
 				SELECT 1
 				FROM post_reactions pr2
 				WHERE pr2.post_id = p.id
 				  AND pr2.user_id = $1
 			) AS is_liked,
-			CASE
-				WHEN p.community_id IS NOT NULL THEN true
-				ELSE false
-			END AS is_from_joined_community
+			EXISTS(
+				SELECT 1
+				FROM user_follows uf
+				WHERE uf.follower_id = $1
+				  AND uf.followee_id = p.author_id
+			) AS is_from_following,
+			EXISTS(
+				SELECT 1
+				FROM communities dc
+				JOIN community_members me
+					ON me.community_id = dc.id
+				   AND me.user_id = $1
+				JOIN community_members other_member
+					ON other_member.community_id = dc.id
+				   AND other_member.user_id = p.author_id
+				WHERE dc.kind = 'direct'
+			) AS is_from_direct_chat,
+			EXISTS(
+				SELECT 1
+				FROM communities gc
+				JOIN community_members me2
+					ON me2.community_id = gc.id
+				   AND me2.user_id = $1
+				WHERE gc.id = p.community_id
+				  AND gc.kind = 'joined_group'
+			) AS is_from_group_community
 		FROM posts p
-		LEFT JOIN communities c ON c.id = p.community_id
+		LEFT JOIN communities c
+			ON c.id = p.community_id
 		ORDER BY p.created_at DESC
-		LIMIT 20
+		LIMIT 50
 	`
 
 	var rows []types.FeedPostRow
-	err := fs.db.Select(&rows, query, userID)
-	if err != nil {
+	if err := fs.db.Select(&rows, query, userID); err != nil {
 		return nil, fmt.Errorf("ListFeedPostsForUser: %w", err)
 	}
 
@@ -60,22 +90,149 @@ func (fs *FeedStore) ListCommunitiesForUser(userID int) ([]types.FeedCommunityRo
 			c.id,
 			c.title,
 			c.kind,
-			COUNT(cm2.id) AS members_count
+			COUNT(cm2.id) AS members_count,
+			CASE
+				WHEN c.kind = 'direct' THEN (
+					SELECT cm_other.user_id
+					FROM community_members cm_other
+					WHERE cm_other.community_id = c.id
+					  AND cm_other.user_id <> $1
+					LIMIT 1
+				)
+				ELSE NULL
+			END AS other_user_id
 		FROM communities c
 		JOIN community_members cm
 			ON cm.community_id = c.id
+		   AND cm.user_id = $1
 		LEFT JOIN community_members cm2
 			ON cm2.community_id = c.id
-		WHERE cm.user_id = $1
 		GROUP BY c.id, c.title, c.kind
-		ORDER BY c.title
+		ORDER BY COALESCE(c.updated_at, c.created_at) DESC
 	`
 
 	var rows []types.FeedCommunityRow
-	err := fs.db.Select(&rows, query, userID)
-	if err != nil {
+	if err := fs.db.Select(&rows, query, userID); err != nil {
 		return nil, fmt.Errorf("ListCommunitiesForUser: %w", err)
 	}
 
 	return rows, nil
+}
+
+func (fs *FeedStore) PostExists(postID string) (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM posts
+			WHERE id = $1
+		)
+	`
+
+	if err := fs.db.Get(&exists, query, postID); err != nil {
+		return false, fmt.Errorf("PostExists: %w", err)
+	}
+
+	return exists, nil
+}
+
+func (fs *FeedStore) ListCommentsByPostID(postID string) ([]types.FeedCommentRow, error) {
+	query := `
+		SELECT
+			id,
+			post_id,
+			author_id,
+			content,
+			created_at
+		FROM post_comments
+		WHERE post_id = $1
+		ORDER BY created_at ASC
+	`
+
+	var rows []types.FeedCommentRow
+	if err := fs.db.Select(&rows, query, postID); err != nil {
+		return nil, fmt.Errorf("ListCommentsByPostID: %w", err)
+	}
+
+	return rows, nil
+}
+
+func (fs *FeedStore) InsertComment(postID string, authorID int, content string) (*types.FeedCommentRow, error) {
+	query := `
+		INSERT INTO post_comments (
+			id,
+			post_id,
+			author_id,
+			content,
+			created_at
+		)
+		VALUES (
+			gen_random_uuid(),
+			$1,
+			$2,
+			$3,
+			NOW()
+		)
+		RETURNING id, post_id, author_id, content, created_at
+	`
+
+	var row types.FeedCommentRow
+	if err := fs.db.Get(&row, query, postID, authorID, content); err != nil {
+		return nil, fmt.Errorf("InsertComment: %w", err)
+	}
+
+	return &row, nil
+}
+
+func (fs *FeedStore) LikePost(postID string, userID int) error {
+	query := `
+		INSERT INTO post_reactions (id, post_id, user_id, reaction_type, created_at)
+		VALUES (gen_random_uuid(), $1::uuid, $2, 'like', NOW())
+		ON CONFLICT (post_id, user_id) DO NOTHING
+	`
+
+	if _, err := fs.db.Exec(query, postID, userID); err != nil {
+		return fmt.Errorf("LikePost: %w", err)
+	}
+
+	return nil
+}
+
+func (fs *FeedStore) UnlikePost(postID string, userID int) error {
+	query := `
+		DELETE FROM post_reactions
+		WHERE post_id = $1::uuid
+		  AND user_id = $2
+	`
+
+	if _, err := fs.db.Exec(query, postID, userID); err != nil {
+		return fmt.Errorf("UnlikePost: %w", err)
+	}
+
+	return nil
+}
+
+func (fs *FeedStore) GetPostLikeState(postID string, userID int) (*types.FeedLikeResponse, error) {
+	query := `
+		SELECT
+			COALESCE((
+				SELECT COUNT(*)
+				FROM post_reactions
+				WHERE post_id = $1::uuid
+			), 0) AS likes_count,
+			EXISTS(
+				SELECT 1
+				FROM post_reactions
+				WHERE post_id = $1::uuid
+				  AND user_id = $2
+			) AS is_liked
+	`
+
+	var resp types.FeedLikeResponse
+	if err := fs.db.Get(&resp, query, postID, userID); err != nil {
+		return nil, fmt.Errorf("GetPostLikeState: %w", err)
+	}
+
+	resp.PostID = postID
+	return &resp, nil
 }

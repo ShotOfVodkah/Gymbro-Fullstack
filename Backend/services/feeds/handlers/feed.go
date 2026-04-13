@@ -29,9 +29,27 @@ func (h *FeedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && r.URL.Path == "/feed":
 		h.GetFeed(w, r)
 		return
+
 	case r.Method == http.MethodGet && r.URL.Path == "/communities":
 		h.GetCommunities(w, r)
 		return
+
+	case r.Method == http.MethodGet && len(r.URL.Path) > len("/posts/") && hasSuffix(r.URL.Path, "/comments"):
+		h.GetPostComments(w, r)
+		return
+
+	case r.Method == http.MethodPost && len(r.URL.Path) > len("/posts/") && hasSuffix(r.URL.Path, "/comments"):
+		h.CreatePostComment(w, r)
+		return
+
+	case r.Method == http.MethodPost && len(r.URL.Path) > len("/posts/") && hasSuffix(r.URL.Path, "/like"):
+		h.LikePost(w, r)
+		return
+
+	case r.Method == http.MethodDelete && len(r.URL.Path) > len("/posts/") && hasSuffix(r.URL.Path, "/like"):
+		h.UnlikePost(w, r)
+		return
+
 	default:
 		http.NotFound(w, r)
 	}
@@ -83,14 +101,16 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 				Name:      authorName,
 				AvatarURL: authorAvatar,
 			},
-			Description:           row.Description,
-			Location:              row.Location,
-			CreatedAt:             row.CreatedAt,
-			LikesCount:            row.LikesCount,
-			CommentsCount:         row.CommentsCount,
-			IsLiked:               row.IsLiked,
-			Kind:                  row.Kind,
-			IsFromJoinedCommunity: row.IsFromJoinedCommunity,
+			Description:          row.Description,
+			Location:             row.Location,
+			CreatedAt:            row.CreatedAt,
+			LikesCount:           row.LikesCount,
+			CommentsCount:        row.CommentsCount,
+			IsLiked:              row.IsLiked,
+			Kind:                 row.Kind,
+			IsFromFollowing:      row.IsFromFollowing,
+			IsFromDirectChat:     row.IsFromDirectChat,
+			IsFromGroupCommunity: row.IsFromGroupCommunity,
 		}
 
 		if row.CommunityID != nil {
@@ -138,11 +158,42 @@ func (h *FeedHandler) GetCommunities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	otherUserIDs := make([]int, 0)
+	seen := make(map[int]struct{})
+	for _, row := range rows {
+		if row.OtherUserID == nil {
+			continue
+		}
+		if _, ok := seen[*row.OtherUserID]; ok {
+			continue
+		}
+		seen[*row.OtherUserID] = struct{}{}
+		otherUserIDs = append(otherUserIDs, *row.OtherUserID)
+	}
+
+	profilesMap := map[int]clients.ProfilePreview{}
+	if len(otherUserIDs) > 0 {
+		profilesMap, err = h.profileClient.FetchProfilesBatch(r.Context(), otherUserIDs)
+		if err != nil {
+			http.Error(w, "failed to fetch community profiles", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	resp := make([]types.FeedCommunityItemResponse, 0, len(rows))
 	for _, row := range rows {
+		displayTitle := row.Title
+
+		if row.Kind == "direct" && row.OtherUserID != nil {
+			if profile, ok := profilesMap[*row.OtherUserID]; ok && profile.Name != "" {
+				displayTitle = profile.Name
+			}
+		}
+
 		resp = append(resp, types.FeedCommunityItemResponse{
 			ID:            row.ID,
 			Title:         row.Title,
+			DisplayTitle:  displayTitle,
 			Kind:          row.Kind,
 			Icon:          mapCommunityIcon(row.Kind),
 			IsSystemImage: true,
@@ -152,6 +203,212 @@ func (h *FeedHandler) GetCommunities(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *FeedHandler) GetPostComments(w http.ResponseWriter, r *http.Request) {
+	postID := extractPostID(r.URL.Path, "/comments")
+	if postID == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	exists, err := h.store.PostExists(postID)
+	if err != nil {
+		http.Error(w, "failed to check post", http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	rows, err := h.store.ListCommentsByPostID(postID)
+	if err != nil {
+		http.Error(w, "failed to load comments", http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := h.buildCommentResponses(r, rows)
+	if err != nil {
+		http.Error(w, "failed to build comments", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *FeedHandler) CreatePostComment(w http.ResponseWriter, r *http.Request) {
+	claims, ok := GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	postID := extractPostID(r.URL.Path, "/comments")
+	if postID == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	var req types.CreateFeedCommentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	if req.Text == "" {
+		http.Error(w, "text is required", http.StatusBadRequest)
+		return
+	}
+
+	exists, err := h.store.PostExists(postID)
+	if err != nil {
+		http.Error(w, "failed to check post", http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	row, err := h.store.InsertComment(postID, claims.UserID, req.Text)
+	if err != nil {
+		http.Error(w, "failed to create comment", http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := h.buildCommentResponses(r, []types.FeedCommentRow{*row})
+	if err != nil || len(resp) == 0 {
+		http.Error(w, "failed to build comment response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(resp[0])
+}
+
+func (h *FeedHandler) LikePost(w http.ResponseWriter, r *http.Request) {
+	claims, ok := GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	postID := extractPostID(r.URL.Path, "/like")
+	if postID == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	exists, err := h.store.PostExists(postID)
+	if err != nil {
+		http.Error(w, "failed to check post", http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	if err := h.store.LikePost(postID, claims.UserID); err != nil {
+		http.Error(w, "failed to like post", http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := h.store.GetPostLikeState(postID, claims.UserID)
+	if err != nil {
+		http.Error(w, "failed to fetch like state", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *FeedHandler) UnlikePost(w http.ResponseWriter, r *http.Request) {
+	claims, ok := GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	postID := extractPostID(r.URL.Path, "/like")
+	if postID == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	exists, err := h.store.PostExists(postID)
+	if err != nil {
+		http.Error(w, "failed to check post", http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	if err := h.store.UnlikePost(postID, claims.UserID); err != nil {
+		http.Error(w, "failed to unlike post", http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := h.store.GetPostLikeState(postID, claims.UserID)
+	if err != nil {
+		http.Error(w, "failed to fetch like state", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *FeedHandler) buildCommentResponses(r *http.Request, rows []types.FeedCommentRow) ([]types.FeedCommentResponse, error) {
+	if len(rows) == 0 {
+		return []types.FeedCommentResponse{}, nil
+	}
+
+	seen := make(map[int]struct{})
+	authorIDs := make([]int, 0)
+
+	for _, row := range rows {
+		if _, ok := seen[row.AuthorID]; ok {
+			continue
+		}
+		seen[row.AuthorID] = struct{}{}
+		authorIDs = append(authorIDs, row.AuthorID)
+	}
+
+	profilesMap, err := h.profileClient.FetchProfilesBatch(r.Context(), authorIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([]types.FeedCommentResponse, 0, len(rows))
+	for _, row := range rows {
+		authorName := "Unknown user"
+		authorAvatar := "person.circle"
+
+		if profile, ok := profilesMap[row.AuthorID]; ok {
+			authorName = profile.Name
+			authorAvatar = profile.AvatarSystemName
+		}
+
+		resp = append(resp, types.FeedCommentResponse{
+			ID: row.ID,
+			Author: types.FeedAuthorPreview{
+				ID:        strconv.Itoa(row.AuthorID),
+				Name:      authorName,
+				AvatarURL: authorAvatar,
+			},
+			Text:      row.Content,
+			CreatedAt: row.CreatedAt,
+		})
+	}
+
+	return resp, nil
 }
 
 func uniqueSessionIDs(rows []types.FeedPostRow) []string {
@@ -222,4 +479,22 @@ func mapCommunityIcon(kind string) string {
 	default:
 		return "person.3.fill"
 	}
+}
+
+func hasSuffix(path string, suffix string) bool {
+	return len(path) >= len(suffix) && path[len(path)-len(suffix):] == suffix
+}
+
+func extractPostID(path string, suffix string) string {
+	prefix := "/posts/"
+	if len(path) <= len(prefix)+len(suffix) {
+		return ""
+	}
+
+	value := path[len(prefix):]
+	value = value[:len(value)-len(suffix)]
+	if value == "" {
+		return ""
+	}
+	return value
 }

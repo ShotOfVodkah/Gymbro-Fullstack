@@ -1,5 +1,4 @@
 import Foundation
-import GymbroNetwork
 import GymbroNavigation
 import GymbroTypes
 
@@ -20,6 +19,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     @Published var communities: [FeedCommunity] = []
     @Published var posts: [FeedPost] = []
+    
     @Published var isShowingChatCreation: Bool = false
     @Published var chatCreationStep: ChatCreationStep = .chooseType
     @Published var chatCreationDraft = ChatCreationDraft()
@@ -27,11 +27,22 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var groupChatSearchText: String = ""
     @Published var chatCreationPeople: [PersonItem] = []
     
+    @Published var isShowingCommentsSheet: Bool = false
+    @Published var selectedPostForComments: FeedPost?
+    @Published var comments: [FeedComment] = []
+    @Published var commentsDraftText: String = ""
+    @Published var isCommentsLoading: Bool = false
+    
     private let router: any Router
+    private let service: any FeedsMainTabService
     private let analytics: any AnalyticsService
-
-    init(router: any Router, analytics: any AnalyticsService) {
+    
+    init(
+        router: any Router,
+        service: any FeedsMainTabService
+    ) {
         self.router = router
+        self.service = service
         self.analytics = analytics
         reload()
         analytics.track(.screenViewed(screen: .feedsMain))
@@ -47,7 +58,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     func didTapOpenFriends() {
         router.navigate(to: .feedsPeople)
     }
-
+    
     func didTapCalendarButton() {
         router.navigate(to: .feedsCalendar(context: .mine))
     }
@@ -66,7 +77,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         case .forYou:
             return []
         case .friends:
-            return communities.filter { $0.kind == .directPerson || $0.kind == .joinedGroup }
+            return communities
         case .personal:
             return communities.filter { $0.kind == .directPerson }
         case .group:
@@ -75,53 +86,29 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     var visiblePosts: [FeedPost] {
+        let sorted = posts.sorted { $0.createdAt > $1.createdAt }
+
         switch selectedTab {
         case .forYou:
-            return posts
+            return sorted
+
         case .friends:
-            return posts.filter { $0.kind == .friend || ($0.kind == .group && $0.isFromJoinedCommunity) }
+            return sorted.filter { $0.isFromFollowing }
+
         case .personal:
-            return posts.filter { $0.kind == .friend }
+            return sorted.filter { $0.isFromDirectChat }
+
         case .group:
-            return posts.filter { $0.kind == .group && $0.isFromJoinedCommunity }
-        }
-    }
-    
-    private func filteredChatCreationPeople(searchText: String) -> [PersonItem] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        guard !query.isEmpty else { return chatCreationPeople }
-        
-        return chatCreationPeople.filter {
-            $0.name.localizedCaseInsensitiveContains(query) ||
-            $0.username.localizedCaseInsensitiveContains(query) ||
-            $0.status.localizedCaseInsensitiveContains(query)
+            return sorted.filter { $0.isFromGroupCommunity }
         }
     }
     
     var directChatSelectablePeople: [PersonItem] {
         filteredChatCreationPeople(searchText: directChatSearchText)
     }
-
+    
     var groupChatSelectablePeople: [PersonItem] {
         filteredChatCreationPeople(searchText: groupChatSearchText)
-    }
-    
-    private func resetChatCreationDraft() {
-        chatCreationDraft = ChatCreationDraft()
-    }
-
-    private func resetChatCreationSearch() {
-        directChatSearchText = ""
-        groupChatSearchText = ""
-    }
-
-    private func loadChatCreationPeopleIfNeeded() {
-        guard chatCreationPeople.isEmpty else { return }
-        
-        Task {
-            await loadChatCreationPeople()
-        }
     }
     
     func didTapCreateCommunity() {
@@ -156,7 +143,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         chatCreationStep = .chooseDirectPerson
         analytics.track(.feedsChatTypeSelected(type: "direct"))
     }
-
+    
     func didChooseGroupChat() {
         resetChatCreationDraft()
         groupChatSearchText = ""
@@ -171,58 +158,6 @@ final class FeedsMainTabViewModel: ObservableObject {
             dismissChatCreation()
         case .chooseDirectPerson, .createGroup:
             chatCreationStep = .chooseType
-        }
-    }
-    
-    private func makeParticipant(from person: PersonItem) -> ChatParticipant {
-        ChatParticipant(
-            id: person.id,
-            name: person.name,
-            avatarSystemName: person.avatarSystemName
-        )
-    }
-    
-    private func openDirectChat(with person: PersonItem) {
-        Task {
-            do {
-                let room = try await AppMicroservices.feeds.createDirectChat(participantID: person.id)
-                let input = ChatSessionInput(response: room)
-                
-                isShowingChatCreation = false
-                router.navigate(to: .feedsChat(input: input))
-            } catch {
-                print("Failed to create direct chat:", error)
-            }
-        }
-    }
-
-    private func openExistingChat(communityID: String) {
-        Task {
-            do {
-                let room = try await AppMicroservices.feeds.fetchChat(id: communityID)
-                let input = ChatSessionInput(response: room)
-                router.navigate(to: .feedsChat(input: input))
-            } catch {
-                print("Failed to open chat:", error)
-            }
-        }
-    }
-    
-    private func openCreatedGroupChat(title: String, participants: [PersonItem]) {
-        Task {
-            do {
-                let room = try await AppMicroservices.feeds.createGroupChat(
-                    title: title,
-                    description: "",
-                    participantIDs: participants.map(\.id)
-                )
-                
-                let input = ChatSessionInput(response: room)
-                isShowingChatCreation = false
-                router.navigate(to: .feedsChat(input: input))
-            } catch {
-                print("Failed to create group chat:", error)
-            }
         }
     }
     
@@ -257,53 +192,112 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func createGroupChat() {
         guard canCreateGroupChat else { return }
-        analytics.track(.feedsGroupChatCreated(memberCount: chatCreationDraft.selectedGroupMembers.count))
-        openCreatedGroupChat(
-            title: chatCreationDraft.groupName,
-            participants: chatCreationDraft.selectedGroupMembers
-        )
+        
+        Task {
+            do {
+                let input = try await service.createGroupChat(
+                    title: chatCreationDraft.groupName,
+                    participantIDs: chatCreationDraft.selectedGroupMembers.map(\.id)
+                )
+                analytics.track(.feedsGroupChatCreated(memberCount: chatCreationDraft.selectedGroupMembers.count))
+                isShowingChatCreation = false
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to create group chat:", error)
+            }
+        }
     }
-
+    
     func toggleFollowInChatCreation(for personID: String) {
         guard let index = chatCreationPeople.firstIndex(where: { $0.id == personID }) else { return }
         chatCreationPeople[index] = chatCreationPeople[index].toggledFollow()
     }
-
+    
     func didTapCommunity(_ community: FeedCommunity) {
-        analytics.track(.feedsCommunityOpened(communityId: community.id.uuidString))
-        openExistingChat(communityID: community.id)
+        Task {
+            do {
+                let input = try await service.openExistingChat(communityID: community.id)
+                analytics.track(.feedsCommunityOpened(communityId: community.id.uuidString))
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to open chat:", error)
+            }
+        }
     }
-
+    
     func didTapComments(for post: FeedPost) {
+        selectedPostForComments = post
+        isShowingCommentsSheet = true
         analytics.track(.feedsPostCommentTapped(postId: post.id.uuidString))
-        print("open comments")
-//        router.navigate(to: .feedsComments(title: post.title))
+        Task {
+            await loadComments(for: post)
+        }
     }
-
+    
+    func dismissCommentsSheet() {
+        isShowingCommentsSheet = false
+        selectedPostForComments = nil
+        comments = []
+        commentsDraftText = ""
+        isCommentsLoading = false
+    }
+    
+    func sendComment() {
+        guard let post = selectedPostForComments else { return }
+        let postID = post.serverID
+        
+        let text = commentsDraftText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        
+        Task {
+            do {
+                let newComment = try await service.createComment(postID: postID, text: text)
+                comments.append(newComment)
+                commentsDraftText = ""
+                
+                if let index = posts.firstIndex(where: { $0.id == post.id }) {
+                    posts[index].commentsCount += 1
+                }
+            } catch {
+                print("Failed to send comment:", error)
+            }
+        }
+    }
+    
     func didTapExercise(_ exercise: ExerciseItem) {
         print("workout info")
     }
-
-    func toggleLike(for postID: UUID) {
+    
+    func toggleLike(for postID: String) {
         guard let index = posts.firstIndex(where: { $0.id == postID }) else { return }
+        
+        let oldIsLiked = posts[index].isLiked
+        let oldLikesCount = posts[index].likesCount
+        
         posts[index].isLiked.toggle()
         posts[index].likesCount += posts[index].isLiked ? 1 : -1
-        analytics.track(.feedsPostLiked(postId: postID.uuidString, isLiked: posts[index].isLiked))
+        
+        Task {
+            do {
+                try await service.toggleLike(postID: postID, isLiked: oldIsLiked)
+                analytics.track(.feedsPostLiked(postId: postID.uuidString, isLiked: posts[index].isLiked))
+            } catch {
+                print("Failed to toggle like:", error)
+                
+                guard let rollbackIndex = posts.firstIndex(where: { $0.id == postID }) else { return }
+                posts[rollbackIndex].isLiked = oldIsLiked
+                posts[rollbackIndex].likesCount = oldLikesCount
+            }
+        }
     }
     
     private func loadFeed() async {
         screenState = .loading
         
         do {
-            async let feedResponse = AppMicroservices.feeds.fetchFeed()
-            async let communitiesResponse = AppMicroservices.feeds.fetchCommunities()
-            
-            let postsResult = try await feedResponse
-            let communitiesResult = try await communitiesResponse
-            
-            posts = postsResult.map(FeedPost.init(response:))
-            communities = communitiesResult.map(FeedCommunity.init(response:))
-            
+            let screenData = try await service.fetchScreen()
+            posts = screenData.posts
+            communities = screenData.communities
             screenState = .loaded
         } catch {
             print("Failed to load feed:", error)
@@ -313,32 +307,66 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     private func loadChatCreationPeople() async {
         do {
-            async let friendsResponse = AppMicroservices.feeds.fetchFriends()
-            async let followingResponse = AppMicroservices.feeds.fetchFollowing()
-            async let discoverResponse = AppMicroservices.feeds.fetchDiscoverPeople()
-            
-            let friends = try await friendsResponse.map(PersonItem.init(response:))
-            let following = try await followingResponse.map(PersonItem.init(response:))
-            let discover = try await discoverResponse.map(PersonItem.init(response:))
-            
-            let combined = friends + following + discover
-            chatCreationPeople = uniquePeople(combined)
+            chatCreationPeople = try await service.fetchChatCreationPeople()
         } catch {
             print("Failed to load chat creation people:", error)
             chatCreationPeople = []
         }
     }
     
-    private func uniquePeople(_ people: [PersonItem]) -> [PersonItem] {
-        var seen = Set<String>()
-        var result: [PersonItem] = []
+    private func loadChatCreationPeopleIfNeeded() {
+        guard chatCreationPeople.isEmpty else { return }
         
-        for person in people {
-            if seen.contains(person.id) { continue }
-            seen.insert(person.id)
-            result.append(person)
+        Task {
+            await loadChatCreationPeople()
+        }
+    }
+    
+    private func loadComments(for post: FeedPost) async {
+        let postID = post.serverID
+        
+        isCommentsLoading = true
+        
+        do {
+            comments = try await service.fetchComments(postID: postID)
+        } catch {
+            print("Failed to load comments:", error)
+            comments = []
         }
         
-        return result
+        isCommentsLoading = false
+    }
+    
+    private func openDirectChat(with person: PersonItem) {
+        Task {
+            do {
+                let input = try await service.createDirectChat(with: person.id)
+                isShowingChatCreation = false
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to create direct chat:", error)
+            }
+        }
+    }
+    
+    private func filteredChatCreationPeople(searchText: String) -> [PersonItem] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !query.isEmpty else { return chatCreationPeople }
+        
+        return chatCreationPeople.filter {
+            $0.name.localizedCaseInsensitiveContains(query) ||
+            $0.username.localizedCaseInsensitiveContains(query) ||
+            $0.status.localizedCaseInsensitiveContains(query)
+        }
+    }
+    
+    private func resetChatCreationDraft() {
+        chatCreationDraft = ChatCreationDraft()
+    }
+    
+    private func resetChatCreationSearch() {
+        directChatSearchText = ""
+        groupChatSearchText = ""
     }
 }

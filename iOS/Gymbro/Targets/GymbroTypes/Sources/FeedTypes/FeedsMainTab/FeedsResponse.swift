@@ -1,17 +1,17 @@
 import Foundation
 
-struct FeedAuthorPreviewResponse: Decodable {
+public struct FeedAuthorPreviewResponse: Decodable {
     let id: String
     let name: String
     let avatar_url: String
 }
 
-struct FeedCommunityPreviewResponse: Decodable {
+public struct FeedCommunityPreviewResponse: Decodable {
     let id: String
     let title: String
 }
 
-struct FeedWorkoutExercisePreviewResponse: Decodable {
+public struct FeedWorkoutExercisePreviewResponse: Decodable {
     let id: String
     let name: String
     let type: String
@@ -25,7 +25,7 @@ struct FeedWorkoutExercisePreviewResponse: Decodable {
     let breathCount: Int?
 }
 
-struct FeedWorkoutPreviewResponse: Decodable {
+public struct FeedWorkoutPreviewResponse: Decodable {
     let id: String
     let title: String
     let category: String
@@ -46,14 +46,24 @@ public struct FeedPostItemResponse: Decodable {
     let comments_count: Int
     let is_liked: Bool
     let kind: String
-    let is_from_joined_community: Bool
+    let is_from_following: Bool
+    let is_from_direct_chat: Bool
+    let is_from_group_community: Bool
 }
 
 public struct FeedCommunityItemResponse: Decodable {
     let id: String
     let title: String
+    let display_title: String
     let kind: String
     let icon: String
     let is_system_image: Bool
     let members_count: Int
+}
+
+public struct FeedCommentResponse: Decodable {
+    let id: String
+    let author: FeedAuthorPreviewResponse
+    let text: String
+    let created_at: Date
 }

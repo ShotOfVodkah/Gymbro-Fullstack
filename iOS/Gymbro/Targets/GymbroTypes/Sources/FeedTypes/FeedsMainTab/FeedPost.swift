@@ -1,7 +1,10 @@
 import Foundation
 
 public struct FeedPost: Identifiable, Hashable {
-    public let id: UUID
+    public let id: String
+    public let serverID: String
+    public let createdAt: Date
+    
     public let authorName: String
     public let authorAvatar: String
     public let postedAt: String
@@ -14,14 +17,21 @@ public struct FeedPost: Identifiable, Hashable {
     public let description: String
     public let exercises: [ExerciseItem]
     public let totalExercisesCount: Int
+    
     public var likesCount: Int
     public var commentsCount: Int
     public var isLiked: Bool
+    
     public let kind: FeedPostKind
-    public let isFromJoinedCommunity: Bool
+    
+    public let isFromFollowing: Bool
+    public let isFromDirectChat: Bool
+    public let isFromGroupCommunity: Bool
     
     public init(
-        id: UUID = UUID(),
+        id: String,
+        serverID: String,
+        createdAt: Date,
         authorName: String,
         authorAvatar: String,
         postedAt: String,
@@ -38,9 +48,13 @@ public struct FeedPost: Identifiable, Hashable {
         commentsCount: Int,
         isLiked: Bool,
         kind: FeedPostKind,
-        isFromJoinedCommunity: Bool
+        isFromFollowing: Bool,
+        isFromDirectChat: Bool,
+        isFromGroupCommunity: Bool
     ) {
         self.id = id
+        self.serverID = serverID
+        self.createdAt = createdAt
         self.authorName = authorName
         self.authorAvatar = authorAvatar
         self.postedAt = postedAt
@@ -57,15 +71,9 @@ public struct FeedPost: Identifiable, Hashable {
         self.commentsCount = commentsCount
         self.isLiked = isLiked
         self.kind = kind
-        self.isFromJoinedCommunity = isFromJoinedCommunity
-    }
-    
-    public static func == (lhs: FeedPost, rhs: FeedPost) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        self.isFromFollowing = isFromFollowing
+        self.isFromDirectChat = isFromDirectChat
+        self.isFromGroupCommunity = isFromGroupCommunity
     }
 }
 
@@ -77,7 +85,9 @@ public enum FeedPostKind: Hashable {
 
 extension FeedPost {
     public init(response: FeedPostItemResponse) {
-        self.id = UUID(uuidString: response.id) ?? UUID()
+        self.id = response.id
+        self.serverID = response.id
+        self.createdAt = response.created_at
         self.authorName = response.author.name
         self.authorAvatar = response.author.avatar_url
         self.postedAt = Self.formattedDate(response.created_at)
@@ -94,7 +104,9 @@ extension FeedPost {
         self.commentsCount = response.comments_count
         self.isLiked = response.is_liked
         self.kind = Self.mapKind(response.kind)
-        self.isFromJoinedCommunity = response.is_from_joined_community
+        self.isFromFollowing = response.is_from_following
+        self.isFromDirectChat = response.is_from_direct_chat
+        self.isFromGroupCommunity = response.is_from_group_community
     }
     
     private static func mapExercisePreview(_ item: FeedWorkoutExercisePreviewResponse) -> ExerciseItem {
@@ -112,7 +124,6 @@ extension FeedPost {
                     weightKg: item.weightKg ?? 0
                 )
             )
-            
         case "cardio":
             return .cardio(
                 CardioExercise(
@@ -123,7 +134,6 @@ extension FeedPost {
                     pace: mapPace(item.pace)
                 )
             )
-            
         case "yoga":
             return .yoga(
                 YogaExercise(
@@ -134,7 +144,6 @@ extension FeedPost {
                     breathCount: item.breathCount ?? 0
                 )
             )
-            
         default:
             return .fallback(
                 DefaultExercise(
@@ -148,41 +157,26 @@ extension FeedPost {
     
     private static func mapMuscleGroup(_ rawValue: String) -> MuscleGroup {
         switch rawValue {
-        case "chest":
-            return .chest
-        case "back":
-            return .back
-        case "shoulders":
-            return .shoulders
-        case "biceps":
-            return .biceps
-        case "triceps":
-            return .triceps
-        case "legs":
-            return .legs
-        case "glutes":
-            return .glutes
-        case "core":
-            return .core
-        case "full_body":
-            return .fullBody
-        default:
-            return .fullBody
+        case "chest": return .chest
+        case "back": return .back
+        case "shoulders": return .shoulders
+        case "biceps": return .biceps
+        case "triceps": return .triceps
+        case "legs": return .legs
+        case "glutes": return .glutes
+        case "core": return .core
+        case "full_body": return .fullBody
+        default: return .fullBody
         }
     }
     
     private static func mapPace(_ rawValue: String?) -> PaceType {
         switch rawValue {
-        case "walk":
-            return .walk
-        case "run":
-            return .run
-        case "sprint":
-            return .sprint
-        case "recovery":
-            return .recovery
-        default:
-            return .jog
+        case "walk": return .walk
+        case "run": return .run
+        case "sprint": return .sprint
+        case "recovery": return .recovery
+        default: return .jog
         }
     }
     
@@ -201,12 +195,17 @@ extension FeedPost {
     
     private static func mapKind(_ rawValue: String) -> FeedPostKind {
         switch rawValue {
-        case "friend":
-            return .friend
-        case "group":
-            return .group
-        default:
-            return .personal
+        case "friend": return .friend
+        case "group": return .group
+        default: return .personal
         }
+    }
+    
+    public static func == (lhs: FeedPost, rhs: FeedPost) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

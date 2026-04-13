@@ -36,7 +36,7 @@ struct CommunityBubbleView: View {
                     }
                 }
 
-                Text(community.title)
+                Text(community.displayTitle)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)

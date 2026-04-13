@@ -31,6 +31,44 @@ public final class FeedsClient {
         )
     }
     
+    public func fetchPostComments(postID: String) async throws -> [FeedCommentResponse] {
+        try await client.request(
+            method: .GET,
+            path: "posts/\(postID)/comments",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [FeedCommentResponse].self
+        )
+    }
+
+    public func createPostComment(postID: String, text: String) async throws -> FeedCommentResponse {
+        try await client.request(
+            method: .POST,
+            path: "posts/\(postID)/comments",
+            body: CreateFeedCommentRequest(text: text),
+            requiresAuth: true,
+            responseType: FeedCommentResponse.self
+        )
+    }
+    
+    public func likePost(postID: String) async throws {
+        try await client.requestVoid(
+            method: .POST,
+            path: "posts/\(postID)/like",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true
+        )
+    }
+
+    public func unlikePost(postID: String) async throws {
+        try await client.requestVoid(
+            method: .DELETE,
+            path: "posts/\(postID)/like",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true
+        )
+    }
+    
     public func fetchCalendarPeople(
         context: CalendarContext
     ) async throws -> [CalendarPersonResponse] {
