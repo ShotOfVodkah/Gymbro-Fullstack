@@ -22,6 +22,7 @@ final class FeedsPeopleViewModel: ObservableObject {
     
     private let router: any Router
     private let service: any FeedsPeopleService
+    private let analytics: any AnalyticsService
     
     init(
         router: any Router,
@@ -29,6 +30,7 @@ final class FeedsPeopleViewModel: ObservableObject {
         analytics: any AnalyticsService
     ) {
         self.router = router
+        self.analytics = analytics
         self.service = service
         reload()
         analytics.track(.screenViewed(screen: .feedsPeople))
@@ -96,7 +98,7 @@ final class FeedsPeopleViewModel: ObservableObject {
                 print("Failed to load person:", error)
                 selectedPerson = person
             }
-            analytics.track(.peoplePersonOpened(personId: person.id.uuidString))
+            analytics.track(.peoplePersonOpened(personId: person.id))
         }
     }
     
@@ -125,13 +127,13 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     func didTapViewProfile(for person: PersonItem) {
-        analytics.track(.peopleProfileOpened(personId: person.id.uuidString))
+        analytics.track(.peopleProfileOpened(personId: person.id))
         selectedPerson = nil
         router.navigate(to: .feedsProfile(title: person.name))
     }
     
     func didTapViewMessage(for person: PersonItem) {
-        analytics.track(.peopleMessageOpened(personId: person.id.uuidString))
+        analytics.track(.peopleMessageOpened(personId: person.id))
         selectedPerson = nil
         
         Task {

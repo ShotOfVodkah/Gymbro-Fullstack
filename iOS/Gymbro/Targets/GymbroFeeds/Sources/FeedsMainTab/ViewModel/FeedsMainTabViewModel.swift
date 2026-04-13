@@ -39,7 +39,8 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     init(
         router: any Router,
-        service: any FeedsMainTabService
+        service: any FeedsMainTabService,
+        analytics: any AnalyticsService
     ) {
         self.router = router
         self.service = service
@@ -64,7 +65,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     func didTapAuthor(_ post: FeedPost) {
-        analytics.track(.feedsPostAuthorTapped(postId: post.id.uuidString))
+        analytics.track(.feedsPostAuthorTapped(postId: post.id))
         router.navigate(to: .feedsProfile(title: post.authorName))
     }
     
@@ -163,7 +164,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func didSelectDirectPerson(_ person: PersonItem) {
         chatCreationDraft.selectedDirectPerson = person
-        analytics.track(.feedsDirectChatPersonSelected(personId: person.id.uuidString))
+        analytics.track(.feedsDirectChatPersonSelected(personId: person.id))
         openDirectChat(with: person)
     }
     
@@ -174,7 +175,7 @@ final class FeedsMainTabViewModel: ObservableObject {
             chatCreationDraft.selectedGroupMembers.append(person)
         }
         analytics.track(.feedsGroupMemberToggled(
-            personId: person.id.uuidString,
+            personId: person.id,
             selectedCount: chatCreationDraft.selectedGroupMembers.count
         ))
     }
@@ -217,7 +218,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         Task {
             do {
                 let input = try await service.openExistingChat(communityID: community.id)
-                analytics.track(.feedsCommunityOpened(communityId: community.id.uuidString))
+                analytics.track(.feedsCommunityOpened(communityId: community.id))
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to open chat:", error)
@@ -228,7 +229,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     func didTapComments(for post: FeedPost) {
         selectedPostForComments = post
         isShowingCommentsSheet = true
-        analytics.track(.feedsPostCommentTapped(postId: post.id.uuidString))
+        analytics.track(.feedsPostCommentTapped(postId: post.id))
         Task {
             await loadComments(for: post)
         }
@@ -280,7 +281,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         Task {
             do {
                 try await service.toggleLike(postID: postID, isLiked: oldIsLiked)
-                analytics.track(.feedsPostLiked(postId: postID.uuidString, isLiked: posts[index].isLiked))
+                analytics.track(.feedsPostLiked(postId: postID, isLiked: posts[index].isLiked))
             } catch {
                 print("Failed to toggle like:", error)
                 

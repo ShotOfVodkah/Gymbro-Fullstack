@@ -29,14 +29,12 @@ struct WorkoutsListView: View {
                         .font(.title3)
                         .foregroundStyle(Color.white)
                     AppButton("Refresh", size: .xl) {
-                        viewModel.reload()
+                        viewModel.screenState = .loading
+                        viewModel.fetchData()
                     }
                 }
                 .padding(.horizontal, 40)
             }
-        }
-        .task {
-            viewModel.loadIfNeeded()
         }
         .sheet(item: $viewModel.streakModel, onDismiss: {
             viewModel.streakModel = nil

@@ -131,7 +131,7 @@ final class ChatViewModel: ObservableObject {
     
     func didTapWorkoutMessage(_ message: ChatMessage) {
         guard case .workout(let sessionID, _, _, _, _) = message.kind else { return }
-        analytics.track(.chatWorkoutMessageTapped(workoutId: workoutID))
+        analytics.track(.chatWorkoutMessageTapped(workoutId: sessionID))
         print("open workout:", sessionID)
     }
     

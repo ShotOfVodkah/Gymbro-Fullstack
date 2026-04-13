@@ -29,10 +29,12 @@ final class FeedsCalendarViewModel: ObservableObject {
     init(
         input: CalendarScreenInput,
         router: any Router,
-        service: any FeedsCalendarService
+        service: any FeedsCalendarService,
+        analytics: any AnalyticsService
     ) {
         self.input = input
         self.router = router
+        self.analytics = analytics
         self.service = service
         reload()
         analytics.track(.screenViewed(screen: .feedsCalendar))
