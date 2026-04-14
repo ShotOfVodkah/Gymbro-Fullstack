@@ -93,7 +93,12 @@ final class ChatViewModel: ObservableObject {
     func didTapHeaderTitle() {
         switch input.presentationStyle {
         case .direct(let person):
-            router.navigate(to: .feedsProfile(title: person.name))
+            guard let userID = Int(person.id) else {
+                print("Invalid userID: \(person.id)")
+                return
+            }
+            router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+            print("\(userID)")
         case .group:
             loadAvailablePeopleToAdd()
             isShowingGroupInfo = true

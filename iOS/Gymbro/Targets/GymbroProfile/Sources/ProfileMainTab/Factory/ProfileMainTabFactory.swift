@@ -6,18 +6,26 @@ import GymbroNavigation
 import GymbroTypes
 
 public final class ProfileMainTabFactoryImpl {
-
-    public init() {}
-
-    @MainActor
-    public func makeView(analytics: any AnalyticsService) -> some View  {
-        guard let viewModelCache else {
-            let viewModel = ProfileMainTabViewModel(analytics: analytics)
-            viewModelCache = viewModel
-            return ProfileMainTabView(viewModel: viewModel)
-        }
-        return ProfileMainTabView(viewModel: viewModelCache)
-    }
     
-    private var viewModelCache: ProfileMainTabViewModel?
+    private var viewModelCache: [ProfileViewMode: ProfileMainTabViewModel] = [:]
+    
+    public init() {}
+    
+    @MainActor
+    public func makeView(router: any Router, mode: ProfileViewMode, analytics: any AnalyticsService) -> some View {
+        if let cachedViewModel = viewModelCache[mode] {
+            return ProfileMainTabView(viewModel: cachedViewModel)
+        }
+        
+        let service = ProfileMainServiceImpl(client: AppMicroservices.feeds)
+        let viewModel = ProfileMainTabViewModel(
+            router: router,
+            mode: mode,
+            service: service,
+            analytics: analytics
+        )
+        viewModelCache[mode] = viewModel
+        
+        return ProfileMainTabView(viewModel: viewModel)
+    }
 }

@@ -127,9 +127,14 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     func didTapViewProfile(for person: PersonItem) {
+        guard let userID = Int(person.id) else {
+            print("Invalid userID: \(person.id)")
+            return
+        }
+        router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+        print("\(userID)")
         analytics.track(.peopleProfileOpened(personId: person.id))
         selectedPerson = nil
-        router.navigate(to: .feedsProfile(title: person.name))
     }
     
     func didTapViewMessage(for person: PersonItem) {

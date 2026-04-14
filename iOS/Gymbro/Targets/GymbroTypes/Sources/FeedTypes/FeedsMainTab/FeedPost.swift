@@ -5,6 +5,7 @@ public struct FeedPost: Identifiable, Hashable {
     public let serverID: String
     public let createdAt: Date
     
+    public let authorID: String
     public let authorName: String
     public let authorAvatar: String
     public let postedAt: String
@@ -32,6 +33,7 @@ public struct FeedPost: Identifiable, Hashable {
         id: String,
         serverID: String,
         createdAt: Date,
+        authorID: String,
         authorName: String,
         authorAvatar: String,
         postedAt: String,
@@ -55,6 +57,7 @@ public struct FeedPost: Identifiable, Hashable {
         self.id = id
         self.serverID = serverID
         self.createdAt = createdAt
+        self.authorID = authorID
         self.authorName = authorName
         self.authorAvatar = authorAvatar
         self.postedAt = postedAt
@@ -88,6 +91,7 @@ extension FeedPost {
         self.id = response.id
         self.serverID = response.id
         self.createdAt = response.created_at
+        self.authorID = response.author.id
         self.authorName = response.author.name
         self.authorAvatar = response.author.avatar_url
         self.postedAt = Self.formattedDate(response.created_at)

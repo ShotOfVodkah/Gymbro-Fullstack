@@ -66,7 +66,9 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func didTapAuthor(_ post: FeedPost) {
         analytics.track(.feedsPostAuthorTapped(postId: post.id))
-        router.navigate(to: .feedsProfile(title: post.authorName))
+        guard let userID = Int(post.authorID) else { return }
+        router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+        print("\(userID)")
     }
     
     var shouldShowCommunities: Bool {

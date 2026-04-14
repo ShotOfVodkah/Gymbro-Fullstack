@@ -100,9 +100,23 @@ final class AppServicesFactory {
         case .feedsChat(let input):
             makeFeedsChatScreen(input: input)
             
-            // change
-        case .feedsProfile(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
+            // profile
+        case .profileMain(let mode):
+            makeProfileMainScreen(mode: mode)
+        case .profileEdit:
+            FeedsMockDestinationView(title: "Edit Profile", subtitle: "Mock edit profile screen")
+        case .profileSettings:
+            FeedsMockDestinationView(title: "Settings", subtitle: "Mock settings screen")
+        case .profileStatistics(let mode):
+            FeedsMockDestinationView(
+                title: mode == .myProfile ? "My Statistics" : "User Statistics",
+                subtitle: "Mock statistics screen"
+            )
+        case .profilePosts(let userID, let userName):
+            FeedsMockDestinationView(
+                title: "\(userName)'s Posts",
+                subtitle: "Mock posts screen for userID: \(userID)"
+            )
         }
     }
     
@@ -226,7 +240,16 @@ final class AppServicesFactory {
     
     @MainActor
     func makeProfileMainTab() -> some View {
-        screenFactories.profileMainTabFactory.makeView(analytics: analytics)
+        makeProfileMainScreen(mode: .myProfile)
+    }
+    
+    @MainActor
+    func makeProfileMainScreen(mode: ProfileViewMode) -> some View {
+        screenFactories.profileMainTabFactory.makeView(
+            router: router,
+            mode: mode,
+            analytics: analytics
+        )
     }
 }
 

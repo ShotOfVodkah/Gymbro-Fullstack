@@ -16,9 +16,14 @@ public enum NavigationRoute: Hashable {
     case workoutGenerator
     
     case feedsPeople
-    case feedsProfile(title: String)
     case feedsCalendar(context: CalendarContext)
     case feedsChat(input: ChatSessionInput)
+    
+    case profileMain(mode: ProfileViewMode)
+    case profileEdit
+    case profileSettings
+    case profileStatistics(mode: ProfileViewMode)
+    case profilePosts(userID: Int, userName: String)
     
     // другие маршруты
 }

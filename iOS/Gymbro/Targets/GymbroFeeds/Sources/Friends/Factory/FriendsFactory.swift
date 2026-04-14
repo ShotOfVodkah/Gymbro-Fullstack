@@ -17,7 +17,7 @@ public final class FeedsPeopleFactoryImpl {
             let viewModel = FeedsPeopleViewModel(
                 router: router,
                 service: service,
-                 analytics: analytics
+                analytics: analytics
             )
             self.viewModelCache = viewModel
             return FeedsPeopleView(viewModel: viewModel)
