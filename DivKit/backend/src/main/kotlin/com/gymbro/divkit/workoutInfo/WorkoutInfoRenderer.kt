@@ -46,19 +46,23 @@ import divkit.dsl.wrapContentSize
 object WorkoutInfoRenderer {
 
     fun DivScope.render(
-        workout: Workout
+        workout: Workout,
+        type: String
     ): Div {
+        val showControls = type == "workout"
+        val showAdd = type =="session_other"
         return container(
             width = matchParentSize(),
             height = matchParentSize(),
             orientation = overlap,
-            items = listOf(
+            items = listOfNotNull(
                 container(
                     width = matchParentSize(),
                     height = matchParentSize(),
                     orientation = vertical,
-                    items = listOf(
-                        buttons(workout.id),
+                    items = listOfNotNull(
+                        if (showControls) buttons(workout.id) else null,
+                        if (!showControls) spacer() else null,
                         header(
                             workout.name,
                             typeTitle(workout.type),
@@ -84,8 +88,19 @@ object WorkoutInfoRenderer {
                         )
                     )
                 ),
-                playButton(workout.id)
+                if (showControls) playButton(workout.id) else null,
+                if (showAdd) addButton(workout.id) else null
             )
+        )
+    }
+
+    private fun DivScope.spacer(): Div {
+        return container(
+            orientation = horizontal,
+            width = matchParentSize(),
+            height = fixedSize(50),
+            contentAlignmentHorizontal = right,
+            items = listOf()
         )
     }
 
@@ -420,6 +435,85 @@ object WorkoutInfoRenderer {
                 url = Url.create("app://open_player?id=$id&")
             )
         )
+        )
+    }
+
+    private fun DivScope.addButton(
+        id: String
+    ): Div {
+        return container(
+            orientation = overlap,
+            border = border(cornerRadius = 28),
+            alignmentVertical = bottom,
+            width = matchParentSize(),
+            height = wrapContentSize(),
+            margins = edgeInsets( left = 10, right = 10, bottom = 25),
+            items = listOf(
+                container(
+                    width = matchParentSize(),
+                    height = matchParentSize(),
+                    border = border(cornerRadius = 28),
+                    paddings = edgeInsets(1),
+                    background = linearGradient(
+                        angle = 180,
+                        colors = listOf(
+                            colorArrayElement("#99FFFFFF"),
+                            colorArrayElement("#45FFFFFF"),
+                            colorArrayElement("#00FFFFFF")
+                        )
+                    ).asList()
+                ),
+                container(
+                    width = matchParentSize(),
+                    height = matchParentSize(),
+                    border = border(cornerRadius = 26),
+                    margins = edgeInsets(2),
+                    background = solidBackground(color("#732AFF")).asList()
+                ),
+                container(
+                    width = matchParentSize(),
+                    height = matchParentSize(),
+                    background = linearGradient(
+                        angle = -45,
+                        colors = listOf(
+                            colorArrayElement("#45FFFFFF"),
+                            colorArrayElement("#20FFFFFF"),
+                            colorArrayElement("#00FFFFFF")
+                        )
+                    ).asList()
+                ),
+                container(
+                    orientation = horizontal,
+                    width = wrapContentSize(),
+                    alignmentVertical = center,
+                    alignmentHorizontal = center,
+                    border = border(cornerRadius = 28),
+                    background = solidBackground(color = color("#00FFFFFF")).asList(),
+                    paddings = edgeInsets(18),
+                    items = listOf(
+                        text(
+                            text = "Add to my workouts",
+                            fontSize = 20,
+                            fontWeight = medium,
+                            textColor = color("#FFFFFF"),
+                            alignmentVertical = center
+                        )
+                    )
+                )
+            ),
+            actionAnimation = animation(
+                name = scale,
+                startValue = 1.0,
+                endValue = 0.9,
+                duration = 120,
+                interpolator = ease_in_out
+            ),
+            actions = listOf(
+                action(
+                    logId = "open_streak",
+                    url = Url.create("app://add_to_my?id=$id&")
+                )
+            )
         )
     }
 

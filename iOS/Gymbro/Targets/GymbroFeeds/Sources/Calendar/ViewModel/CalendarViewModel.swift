@@ -79,13 +79,13 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     func openMyWorkoutFromSelectedDay() {
         guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
-        print("open my workout:", workoutID)
+        router.navigate(to: .workoutInfo(id: workoutID, type: .session))
         analytics.track(.calendarMyWorkoutOpened)
     }
 
     func openPartnerWorkoutFromSelectedDay() {
         guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
-        print("open partner workout:", workoutID)
+        router.navigate(to: .workoutInfo(id: workoutID, type: .session))
         analytics.track(.calendarPartnerWorkoutOpened)
     }
 
@@ -107,13 +107,13 @@ final class FeedsCalendarViewModel: ObservableObject {
         
         if let partnerWorkoutID = day.partnerWorkoutID {
             analytics.track(.calendarPartnerWorkoutOpened)
-            print("open partner workout:", partnerWorkoutID)
+            router.navigate(to: .workoutInfo(id: partnerWorkoutID, type: .session))
             return
         }
         
         if let myWorkoutID = day.myWorkoutID {
             analytics.track(.calendarMyWorkoutOpened)
-            print("open my workout:", myWorkoutID)
+            router.navigate(to: .workoutInfo(id: myWorkoutID, type: .session))
         }
     }
     

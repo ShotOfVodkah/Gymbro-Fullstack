@@ -16,6 +16,13 @@ fun WorkoutDto.toDomain(): Workout = Workout(
     exercises = exercises.map { it.toExercise() }
 )
 
+fun WorkoutSessionDto.toWorkout(): Workout = Workout(
+    id = id,
+    name = workoutName,
+    type = workoutType.toWorkoutType(),
+    exercises = exercises.map { it.toExercise() }
+)
+
 fun WorkoutExerciseDto.toExercise(): Exercise {
     val mg = muscleGroup.toMuscleGroup()
     return when (type.lowercase()) {

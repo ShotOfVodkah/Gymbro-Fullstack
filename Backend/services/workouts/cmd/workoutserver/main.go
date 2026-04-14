@@ -33,6 +33,8 @@ func main() {
 	mux.Handle("/workouts", authMiddleware(workoutH))
 	mux.Handle("/exercises", exerciseH)
 	mux.Handle("/sessions/preview/batch", sessionH)
+	mux.Handle("/sessions/save-as-workout", authMiddleware(sessionH))
+	mux.Handle("/sessions/save-as-workout/", authMiddleware(sessionH))
 	mux.Handle("/sessions/calendar", sessionH)
 	mux.Handle("/sessions", authMiddleware(sessionH))
 	mux.Handle("/sessions/", authMiddleware(sessionH))

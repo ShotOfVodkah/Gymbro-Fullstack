@@ -104,6 +104,18 @@ public struct CreateSessionRequest: Encodable {
     }
 }
 
+public struct SaveSessionAsWorkoutRequest: Encodable {
+    public let sessionId: String
+    public let workoutId: String?
+    public let name: String?
+
+    public init(sessionId: String, workoutId: String? = nil, name: String? = nil) {
+        self.sessionId = sessionId
+        self.workoutId = workoutId
+        self.name = name
+    }
+}
+
 public struct GenerateWorkoutRequest: Encodable {
     public let user_input: String
     public let injuries: [String]
@@ -118,4 +130,9 @@ public struct GenerateWorkoutRequest: Encodable {
         self.injuries = injuries
         self.user_id = user_id
     }
+}
+
+public enum WorkoutInfoType: String {
+    case workout
+    case session
 }

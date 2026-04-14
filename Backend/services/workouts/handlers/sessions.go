@@ -3,20 +3,21 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 	"time"
-	"log"
 
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 var reSessionByID = regexp.MustCompile(`^/sessions/([^/]+)$`)
 
 type sessionHandler struct {
-	sessionStore store.SessionStore
+	sessionStore store.SessionStorer
 	workoutStore store.WorkoutStorer
 }
 
@@ -33,6 +34,15 @@ func (h *sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/sessions/preview/batch" {
 		if r.Method == http.MethodPost {
 			h.GetSessionPreviewBatch(w, r)
+		} else {
+			notFound(w, r)
+		}
+		return
+	}
+
+	if r.URL.Path == "/sessions/save-as-workout" || r.URL.Path == "/sessions/save-as-workout/" {
+		if r.Method == http.MethodPost {
+			h.SaveSessionAsWorkout(w, r)
 		} else {
 			notFound(w, r)
 		}
@@ -117,8 +127,7 @@ func (h *sessionHandler) GetCalendarSessions(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, id string) {
-	userID, ok := userIDFromContext(r)
-	if !ok {
+	if _, ok := userIDFromContext(r); !ok {
 		unauthorized(w, r)
 		return
 	}
@@ -130,10 +139,6 @@ func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, 
 	}
 	if err != nil {
 		internalServerError(w, r)
-		return
-	}
-	if session.UserID != userID {
-		unauthorized(w, r)
 		return
 	}
 	json.NewEncoder(w).Encode(session)
@@ -217,4 +222,120 @@ func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(session)
+}
+
+func (h *sessionHandler) SaveSessionAsWorkout(w http.ResponseWriter, r *http.Request) {
+	userID, ok := userIDFromContext(r)
+	if !ok {
+		unauthorized(w, r)
+		return
+	}
+
+	var req types.SaveSessionAsWorkoutRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		badRequest(w, r)
+		return
+	}
+	if req.SessionID == "" {
+		badRequest(w, r)
+		return
+	}
+
+	session, err := h.sessionStore.GetSessionByID(req.SessionID)
+	if errors.Is(err, store.ErrNotFound) {
+		notFound(w, r)
+		return
+	}
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	wt, ok := parseSessionWorkoutType(session.WorkoutType)
+	if !ok {
+		badRequest(w, r)
+		return
+	}
+
+	exerciseIDs := make([]string, 0, len(session.Exercises))
+	for _, ex := range session.Exercises {
+		exerciseIDs = append(exerciseIDs, ex.ID)
+	}
+	if err := h.sessionStore.EnsureExercisesFromSessionDictionary(exerciseIDs); err != nil {
+		if errors.Is(err, store.ErrInvalidExerciseDictionary) {
+			badRequest(w, r)
+			return
+		}
+		internalServerError(w, r)
+		return
+	}
+
+	exercises := make([]types.WorkoutExerciseInput, len(session.Exercises))
+	for i, ex := range session.Exercises {
+		exercises[i] = types.WorkoutExerciseInput{
+			ExerciseID:      ex.ID,
+			Sets:            ex.Sets,
+			Reps:            ex.Reps,
+			WeightKg:        ex.WeightKg,
+			DurationMinutes: ex.DurationMinutes,
+			Pace:            ex.Pace,
+			HoldSeconds:     ex.HoldSeconds,
+			BreathCount:     ex.BreathCount,
+		}
+	}
+
+	newWorkoutID := req.WorkoutID
+	if newWorkoutID == "" {
+		newWorkoutID = newID()
+	} else {
+		if _, err := h.workoutStore.GetWorkoutByID(newWorkoutID); err == nil {
+			conflict(w, r)
+			return
+		} else if !errors.Is(err, store.ErrNotFound) {
+			internalServerError(w, r)
+			return
+		}
+	}
+
+	name := session.WorkoutName
+	if req.Name != "" {
+		name = req.Name
+	}
+
+	input := types.WorkoutInput{
+		ID:        newWorkoutID,
+		UserID:    userID,
+		Name:      name,
+		Type:      wt,
+		Exercises: exercises,
+	}
+
+	if err := h.workoutStore.InsertWorkout(&input); err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+			conflict(w, r)
+			return
+		}
+		internalServerError(w, r)
+		return
+	}
+
+	workout, err := h.workoutStore.GetWorkoutByID(newWorkoutID)
+	if err != nil {
+		internalServerError(w, r)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(workout)
+}
+
+func parseSessionWorkoutType(s string) (types.WorkoutType, bool) {
+	t := types.WorkoutType(s)
+	switch t {
+	case types.WorkoutTypeStrength, types.WorkoutTypeCardio, types.WorkoutTypeYoga:
+		return t, true
+	default:
+		return "", false
+	}
 }

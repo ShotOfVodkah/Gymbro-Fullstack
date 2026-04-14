@@ -21,3 +21,8 @@ func unauthorized(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte(`{"error": "не авторизован"}`))
 }
+
+func conflict(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusConflict)
+	w.Write([]byte(`{"error": "конфликт"}`))
+}

@@ -12,6 +12,7 @@ final class WorkoutInfoViewModel: ObservableObject {
 
     init(
         id: String,
+        type: WorkoutInfoType,
         service: any WorkoutInfoService,
         router: any Router,
         modelModifier: WorkoutsModelModifier,
@@ -23,7 +24,9 @@ final class WorkoutInfoViewModel: ObservableObject {
         self.analytics = analytics
 
         let handler = WorkoutInfoDivUrlHandler { [weak self] link in
-            self?.handle(link: link)
+            Task { [weak self] in
+                await self?.handle(link: link)
+            }
         }
         self.divkitComponents = DivKitComponents(urlHandler: handler)
 
@@ -31,7 +34,7 @@ final class WorkoutInfoViewModel: ObservableObject {
             .sink { [weak self] event in
                 guard let self else { return }
                 switch event {
-                case .workoutEdited(let id): fetchData(with: id)
+                case .workoutEdited(let id): fetchData(with: id, type: .workout)
                 case .statusChanged(let status): handleStatusChange(status: status)
                 default: break
                 }
@@ -39,16 +42,16 @@ final class WorkoutInfoViewModel: ObservableObject {
             .store(in: &cancellables)
 
         analytics.track(.screenViewed(screen: .workoutInfo))
-        fetchData(with: id)
+        fetchData(with: id, type: type)
     }
 
     // MARK: - Actions
 
-    func fetchData(with id: String) {
+    func fetchData(with id: String, type: WorkoutInfoType) {
         screenState = .loading
         Task {
             do {
-                let (data, state) = try await service.fetchScreen(id: id)
+                let (data, state) = try await service.fetchScreen(id: id, type: type)
                 source = DivViewSource(kind: .data(data), cardId: "WorkoutInfoCard")
                 modelModifier.events.send(.statusChanged(status: state == .loaded ? .online : .offline))
                 screenState = state
@@ -75,7 +78,8 @@ final class WorkoutInfoViewModel: ObservableObject {
     // MARK: - Published state
 
     @Published var screenState: ScreenState = .loading
-    @Published var showAlert: Bool = false
+    @Published var showDeleteAlert: Bool = false
+    @Published var showAddAlert: Bool = false
     @Published var source: DivViewSource? = nil
     @Published var divkitComponents: DivKitComponents = DivKitComponents(urlHandler: NoopDivUrlHandler())
 
@@ -88,7 +92,7 @@ final class WorkoutInfoViewModel: ObservableObject {
     private let router: any Router
     private let analytics: any AnalyticsService
 
-    private func handle(link: WorkoutInfoNavigationLink) {
+    private func handle(link: WorkoutInfoNavigationLink) async {
         switch link {
         case .openPlayer(let id):
             router.navigate(to: .workoutPlayer(id: id))
@@ -96,7 +100,15 @@ final class WorkoutInfoViewModel: ObservableObject {
             router.navigate(to: .workoutBuilderForType(type: nil, workoutId: id))
         case .delete(let id):
             self.id = id
-            showAlert = true
+            showDeleteAlert = true
+        case .addToMy(let id):
+            do {
+                try await service.addWorkout(id: id)
+            } catch {
+                showAddAlert = true
+            }
+            router.pop()
+            modelModifier.events.send(.forceReload)
         }
     }
 
