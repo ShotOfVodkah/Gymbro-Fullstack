@@ -39,6 +39,20 @@ class GymbroBackendClient(
         }
     }
 
+    fun getSession(id: String, authorization: String): WorkoutSessionDto? {
+        return try {
+            val entity = HttpEntity<Void>(headers(authorization))
+            restTemplate.exchange(
+                "$backendUrl/sessions/$id",
+                HttpMethod.GET,
+                entity,
+                WorkoutSessionDto::class.java
+            ).body
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun getExercisesByType(type: String): List<ExerciseCatalogDto> {
         val url = "$backendUrl/exercises?type=$type"
         return restTemplate.exchange(

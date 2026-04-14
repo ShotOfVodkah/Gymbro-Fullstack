@@ -12,6 +12,7 @@ enum WorkoutsNavigationLink {
 enum WorkoutInfoNavigationLink {
     case openPlayer(id: String)
     case delete(id: String)
+    case addToMy(id: String)
     case edit(id: String)
 }
 

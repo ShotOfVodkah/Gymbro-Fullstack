@@ -81,8 +81,8 @@ final class AppServicesFactory {
     @ViewBuilder
     func makeDestinationView(for route: NavigationRoute) -> some View {
         switch route {
-        case .workoutInfo(let id):
-            makeWorkoutInfoScreen(id: id)
+        case .workoutInfo(let id, let type):
+            makeWorkoutInfoScreen(id: id, type: type)
         case .workoutPlayer(let id):
             makeWorkoutPlayerScreen(id: id)
         case .workoutBuilder:
@@ -123,9 +123,10 @@ final class AppServicesFactory {
     }
     
     @MainActor
-    func makeWorkoutInfoScreen(id: String) -> some View {
+    func makeWorkoutInfoScreen(id: String, type: WorkoutInfoType) -> some View {
         screenFactories.workoutInfoFactory.makeView(
             id: id,
+            type: type,
             router: router,
             divLocalRepository: divLocalRepository,
             actionsRepository: actionsRepository,

@@ -44,3 +44,9 @@ type SessionInput struct {
 	CompletedAt *time.Time             `json:"completedAt"`
 	Exercises   []SessionExerciseInput `json:"exercises"`
 }
+
+type SaveSessionAsWorkoutRequest struct {
+	SessionID string `json:"sessionId"`
+	WorkoutID string `json:"workoutId,omitempty"`
+	Name      string `json:"name,omitempty"`
+}

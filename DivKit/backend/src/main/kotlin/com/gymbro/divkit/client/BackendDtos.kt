@@ -1,5 +1,7 @@
 package com.gymbro.divkit.client
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
 data class ExerciseCatalogDto(
     val id: String,
     val name: String,
@@ -26,5 +28,15 @@ data class WorkoutDto(
     val userId: String? = null,
     val name: String,
     val type: String,
+    val exercises: List<WorkoutExerciseDto>
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class WorkoutSessionDto(
+    val id: String,
+    val userId: String,
+    val workoutId: String? = null,
+    val workoutName: String,
+    val workoutType: String,
     val exercises: List<WorkoutExerciseDto>
 )

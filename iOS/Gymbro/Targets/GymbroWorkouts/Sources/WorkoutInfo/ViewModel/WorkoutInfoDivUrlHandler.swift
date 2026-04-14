@@ -21,6 +21,12 @@ extension WorkoutInfoNavigationLink {
                 .value
             guard let id, !id.isEmpty else { return nil }
             self = .delete(id: id)
+        case "add_to_my":
+            let id = comps?.queryItems?
+                .first(where: { $0.name == "id" })?
+                .value
+            guard let id, !id.isEmpty else { return nil }
+            self = .addToMy(id: id)
         case "edit":
             let id = comps?.queryItems?
                 .first(where: { $0.name == "id" })?

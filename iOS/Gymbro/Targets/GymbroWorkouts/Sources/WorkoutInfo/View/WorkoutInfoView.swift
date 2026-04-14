@@ -2,16 +2,19 @@ import Foundation
 import SwiftUI
 import DivKit
 
+import GymbroTypes
 import GymbroCommonUI
 
 struct WorkoutInfoView: View {
     
     init(
         viewModel: WorkoutInfoViewModel,
-        id: String
+        id: String,
+        type: WorkoutInfoType
     ) {
         self.viewModel = viewModel
         self.id = id
+        self.type = type
     }
 
     var body: some View {
@@ -33,7 +36,7 @@ struct WorkoutInfoView: View {
                             .font(.title3)
                             .foregroundStyle(Color.white)
                         AppButton("Refresh", size: .xl) {
-                            viewModel.fetchData(with: id)
+                            viewModel.fetchData(with: id, type: type)
                         }
                     }
                     .padding(.horizontal, 40)
@@ -52,12 +55,21 @@ struct WorkoutInfoView: View {
             .padding(.leading, 16)
         }
         .customAlert(
-            isPresented: $viewModel.showAlert,
+            isPresented: $viewModel.showDeleteAlert,
             data: CustomAlertData(
                 message: "Are you sure you want to delete this workout?",
                 primaryButton: AppButton("Delete", action: {
-                    viewModel.showAlert = false
+                    viewModel.showDeleteAlert = false
                     viewModel.deleteCurrentWorkout()
+                })
+            )
+        )
+        .customAlert(
+            isPresented: $viewModel.showAddAlert,
+            data: CustomAlertData(
+                message: "There was an error adding this workout",
+                primaryButton: AppButton("Oh.. Ok", action: {
+                    viewModel.showAddAlert = false
                 })
             )
         )
@@ -71,4 +83,5 @@ struct WorkoutInfoView: View {
 
     @ObservedObject private var viewModel: WorkoutInfoViewModel
     private let id: String
+    private let type: WorkoutInfoType
 }

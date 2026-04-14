@@ -193,12 +193,12 @@ public final class WorkoutsClient {
         )
     }
 
-    public func fetchWorkoutInfoDivJson(with id: String) async throws -> Data {
+    public func fetchWorkoutInfoDivJson(with id: String, type: WorkoutInfoType) async throws -> Data {
         return try await client.requestData(
             method: .GET,
             base: URL(string: "http://localhost:8090"),
             path: "workoutInfo",
-            queryItems: [URLQueryItem(name: "id", value: id)],
+            queryItems: [URLQueryItem(name: "id", value: id), URLQueryItem(name: "type", value: type.rawValue)],
             body: Optional<EmptyBody>.none,
             requiresAuth: true
         )
@@ -223,6 +223,26 @@ public final class WorkoutsClient {
             body: body,
             requiresAuth: true
         )
+    }
+
+    public func saveSessionAsWorkout(
+        sessionId: String,
+        name: String? = nil,
+        workoutId: String? = nil
+    ) async throws -> Workout {
+        let body = SaveSessionAsWorkoutRequest(
+            sessionId: sessionId,
+            workoutId: workoutId,
+            name: name
+        )
+        let dto = try await client.request(
+            method: .POST,
+            path: "sessions/save-as-workout",
+            body: body,
+            requiresAuth: true,
+            responseType: WorkoutDTO.self
+        )
+        return dto.toWorkout()
     }
 
     public func deleteWorkout(id: String) async throws {

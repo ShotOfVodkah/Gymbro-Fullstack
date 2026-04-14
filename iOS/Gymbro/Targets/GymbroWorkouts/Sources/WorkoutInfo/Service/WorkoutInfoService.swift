@@ -4,7 +4,8 @@ import GymbroNetwork
 import GymbroTypes
 
 protocol WorkoutInfoService {
-    func fetchScreen(id: String) async throws -> (Data, ScreenState)
+    func fetchScreen(id: String, type: WorkoutInfoType) async throws -> (Data, ScreenState)
+    func addWorkout(id: String) async throws
     func deleteWorkout(id: String) async
 }
 
@@ -22,9 +23,9 @@ final class WorkoutInfoServiceImpl: WorkoutInfoService {
         self.localMapper = localMapper
     }
 
-    func fetchScreen(id: String) async throws -> (Data, ScreenState) {
+    func fetchScreen(id: String, type: WorkoutInfoType) async throws -> (Data, ScreenState) {
         do {
-            let data = try await networkClient.fetchWorkoutInfoDivJson(with: id)
+            let data = try await networkClient.fetchWorkoutInfoDivJson(with: id, type: type)
             return (data, .loaded)
         } catch {
             guard let data = localMapper.renderWorkoutInfo(id: id) else {
@@ -40,6 +41,10 @@ final class WorkoutInfoServiceImpl: WorkoutInfoService {
         } catch {
             actionsRepository.enqueueSmart(.deletedWorkout(id: id))
         }
+    }
+    
+    func addWorkout(id: String) async throws {
+        try await networkClient.saveSessionAsWorkout(sessionId: id)
     }
 
     // MARK: - Private

@@ -139,7 +139,7 @@ final class WorkoutsListViewModel: ObservableObject {
     private func handle(link: WorkoutsNavigationLink) {
         switch link {
         case .openWorkout(let id):
-            router.navigate(to: .workoutInfo(id: id))
+            router.navigate(to: .workoutInfo(id: id, type: .workout))
         case .openBuilder:
             router.navigate(to: .workoutBuilder)
         case .openStreak(let current, let goal, let daysLeft, let value):

@@ -12,6 +12,7 @@ public final class WorkoutInfoFactoryImpl {
     @MainActor
     public func makeView(
         id: String,
+        type: WorkoutInfoType,
         router: any Router,
         divLocalRepository: DivCacheRepository,
         actionsRepository: OfflineActionsRepository,
@@ -29,6 +30,7 @@ public final class WorkoutInfoFactoryImpl {
             )
             let viewModel = WorkoutInfoViewModel(
                 id: id,
+                type: type,
                 service: service,
                 router: router,
                 modelModifier: modelModifier,
@@ -36,9 +38,9 @@ public final class WorkoutInfoFactoryImpl {
             )
             viewModelCache = viewModel
             idCache = id
-            return WorkoutInfoView(viewModel: viewModel, id: id)
+            return WorkoutInfoView(viewModel: viewModel, id: id, type: type)
         }
-        return WorkoutInfoView(viewModel: viewModelCache, id: id)
+        return WorkoutInfoView(viewModel: viewModelCache, id: id, type: type)
     }
 
     private var idCache: String?
