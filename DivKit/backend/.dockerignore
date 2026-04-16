@@ -1,0 +1,11 @@
+.gradle
+build
+out
+.idea
+*.iml
+.gigaide
+.git
+.gitattributes
+**/.DS_Store
+local.properties
+*.log
