@@ -1,7 +1,7 @@
 package com.gymbro.divkit.workoutBuilderForType
 
 import com.gymbro.divkit.Exercise
-import com.gymbro.divkit.nameFor
+import com.gymbro.divkit.i18n.DomainStrings
 import divkit.dsl.Background
 import divkit.dsl.Container
 import divkit.dsl.Div
@@ -50,7 +50,8 @@ object WorkoutBuilderForTypeRenderer {
     fun DivScope.render(
         exercises: List<Exercise>,
         color: String,
-        selectedIds: Set<String>
+        selectedIds: Set<String>,
+        domain: DomainStrings,
     ): Div {
         return container(
             width = matchParentSize(),
@@ -67,7 +68,7 @@ object WorkoutBuilderForTypeRenderer {
                         toggleStateBlock(
                             id = exercise.id,
                             name = exercise.name,
-                            group = nameFor(exercise.muscleGroup),
+                            group = domain.muscle(exercise.muscleGroup),
                             color = color,
                             isSelected = exercise.id in selectedIds
                         )

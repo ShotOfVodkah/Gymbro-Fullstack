@@ -104,7 +104,8 @@ public final class WorkoutsClient {
     public func fetchWorkoutsList() async throws -> Data {
         let userId = try requireUserId()
         let queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "userId", value: userId)
+            URLQueryItem(name: "userId", value: userId),
+            divKitLanguageQueryItem(),
         ]
         return try await client.requestData(
             method: .GET,
@@ -151,6 +152,7 @@ public final class WorkoutsClient {
             method: .GET,
             base: URL(string: "http://localhost:8090"),
             path: "workoutBuilderTitle",
+            queryItems: [divKitLanguageQueryItem()],
             body: Optional<EmptyBody>.none,
             requiresAuth: true
         )
@@ -162,10 +164,9 @@ public final class WorkoutsClient {
     ) async throws -> Data {
         
         var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "type", value: type)
+            URLQueryItem(name: "type", value: type),
+            divKitLanguageQueryItem(),
         ]
-        
-        print(workout?.exercises)
         
         if let workout {
             let ids = workout.exercises.map { $0.id }
@@ -183,11 +184,15 @@ public final class WorkoutsClient {
     }
 
     public func fetchWorkoutBuilderSheetJson(with id: String) async throws -> Data {
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "id", value: id),
+            divKitLanguageQueryItem(),
+        ]
         return try await client.requestData(
             method: .GET,
             base: URL(string: "http://localhost:8090"),
             path: "workoutBuilderSheet",
-            queryItems: [URLQueryItem(name: "id", value: id)],
+            queryItems: queryItems,
             body: Optional<EmptyBody>.none,
             requiresAuth: true
         )
@@ -198,7 +203,11 @@ public final class WorkoutsClient {
             method: .GET,
             base: URL(string: "http://localhost:8090"),
             path: "workoutInfo",
-            queryItems: [URLQueryItem(name: "id", value: id), URLQueryItem(name: "type", value: type.rawValue)],
+            queryItems: [
+                URLQueryItem(name: "id", value: id),
+                URLQueryItem(name: "type", value: type.rawValue),
+                divKitLanguageQueryItem(),
+            ],
             body: Optional<EmptyBody>.none,
             requiresAuth: true
         )
@@ -284,6 +293,10 @@ public final class WorkoutsClient {
         }
         return userId
     }
-    
+
+    private func divKitLanguageQueryItem() -> URLQueryItem {
+        let code = Locale.current.language.languageCode?.identifier ?? "en"
+        return URLQueryItem(name: "lang", value: code)
+    }
 }
 

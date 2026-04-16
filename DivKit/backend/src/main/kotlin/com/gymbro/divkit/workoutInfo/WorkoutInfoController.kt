@@ -1,5 +1,6 @@
 package com.gymbro.divkit.workoutInfo
 
+import com.gymbro.divkit.Language
 import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
 import com.gymbro.divkit.client.toDomain
@@ -8,7 +9,6 @@ import divkit.dsl.Divan
 import divkit.dsl.container
 import divkit.dsl.data
 import divkit.dsl.divan
-import divkit.dsl.stringVariable
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -30,8 +30,11 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
     fun getWorkoutInfo(
         @RequestParam(defaultValue = "1") id: String,
         @RequestParam(defaultValue = "workout") type: String,
+        @RequestParam(name = "lang", required = false, defaultValue = "en") lang: String,
         request: HttpServletRequest
     ): ResponseEntity<Divan> {
+        val language = Language.fromRequestParam(lang)
+        val translations = WorkoutInfoTranslations(language)
         val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
 
@@ -63,7 +66,7 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
             divan {
                 data(
                     logId = "workouts_list",
-                    div = with(WorkoutInfoRenderer) { render(workout, sourceKind) },
+                    div = with(WorkoutInfoRenderer) { render(workout, sourceKind, translations) },
                     variables = listOf()
                 )
             },

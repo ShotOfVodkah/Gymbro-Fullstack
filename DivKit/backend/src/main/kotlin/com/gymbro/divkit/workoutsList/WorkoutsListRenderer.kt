@@ -1,7 +1,7 @@
 package com.gymbro.divkit.workoutsList
 
+import com.gymbro.divkit.Language
 import com.gymbro.divkit.WorkoutType
-import com.gymbro.divkit.typeTitle
 import com.gymbro.divkit.styleFor
 import divkit.dsl.core.expression
 import divkit.dsl.Visibility
@@ -56,114 +56,24 @@ object WorkoutsListRenderer {
         streakData: Int,
         streakGoal: Int,
         daysLeft: Int,
-        currentStreak: Int
+        currentStreak: Int,
+        language: Language
     ): Div {
+        val translations = WorkoutsListTranslations(language)
         return container(
             width = matchParentSize(),
             height = matchParentSize(),
             orientation = vertical,
             items = listOf(
-                workoutHeader(streakData, streakGoal, daysLeft, currentStreak),
+                workoutHeader(streakData, streakGoal, daysLeft, currentStreak, translations),
                 workoutSecondRow(),
                 gallery(
                     width = matchParentSize(),
                     height = matchParentSize(),
                     orientation = vertical,
                     columnCount = 1,
-                    items = workouts.map { workoutCard(it) }
+                    items = workouts.map { workoutCard(it, translations) }
                 )
-            )
-        )
-    }
-
-    private fun DivScope.emptyStateView(): Div {
-        return container(
-            orientation = vertical,
-            contentAlignmentVertical = center,
-            contentAlignmentHorizontal = center,
-            width = matchParentSize(),
-            height = matchParentSize(),
-            items = listOf(
-                text(
-                    text = "Wow, so empty here... Hit the plus button to add your first workout!",
-                    fontSize = 20,
-                    fontWeight = medium,
-                    textAlignmentHorizontal = center,
-                    textColor = color("#FFFFFF"),
-                    margins = edgeInsets(top = 16, left = 20, right = 20, bottom = 20),
-                    alignmentVertical = center,
-                    alignmentHorizontal = center
-                ),
-                container(
-                    orientation = overlap,
-                    border = border(cornerRadius = 38),
-                    margins = edgeInsets(top = 16, left = 20, right = 20, bottom = 100),
-                    width = wrapContentSize(),
-                    height = wrapContentSize(),
-                    items = listOf(
-                        container(
-                            width = matchParentSize(),
-                            height = matchParentSize(),
-                            border = border(cornerRadius = 38),
-                            paddings = edgeInsets(1),
-                            background = linearGradient(
-                                angle = 180,
-                                colors = listOf(
-                                    colorArrayElement("#99FFFFFF"),
-                                    colorArrayElement("#45FFFFFF"),
-                                    colorArrayElement("#00FFFFFF")
-                                )
-                            ).asList()
-                        ),
-                        container(
-                            width = matchParentSize(),
-                            height = matchParentSize(),
-                            border = border(cornerRadius = 38),
-                            margins = edgeInsets(1),
-                            background = solidBackground(color("#732AFF")).asList()
-                        ),
-                        container(
-                            width = matchParentSize(),
-                            height = matchParentSize(),
-                            background = linearGradient(
-                                angle = -45,
-                                colors = listOf(
-                                    colorArrayElement("#38FFFFFF"),
-                                    colorArrayElement("#19FFFFFF"),
-                                    colorArrayElement("#00FFFFFF")
-                                )
-                            ).asList()
-                        ),
-                        container(
-                            width = wrapContentSize(),
-                            height = wrapContentSize(),
-                            orientation = horizontal,
-                            alignmentVertical = center,
-                            border = border(cornerRadius = 38),
-                            paddings = edgeInsets(18),
-                            items = listOf(
-                                image(
-                                    imageUrl = Url.create("http://localhost:8090/assets/plus.png"),
-                                    width = fixedSize(30),
-                                    height = fixedSize(30)
-                                )
-                            )
-                        )
-                    ),
-                    actionAnimation = animation(
-                        name = scale,
-                        startValue = 1.0,
-                        endValue = 0.8,
-                        duration = 120,
-                        interpolator = ease_in_out
-                    ),
-                    actions = listOf(
-                        action(
-                            logId = "open_builder",
-                            url = Url.create("app://open_builder")
-                        )
-                    )
-                ),
             )
         )
     }
@@ -172,7 +82,8 @@ object WorkoutsListRenderer {
         streakData: Int,
         streakGoal: Int,
         daysLeft: Int,
-        current: Int
+        current: Int,
+        translations: WorkoutsListTranslations
     ): Div {
         val imageUrl = "http://localhost:8090/assets/fire.png"
         return container(
@@ -182,7 +93,7 @@ object WorkoutsListRenderer {
             margins = edgeInsets(bottom = 12),
             items = listOf(
                 text(
-                    text = "My workouts",
+                    text = translations.header(),
                     fontSize = 30,
                     fontWeight = bold,
                     textColor = color("#FFFFFF"),
@@ -396,7 +307,10 @@ object WorkoutsListRenderer {
             margins = edgeInsets(left = 10)
         )
 
-    private fun DivScope.workoutCard(item: WorkoutItem): Div {
+    private fun DivScope.workoutCard(
+        item: WorkoutItem,
+        translations: WorkoutsListTranslations
+    ): Div {
         val style = styleFor(item.type)
 
 
@@ -418,7 +332,7 @@ object WorkoutsListRenderer {
         return render(
             WorkoutCardTemplate.template,
             WorkoutCardTemplate.titleRef bind item.name,
-            WorkoutCardTemplate.subtitleRef bind typeTitle(item.type),
+            WorkoutCardTemplate.subtitleRef bind translations.workoutType(item.type),
             WorkoutCardTemplate.iconUrlRef bind Url.create(style.iconUrl),
             WorkoutCardTemplate.openUrlRef bind openUrl,
             WorkoutCardTemplate.visibilityRef bind expression(

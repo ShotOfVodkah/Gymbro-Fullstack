@@ -3,7 +3,6 @@ package com.gymbro.divkit.workoutBuilderTitle
 import com.gymbro.divkit.WorkoutStyle
 import com.gymbro.divkit.WorkoutType
 import com.gymbro.divkit.styleFor
-import com.gymbro.divkit.typeTitle
 import com.gymbro.divkit.Workout
 
 import divkit.dsl.Div
@@ -44,6 +43,7 @@ object WorkoutBuilderTitleRenderer {
 
     fun DivScope.render(
         workouts: List<Workout>,
+        t: WorkoutBuilderTitleTranslations,
     ): Div {
         return container(
             width = matchParentSize(),
@@ -51,23 +51,25 @@ object WorkoutBuilderTitleRenderer {
             orientation = vertical,
             paddings = edgeInsets(top = 16, bottom = 16),
             items = listOf(
-                screenHeader(),
+                screenHeader(t),
                 gallery(
                     width = matchParentSize(),
                     height = matchParentSize(),
                     orientation = vertical,
                     columnCount = 1,
                     items = listOf(
-                        aiCard(),
-                        categories(),
+                        aiCard(t),
+                        categories(t),
                         pagerWithIndicator(
+                            t = t,
                             items = workouts.map { workout ->
                                 premadeCard(
                                     name = workout.name,
-                                    category = typeTitle(workout.type),
+                                    workoutType = workout.type,
                                     color = styleFor(workout.type).backgroundColor,
                                     amount = workout.exercises.count(),
-                                    id = workout.id
+                                    id = workout.id,
+                                    t = t,
                                 )
                             }
                         )
@@ -77,14 +79,14 @@ object WorkoutBuilderTitleRenderer {
         )
     }
 
-    private fun DivScope.screenHeader(): Div {
+    private fun DivScope.screenHeader(t: WorkoutBuilderTitleTranslations): Div {
         return container(
             orientation = vertical,
             alignmentVertical = center,
             width = matchParentSize(),
             items = listOf(
                 text(
-                    text = "Build your workout",
+                    text = t.screenTitle(),
                     fontSize = 30,
                     fontWeight = bold,
                     textColor = color("#FFFFFF"),
@@ -92,7 +94,7 @@ object WorkoutBuilderTitleRenderer {
                     alignmentVertical = center
                 ),
                 text(
-                    text = "Make the perfect workout just for you using one of the many options!",
+                    text = t.screenSubtitle(),
                     fontSize = 16,
                     margins = edgeInsets(left = 20, right = 20, bottom = 17),
                     fontWeight = bold,
@@ -102,7 +104,7 @@ object WorkoutBuilderTitleRenderer {
         )
     }
 
-    private fun DivScope.aiCard(): Div {
+    private fun DivScope.aiCard(t: WorkoutBuilderTitleTranslations): Div {
         val imageUrl = "http://localhost:8090/assets/lightning.png"
         return container(
             orientation = vertical,
@@ -135,7 +137,7 @@ object WorkoutBuilderTitleRenderer {
                     )
                 ),
                 text(
-                    text = "AI generator for workouts",
+                    text = t.aiCardTitle(),
                     fontSize = 20,
                     fontWeight = bold,
                     textColor = color("#FFFFFF"),
@@ -143,18 +145,18 @@ object WorkoutBuilderTitleRenderer {
                     alignmentVertical = center
                 ),
                 text(
-                    text = "Make a personalized workout in a matter of seconds using the magic of AI!",
+                    text = t.aiCardBody(),
                     fontSize = 16,
                     margins = edgeInsets(top = 10),
                     fontWeight = medium,
                     textColor = color("#75FFFFFF"),
                 ),
-                aiButton()
+                aiButton(t)
             )
         )
     }
 
-    private fun DivScope.aiButton(): Div {
+    private fun DivScope.aiButton(t: WorkoutBuilderTitleTranslations): Div {
         return container(
             orientation = overlap,
             border = border(cornerRadius = 28),
@@ -205,7 +207,7 @@ object WorkoutBuilderTitleRenderer {
                     paddings = edgeInsets(18),
                     items = listOf(
                         text(
-                            text = "Try it out!",
+                            text = t.aiCta(),
                             fontSize = 16,
                             fontWeight = bold,
                             textColor = color("#FFFFFF"),
@@ -230,7 +232,7 @@ object WorkoutBuilderTitleRenderer {
         )
     }
 
-    private fun DivScope.categories(): Div {
+    private fun DivScope.categories(t: WorkoutBuilderTitleTranslations): Div {
         return container(
             orientation = vertical,
             width = matchParentSize(),
@@ -238,7 +240,7 @@ object WorkoutBuilderTitleRenderer {
             margins = edgeInsets(top = 16, right = 16),
             items = listOf(
                 text(
-                    text = "Build by category",
+                    text = t.buildByCategory(),
                     fontSize = 20,
                     fontWeight = bold,
                     textColor = color("#FFFFFF"),
@@ -251,9 +253,9 @@ object WorkoutBuilderTitleRenderer {
                     height = wrapContentSize(),
                     margins = edgeInsets(top = 16),
                     items = listOf(
-                        typeCard(styleFor(WorkoutType.YOGA), typeTitle(WorkoutType.YOGA)),
-                        typeCard(styleFor(WorkoutType.STRENGTH), typeTitle(WorkoutType.STRENGTH)),
-                        typeCard(styleFor(WorkoutType.CARDIO), typeTitle(WorkoutType.CARDIO)),
+                        typeCard(styleFor(WorkoutType.YOGA), WorkoutType.YOGA, t),
+                        typeCard(styleFor(WorkoutType.STRENGTH), WorkoutType.STRENGTH, t),
+                        typeCard(styleFor(WorkoutType.CARDIO), WorkoutType.CARDIO, t),
                     )
                 )
             )
@@ -262,7 +264,8 @@ object WorkoutBuilderTitleRenderer {
 
     private fun DivScope.typeCard(
         style: WorkoutStyle,
-        title: String
+        type: WorkoutType,
+        t: WorkoutBuilderTitleTranslations,
     ): Div {
         return container(
             orientation = vertical,
@@ -288,7 +291,7 @@ object WorkoutBuilderTitleRenderer {
                     alignmentHorizontal = center
                 ),
                 text(
-                    text = title,
+                    text = t.workoutTypeLabel(type),
                     fontSize = 16,
                     margins = edgeInsets(top = 10),
                     fontWeight = medium,
@@ -307,7 +310,7 @@ object WorkoutBuilderTitleRenderer {
             actions = listOf(
                 action(
                     logId = "open_builder_for_type",
-                    url = Url.create("app://open_builder_for_type?type=$title&")
+                    url = Url.create("app://open_builder_for_type?type=${t.workoutTypeQueryParam(type)}&")
                 )
             )
         )
@@ -315,10 +318,11 @@ object WorkoutBuilderTitleRenderer {
 
     private fun DivScope.premadeCard(
         name: String,
-        category: String,
+        workoutType: WorkoutType,
         color: String,
         amount: Int,
-        id: String
+        id: String,
+        t: WorkoutBuilderTitleTranslations,
     ): Div {
         return container(
             orientation = vertical,
@@ -392,7 +396,7 @@ object WorkoutBuilderTitleRenderer {
                     ),
                 ),
                 text(
-                    text = "${category}  -  ${amount} exercises",
+                    text = t.premadeMetaLine(workoutType, amount),
                     fontSize = 15,
                     fontWeight = bold,
                     textColor = color("#90FFFFFF"),
@@ -420,13 +424,14 @@ object WorkoutBuilderTitleRenderer {
 
     private fun DivScope.pagerWithIndicator(
         pagerId: String = "pager_with_indicator",
+        t: WorkoutBuilderTitleTranslations,
         items: List<Div>,
     ): Div {
         return container(
             orientation = vertical,
             items = listOf(
                 text(
-                    text = "Select premade",
+                    text = t.selectPremade(),
                     fontSize = 20,
                     fontWeight = bold,
                     textColor = color("#FFFFFF"),

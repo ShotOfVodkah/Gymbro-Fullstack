@@ -2,7 +2,6 @@ package com.gymbro.divkit.workoutBuilderSheet
 
 import com.gymbro.divkit.Workout
 import com.gymbro.divkit.WorkoutStyle
-import com.gymbro.divkit.typeTitle
 import com.gymbro.divkit.styleFor
 import com.gymbro.divkit.workoutInfo.WorkoutInfoRenderer.exerciseCard
 import divkit.dsl.Div
@@ -39,7 +38,9 @@ object WorkoutBuilderSheetRenderer {
 
     fun DivScope.render(
         workout: Workout,
+        t: WorkoutBuilderSheetTranslations,
     ): Div {
+        val card = t.exerciseCard
         return container(
             orientation = overlap,
             width = matchParentSize(),
@@ -52,25 +53,27 @@ object WorkoutBuilderSheetRenderer {
                     orientation = vertical,
                     columnCount = 1,
                     items = workout.exercises.mapIndexed { index, exercise ->
-                        exerciseCard(exercise, number = index + 1)
+                        exerciseCard(exercise, number = index + 1, card)
                     }
                 ),
                 header(
                     workout.name,
-                    typeTitle(workout.type),
+                    t.workoutType(workout.type),
                     workout.exercises.count(),
-                    styleFor(workout.type)
+                    styleFor(workout.type),
+                    t,
                 ),
-                addButton(workout.id)
+                addButton(workout.id, t)
             )
         )
     }
 
     private fun DivScope.header(
         name: String,
-        type: String,
+        typeLabel: String,
         amount: Int,
-        style: WorkoutStyle
+        style: WorkoutStyle,
+        t: WorkoutBuilderSheetTranslations,
     ): Div {
         return container(
             orientation = horizontal,
@@ -99,7 +102,7 @@ object WorkoutBuilderSheetRenderer {
                             textColor = color("#FFFFFF"),
                             maxLines = 1
                         ),
-                        amountLabel(amount, style.iconUrl, type)
+                        amountLabel(style.iconUrl, typeLabel, t.exerciseCount(amount))
                     )
                 )
             )
@@ -107,9 +110,9 @@ object WorkoutBuilderSheetRenderer {
     }
 
     private fun DivScope.amountLabel(
-        amount: Int,
         imageUrl: String,
-        type: String
+        typeLabel: String,
+        exerciseCountText: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -131,7 +134,7 @@ object WorkoutBuilderSheetRenderer {
                             height = fixedSize(20)
                         ),
                         text(
-                            text = type,
+                            text = typeLabel,
                             fontSize = 15,
                             fontWeight = regular,
                             textColor = color("#FFFFFF"),
@@ -154,7 +157,7 @@ object WorkoutBuilderSheetRenderer {
                             height = fixedSize(20)
                         ),
                         text(
-                            text = "${amount} exercises",
+                            text = exerciseCountText,
                             fontSize = 15,
                             fontWeight = regular,
                             textColor = color("#FFFFFF"),
@@ -168,7 +171,8 @@ object WorkoutBuilderSheetRenderer {
     }
 
     private fun DivScope.addButton(
-        id: String
+        id: String,
+        t: WorkoutBuilderSheetTranslations,
     ): Div {
         return container(
             orientation = vertical,
@@ -228,7 +232,7 @@ object WorkoutBuilderSheetRenderer {
                             paddings = edgeInsets(18),
                             items = listOf(
                                 text(
-                                    text = "Add to my workouts",
+                                    text = t.addToMyWorkouts(),
                                     fontSize = 18,
                                     fontWeight = bold,
                                     textColor = color("#FFFFFF"),

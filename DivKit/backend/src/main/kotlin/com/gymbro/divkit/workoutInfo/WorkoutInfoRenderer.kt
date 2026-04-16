@@ -1,7 +1,7 @@
 package com.gymbro.divkit.workoutInfo
 
 import com.gymbro.divkit.WorkoutType
-import com.gymbro.divkit.typeTitle
+import com.gymbro.divkit.i18n.ExerciseCardStrings
 import com.gymbro.divkit.styleFor
 import com.gymbro.divkit.WorkoutStyle
 import com.gymbro.divkit.Workout
@@ -9,8 +9,6 @@ import com.gymbro.divkit.Exercise
 import com.gymbro.divkit.StrengthExercise
 import com.gymbro.divkit.CardioExercise
 import com.gymbro.divkit.YogaExercise
-import com.gymbro.divkit.nameFor
-
 import divkit.dsl.Div
 import divkit.dsl.medium
 import divkit.dsl.Url
@@ -47,10 +45,12 @@ object WorkoutInfoRenderer {
 
     fun DivScope.render(
         workout: Workout,
-        type: String
+        type: String,
+        t: WorkoutInfoTranslations,
     ): Div {
         val showControls = type == "workout"
         val showAdd = type =="session_other"
+        val card = t.exerciseCard
         return container(
             width = matchParentSize(),
             height = matchParentSize(),
@@ -65,12 +65,13 @@ object WorkoutInfoRenderer {
                         if (!showControls) spacer() else null,
                         header(
                             workout.name,
-                            typeTitle(workout.type),
+                            t.workoutType(workout.type),
                             workout.exercises.count(),
-                            styleFor(workout.type)
+                            styleFor(workout.type),
+                            t,
                         ),
                         text(
-                            text = "EXERCISES",
+                            text = t.exercisesSection(),
                             fontSize = 16,
                             margins = edgeInsets(left = 25, top = 17, bottom = 17),
                             fontWeight = bold,
@@ -83,13 +84,13 @@ object WorkoutInfoRenderer {
                             orientation = vertical,
                             columnCount = 1,
                             items = workout.exercises.mapIndexed { index, exercise ->
-                                exerciseCard(exercise, number = index + 1)
+                                exerciseCard(exercise, number = index + 1, card)
                             }
                         )
                     )
                 ),
-                if (showControls) playButton(workout.id) else null,
-                if (showAdd) addButton(workout.id) else null
+                if (showControls) playButton(workout.id, t) else null,
+                if (showAdd) addButton(workout.id, t) else null
             )
         )
     }
@@ -259,9 +260,10 @@ object WorkoutInfoRenderer {
 
     private fun DivScope.header(
         name: String,
-        type: String,
+        typeLabel: String,
         amount: Int,
-        style: WorkoutStyle
+        style: WorkoutStyle,
+        t: WorkoutInfoTranslations,
     ): Div {
         return container(
             orientation = horizontal,
@@ -291,7 +293,7 @@ object WorkoutInfoRenderer {
                             textColor = color("#FFFFFF"),
                             maxLines = 1
                         ),
-                        amountLabel(amount, style.iconUrl, type)
+                        amountLabel(style.iconUrl, typeLabel, t.exerciseCount(amount))
                     )
                 )
             )
@@ -299,9 +301,9 @@ object WorkoutInfoRenderer {
     }
 
     private fun DivScope.amountLabel(
-        amount: Int,
         imageUrl: String,
-        type: String
+        typeLabel: String,
+        exerciseCountText: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -323,7 +325,7 @@ object WorkoutInfoRenderer {
                             height = fixedSize(20)
                         ),
                         text(
-                            text = type,
+                            text = typeLabel,
                             fontSize = 15,
                             fontWeight = regular,
                             textColor = color("#FFFFFF"),
@@ -346,7 +348,7 @@ object WorkoutInfoRenderer {
                             height = fixedSize(20)
                         ),
                         text(
-                            text = "${amount} exercises",
+                            text = exerciseCountText,
                             fontSize = 15,
                             fontWeight = regular,
                             textColor = color("#FFFFFF"),
@@ -360,7 +362,8 @@ object WorkoutInfoRenderer {
     }
 
     private fun DivScope.playButton(
-        id: String
+        id: String,
+        t: WorkoutInfoTranslations,
     ): Div {
         return container(
             orientation = overlap,
@@ -413,7 +416,7 @@ object WorkoutInfoRenderer {
                 paddings = edgeInsets(18),
                 items = listOf(
                     text(
-                        text = "Start Workout",
+                        text = t.startWorkout(),
                         fontSize = 20,
                         fontWeight = medium,
                         textColor = color("#FFFFFF"),
@@ -439,7 +442,8 @@ object WorkoutInfoRenderer {
     }
 
     private fun DivScope.addButton(
-        id: String
+        id: String,
+        t: WorkoutInfoTranslations,
     ): Div {
         return container(
             orientation = overlap,
@@ -492,7 +496,7 @@ object WorkoutInfoRenderer {
                     paddings = edgeInsets(18),
                     items = listOf(
                         text(
-                            text = "Add to my workouts",
+                            text = t.addToMyWorkouts(),
                             fontSize = 20,
                             fontWeight = medium,
                             textColor = color("#FFFFFF"),
@@ -519,19 +523,21 @@ object WorkoutInfoRenderer {
 
     fun DivScope.exerciseCard(
         exercise: Exercise,
-        number: Int
+        number: Int,
+        card: ExerciseCardStrings,
     ): Div {
         return when (exercise) {
-            is StrengthExercise -> strengthExerciseCard(exercise, number, styleFor(WorkoutType.STRENGTH).backgroundColor)
-            is CardioExercise -> cardioExerciseCard(exercise, number, styleFor(WorkoutType.CARDIO).backgroundColor)
-            is YogaExercise -> yogaExerciseCard(exercise, number, styleFor(WorkoutType.YOGA).backgroundColor)
+            is StrengthExercise -> strengthExerciseCard(exercise, number, styleFor(WorkoutType.STRENGTH).backgroundColor, card)
+            is CardioExercise -> cardioExerciseCard(exercise, number, styleFor(WorkoutType.CARDIO).backgroundColor, card)
+            is YogaExercise -> yogaExerciseCard(exercise, number, styleFor(WorkoutType.YOGA).backgroundColor, card)
         }
     }
 
     private fun DivScope.cardioExerciseCard(
         exercise: CardioExercise,
         number: Int,
-        color: String
+        color: String,
+        card: ExerciseCardStrings,
     ): Div {
         return container(
             orientation = vertical,
@@ -601,7 +607,7 @@ object WorkoutInfoRenderer {
                                     border = border(cornerRadius = 15),
                                     items = listOf(
                                         text(
-                                            text = nameFor(exercise.muscleGroup),
+                                            text = card.muscleGroup(exercise.muscleGroup),
                                             alignmentVertical = center,
                                             alignmentHorizontal = center,
                                             fontSize = 15,
@@ -622,10 +628,9 @@ object WorkoutInfoRenderer {
                     contentAlignmentHorizontal = center,
                     margins = edgeInsets(left = 35),
                     paddings = edgeInsets( top = 5, bottom = 10),
-                    items = listOf(
-                        statCard("Duration","${exercise.durationMinutes} min"),
-                        statCard("Pace","${nameFor(exercise.pace)}")
-                    )
+                    items = card.cardioStatRows(exercise).map { (label, value) ->
+                        statCard(label, value)
+                    }
                 )
             )
         )
@@ -634,7 +639,8 @@ object WorkoutInfoRenderer {
     private fun DivScope.yogaExerciseCard(
         exercise: YogaExercise,
         number: Int,
-        color: String
+        color: String,
+        card: ExerciseCardStrings,
     ): Div {
         return container(
             orientation = vertical,
@@ -704,7 +710,7 @@ object WorkoutInfoRenderer {
                                     border = border(cornerRadius = 15),
                                     items = listOf(
                                         text(
-                                            text = nameFor(exercise.muscleGroup),
+                                            text = card.muscleGroup(exercise.muscleGroup),
                                             alignmentVertical = center,
                                             alignmentHorizontal = center,
                                             fontSize = 15,
@@ -725,10 +731,9 @@ object WorkoutInfoRenderer {
                     contentAlignmentHorizontal = center,
                     margins = edgeInsets(left = 35),
                     paddings = edgeInsets( top = 5, bottom = 10),
-                    items = listOf(
-                        statCard("Hold for","${exercise.holdSeconds} sec"),
-                        statCard("Breath Count","${exercise.breathCount}/min")
-                    )
+                    items = card.yogaStatRows(exercise).map { (label, value) ->
+                        statCard(label, value)
+                    }
                 )
             )
         )
@@ -737,7 +742,8 @@ object WorkoutInfoRenderer {
     private fun DivScope.strengthExerciseCard(
         exercise: StrengthExercise,
         number: Int,
-        color: String
+        color: String,
+        card: ExerciseCardStrings,
     ): Div {
         return container(
             orientation = vertical,
@@ -807,7 +813,7 @@ object WorkoutInfoRenderer {
                                     border = border(cornerRadius = 15),
                                     items = listOf(
                                         text(
-                                            text = nameFor(exercise.muscleGroup),
+                                            text = card.muscleGroup(exercise.muscleGroup),
                                             alignmentVertical = center,
                                             alignmentHorizontal = center,
                                             fontSize = 15,
@@ -828,11 +834,9 @@ object WorkoutInfoRenderer {
                     contentAlignmentHorizontal = center,
                     margins = edgeInsets(left = 35),
                     paddings = edgeInsets( top = 5, bottom = 10),
-                    items = listOf(
-                        statCard("Sets","${exercise.sets}"),
-                        statCard("Reps","${exercise.reps}"),
-                        statCard("Weight","${exercise.weightKg} Kg"),
-                    )
+                    items = card.strengthStatRows(exercise).map { (label, value) ->
+                        statCard(label, value)
+                    }
                 )
             )
         )
