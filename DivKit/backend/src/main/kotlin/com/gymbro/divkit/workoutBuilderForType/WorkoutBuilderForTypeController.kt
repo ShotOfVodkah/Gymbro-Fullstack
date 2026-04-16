@@ -1,6 +1,8 @@
 package com.gymbro.divkit.workoutBuilderForType
 
+import com.gymbro.divkit.Language
 import com.gymbro.divkit.WorkoutType
+import com.gymbro.divkit.i18n.DomainStrings
 import com.gymbro.divkit.client.GymbroBackendClient
 import com.gymbro.divkit.client.toExercise
 import com.gymbro.divkit.styleFor
@@ -21,8 +23,11 @@ class WorkoutBuilderForTypeController(private val backendClient: GymbroBackendCl
     @GetMapping
     fun getWorkoutInfo(
         @RequestParam(defaultValue = "yoga") type: String,
-        @RequestParam(required = false) exerciseIds: List<String>?
+        @RequestParam(required = false) exerciseIds: List<String>?,
+        @RequestParam(name = "lang", required = false, defaultValue = "en") lang: String,
     ): ResponseEntity<Divan> {
+        val language = Language.fromRequestParam(lang)
+        val domainStrings = DomainStrings(language)
 
         val exercises = backendClient.getExercisesByType(type.lowercase()).map { it.toExercise() }
 
@@ -40,7 +45,7 @@ class WorkoutBuilderForTypeController(private val backendClient: GymbroBackendCl
             divan {
                 data(
                     logId = "workoutBuilderCards",
-                    div = with(WorkoutBuilderForTypeRenderer) { render(exercises, color, selected) },
+                    div = with(WorkoutBuilderForTypeRenderer) { render(exercises, color, selected, domainStrings) },
                     variables = listOf()
                 )
             },

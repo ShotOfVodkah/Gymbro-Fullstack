@@ -26,6 +26,13 @@ class GymbroBackendClient(
     }
 
     fun getWorkout(id: String, authorization: String): WorkoutDto? {
+        if (id.startsWith("premade-")) {
+            return try {
+                getWorkouts(authorization, premadeCatalog = true).find { it.id == id }
+            } catch (_: Exception) {
+                null
+            }
+        }
         return try {
             val entity = HttpEntity<Void>(headers(authorization))
             restTemplate.exchange(

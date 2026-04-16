@@ -1,5 +1,6 @@
 package com.gymbro.divkit.workoutsList
 
+import com.gymbro.divkit.Language
 import com.gymbro.divkit.WorkoutType
 import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
@@ -23,7 +24,8 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
     @GetMapping
     fun getWorkouts(
         @RequestParam userId: String,
-        request: HttpServletRequest
+        @RequestParam(name = "lang", required = false, defaultValue = "en") lang: String,
+        request: HttpServletRequest,
     ): ResponseEntity<Divan> {
         val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
         if (userId != jwtUserId) {
@@ -42,12 +44,21 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
                 }
             )
         }
+        val language = Language.fromRequestParam(lang)
 
         return ResponseEntity(
             divan {
                 data(
                     logId = "workouts_list",
-                    div = with(WorkoutsListRenderer) { render(workouts, 4, 6, 2, 10) },
+                    div = with(WorkoutsListRenderer) {
+                        render(
+                            workouts,
+                            4,
+                            6,
+                            2,
+                            10,
+                            language
+                        ) },
                     variables = listOf(
                         stringVariable(
                             name = WorkoutsListRenderer.SEARCH_TEXT_VARIABLE,

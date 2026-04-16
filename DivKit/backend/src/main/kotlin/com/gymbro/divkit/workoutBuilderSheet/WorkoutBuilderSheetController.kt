@@ -1,5 +1,6 @@
 package com.gymbro.divkit.workoutBuilderSheet
 
+import com.gymbro.divkit.Language
 import com.gymbro.divkit.client.GymbroBackendClient
 import com.gymbro.divkit.client.toDomain
 import divkit.dsl.Divan
@@ -22,7 +23,8 @@ class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClie
     @GetMapping
     fun getWorkoutInfo(
         @RequestParam(defaultValue = "1") id: String,
-        request: HttpServletRequest
+        @RequestParam(name = "lang", required = false, defaultValue = "en") lang: String,
+        request: HttpServletRequest,
     ): ResponseEntity<Divan> {
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
         val workout = backendClient.getWorkout(id, authorization)?.toDomain()
@@ -40,11 +42,14 @@ class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClie
             )
         }
 
+        val language = Language.fromRequestParam(lang)
+        val translations = WorkoutBuilderSheetTranslations(language)
+
         return ResponseEntity(
             divan {
                 data(
                     logId = "workoutBuilderSheet",
-                    div = with(WorkoutBuilderSheetRenderer) { render(workout) },
+                    div = with(WorkoutBuilderSheetRenderer) { render(workout, translations) },
                     variables = listOf()
                 )
             },

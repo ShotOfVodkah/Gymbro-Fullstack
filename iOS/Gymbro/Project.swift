@@ -18,7 +18,10 @@ let mainAppTarget: ProjectDescription.Target = .target(
     deploymentTargets: .iOS(iOSTargetVersion),
     infoPlist: .extendingDefault(
         with: [
-            "UILaunchScreen": [:]
+            "UILaunchScreen": [:],
+            "CFBundleDevelopmentRegion": "en",
+            "CFBundleLocalizations": ["en", "ru"],
+            "CFBundleAllowMixedLocalizations": true
         ]
     ),
     sources: ["\(basePath)/Gymbro/Sources/**"],

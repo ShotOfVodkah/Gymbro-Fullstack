@@ -64,13 +64,6 @@ data class Workout(
     val exercises: List<Exercise>
 )
 
-// HELPERS
-
-fun typeTitle(type: WorkoutType): String = when (type) {
-    WorkoutType.STRENGTH -> "Strength"
-    WorkoutType.CARDIO -> "Cardio"
-    WorkoutType.YOGA -> "Yoga"
-}
 
 fun styleFor(type: WorkoutType): WorkoutStyle {
     val base = "http://localhost:8090/assets"
@@ -87,30 +80,6 @@ fun styleFor(type: WorkoutType): WorkoutStyle {
             backgroundColor = "#73FF7A",
             iconUrl = "$base/yoga.png"
         )
-    }
-}
-
-fun nameFor(type: MuscleGroup): String {
-    return when (type) {
-        MuscleGroup.CHEST -> "Chest"
-        MuscleGroup.BACK -> "Back"
-        MuscleGroup.SHOULDERS -> "Shoulders"
-        MuscleGroup.BICEPS -> "Biceps"
-        MuscleGroup.TRICEPS -> "Triceps"
-        MuscleGroup.LEGS -> "Legs"
-        MuscleGroup.GLUTES -> "Glutes"
-        MuscleGroup.CORE -> "Core"
-        MuscleGroup.FULL_BODY -> "Full body"
-    }
-}
-
-fun nameFor(type: PaceType): String {
-    return when (type) {
-        PaceType.SPRINT -> "Sprint"
-        PaceType.WALK -> "Walk"
-        PaceType.JOG -> "Jog"
-        PaceType.RECOVERY -> "Recovery"
-        PaceType.RUN -> "Run"
     }
 }
 

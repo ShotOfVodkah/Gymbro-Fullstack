@@ -51,7 +51,6 @@ final class WorkoutBuilderServiceImpl: WorkoutBuilderService {
         do {
             try await networkClient.addPremadeWorkout(premadeId: id)
         } catch {
-            print("[WorkoutBuilderService] addPremadeWorkout failed: \(error), queuing offline")
             actionsRepository.enqueueSmart(.premadeAdded(id: id))
         }
     }
