@@ -32,7 +32,7 @@ struct FeedCommentsSheetView: View {
     
     private var header: some View {
         VStack(spacing: 8) {
-            Text("Comments")
+            Text(String(localized: "feeds.comments.title", bundle: .module))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.white)
             
@@ -55,7 +55,7 @@ struct FeedCommentsSheetView: View {
                 ProgressView()
                     .tint(.white)
                 
-                Text("Loading comments...")
+                Text(String(localized: "feeds.comments.loading", bundle: .module))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.white.opacity(0.7))
             }
@@ -68,11 +68,11 @@ struct FeedCommentsSheetView: View {
                     .font(.system(size: 28))
                     .foregroundStyle(.white.opacity(0.7))
                 
-                Text("No comments yet")
+                Text(String(localized: "feeds.comments.empty", bundle: .module))
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
                 
-                Text("Be the first to say something")
+                Text(String(localized: "feeds.comments.cta", bundle: .module))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.white.opacity(0.6))
             }

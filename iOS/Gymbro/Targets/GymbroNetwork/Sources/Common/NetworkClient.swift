@@ -25,23 +25,23 @@ extension NetworkError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid URL"
+            return String(localized: "network.error.invalid_url", bundle: .module)
         case .invalidResponse:
-            return "Invalid server response"
+            return String(localized: "network.error.invalid_response", bundle: .module)
         case .unauthorized:
-            return "You are not authorized"
+            return String(localized: "network.error.unauthorized", bundle: .module)
         case .serverError(let code):
-            return "Server error: \(code)"
+            return NetworkL10n.serverError(code: code)
         case .decodingError:
-            return "Failed to decode server response"
+            return String(localized: "network.error.decode", bundle: .module)
         case .encodingError:
-            return "Failed to encode request body"
+            return String(localized: "network.error.encode", bundle: .module)
         case .noInternet:
-            return "No internet connection"
+            return String(localized: "network.error.no_connection", bundle: .module)
         case .hostNotFound:
-            return "Could not reach the server"
+            return String(localized: "network.error.unreachable", bundle: .module)
         case .cancelled:
-            return "Request was cancelled"
+            return String(localized: "network.error.cancelled", bundle: .module)
         case .unknown(let error):
             return error.localizedDescription
         }

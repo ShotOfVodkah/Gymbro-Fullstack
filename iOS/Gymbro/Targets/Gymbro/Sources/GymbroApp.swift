@@ -57,9 +57,9 @@ struct GymbroApp: App {
                                             appServicesFactory.makeDestinationView(for: route)
                                         }
                                 case .challenge:
-                                    Text("Challenges")
+                                    Text(String(localized: "app.tab.challenges", bundle: .module))
                                 case .perks:
-                                    Text("Perks")
+                                    Text(String(localized: "app.tab.perks", bundle: .module))
                                 }
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)

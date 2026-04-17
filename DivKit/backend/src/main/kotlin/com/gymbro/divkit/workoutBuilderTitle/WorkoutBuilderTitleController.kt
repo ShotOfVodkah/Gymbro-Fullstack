@@ -25,9 +25,13 @@ class WorkoutBuilerTitleController(private val backendClient: GymbroBackendClien
         request: HttpServletRequest,
     ): ResponseEntity<Divan> {
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
-        val workouts = backendClient.getWorkouts(authorization = authorization, premadeCatalog = true)
-            .map { it.toDomain() }
         val language = Language.fromRequestParam(lang)
+        val workouts = backendClient.getWorkouts(
+            authorization = authorization,
+            premadeCatalog = true,
+            locale = language.asString,
+        )
+            .map { it.toDomain() }
         val translations = WorkoutBuilderTitleTranslations(language)
 
         return ResponseEntity(

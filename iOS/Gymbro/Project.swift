@@ -235,7 +235,9 @@ let watchOSTarget: ProjectDescription.Target = .target(
     infoPlist: InfoPlist.extendingDefault(with: [
         "WKApplication": true,
         "WKCompanionAppBundleIdentifier": "\(bundleId)",
-        
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleLocalizations": ["en", "ru"],
+        "CFBundleAllowMixedLocalizations": true
         ]
     ),
     sources: ["\(basePath)/GymbroWatchApp/Sources/**"],

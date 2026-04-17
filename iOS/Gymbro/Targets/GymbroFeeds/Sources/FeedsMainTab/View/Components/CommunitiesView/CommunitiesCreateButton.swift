@@ -22,7 +22,7 @@ struct CreateCommunityButtonView: View {
                             .foregroundStyle(.white)
                     )
 
-                Text("Create")
+                Text(String(localized: "feeds.communities.create", bundle: .module))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)

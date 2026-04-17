@@ -31,14 +31,14 @@ class GymbroBackendClientTest {
 
     @Test
     fun `getWorkout fetches single workout for non premade id`() {
-        mockServer.expect(requestTo("http://localhost:8080/workouts/user-1"))
+        mockServer.expect(requestTo("http://localhost:8080/workouts/user-1?locale=en"))
             .andRespond(
                 withSuccess(
                     """{"id":"user-1","name":"W","type":"strength","exercises":[]}""",
                     MediaType.APPLICATION_JSON,
                 ),
             )
-        val dto = client.getWorkout("user-1", "Bearer token")
+        val dto = client.getWorkout("user-1", "Bearer token", "en")
         assertThat(dto).isNotNull
         assertThat(dto!!.id).isEqualTo("user-1")
         assertThat(dto.name).isEqualTo("W")
@@ -46,7 +46,7 @@ class GymbroBackendClientTest {
 
     @Test
     fun `getWorkout premade id loads from catalog list`() {
-        mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade"))
+        mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
             .andRespond(
                 withSuccess(
                     """
@@ -58,7 +58,7 @@ class GymbroBackendClientTest {
                     MediaType.APPLICATION_JSON,
                 ),
             )
-        val dto = client.getWorkout("premade-2", "Bearer x")
+        val dto = client.getWorkout("premade-2", "Bearer x", "en")
         assertThat(dto).isNotNull
         assertThat(dto!!.id).isEqualTo("premade-2")
         assertThat(dto.name).isEqualTo("B")
@@ -66,22 +66,22 @@ class GymbroBackendClientTest {
 
     @Test
     fun `getWorkout premade id returns null when not in catalog`() {
-        mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade"))
+        mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON))
-        assertThat(client.getWorkout("premade-2", "Bearer x")).isNull()
+        assertThat(client.getWorkout("premade-2", "Bearer x", "en")).isNull()
     }
 
     @Test
     fun `getWorkout returns null on HTTP error for single workout`() {
-        mockServer.expect(requestTo("http://localhost:8080/workouts/user-1"))
+        mockServer.expect(requestTo("http://localhost:8080/workouts/user-1?locale=en"))
             .andRespond(withServerError())
-        assertThat(client.getWorkout("user-1", "Bearer x")).isNull()
+        assertThat(client.getWorkout("user-1", "Bearer x", "en")).isNull()
     }
 
     @Test
     fun `getWorkout premade returns null when catalog request fails`() {
-        mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade"))
+        mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
             .andRespond(withServerError())
-        assertThat(client.getWorkout("premade-2", "Bearer x")).isNull()
+        assertThat(client.getWorkout("premade-2", "Bearer x", "en")).isNull()
     }
 }

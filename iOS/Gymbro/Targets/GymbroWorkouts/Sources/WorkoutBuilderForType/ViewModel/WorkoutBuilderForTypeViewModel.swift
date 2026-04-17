@@ -27,14 +27,12 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
         self.modelModifier = modelModifier
         self.analytics = analytics
 
-        
-
         if let workoutId, let workout = service.loadWorkout(id: workoutId) {
             self.workout = workout
             self.screenMode = .edit
             self.selectedExercises = workout.exercises.map { ExerciseItem(from: $0) }
             self.name = workout.name
-            self.type = workout.type.title
+            self.workoutKind = workout.type
             self.workoutId = workout.id
             self.availableExercises = []
 
@@ -43,10 +41,10 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
             }
             self.divkitComponents = DivKitComponents(urlHandler: handler)
 
-            fetchData(for: workout.type.title, workout: workout)
+            fetchData()
         } else {
             self.screenMode = .create
-            self.type = type ?? ""
+            self.workoutKind = WorkoutType.resolvingBuilderTypeToken(type ?? "")
             self.workoutId = workoutId ?? UUID().uuidString
             self.availableExercises = []
 
@@ -55,7 +53,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
             }
             self.divkitComponents = DivKitComponents(urlHandler: handler)
 
-            fetchData(for: type ?? "", workout: nil)
+            fetchData()
         }
 
         modelModifier.events
@@ -73,12 +71,13 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
 
     // MARK: - Actions
 
-    func fetchData(for type: String, workout: Workout?) {
+    func fetchData() {
+        let apiType = workoutKind.builderTypeQueryValue
         Task {
             do {
-                availableExercises = await service.fetchAvailableExercises(type: type)
+                availableExercises = await service.fetchAvailableExercises(type: apiType)
                 let (data, state) = try await service.fetchScreen(
-                    type: type,
+                    type: apiType,
                     workout: workout,
                     selectedExerciseIds: selectedExercises.map(\.id)
                 )
@@ -97,20 +96,13 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
     }
 
     func saveButtonTapped() {
-        let workoutType: WorkoutType
-        switch type {
-        case "Yoga": workoutType = .yoga
-        case "Cardio": workoutType = .cardio
-        default: workoutType = .strength
-        }
-
         let exercises = selectedExercises.map { $0.exercise }
         guard !exercises.isEmpty, !name.isEmpty else {
             showAlert.toggle()
             return
         }
 
-        let workout = Workout(id: workoutId, name: name, type: workoutType, exercises: exercises)
+        let workout = Workout(id: workoutId, name: name, type: workoutKind, exercises: exercises)
 
         Task {
             switch screenMode {
@@ -133,7 +125,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
 
     // MARK: - Published state
 
-    @Published var type: String
+    @Published var workoutKind: WorkoutType
     @Published var workoutId: String
     @Published var workout: Workout?
     @Published var screenState: ScreenState = .loading

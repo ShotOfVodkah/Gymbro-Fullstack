@@ -25,10 +25,10 @@ struct WorkoutBuilderView: View {
                     .ignoresSafeArea(.container, edges: .bottom)
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(Color.white)
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.fetchData()
                         }
                     }
@@ -58,8 +58,8 @@ struct WorkoutBuilderView: View {
         .customAlert(
             isPresented: $viewModel.showAlert,
             data: CustomAlertData(
-                message: "Workout generator is unavailable in offline mode.",
-                primaryButton: AppButton("Okay", action: {
+                message: String(localized: "workout.builder.offline_generator", bundle: .module),
+                primaryButton: AppButton(String(localized: "workout.builder.action_okay", bundle: .module), action: {
                     viewModel.showAlert = false
                 })
             )

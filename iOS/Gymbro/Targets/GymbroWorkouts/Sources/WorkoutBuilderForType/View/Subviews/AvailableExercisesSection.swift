@@ -21,7 +21,7 @@ struct AvailableExercisesSection: View {
 
     private var header: some View {
         HStack(spacing: Layout.headerSpacing) {
-            Text("Available exercises")
+            Text(String(localized: "workout.available_exercises", bundle: .module))
                 .foregroundStyle(.white)
                 .font(.headline)
                 .fontWeight(.bold)

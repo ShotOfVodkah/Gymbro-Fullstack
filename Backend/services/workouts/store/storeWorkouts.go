@@ -12,8 +12,8 @@ import (
 var ErrNotFound = errors.New("not found")
 
 type WorkoutStorer interface {
-	GetWorkoutByID(id string) (*types.Workout, error)
-	ListWorkoutsByUserID(userID string) ([]types.Workout, error)
+	GetWorkoutByID(id string, locale string) (*types.Workout, error)
+	ListWorkoutsByUserID(userID string, locale string) ([]types.Workout, error)
 	InsertWorkout(input *types.WorkoutInput) error
 	UpdateWorkout(id string, input *types.WorkoutInput) error
 	DeleteWorkout(id string) error
@@ -88,10 +88,12 @@ type workoutPreviewExerciseRow struct {
 	BreathCount     *int     `db:"breath_count"`
 }
 
-const exerciseJoinQuery = `
+func exerciseJoinSQL(locale string) string {
+	nameExpr := exerciseDisplayNameExpr("e", locale)
+	return `
 	SELECT
 		we.exercise_id,
-		e.name,
+		` + nameExpr + ` AS name,
 		e.type        AS ex_type,
 		e.muscle_group,
 		we.sets,
@@ -106,10 +108,11 @@ const exerciseJoinQuery = `
 	WHERE we.workout_id = $1
 	ORDER BY we.position
 `
+}
 
-func (ws *WorkoutStore) loadExercises(workoutID string) ([]types.Exercise, error) {
+func (ws *WorkoutStore) loadExercises(workoutID string, locale string) ([]types.Exercise, error) {
 	var rows []workoutExerciseRow
-	if err := ws.db.Select(&rows, exerciseJoinQuery, workoutID); err != nil {
+	if err := ws.db.Select(&rows, exerciseJoinSQL(locale), workoutID); err != nil {
 		return nil, fmt.Errorf("loadExercises: %w", err)
 	}
 	exercises := make([]types.Exercise, len(rows))
@@ -137,7 +140,7 @@ func (ws *WorkoutStore) insertExercises(tx *sqlx.Tx, workoutID string, inputs []
 	return nil
 }
 
-func (ws *WorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
+func (ws *WorkoutStore) GetWorkoutByID(id string, locale string) (*types.Workout, error) {
 	var row workoutRow
 	err := ws.db.Get(&row, `SELECT id, user_id, name, type FROM workouts WHERE id = $1`, id)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -147,7 +150,7 @@ func (ws *WorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
 		return nil, fmt.Errorf("GetWorkoutByID: %w", err)
 	}
 
-	exercises, err := ws.loadExercises(id)
+	exercises, err := ws.loadExercises(id, locale)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +164,7 @@ func (ws *WorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
 	}, nil
 }
 
-func (ws *WorkoutStore) ListWorkoutsByUserID(userID string) ([]types.Workout, error) {
+func (ws *WorkoutStore) ListWorkoutsByUserID(userID string, locale string) ([]types.Workout, error) {
 	var rows []workoutRow
 	err := ws.db.Select(&rows,
 		`SELECT id, user_id, name, type FROM workouts WHERE user_id = $1 ORDER BY id`,
@@ -173,7 +176,7 @@ func (ws *WorkoutStore) ListWorkoutsByUserID(userID string) ([]types.Workout, er
 
 	workouts := make([]types.Workout, 0, len(rows))
 	for _, row := range rows {
-		exercises, err := ws.loadExercises(row.ID)
+		exercises, err := ws.loadExercises(row.ID, locale)
 		if err != nil {
 			return nil, err
 		}

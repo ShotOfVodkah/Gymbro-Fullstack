@@ -18,9 +18,9 @@ struct WorkoutResultCard: View {
         VStack(alignment: .leading, spacing: 16) {
             header
             exercisesList
-            AppButton("Save", action: saveAction, wrapContent: false)
+            AppButton(String(localized: "workout.generator.action_save", bundle: .module), action: saveAction, wrapContent: false)
                 .padding(.horizontal, 40)
-            Text("AI can make mistakes. Check important info.")
+            Text(String(localized: "workout.generator.disclaimer", bundle: .module))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.6))
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -55,7 +55,7 @@ struct WorkoutResultCard: View {
 
             Spacer(minLength: 0)
 
-            Text(workout.type.title)
+            Text(workout.type.localizedTitle)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 10)

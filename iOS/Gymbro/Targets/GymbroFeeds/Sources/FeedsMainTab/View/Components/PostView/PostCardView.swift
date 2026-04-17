@@ -52,7 +52,7 @@ struct PostCardView: View {
                     .foregroundStyle(.white.opacity(0.95))
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Exercises")
+                Text(String(localized: "feeds.post.exercises", bundle: .module))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
@@ -71,7 +71,7 @@ struct PostCardView: View {
                         Button {
                             print("Mock: show all exercises")
                         } label: {
-                            Text("Show all")
+                            Text(String(localized: "feeds.post.show_all", bundle: .module))
                                 .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(.white.opacity(0.85))
                                 .frame(maxWidth: .infinity)

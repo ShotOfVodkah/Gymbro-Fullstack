@@ -18,7 +18,7 @@ struct CardioTimerView: View {
         VStack(spacing: 0) {
 
             if isFinished, let onNext {
-                AppButton("Next →", action: onNext)
+                AppButton(String(localized: "workout.cardio.action_next", bundle: .module), action: onNext)
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                     .frame(height: 120)
             } else {

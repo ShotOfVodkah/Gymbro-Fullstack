@@ -13,7 +13,7 @@ struct WeightPickerView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            Text("Update your weight")
+            Text(String(localized: "workout.weight_picker.title", bundle: .module))
                 .font(.system(.subheadline, design: .rounded).weight(.medium))
                 .foregroundStyle(.white.opacity(0.6))
 

@@ -16,24 +16,24 @@ import (
 )
 
 type mockWorkoutStore struct {
-	getByID func(id string) (*types.Workout, error)
-	listBy  func(userID string) ([]types.Workout, error)
+	getByID func(id string, locale string) (*types.Workout, error)
+	listBy  func(userID string, locale string) ([]types.Workout, error)
 	insert  func(input *types.WorkoutInput) error
 	update  func(id string, input *types.WorkoutInput) error
 	delete  func(id string) error
 }
 
-func (m *mockWorkoutStore) GetWorkoutByID(id string) (*types.Workout, error) {
+func (m *mockWorkoutStore) GetWorkoutByID(id string, locale string) (*types.Workout, error) {
 	if m.getByID == nil {
 		return nil, store.ErrNotFound
 	}
-	return m.getByID(id)
+	return m.getByID(id, locale)
 }
-func (m *mockWorkoutStore) ListWorkoutsByUserID(userID string) ([]types.Workout, error) {
+func (m *mockWorkoutStore) ListWorkoutsByUserID(userID string, locale string) ([]types.Workout, error) {
 	if m.listBy == nil {
 		return []types.Workout{}, nil
 	}
-	return m.listBy(userID)
+	return m.listBy(userID, locale)
 }
 func (m *mockWorkoutStore) InsertWorkout(input *types.WorkoutInput) error {
 	if m.insert == nil {
@@ -78,7 +78,7 @@ func doRequest(h http.Handler, method, path string, body any) *httptest.Response
 func TestGetWorkoutByID_OK(t *testing.T) {
 	w := &types.Workout{ID: "w1", UserID: "u1", Name: "Test", Type: types.WorkoutTypeStrength, Exercises: []types.Exercise{}}
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			assert.Equal(t, "w1", id)
 			return w, nil
 		},
@@ -95,7 +95,7 @@ func TestGetWorkoutByID_OK(t *testing.T) {
 
 func TestGetWorkoutByID_NotFound(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return nil, store.ErrNotFound
 		},
 	})
@@ -106,7 +106,7 @@ func TestGetWorkoutByID_NotFound(t *testing.T) {
 
 func TestGetWorkoutByID_InternalError(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return nil, errors.New("db down")
 		},
 	})
@@ -121,7 +121,7 @@ func TestListWorkoutsByUser_OK(t *testing.T) {
 		{ID: "w2", UserID: "u1", Name: "B", Type: types.WorkoutTypeYoga, Exercises: []types.Exercise{}},
 	}
 	h := newHandler(&mockWorkoutStore{
-		listBy: func(userID string) ([]types.Workout, error) {
+		listBy: func(userID string, _ string) ([]types.Workout, error) {
 			assert.Equal(t, "u1", userID)
 			return workouts, nil
 		},
@@ -140,7 +140,7 @@ func TestListWorkoutsByUser_PremadeQuery(t *testing.T) {
 		{ID: "premade-1", UserID: "premade", Name: "P", Type: types.WorkoutTypeStrength, Exercises: []types.Exercise{}},
 	}
 	h := newHandler(&mockWorkoutStore{
-		listBy: func(userID string) ([]types.Workout, error) {
+		listBy: func(userID string, _ string) ([]types.Workout, error) {
 			assert.Equal(t, "premade", userID)
 			return workouts, nil
 		},
@@ -167,7 +167,7 @@ func TestListWorkoutsByUser_UnauthorizedWithoutContext(t *testing.T) {
 
 func TestListWorkoutsByUser_InternalError(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		listBy: func(userID string) ([]types.Workout, error) {
+		listBy: func(userID string, _ string) ([]types.Workout, error) {
 			return nil, errors.New("db down")
 		},
 	})
@@ -198,7 +198,7 @@ func TestCreateWorkout_OK(t *testing.T) {
 			assert.Equal(t, "w1", inp.ID)
 			return nil
 		},
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return created, nil
 		},
 	})
@@ -248,7 +248,7 @@ func TestUpdateWorkout_OK(t *testing.T) {
 			assert.Equal(t, "Updated", inp.Name)
 			return nil
 		},
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return updated, nil
 		},
 	})
@@ -270,7 +270,7 @@ func TestUpdateWorkout_MissingFields(t *testing.T) {
 
 func TestUpdateWorkout_NotFound(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return &types.Workout{ID: "missing", UserID: "u1", Name: "Old", Type: types.WorkoutTypeCardio}, nil
 		},
 		update: func(id string, inp *types.WorkoutInput) error {
@@ -284,7 +284,7 @@ func TestUpdateWorkout_NotFound(t *testing.T) {
 
 func TestUpdateWorkout_InternalError(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return &types.Workout{ID: "w1", UserID: "u1", Name: "Old", Type: types.WorkoutTypeCardio}, nil
 		},
 		update: func(id string, inp *types.WorkoutInput) error {
@@ -298,7 +298,7 @@ func TestUpdateWorkout_InternalError(t *testing.T) {
 
 func TestDeleteWorkout_OK(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return &types.Workout{ID: "w1", UserID: "u1", Name: "X", Type: types.WorkoutTypeCardio}, nil
 		},
 		delete: func(id string) error {
@@ -318,7 +318,7 @@ func TestDeleteWorkout_OK(t *testing.T) {
 
 func TestDeleteWorkout_NotFound(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) { return nil, store.ErrNotFound },
+		getByID: func(id string, _ string) (*types.Workout, error) { return nil, store.ErrNotFound },
 	})
 
 	rr := doRequest(h, http.MethodDelete, "/workouts/missing", nil)
@@ -327,7 +327,7 @@ func TestDeleteWorkout_NotFound(t *testing.T) {
 
 func TestDeleteWorkout_InternalError(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return &types.Workout{ID: "w1", UserID: "u1", Name: "X", Type: types.WorkoutTypeCardio}, nil
 		},
 		delete: func(id string) error { return errors.New("db down") },
@@ -353,7 +353,7 @@ func TestCopyPremadeWorkout_OK(t *testing.T) {
 	var capturedInput *types.WorkoutInput
 
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			if id == "premade-1" {
 				return premade, nil
 			}
@@ -397,7 +397,7 @@ func TestCopyPremadeWorkout_OK(t *testing.T) {
 
 func TestCopyPremadeWorkout_PremadeNotFound(t *testing.T) {
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			return nil, store.ErrNotFound
 		},
 	})
@@ -447,7 +447,7 @@ func TestCopyPremadeWorkout_InsertError(t *testing.T) {
 		Exercises: []types.Exercise{},
 	}
 	h := newHandler(&mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) { return premade, nil },
+		getByID: func(id string, _ string) (*types.Workout, error) { return premade, nil },
 		insert:  func(input *types.WorkoutInput) error { return errors.New("db down") },
 	})
 

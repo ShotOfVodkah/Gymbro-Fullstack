@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 import GymbroTypes
@@ -20,7 +21,7 @@ struct WorkoutResultRow: View {
                     .lineLimit(1)
 
                 HStack(spacing: 6) {
-                    Text(item.muscleGroup.title)
+                    Text(item.muscleGroup.localizedTitle)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.white.opacity(0.5))
 
@@ -65,12 +66,20 @@ struct WorkoutResultRow: View {
     private var detailText: String? {
         switch item {
         case .strength(let e):
-            let weight = e.weightKg == 0 ? "bodyweight" : "\(Int(e.weightKg)) kg"
-            return "\(e.sets) sets × \(e.reps) reps · \(weight)"
+            let weight: String
+            if e.weightKg == 0 {
+                weight = String(localized: "workout.result.bodyweight", bundle: .module)
+            } else {
+                weight = "\(Int(e.weightKg)) \(String(localized: "workout.field.kg", bundle: .module))"
+            }
+            let fmt = String(localized: "workout.detail.strength", bundle: .module)
+            return String(format: fmt, locale: .current, "\(e.sets)", "\(e.reps)", weight)
         case .cardio(let e):
-            return "\(e.durationMinutes) min · \(e.pace.title)"
+            let fmt = String(localized: "workout.detail.cardio", bundle: .module)
+            return String(format: fmt, locale: .current, "\(e.durationMinutes)", e.pace.localizedTitle)
         case .yoga(let e):
-            return "\(e.holdSeconds)s hold · \(e.breathCount) breaths"
+            let fmt = String(localized: "workout.detail.yoga", bundle: .module)
+            return String(format: fmt, locale: .current, "\(e.holdSeconds)", "\(e.breathCount)")
         case .fallback:
             return nil
         }

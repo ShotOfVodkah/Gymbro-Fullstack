@@ -10,11 +10,16 @@ public enum AppTab: Hashable {
 
     public var title: String {
         switch self {
-        case .workouts: return "Workouts"
-        case .feeds: return "Feeds"
-        case .profile: return "Profile"
-        case .challenge: return "Challenge"
-        case .perks: return "Perks"
+        case .workouts:
+            return String(localized: "tab.workouts", bundle: .module)
+        case .feeds:
+            return String(localized: "tab.feeds", bundle: .module)
+        case .profile:
+            return String(localized: "tab.profile", bundle: .module)
+        case .challenge:
+            return String(localized: "tab.challenge", bundle: .module)
+        case .perks:
+            return String(localized: "tab.perks", bundle: .module)
         }
     }
 

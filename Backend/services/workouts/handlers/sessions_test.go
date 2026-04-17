@@ -17,19 +17,19 @@ import (
 )
 
 type mockSessionStore struct {
-	getByID       func(id string) (*types.WorkoutSession, error)
+	getByID       func(id string, locale string) (*types.WorkoutSession, error)
 	insertSession func(*types.SessionInput) error
-	listByUser    func(userID string, from, to *time.Time) ([]types.WorkoutSession, error)
-	previews      func([]string) ([]types.SessionPreviewItem, error)
+	listByUser    func(userID string, from, to *time.Time, locale string) ([]types.WorkoutSession, error)
+	previews      func([]string, string) ([]types.SessionPreviewItem, error)
 	calendar      func(userID, month string) ([]types.CalendarWorkoutDayResponse, error)
 	ensure        func([]string) error
 }
 
-func (m *mockSessionStore) GetSessionByID(id string) (*types.WorkoutSession, error) {
+func (m *mockSessionStore) GetSessionByID(id string, locale string) (*types.WorkoutSession, error) {
 	if m.getByID == nil {
 		return nil, store.ErrNotFound
 	}
-	return m.getByID(id)
+	return m.getByID(id, locale)
 }
 
 func (m *mockSessionStore) InsertSession(input *types.SessionInput) error {
@@ -39,18 +39,18 @@ func (m *mockSessionStore) InsertSession(input *types.SessionInput) error {
 	return m.insertSession(input)
 }
 
-func (m *mockSessionStore) ListSessionsByUserID(userID string, from, to *time.Time) ([]types.WorkoutSession, error) {
+func (m *mockSessionStore) ListSessionsByUserID(userID string, from, to *time.Time, locale string) ([]types.WorkoutSession, error) {
 	if m.listByUser == nil {
 		return nil, nil
 	}
-	return m.listByUser(userID, from, to)
+	return m.listByUser(userID, from, to, locale)
 }
 
-func (m *mockSessionStore) GetSessionPreviewsByIDs(ids []string) ([]types.SessionPreviewItem, error) {
+func (m *mockSessionStore) GetSessionPreviewsByIDs(ids []string, locale string) ([]types.SessionPreviewItem, error) {
 	if m.previews == nil {
 		return nil, nil
 	}
-	return m.previews(ids)
+	return m.previews(ids, locale)
 }
 
 func (m *mockSessionStore) ListCalendarSessionsByUserAndMonth(userID string, month string) ([]types.CalendarWorkoutDayResponse, error) {
@@ -101,7 +101,7 @@ func TestSaveSessionAsWorkout_OK(t *testing.T) {
 
 	var captured *types.WorkoutInput
 	ms := &mockSessionStore{
-		getByID: func(id string) (*types.WorkoutSession, error) {
+		getByID: func(id string, _ string) (*types.WorkoutSession, error) {
 			if id == "sess-1" {
 				return sess, nil
 			}
@@ -113,7 +113,7 @@ func TestSaveSessionAsWorkout_OK(t *testing.T) {
 		},
 	}
 	mw := &mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			if captured != nil && id == captured.ID {
 				ex := make([]types.Exercise, len(captured.Exercises))
 				for i, e := range captured.Exercises {
@@ -158,10 +158,10 @@ func TestSaveSessionAsWorkout_CustomNameAndWorkoutID(t *testing.T) {
 	}
 	var captured *types.WorkoutInput
 	ms := &mockSessionStore{
-		getByID: func(id string) (*types.WorkoutSession, error) { return sess, nil },
+		getByID: func(id string, _ string) (*types.WorkoutSession, error) { return sess, nil },
 	}
 	mw := &mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			if captured != nil && id == captured.ID {
 				return &types.Workout{ID: captured.ID, UserID: captured.UserID, Name: captured.Name, Type: captured.Type}, nil
 			}
@@ -184,7 +184,7 @@ func TestSaveSessionAsWorkout_CustomNameAndWorkoutID(t *testing.T) {
 
 func TestSaveSessionAsWorkout_SessionNotFound(t *testing.T) {
 	ms := &mockSessionStore{
-		getByID: func(id string) (*types.WorkoutSession, error) { return nil, store.ErrNotFound },
+		getByID: func(id string, _ string) (*types.WorkoutSession, error) { return nil, store.ErrNotFound },
 	}
 	h := newSessionHandlerForTest(ms, &mockWorkoutStore{})
 	rr := doSessionRequest(h, http.MethodPost, "/sessions/save-as-workout", types.SaveSessionAsWorkoutRequest{SessionID: "x"})
@@ -196,9 +196,9 @@ func TestSaveSessionAsWorkout_OtherUsersSession_OK(t *testing.T) {
 		ID: "s1", UserID: "other", WorkoutName: "Their leg day", WorkoutType: "strength", Exercises: nil,
 	}
 	var captured *types.WorkoutInput
-	ms := &mockSessionStore{getByID: func(id string) (*types.WorkoutSession, error) { return sess, nil }}
+	ms := &mockSessionStore{getByID: func(id string, _ string) (*types.WorkoutSession, error) { return sess, nil }}
 	mw := &mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			if captured != nil && id == captured.ID {
 				return &types.Workout{ID: captured.ID, UserID: captured.UserID, Name: captured.Name, Type: captured.Type}, nil
 			}
@@ -236,7 +236,7 @@ func TestSaveSessionAsWorkout_InvalidWorkoutType(t *testing.T) {
 	sess := &types.WorkoutSession{
 		ID: "s1", UserID: "u1", WorkoutType: "unknown", Exercises: []types.SessionExercise{},
 	}
-	ms := &mockSessionStore{getByID: func(id string) (*types.WorkoutSession, error) { return sess, nil }}
+	ms := &mockSessionStore{getByID: func(id string, _ string) (*types.WorkoutSession, error) { return sess, nil }}
 	h := newSessionHandlerForTest(ms, &mockWorkoutStore{})
 	rr := doSessionRequest(h, http.MethodPost, "/sessions/save-as-workout", types.SaveSessionAsWorkoutRequest{SessionID: "s1"})
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
@@ -248,7 +248,7 @@ func TestSaveSessionAsWorkout_EnsureDictionaryError(t *testing.T) {
 		Exercises: []types.SessionExercise{{ID: "ghost"}},
 	}
 	ms := &mockSessionStore{
-		getByID: func(id string) (*types.WorkoutSession, error) { return sess, nil },
+		getByID: func(id string, _ string) (*types.WorkoutSession, error) { return sess, nil },
 		ensure:  func([]string) error { return store.ErrInvalidExerciseDictionary },
 	}
 	h := newSessionHandlerForTest(ms, &mockWorkoutStore{})
@@ -260,9 +260,9 @@ func TestSaveSessionAsWorkout_WorkoutIDConflict(t *testing.T) {
 	sess := &types.WorkoutSession{
 		ID: "s1", UserID: "u1", WorkoutType: "yoga", Exercises: []types.SessionExercise{},
 	}
-	ms := &mockSessionStore{getByID: func(id string) (*types.WorkoutSession, error) { return sess, nil }}
+	ms := &mockSessionStore{getByID: func(id string, _ string) (*types.WorkoutSession, error) { return sess, nil }}
 	mw := &mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) {
+		getByID: func(id string, _ string) (*types.Workout, error) {
 			if id == "existing" {
 				return &types.Workout{ID: "existing", UserID: "u1"}, nil
 			}
@@ -280,9 +280,9 @@ func TestSaveSessionAsWorkout_InsertUniqueViolation(t *testing.T) {
 	sess := &types.WorkoutSession{
 		ID: "s1", UserID: "u1", WorkoutType: "strength", Exercises: []types.SessionExercise{},
 	}
-	ms := &mockSessionStore{getByID: func(id string) (*types.WorkoutSession, error) { return sess, nil }}
+	ms := &mockSessionStore{getByID: func(id string, _ string) (*types.WorkoutSession, error) { return sess, nil }}
 	mw := &mockWorkoutStore{
-		getByID: func(id string) (*types.Workout, error) { return nil, store.ErrNotFound },
+		getByID: func(id string, _ string) (*types.Workout, error) { return nil, store.ErrNotFound },
 		insert:  func(*types.WorkoutInput) error { return &pq.Error{Code: "23505"} },
 	}
 	h := newSessionHandlerForTest(ms, mw)

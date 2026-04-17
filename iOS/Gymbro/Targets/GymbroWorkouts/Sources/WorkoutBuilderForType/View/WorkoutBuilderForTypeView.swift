@@ -26,11 +26,11 @@ struct WorkoutBuilderForTypeView: View {
                     .ignoresSafeArea(.container, edges: .bottom)
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(Color.white)
-                        AppButton("Refresh", size: .xl) {
-                            viewModel.fetchData(for: viewModel.type, workout: viewModel.workout)
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
+                            viewModel.fetchData()
                         }
                     }
                     .padding(.horizontal, 40)
@@ -59,8 +59,8 @@ struct WorkoutBuilderForTypeView: View {
         .customAlert(
             isPresented: $viewModel.showAlert,
             data: CustomAlertData(
-                message: "So empty here... Make sure to add some exercises and name your workout before saving!",
-                primaryButton: AppButton("Okay", action: { viewModel.showAlert.toggle() })
+                message: String(localized: "workout.builder.alert_empty", bundle: .module),
+                primaryButton: AppButton(String(localized: "workout.builder.action_okay", bundle: .module), action: { viewModel.showAlert.toggle() })
             )
         )
     }
@@ -73,7 +73,7 @@ struct WorkoutBuilderForTypeView: View {
             VStack(alignment: .leading, spacing: 0) {
 
                 BuilderHeaderView(
-                    title: "\(viewModel.type) workout",
+                    title: WorkoutL10n.builderScreenTitle(typeName: viewModel.workoutKind.localizedTitle),
                     name: $viewModel.name
                 )
 
@@ -99,7 +99,7 @@ struct WorkoutBuilderForTypeView: View {
             }
 
             AppButton(
-                "Save",
+                String(localized: "workout.builder.action_save", bundle: .module),
                 size: .xl,
                 action: { viewModel.saveButtonTapped() },
                 wrapContent: false

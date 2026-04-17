@@ -60,7 +60,7 @@ struct ChatWorkoutMessageCardView: View {
                         tag(workoutCategory)
                         tag(workoutDuration)
                         Spacer()
-                        Text("Tap for more info")
+                        Text(String(localized: "feeds.chat.workout_tap_hint", bundle: .module))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.white.opacity(0.68))
                     }

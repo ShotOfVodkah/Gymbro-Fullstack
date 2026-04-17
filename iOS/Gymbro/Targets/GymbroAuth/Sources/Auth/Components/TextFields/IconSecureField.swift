@@ -24,7 +24,7 @@ struct IconSecureField: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .placeholder(when: text.isEmpty) {
-                                Text("Enter your password")
+                                Text(String(localized: "auth.placeholder.password", bundle: .module))
                                     .foregroundColor(.white.opacity(0.6))
                                     .bold()
                             }
@@ -33,7 +33,7 @@ struct IconSecureField: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .placeholder(when: text.isEmpty) {
-                                Text("Enter your password")
+                                Text(String(localized: "auth.placeholder.password", bundle: .module))
                                     .foregroundColor(.white.opacity(0.6))
                                     .bold()
                             }

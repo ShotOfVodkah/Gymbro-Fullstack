@@ -10,7 +10,8 @@ public final class WorkoutsClient {
     
     public func fetchPremadeWorkouts() async throws -> [Workout] {
         let queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "userId", value: "premade")
+            URLQueryItem(name: "userId", value: "premade"),
+            backendLocaleQueryItem(),
         ]
         let dtos = try await client.request(
             method: .GET,
@@ -26,7 +27,8 @@ public final class WorkoutsClient {
     public func fetchUserWorkouts() async throws -> [Workout] {
         let userId = try requireUserId()
         let queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "userId", value: userId)
+            URLQueryItem(name: "userId", value: userId),
+            backendLocaleQueryItem(),
         ]
         let dtos = try await client.request(
             method: .GET,
@@ -41,7 +43,8 @@ public final class WorkoutsClient {
 
     public func fetchExercises(type: WorkoutType) async throws -> [ExerciseItemDTO] {
         let queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "type", value: type.rawValue)
+            URLQueryItem(name: "type", value: type.rawValue),
+            backendLocaleQueryItem(),
         ]
         let dtos = try await client.request(
             method: .GET,
@@ -66,6 +69,7 @@ public final class WorkoutsClient {
         let dto = try await client.request(
             method: .POST,
             path: "workouts/",
+            queryItems: [backendLocaleQueryItem()],
             body: body,
             requiresAuth: true,
             responseType: WorkoutDTO.self
@@ -82,6 +86,7 @@ public final class WorkoutsClient {
         let dto = try await client.request(
             method: .PUT,
             path: "workouts/\(workout.id)",
+            queryItems: [backendLocaleQueryItem()],
             body: body,
             requiresAuth: true,
             responseType: WorkoutDTO.self
@@ -93,6 +98,7 @@ public final class WorkoutsClient {
         let dto = try await client.request(
             method: .GET,
             path: "workouts/\(id)",
+            queryItems: [backendLocaleQueryItem()],
             body: Optional<EmptyBody>.none,
             requiresAuth: true,
             responseType: WorkoutDTO.self
@@ -122,7 +128,8 @@ public final class WorkoutsClient {
         let requestBody = GenerateWorkoutRequest(
             user_input: prompt,
             injuries: injuries.map { $0.codingValue },
-            user_id: userId
+            user_id: userId,
+            locale: backendLocaleCode()
         )
         
         let data = try await client.request(
@@ -247,6 +254,7 @@ public final class WorkoutsClient {
         let dto = try await client.request(
             method: .POST,
             path: "sessions/save-as-workout",
+            queryItems: [backendLocaleQueryItem()],
             body: body,
             requiresAuth: true,
             responseType: WorkoutDTO.self
@@ -270,6 +278,7 @@ public final class WorkoutsClient {
         let dto = try await client.request(
             method: .POST,
             path: "workouts/copy-premade",
+            queryItems: [backendLocaleQueryItem()],
             body: body,
             requiresAuth: true,
             responseType: WorkoutDTO.self
@@ -297,6 +306,15 @@ public final class WorkoutsClient {
     private func divKitLanguageQueryItem() -> URLQueryItem {
         let code = Locale.current.language.languageCode?.identifier ?? "en"
         return URLQueryItem(name: "lang", value: code)
+    }
+
+    private func backendLocaleCode() -> String {
+        let code = Locale.current.language.languageCode?.identifier ?? "en"
+        return code == "ru" ? "ru" : "en"
+    }
+
+    private func backendLocaleQueryItem() -> URLQueryItem {
+        URLQueryItem(name: "locale", value: backendLocaleCode())
     }
 }
 

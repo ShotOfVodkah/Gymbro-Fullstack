@@ -11,13 +11,13 @@ struct GroupChatCreationStep: View {
             header
             groupNameField
             
-            Text("Select members")
+            Text(String(localized: "feeds.chat.group.select_members_title", bundle: .module))
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(.white.opacity(0.85))
             
             PeopleSearchBar(text: $viewModel.groupChatSearchText)
             
-            Text("Selected: \(viewModel.chatCreationDraft.selectedGroupMembers.count) • Minimum 2 people")
+            Text(FeedsL10n.groupSelectedLine(count: viewModel.chatCreationDraft.selectedGroupMembers.count))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.white.opacity(0.55))
             
@@ -30,7 +30,7 @@ struct GroupChatCreationStep: View {
             }
             
             AppButton(
-                "Create group chat",
+                String(localized: "feeds.chat.group.create_chat_action", bundle: .module),
                 size: .l,
                 action: viewModel.createGroupChat,
                 wrapContent: false
@@ -42,14 +42,14 @@ struct GroupChatCreationStep: View {
     
     private var header: some View {
         ChatCreationHeaderView(
-            title: "Create group",
+            title: String(localized: "feeds.chat.group.header_create", bundle: .module),
             onBackTap: viewModel.goBackInChatCreationFlow
         )
     }
     
     private var groupNameField: some View {
         TextField(
-            "Group name",
+            String(localized: "feeds.chat.group.name_placeholder", bundle: .module),
             text: Binding(
                 get: { viewModel.chatCreationDraft.groupName },
                 set: { viewModel.updateGroupName($0) }

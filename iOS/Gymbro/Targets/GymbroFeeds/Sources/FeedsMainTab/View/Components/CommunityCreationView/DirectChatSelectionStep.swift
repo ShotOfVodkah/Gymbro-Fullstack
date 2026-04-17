@@ -28,7 +28,7 @@ struct DirectChatSelectionStep: View {
     
     private var header: some View {
         ChatCreationHeaderView(
-            title: "Choose person",
+            title: String(localized: "feeds.chat.direct.choose_person", bundle: .module),
             onBackTap: viewModel.goBackInChatCreationFlow
         )
     }

@@ -29,7 +29,7 @@ class WorkoutBuilderForTypeController(private val backendClient: GymbroBackendCl
         val language = Language.fromRequestParam(lang)
         val domainStrings = DomainStrings(language)
 
-        val exercises = backendClient.getExercisesByType(type.lowercase()).map { it.toExercise() }
+        val exercises = backendClient.getExercisesByType(type.lowercase(), language.asString).map { it.toExercise() }
 
         val workoutType = when (type.lowercase()) {
             "strength" -> WorkoutType.STRENGTH

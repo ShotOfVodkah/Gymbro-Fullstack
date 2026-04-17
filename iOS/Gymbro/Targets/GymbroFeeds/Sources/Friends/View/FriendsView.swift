@@ -18,11 +18,11 @@ struct FeedsPeopleView: View {
                 
             case .error:
                 VStack(alignment: .center) {
-                    Text("Something went wrong, oopsie...")
+                    Text(GymbroCommonStrings.genericError)
                         .font(.title3)
                         .foregroundStyle(Color.white)
                     
-                    AppButton("Refresh", size: .xl) {
+                    AppButton(GymbroCommonStrings.refresh, size: .xl) {
                         viewModel.reload()
                     }
                 }
@@ -103,7 +103,7 @@ struct FeedsPeopleView: View {
             }
             .buttonStyle(.plain)
             
-            Text("People")
+            Text(String(localized: "feeds.people.title", bundle: .module))
                 .font(.system(size: 30, weight: .bold))
                 .foregroundStyle(.white)
             

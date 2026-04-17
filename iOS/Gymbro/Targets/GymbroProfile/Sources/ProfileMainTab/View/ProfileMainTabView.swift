@@ -14,15 +14,15 @@ struct ProfileMainTabView: View {
         Group {
             switch viewModel.screenState {
             case .loading:
-                Text("loading")
+                Text(String(localized: "profile.loading", bundle: .module))
             case .loaded:
                 VStack(spacing: 24) {
-                    Text("Profile")
+                    Text(String(localized: "profile.title", bundle: .module))
                         .font(.title)
                         .foregroundStyle(.white)
                     
                     AppButton(
-                        viewModel.isLoggingOut ? "Logging out..." : "Log out",
+                        viewModel.isLoggingOut ? String(localized: "profile.logging_out", bundle: .module) : String(localized: "profile.logout", bundle: .module),
                         size: .xl
                     ) {
                         viewModel.logout()
@@ -31,10 +31,10 @@ struct ProfileMainTabView: View {
                 .padding(.horizontal, 24)
             case .error:
                 VStack(alignment: .center) {
-                    Text("Something went wrong, oopsie...")
+                    Text(GymbroCommonStrings.genericError)
                         .font(.title3)
                         .foregroundStyle(Color.white)
-                    AppButton("Refresh", size: .xl) {
+                    AppButton(GymbroCommonStrings.refresh, size: .xl) {
                         // TODO Refresh
                     }
                 }

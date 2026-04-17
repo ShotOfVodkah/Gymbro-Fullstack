@@ -12,10 +12,10 @@ public struct ErrorView: View {
     
     public var body: some View {
         VStack(alignment: .center) {
-            Text("Something went wrong, oopsie...")
+            Text(GymbroCommonStrings.genericError)
                 .font(.title3)
                 .foregroundStyle(Color.white)
-            AppButton("Refresh", size: .xl) {
+            AppButton(GymbroCommonStrings.refresh, size: .xl) {
                 action()
             }
         }

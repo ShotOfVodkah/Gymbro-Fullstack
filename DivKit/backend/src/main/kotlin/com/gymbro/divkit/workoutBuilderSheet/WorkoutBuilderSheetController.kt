@@ -27,7 +27,8 @@ class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClie
         request: HttpServletRequest,
     ): ResponseEntity<Divan> {
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
-        val workout = backendClient.getWorkout(id, authorization)?.toDomain()
+        val language = Language.fromRequestParam(lang)
+        val workout = backendClient.getWorkout(id, authorization, language.asString)?.toDomain()
 
         if (workout == null) {
             return ResponseEntity(
@@ -42,7 +43,6 @@ class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClie
             )
         }
 
-        val language = Language.fromRequestParam(lang)
         val translations = WorkoutBuilderSheetTranslations(language)
 
         return ResponseEntity(

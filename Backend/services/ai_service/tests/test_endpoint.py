@@ -48,6 +48,14 @@ def client():
         app.dependency_overrides.clear()
 
 
+def test_generate_workout_locale_ru_exercise_names(client):
+    c, _ = client
+    resp = c.post("/ai/generate", json={**_VALID_REQUEST, "locale": "ru"})
+    assert resp.status_code == 200
+    ex = resp.json()["exercises"][0]
+    assert ex["name"] == "Приседания"
+
+
 def test_generate_workout_ok(client):
     c, _ = client
     resp = c.post("/ai/generate", json=_VALID_REQUEST)
@@ -60,7 +68,7 @@ def test_generate_workout_ok(client):
     assert len(body["exercises"]) == 1
     ex = body["exercises"][0]
     assert ex["id"] == "squat"
-    assert ex["name"] == "Приседания"
+    assert ex["name"] == "Squat"
     assert ex["muscleGroup"] == "legs"
     assert ex["sets"] == 3
     assert ex["reps"] == 10

@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct ExerciseInfoView: View {
@@ -30,12 +31,12 @@ struct ExerciseInfoView: View {
                     )
                     .id(exercise.id)
                 case .strength(let e):
-                    dataCapsule(title: "Sets", data: "\(e.sets)")
-                    dataCapsule(title: "Reps", data: "\(e.reps)")
-                    dataCapsule(title: "Kg", data: "\(e.weightKg)")
+                    dataCapsule(title: String(localized: "watch.field.sets", bundle: .module), data: "\(e.sets)")
+                    dataCapsule(title: String(localized: "watch.field.reps", bundle: .module), data: "\(e.reps)")
+                    dataCapsule(title: String(localized: "watch.field.kg", bundle: .module), data: "\(e.weightKg)")
                 case .yoga(let e):
-                    dataCapsule(title: "Breath", data: "\(e.breathCount)")
-                    dataCapsule(title: "Hold", data: "\(e.holdSeconds)")
+                    dataCapsule(title: String(localized: "watch.field.breath", bundle: .module), data: "\(e.breathCount)")
+                    dataCapsule(title: String(localized: "watch.field.hold", bundle: .module), data: "\(e.holdSeconds)")
                 case .fallback(_):
                     EmptyView()
                 }

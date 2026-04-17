@@ -49,11 +49,11 @@ public struct AuthView: View {
                     .foregroundStyle(.white)
             }
             
-            Text("GymBro")
+            Text(String(localized: "auth.brand", bundle: .module))
                 .font(.system(size: 40, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Your own path to perfection")
+            Text(String(localized: "auth.tagline", bundle: .module))
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(.white.opacity(0.65))
         }
@@ -70,12 +70,12 @@ public struct AuthView: View {
             
             VStack(spacing: 14) {
                 IconEmailField(
-                    title: "Email",
+                    title: String(localized: "auth.field.email", bundle: .module),
                     systemImage: "envelope",
                     text: $vm.email
                 )
                 IconSecureField(
-                    title: "Password",
+                    title: String(localized: "auth.field.password", bundle: .module),
                     systemImage: "lock",
                     text: $vm.password,
                     isHidden: $vm.isPasswordHidden
@@ -86,7 +86,7 @@ public struct AuthView: View {
                 vm.submit()
             } label: {
                 HStack(spacing: 10) {
-                    Text(vm.tab == .login ? "Log in" : "Create an account")
+                    Text(vm.tab == .login ? String(localized: "auth.action.login", bundle: .module) : String(localized: "auth.action.create_account", bundle: .module))
                         .font(.system(size: 18, weight: .semibold))
                     Image(systemName: "arrow.right")
                         .font(.system(size: 16, weight: .semibold))
@@ -120,7 +120,7 @@ public struct AuthView: View {
     
     private var legalText: some View {
         VStack(spacing: 6) {
-            Text(vm.consent.allAccepted ? "You're all set legally." : "By continuing, you agree to GymBro's")
+            Text(vm.consent.allAccepted ? String(localized: "auth.legal.all_set", bundle: .module) : String(localized: "auth.legal.prefix", bundle: .module))
                 .font(.system(size: 14))
                 .foregroundStyle(.white.opacity(0.35))
             
@@ -128,18 +128,18 @@ public struct AuthView: View {
                 Button {
                     vm.openLegal(.terms)
                 } label: {
-                    Text("Terms of Service")
+                    Text(String(localized: "auth.legal.terms", bundle: .module))
                         .foregroundStyle(vm.consent.termsAccepted ? .white.opacity(0.35) : .white.opacity(0.6))
                         .underline()
                 }
                 
-                Text("and")
+                Text(String(localized: "auth.legal.and", bundle: .module))
                     .foregroundStyle(.white.opacity(0.35))
                 
                 Button {
                     vm.openLegal(.privacy)
                 } label: {
-                    Text("Privacy Policy")
+                    Text(String(localized: "auth.legal.privacy", bundle: .module))
                         .foregroundStyle(vm.consent.privacyAccepted ? .white.opacity(0.35) : .white.opacity(0.6))
                         .underline()
                 }
@@ -152,20 +152,20 @@ public struct AuthView: View {
     
     private var rolePicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Who are you?")
+            Text(String(localized: "auth.role.who", bundle: .module))
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.white)
             
             HStack(spacing: 14) {
                 RoleCard(
-                    title: "Athlete",
+                    title: String(localized: "auth.role.athlete", bundle: .module),
                     systemImage: "figure.run",
                     selected: vm.role == .athlete
                 )
                 .onTapGesture { vm.role = .athlete }
                 
                 RoleCard(
-                    title: "Coach",
+                    title: String(localized: "auth.role.coach", bundle: .module),
                     systemImage: "person.3.fill",
                     selected: vm.role == .coach
                 )

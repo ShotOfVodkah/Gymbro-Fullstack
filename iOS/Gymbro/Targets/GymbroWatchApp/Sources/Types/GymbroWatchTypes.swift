@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct WatchWorkoutPayload: Codable, Hashable, Identifiable {
@@ -51,9 +52,12 @@ enum WorkoutType: String, Codable, Hashable {
     
     public var title: String {
         switch self {
-        case .strength: return "Strength"
-        case .cardio: return "Cardio"
-        case .yoga: return "Yoga"
+        case .strength:
+            return String(localized: "watch.type.strength", bundle: .module)
+        case .cardio:
+            return String(localized: "watch.type.cardio", bundle: .module)
+        case .yoga:
+            return String(localized: "watch.type.yoga", bundle: .module)
         }
     }
     
@@ -79,11 +83,16 @@ enum PaceType: String, Codable, Hashable {
     
     public var title: String {
         switch self {
-        case .walk: return "Walk"
-        case .jog: return "Jog"
-        case .run: return "Run"
-        case .sprint: return "Sprint"
-        case .recovery: return "Recovery"
+        case .walk:
+            return String(localized: "watch.pace.walk", bundle: .module)
+        case .jog:
+            return String(localized: "watch.pace.jog", bundle: .module)
+        case .run:
+            return String(localized: "watch.pace.run", bundle: .module)
+        case .sprint:
+            return String(localized: "watch.pace.sprint", bundle: .module)
+        case .recovery:
+            return String(localized: "watch.pace.recovery", bundle: .module)
         }
     }
 }

@@ -100,18 +100,57 @@ public enum ExerciseItem: Identifiable, Equatable, Codable {
     private enum CodingKeys: String, CodingKey {
         case type
     }
+
+    public var localizedTypeTitle: String {
+        switch self {
+        case .strength:
+            return String(localized: "exercise.kind.strength", bundle: .module)
+        case .cardio:
+            return String(localized: "exercise.kind.cardio", bundle: .module)
+        case .yoga:
+            return String(localized: "exercise.kind.yoga", bundle: .module)
+        case .fallback:
+            return String(localized: "exercise.kind.generic", bundle: .module)
+        }
+    }
 }
 
 public enum WorkoutType: String, Codable {
     case strength
     case cardio
     case yoga
-    
+
+    /// English label for APIs, analytics, and DivKit `type` query (not for user-visible UI).
     public var title: String {
         switch self {
         case .strength: return "Strength"
         case .cardio: return "Cardio"
         case .yoga: return "Yoga"
+        }
+    }
+
+    public var localizedTitle: String {
+        switch self {
+        case .strength:
+            return String(localized: "workout.type.strength", bundle: .module)
+        case .cardio:
+            return String(localized: "workout.type.cardio", bundle: .module)
+        case .yoga:
+            return String(localized: "workout.type.yoga", bundle: .module)
+        }
+    }
+
+    /// Same as `title`; stable token for `workoutBuilderForType` requests.
+    public var builderTypeQueryValue: String { title }
+
+    public static func resolvingBuilderTypeToken(_ token: String) -> WorkoutType {
+        let t = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let w = WorkoutType(rawValue: t.lowercased()) { return w }
+        switch t {
+        case "Strength": return .strength
+        case "Cardio": return .cardio
+        case "Yoga": return .yoga
+        default: return .strength
         }
     }
     
@@ -144,7 +183,8 @@ public enum WorkoutType: String, Codable {
 
 public enum PaceType: String, CaseIterable, Hashable, Codable {
     case walk, jog, run, sprint, recovery
-    
+
+    /// English label for persistence and APIs.
     public var title: String {
         switch self {
         case .walk: return "Walk"
@@ -154,12 +194,28 @@ public enum PaceType: String, CaseIterable, Hashable, Codable {
         case .recovery: return "Recovery"
         }
     }
+
+    public var localizedTitle: String {
+        switch self {
+        case .walk:
+            return String(localized: "pace.walk", bundle: .module)
+        case .jog:
+            return String(localized: "pace.jog", bundle: .module)
+        case .run:
+            return String(localized: "pace.run", bundle: .module)
+        case .sprint:
+            return String(localized: "pace.sprint", bundle: .module)
+        case .recovery:
+            return String(localized: "pace.recovery", bundle: .module)
+        }
+    }
 }
 
 public enum MuscleGroup: String, Codable {
     case chest, back, shoulders, biceps, triceps, legs, glutes, core
     case fullBody = "full_body"
-    
+
+    /// English label for persistence and APIs.
     public var title: String {
         switch self {
         case .chest: return "Chest"
@@ -171,6 +227,29 @@ public enum MuscleGroup: String, Codable {
         case .glutes: return "Glutes"
         case .core: return "Core"
         case .fullBody: return "Full body"
+        }
+    }
+
+    public var localizedTitle: String {
+        switch self {
+        case .chest:
+            return String(localized: "muscle.chest", bundle: .module)
+        case .back:
+            return String(localized: "muscle.back", bundle: .module)
+        case .shoulders:
+            return String(localized: "muscle.shoulders", bundle: .module)
+        case .biceps:
+            return String(localized: "muscle.biceps", bundle: .module)
+        case .triceps:
+            return String(localized: "muscle.triceps", bundle: .module)
+        case .legs:
+            return String(localized: "muscle.legs", bundle: .module)
+        case .glutes:
+            return String(localized: "muscle.glutes", bundle: .module)
+        case .core:
+            return String(localized: "muscle.core", bundle: .module)
+        case .fullBody:
+            return String(localized: "muscle.full_body", bundle: .module)
         }
     }
 }

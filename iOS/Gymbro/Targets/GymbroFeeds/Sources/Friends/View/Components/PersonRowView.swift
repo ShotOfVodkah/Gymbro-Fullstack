@@ -69,7 +69,7 @@ struct PersonRowView: View {
     
     private var followButton: some View {
         Button(action: onFollowTap) {
-            Text(person.isFollowing ? "Following" : "Follow")
+            Text(person.isFollowing ? String(localized: "feeds.following", bundle: .module) : String(localized: "feeds.follow", bundle: .module))
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14)

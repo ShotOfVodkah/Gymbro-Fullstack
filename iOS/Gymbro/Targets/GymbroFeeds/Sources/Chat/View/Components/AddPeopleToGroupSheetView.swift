@@ -27,7 +27,7 @@ struct AddPeopleToGroupSheetView: View {
             backgroundView
             
             VStack(alignment: .leading, spacing: 16) {
-                Text("Add people")
+                Text(String(localized: "feeds.group.sheet_title", bundle: .module))
                     .font(.system(size: 26, weight: .bold))
                     .foregroundStyle(.white)
                 
@@ -41,7 +41,7 @@ struct AddPeopleToGroupSheetView: View {
                     }
                 }
                 
-                AppButton("Add selected", size: .l, action: {
+                AppButton(String(localized: "feeds.group.add_selected", bundle: .module), size: .l, action: {
                     let selected = filteredPeople.filter { selectedIDs.contains($0.id) } + allPeople.filter { selectedIDs.contains($0.id) && !filteredPeople.contains($0) }
                     onAdd(Array(Set(selected)))
                     dismiss()

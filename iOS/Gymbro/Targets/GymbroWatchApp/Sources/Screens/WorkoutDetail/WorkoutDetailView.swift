@@ -18,7 +18,7 @@ struct WorkoutDetailView: View {
                 NavigationLink {
                     WorkoutPlayerView(viewModel: viewModel.makePlayerViewModel())
                 } label: {
-                    Label("Start", systemImage: "play.fill")
+                    Label(String(localized: "watch.workout.start", bundle: .module), systemImage: "play.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .background(Color.appPurple)

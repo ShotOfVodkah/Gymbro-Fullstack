@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 
@@ -10,13 +11,13 @@ func validateEmail(_ email: String) -> Bool {
 
 func validatePassword(_ password: String) -> String? {
     if password.count < 8 {
-        return "Password must be at least 8 characters."
+        return String(localized: "auth.password.min_length", bundle: .module)
     }
     if password.range(of: "[A-Z]", options: .regularExpression) == nil {
-        return "Password must contain at least one uppercase letter."
+        return String(localized: "auth.password.uppercase", bundle: .module)
     }
     if password.range(of: "[0-9]", options: .regularExpression) == nil {
-        return "Password must contain at least one number."
+        return String(localized: "auth.password.number", bundle: .module)
     }
     return nil
 }

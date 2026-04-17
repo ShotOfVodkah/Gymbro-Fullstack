@@ -6,24 +6,24 @@ struct CalendarLegendView: View {
         HStack(spacing: 18) {
             legendDot(
                 color: Color.appPurple,
-                title: "You"
+                title: String(localized: "feeds.calendar.legend_you", bundle: .module)
             )
             
             legendDot(
                 color: Color.blue.opacity(0.9),
-                title: "Chat partner"
+                title: String(localized: "feeds.calendar.legend_partner", bundle: .module)
             )
             
             legendItem(
                 fill: Color.white.opacity(0.10),
                 stroke: Color.white.opacity(0.8),
-                title: "Selected"
+                title: String(localized: "feeds.calendar.legend_selected", bundle: .module)
             )
             
             legendItem(
                 fill: Color.white.opacity(0.04),
                 stroke: Color.white.opacity(0.35),
-                title: "Today"
+                title: String(localized: "feeds.calendar.legend_today", bundle: .module)
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)

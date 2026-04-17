@@ -7,7 +7,7 @@ struct SegmentedPill: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AuthTab.allCases, id: \.self) { item in
-                Text(item.rawValue)
+                Text(item.localizedTitle)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(tab == item ? .white : .white.opacity(0.55))
                     .frame(maxWidth: .infinity)

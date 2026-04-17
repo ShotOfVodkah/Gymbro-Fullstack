@@ -12,7 +12,7 @@ struct PeopleSegmentPicker: View {
                 Button {
                     onSelectTab(tab)
                 } label: {
-                    Text(tab.rawValue)
+                    Text(tab.localizedTitle)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(selectedTab == tab ? .white : .gray)
                         .padding(.horizontal, 16)

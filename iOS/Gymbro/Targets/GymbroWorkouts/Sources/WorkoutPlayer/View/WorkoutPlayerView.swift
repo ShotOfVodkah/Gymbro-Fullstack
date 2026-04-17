@@ -55,10 +55,10 @@ struct WorkoutPlayerView: View {
                     .padding(.leading, 16)
                     
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(Color.white)
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             Task { await viewModel.loadWorkout() }
                         }
                     }
@@ -82,8 +82,8 @@ struct WorkoutPlayerView: View {
         .customAlert(
             isPresented: $viewModel.showAlert,
             data: CustomAlertData(
-                message: "Are you sure you want to exit this workout?",
-                primaryButton: AppButton("Yes", action: {
+                message: String(localized: "workout.player.exit_confirm", bundle: .module),
+                primaryButton: AppButton(String(localized: "workout.player.action_yes", bundle: .module), action: {
                     viewModel.showAlert = false
                     viewModel.exit()
                 })
@@ -114,7 +114,7 @@ struct WorkoutPlayerView: View {
 
             if viewModel.exercises.isEmpty {
                 Spacer()
-                Text("No exercises in this workout")
+                Text(String(localized: "workout.player.no_exercises", bundle: .module))
                     .font(.system(.body, design: .rounded))
                     .foregroundStyle(.white.opacity(0.6))
                     .frame(maxWidth: .infinity)
@@ -155,7 +155,7 @@ struct WorkoutPlayerView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(viewModel.workoutType.title)
+            Text(viewModel.workoutType.localizedTitle)
                 .font(.system(.subheadline, design: .rounded).weight(.medium))
                 .foregroundStyle(.white.opacity(0.5))
                 .padding(.leading, 24)
@@ -203,7 +203,7 @@ struct WorkoutPlayerView: View {
         HStack {
             if let nextExercise = viewModel.nextExercise {
                 VStack(alignment: .leading) {
-                    Text("Up Next")
+                    Text(String(localized: "workout.player.up_next", bundle: .module))
                         .font(.system(.subheadline, design: .rounded).weight(.medium))
                         .foregroundStyle(.white.opacity(0.8))
                     Text("\(nextExercise.name)")
@@ -216,12 +216,12 @@ struct WorkoutPlayerView: View {
                     .foregroundColor(.white)
             } else {
                 VStack(alignment: .leading) {
-                    Text("Looks like you're all done!")
+                    Text(String(localized: "workout.player.all_done", bundle: .module))
                         .font(.system(.title3, design: .rounded).weight(.semibold))
                         .foregroundStyle(.white)
                 }
                 Spacer()
-                AppButton("Finish", action: { viewModel.showFinishPopup = true })
+                AppButton(String(localized: "workout.player.action_finish", bundle: .module), action: { viewModel.showFinishPopup = true })
             }
             
         }

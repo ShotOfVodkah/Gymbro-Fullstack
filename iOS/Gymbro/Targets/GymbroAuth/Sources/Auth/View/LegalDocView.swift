@@ -23,7 +23,7 @@ struct LegalDocScreen: View {
                         }
                         .padding(16)
                     }
-                    AppButton(isAlreadyAccepted ? "✓ Already Accepted" : "I agree", size: .xl) {
+                    AppButton(isAlreadyAccepted ? String(localized: "legal.accepted", bundle: .module) : String(localized: "legal.agree", bundle: .module), size: .xl) {
                         onAccept()
                         dismiss()
                     }
@@ -37,7 +37,7 @@ struct LegalDocScreen: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") { dismiss() }
+                    Button(String(localized: "legal.close", bundle: .module)) { dismiss() }
                 }
             }
         }
@@ -46,9 +46,9 @@ struct LegalDocScreen: View {
     private func dummyText(for type: LegalDocType) -> String {
         switch type {
         case .terms:
-            return "Terms of Service text goes here...\n\n1. You agree...\n2. You also agree...\n\n(Yes, nobody reads this.)"
+            return String(localized: "legal.dummy.terms", bundle: .module)
         case .privacy:
-            return "Privacy Policy text goes here...\n\nWe collect X, store Y, process Z...\n\n(Also nobody reads this.)"
+            return String(localized: "legal.dummy.privacy", bundle: .module)
         }
     }
 }

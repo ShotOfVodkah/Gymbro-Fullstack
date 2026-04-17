@@ -32,10 +32,10 @@ struct WorkoutInfoView: View {
                     }
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(Color.white)
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.fetchData(with: id, type: type)
                         }
                     }
@@ -57,8 +57,8 @@ struct WorkoutInfoView: View {
         .customAlert(
             isPresented: $viewModel.showDeleteAlert,
             data: CustomAlertData(
-                message: "Are you sure you want to delete this workout?",
-                primaryButton: AppButton("Delete", action: {
+                message: String(localized: "workout.info.delete_confirm", bundle: .module),
+                primaryButton: AppButton(String(localized: "workout.info.delete_action", bundle: .module), action: {
                     viewModel.showDeleteAlert = false
                     viewModel.deleteCurrentWorkout()
                 })
@@ -67,8 +67,8 @@ struct WorkoutInfoView: View {
         .customAlert(
             isPresented: $viewModel.showAddAlert,
             data: CustomAlertData(
-                message: "There was an error adding this workout",
-                primaryButton: AppButton("Oh.. Ok", action: {
+                message: String(localized: "workout.info.add_error", bundle: .module),
+                primaryButton: AppButton(String(localized: "workout.info.action_oh_ok", bundle: .module), action: {
                     viewModel.showAddAlert = false
                 })
             )

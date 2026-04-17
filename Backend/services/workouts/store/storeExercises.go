@@ -15,23 +15,22 @@ func NewExerciseStore(db *sqlx.DB) ExerciseStore {
 	return ExerciseStore{db: db}
 }
 
-func (es *ExerciseStore) ListByType(exerciseType string) ([]types.CatalogExercise, error) {
+func (es *ExerciseStore) ListByType(exerciseType string, locale string) ([]types.CatalogExercise, error) {
+	nameExpr := exerciseDisplayNameExpr("e", locale)
 	var exercises []types.CatalogExercise
-	err := es.db.Select(&exercises,
-		`SELECT id, name, type, muscle_group FROM exercises WHERE type = $1 ORDER BY name`,
-		exerciseType,
-	)
+	query := `SELECT id, ` + nameExpr + ` AS name, type, muscle_group FROM exercises e WHERE type = $1 ORDER BY ` + nameExpr
+	err := es.db.Select(&exercises, query, exerciseType)
 	if err != nil {
 		return nil, fmt.Errorf("ListByType: %w", err)
 	}
 	return exercises, nil
 }
 
-func (es *ExerciseStore) ListAll() ([]types.CatalogExercise, error) {
+func (es *ExerciseStore) ListAll(locale string) ([]types.CatalogExercise, error) {
+	nameExpr := exerciseDisplayNameExpr("e", locale)
 	var exercises []types.CatalogExercise
-	err := es.db.Select(&exercises,
-		`SELECT id, name, type, muscle_group FROM exercises ORDER BY type, name`,
-	)
+	query := `SELECT id, ` + nameExpr + ` AS name, type, muscle_group FROM exercises e ORDER BY type, ` + nameExpr
+	err := es.db.Select(&exercises, query)
 	if err != nil {
 		return nil, fmt.Errorf("ListAll: %w", err)
 	}

@@ -23,7 +23,7 @@ struct IconEmailField: View {
                     .keyboardType(.emailAddress)
                     .foregroundStyle(.white)
                     .placeholder(when: text.isEmpty) {
-                        Text("Enter your email")
+                        Text(String(localized: "auth.placeholder.email", bundle: .module))
                             .foregroundColor(.white.opacity(0.6))
                             .bold()
                     }
