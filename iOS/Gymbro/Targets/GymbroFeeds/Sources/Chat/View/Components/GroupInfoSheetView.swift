@@ -40,14 +40,14 @@ struct GroupInfoSheetView: View {
             
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Group info")
+                    Text(String(localized: "feeds.group.info_title", bundle: .module))
                         .font(.system(size: 28, weight: .bold))
                         .foregroundStyle(.white)
                     
-                    inputField(title: "Group name", text: $title)
-                    inputField(title: "Description", text: $description)
+                    inputField(title: String(localized: "feeds.group.field_name", bundle: .module), text: $title)
+                    inputField(title: String(localized: "feeds.group.field_description", bundle: .module), text: $description)
                     
-                    Text("Participants")
+                    Text(String(localized: "feeds.group.participants", bundle: .module))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.white)
                     
@@ -69,7 +69,7 @@ struct GroupInfoSheetView: View {
                                 
                                 Spacer()
                                 
-                                Button("Remove") {
+                                Button(String(localized: "feeds.group.remove", bundle: .module)) {
                                     onRemovePerson(participant.id)
                                 }
                                 .foregroundStyle(.red.opacity(0.85))
@@ -80,15 +80,15 @@ struct GroupInfoSheetView: View {
                         }
                     }
                     
-                    AppButton("Add people", size: .l, action: {
+                    AppButton(String(localized: "feeds.group.add_people", bundle: .module), size: .l, action: {
                         isShowingAddPeopleSheet = true
                     }, wrapContent: false)
                     
-                    AppButton("Save changes", size: .l, action: {
+                    AppButton(String(localized: "feeds.group.save", bundle: .module), size: .l, action: {
                         onUpdate(title, description)
                     }, wrapContent: false)
                     
-                    AppButton("Delete group", size: .l, action: onDelete, wrapContent: false)
+                    AppButton(String(localized: "feeds.group.delete", bundle: .module), size: .l, action: onDelete, wrapContent: false)
                 }
                 .padding(20)
             }

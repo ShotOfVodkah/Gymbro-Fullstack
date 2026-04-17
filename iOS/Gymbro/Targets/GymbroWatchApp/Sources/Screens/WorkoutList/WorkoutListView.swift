@@ -14,7 +14,7 @@ struct WorkoutListView: View {
                 list
             }
         }
-        .navigationTitle("Workouts")
+        .navigationTitle(String(localized: "watch.workouts.title", bundle: .module))
     }
 
     // MARK: - Subviews
@@ -59,7 +59,7 @@ struct WorkoutListView: View {
             Image(systemName: "iphone.and.arrow.forward")
                 .font(.system(size: 28))
                 .foregroundStyle(Color.appPurple)
-            Text("Open Gymbro on iPhone to sync workouts")
+            Text(String(localized: "watch.workouts.sync_hint", bundle: .module))
                 .font(.footnote)
                 .foregroundStyle(Color.appPurple)
                 .multilineTextAlignment(.center)

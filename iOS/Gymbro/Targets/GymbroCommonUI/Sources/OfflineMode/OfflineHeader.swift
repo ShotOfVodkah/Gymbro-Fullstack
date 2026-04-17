@@ -5,7 +5,7 @@ public struct OfflineHeader: View {
     public init() { }
     
     public var body: some View {
-        Text("Offline mode")
+        Text(GymbroCommonStrings.offlineMode)
             .font(.subheadline)
             .frame(maxWidth: .infinity)
             .padding(.bottom, 10)

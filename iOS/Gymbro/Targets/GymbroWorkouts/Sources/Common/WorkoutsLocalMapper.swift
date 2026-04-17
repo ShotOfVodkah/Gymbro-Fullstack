@@ -59,7 +59,7 @@ public final class WorkoutsLocalMapper {
             
             let context: [String: String] = [
                 "workout_name": workout.name,
-                "workout_type": workout.type.title,
+                "workout_type": workout.type.localizedTitle,
                 "workout_id": workout.id,
                 "icon_url": workout.type.style.iconUrl,
                 "workout_color": workout.type.style.headerGradientStart
@@ -382,7 +382,7 @@ public final class WorkoutsLocalMapper {
         var context: [String: String] = [
             "workout.id": workout.id,
             "workout.name": workout.name,
-            "workout.type_title": workout.type.title,
+            "workout.type_title": workout.type.localizedTitle,
             "workout.exercises_count": "\(workout.exercises.count)",
             
             "style.header_gradient_start": style.headerGradientStart,
@@ -403,7 +403,7 @@ public final class WorkoutsLocalMapper {
         var context: [String: String] = [
             "exercise.number": "\(number)",
             "exercise.name": exercise.name,
-            "exercise.muscle_group": exercise.muscleGroup.title,
+            "exercise.muscle_group": exercise.muscleGroup.localizedTitle,
             "style.exercise_gradient_color": style.exerciseGradientColor
         ]
         
@@ -424,7 +424,7 @@ public final class WorkoutsLocalMapper {
             
         case let cardio as CardioExercise:
             context["exercise.duration"] = "\(cardio.durationMinutes)"
-            context["exercise.pace"] = cardio.pace.title
+            context["exercise.pace"] = cardio.pace.localizedTitle
             
         case let yoga as YogaExercise:
             context["exercise.hold_seconds"] = "\(yoga.holdSeconds)"

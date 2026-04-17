@@ -17,7 +17,7 @@ struct BuilderHeaderView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             AppTextField(
-                placeholder: "Workout name",
+                placeholder: String(localized: "workout.builder.placeholder_name", bundle: .module),
                 text: $name
             )
             .padding(.vertical, Layout.fieldVertical)

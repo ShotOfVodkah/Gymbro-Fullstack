@@ -1,9 +1,9 @@
 import Foundation
 
 public enum PeopleTab: String, CaseIterable, Identifiable {
-    case friends = "Friends"
-    case following = "Following"
-    case discover = "Discover"
-    
+    case friends
+    case following
+    case discover
+
     public var id: String { rawValue }
 }

@@ -6,8 +6,8 @@ struct YogaInputsView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            IntField(title: "Hold", value: $holdSeconds, range: 5...300)
-            IntField(title: "Breath", value: $breathCount, range: 1...50)
+            IntField(title: String(localized: "workout.field.hold", bundle: .module), value: $holdSeconds, range: 5...300)
+            IntField(title: String(localized: "workout.field.breath", bundle: .module), value: $breathCount, range: 1...50)
         }
     }
 }

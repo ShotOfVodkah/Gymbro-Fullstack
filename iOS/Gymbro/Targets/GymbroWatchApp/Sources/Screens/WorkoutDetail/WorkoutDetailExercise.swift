@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct ExerciseRowView: View {
@@ -33,11 +34,11 @@ struct ExerciseRowView: View {
     private var subtitle: String {
         switch exercise {
         case .strength(let e):
-            return "\(e.sets) sets × \(e.reps) reps · \(e.weightKg) kg"
+            return "\(e.sets)×\(e.reps) · \(Int(e.weightKg)) \(String(localized: "watch.field.kg", bundle: .module))"
         case .cardio(let e):
             return "\(e.durationMinutes) min · \(e.pace.title)"
         case .yoga(let e):
-            return "\(e.holdSeconds)s hold · \(e.breathCount) breaths"
+            return "\(e.holdSeconds)s · \(e.breathCount) \(String(localized: "watch.field.breath", bundle: .module))"
         case .fallback:
             return ""
         }

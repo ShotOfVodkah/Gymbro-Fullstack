@@ -59,7 +59,7 @@ extension ChatMessage {
             let workout = response.workout
             kind = .workout(
                 sessionID: workout?.session_id ?? "",
-                title: workout?.title ?? "Workout",
+                title: workout?.title ?? String(localized: "chat.fallback.workout", bundle: .module),
                 subtitle: workout?.subtitle ?? "",
                 duration: workout?.duration ?? "",
                 category: workout?.category ?? ""

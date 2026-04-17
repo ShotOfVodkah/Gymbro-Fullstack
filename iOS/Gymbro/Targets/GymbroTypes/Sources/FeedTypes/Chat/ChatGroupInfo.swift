@@ -19,7 +19,7 @@ public struct ChatGroupInfo: Hashable {
 extension ChatGroupInfo {
     public init(response: ChatRoomResponse) {
         self.init(
-            title: response.title ?? "Group",
+            title: response.title ?? String(localized: "chat.fallback.group", bundle: .module),
             description: response.description ?? "",
             participants: response.participants.map(ChatParticipant.init(response:))
         )

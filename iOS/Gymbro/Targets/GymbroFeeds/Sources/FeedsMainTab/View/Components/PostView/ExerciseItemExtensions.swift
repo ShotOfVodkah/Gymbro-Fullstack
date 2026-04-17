@@ -33,13 +33,13 @@ extension ExerciseItem {
             return "\(exercise.sets)x\(exercise.reps) • \(Int(exercise.weightKg)) kg"
             
         case .cardio(let exercise):
-            return "\(exercise.durationMinutes) min • \(exercise.pace.title)"
+            return "\(exercise.durationMinutes) min • \(exercise.pace.localizedTitle)"
             
         case .yoga(let exercise):
             return "\(exercise.holdSeconds) sec • \(exercise.breathCount) breaths"
             
         case .fallback(let exercise):
-            return exercise.muscleGroup.title
+            return exercise.muscleGroup.localizedTitle
         }
     }
     
@@ -59,27 +59,18 @@ extension ExerciseItem {
     var muscleGroupTitle: String {
         switch self {
         case .strength(let exercise):
-            return exercise.muscleGroup.title
+            return exercise.muscleGroup.localizedTitle
         case .cardio(let exercise):
-            return exercise.muscleGroup.title
+            return exercise.muscleGroup.localizedTitle
         case .yoga(let exercise):
-            return exercise.muscleGroup.title
+            return exercise.muscleGroup.localizedTitle
         case .fallback(let exercise):
-            return exercise.muscleGroup.title
+            return exercise.muscleGroup.localizedTitle
         }
     }
     
     var typeTitle: String {
-        switch self {
-        case .strength:
-            return "Strength"
-        case .cardio:
-            return "Cardio"
-        case .yoga:
-            return "Yoga"
-        case .fallback:
-            return "Exercise"
-        }
+        localizedTypeTitle
     }
     
     var accentColor: Color {

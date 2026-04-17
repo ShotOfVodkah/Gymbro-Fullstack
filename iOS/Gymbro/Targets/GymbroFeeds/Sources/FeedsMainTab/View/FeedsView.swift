@@ -22,11 +22,11 @@ struct FeedsMainTabView: View {
                     
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(.white)
                         
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.reload()
                         }
                     }

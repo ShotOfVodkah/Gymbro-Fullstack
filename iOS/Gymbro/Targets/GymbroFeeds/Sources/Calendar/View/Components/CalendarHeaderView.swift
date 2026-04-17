@@ -18,7 +18,7 @@ struct CalendarHeaderView: View {
             }
             .buttonStyle(.plain)
             
-            Text("Calendar")
+            Text(String(localized: "feeds.calendar.title", bundle: .module))
                 .font(.system(size: 30, weight: .bold))
                 .foregroundStyle(.white)
             

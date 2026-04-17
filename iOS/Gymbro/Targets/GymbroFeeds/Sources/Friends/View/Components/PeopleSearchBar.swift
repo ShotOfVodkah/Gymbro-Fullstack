@@ -11,7 +11,7 @@ struct PeopleSearchBar: View {
             
             ZStack(alignment: .leading) {
                 if text.isEmpty {
-                    Text("Search people")
+                    Text(String(localized: "feeds.search.people", bundle: .module))
                         .foregroundStyle(.white.opacity(0.45))
                 }
                 

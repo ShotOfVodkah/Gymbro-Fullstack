@@ -7,26 +7,26 @@ struct ChatTypeSelectionStep: View {
     
     var body: some View {
         VStack(spacing: 18) {
-            Text("Create chat")
+            Text(String(localized: "feeds.chat.create.title", bundle: .module))
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Choose what kind of conversation you want to start")
+            Text(String(localized: "feeds.chat.create.subtitle", bundle: .module))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.white.opacity(0.7))
                 .multilineTextAlignment(.center)
             
             VStack(spacing: 12) {
                 typeCard(
-                    title: "Direct chat",
-                    subtitle: "Start a one-to-one conversation",
+                    title: String(localized: "feeds.chat.direct.title", bundle: .module),
+                    subtitle: String(localized: "feeds.chat.direct.subtitle", bundle: .module),
                     icon: "person.fill",
                     action: onDirectTap
                 )
                 
                 typeCard(
-                    title: "Group chat",
-                    subtitle: "Create a conversation with several people",
+                    title: String(localized: "feeds.chat.group.title", bundle: .module),
+                    subtitle: String(localized: "feeds.chat.group.subtitle", bundle: .module),
                     icon: "person.3.fill",
                     action: onGroupTap
                 )

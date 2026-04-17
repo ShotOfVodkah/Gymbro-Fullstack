@@ -7,15 +7,15 @@ struct CardioInputsView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            IntField(title: "Min", value: $duration, range: 1...240)
+            IntField(title: String(localized: "workout.field.min", bundle: .module), value: $duration, range: 1...240)
 
-            Text("Pace")
+            Text(String(localized: "workout.field.pace", bundle: .module))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.6))
 
             Picker("", selection: $pace) {
                 ForEach(PaceType.allCases, id: \.self) { p in
-                    Text(String(describing: p)).tag(p)
+                    Text(p.localizedTitle).tag(p)
                 }
             }
             .pickerStyle(.menu)

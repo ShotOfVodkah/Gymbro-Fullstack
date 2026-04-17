@@ -70,7 +70,7 @@ struct PersonDetailsSheet: View {
                     .foregroundStyle(.white.opacity(0.75))
                     .multilineTextAlignment(.center)
                 
-                Text("\(person.workoutsThisMonth) workouts this month")
+                Text(FeedsL10n.workoutsThisMonth(person.workoutsThisMonth))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.white.opacity(0.6))
             }

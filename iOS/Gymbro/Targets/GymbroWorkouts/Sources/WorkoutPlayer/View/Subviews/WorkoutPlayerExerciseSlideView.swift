@@ -89,7 +89,7 @@ struct WorkoutPlayerExerciseSlideView: View {
             .fontWeight(.bold)
             .foregroundStyle(.white)
 
-        Text(exercise.muscleGroup.title)
+        Text(exercise.muscleGroup.localizedTitle)
             .font(.system(.subheadline, design: .rounded).weight(.semibold))
             .foregroundStyle(.white)
             .padding(.horizontal, 10)
@@ -142,15 +142,15 @@ struct WorkoutPlayerExerciseSlideView: View {
         HStack(spacing: 8) {
             switch exercise {
             case .strength(let e):
-                paramCapsule(title: "Sets", subtitle: "\(e.sets)")
-                paramCapsule(title: "Reps", subtitle: "\(e.reps)")
-                paramCapsule(title: "Weight", subtitle: formatKg(selectedWeight))
+                paramCapsule(title: String(localized: "workout.field.sets", bundle: .module), subtitle: "\(e.sets)")
+                paramCapsule(title: String(localized: "workout.field.reps", bundle: .module), subtitle: "\(e.reps)")
+                paramCapsule(title: String(localized: "workout.player.label_weight", bundle: .module), subtitle: formatKg(selectedWeight))
             case .cardio(let e):
-                paramCapsule(title: "Duration", subtitle: "\(e.durationMinutes) min")
-                paramCapsule(title: "Pace", subtitle: e.pace.title)
+                paramCapsule(title: String(localized: "workout.player.label_duration", bundle: .module), subtitle: "\(e.durationMinutes) min")
+                paramCapsule(title: String(localized: "workout.field.pace", bundle: .module), subtitle: e.pace.localizedTitle)
             case .yoga(let e):
-                paramCapsule(title: "Breath Count", subtitle: "\(e.breathCount)")
-                paramCapsule(title: "Hold for", subtitle: "\(e.holdSeconds) sec")
+                paramCapsule(title: String(localized: "workout.player.breath_count", bundle: .module), subtitle: "\(e.breathCount)")
+                paramCapsule(title: String(localized: "workout.player.hold_for", bundle: .module), subtitle: "\(e.holdSeconds) sec")
             case .fallback:
                 EmptyView()
             }

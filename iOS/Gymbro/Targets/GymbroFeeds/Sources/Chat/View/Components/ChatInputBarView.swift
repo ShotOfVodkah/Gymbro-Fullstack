@@ -9,7 +9,7 @@ struct ChatInputBarView: View {
         HStack(spacing: 10) {
             ZStack(alignment: .leading) {
                 if text.isEmpty {
-                    Text("Write a message")
+                    Text(String(localized: "feeds.chat.placeholder", bundle: .module))
                         .foregroundStyle(.white.opacity(0.45))
                         .padding(.horizontal, 14)
                 }

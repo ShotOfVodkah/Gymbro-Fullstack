@@ -265,9 +265,9 @@ final class ChatViewModel: ObservableObject {
         let calendar = Calendar.current
         
         if calendar.isDateInToday(date) {
-            return "Today"
+            return String(localized: "feeds.chat.date.today", bundle: .module)
         } else if calendar.isDateInYesterday(date) {
-            return "Yesterday"
+            return String(localized: "feeds.chat.date.yesterday", bundle: .module)
         } else {
             let formatter = DateFormatter()
             formatter.dateFormat = "EEEE"

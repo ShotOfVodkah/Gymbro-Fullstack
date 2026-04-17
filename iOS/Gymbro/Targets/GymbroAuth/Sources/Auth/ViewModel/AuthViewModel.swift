@@ -36,7 +36,7 @@ final class AuthViewModel: ObservableObject {
     
     func submit() {
         guard consent.allAccepted else {
-            showAlert("Please read and accept Terms of Service and Privacy Policy to continue.")
+            showAlert(String(localized: "auth.alert.accept_legal", bundle: .module))
             return
         }
         
@@ -45,18 +45,18 @@ final class AuthViewModel: ObservableObject {
         switch tab {
         case .login:
             guard !email.isEmpty else {
-                showAlert("Enter your email address.")
+                showAlert(String(localized: "auth.alert.enter_email", bundle: .module))
                 return
             }
             
             guard !password.isEmpty else {
-                showAlert("Enter your password.")
+                showAlert(String(localized: "auth.alert.enter_password", bundle: .module))
                 return
             }
             
         case .register:
             guard validateEmail(trimmedEmail) else {
-                showAlert("Enter a valid email address.")
+                showAlert(String(localized: "auth.alert.invalid_email", bundle: .module))
                 return
             }
             
@@ -109,7 +109,7 @@ final class AuthViewModel: ObservableObject {
     private func showAlert(_ message: String) {
         alertData = CustomAlertData(
             message: message,
-            primaryButton: AppButton("OK", size: .l) { [weak self] in
+            primaryButton: AppButton(String(localized: "auth.alert.ok", bundle: .module), size: .l) { [weak self] in
                 self?.isAlertPresented = false
             }
         )

@@ -21,11 +21,11 @@ struct FeedsCalendarView: View {
                     
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(.white)
                         
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.reload()
                         }
                     }
@@ -39,18 +39,18 @@ struct FeedsCalendarView: View {
             titleVisibility: .visible
         ) {
             if viewModel.selectedDayForActions?.myWorkoutID != nil {
-                Button("My workout") {
+                Button(String(localized: "feeds.calendar.action_my_workout", bundle: .module)) {
                     viewModel.openMyWorkoutFromSelectedDay()
                 }
             }
             
             if viewModel.selectedDayForActions?.partnerWorkoutID != nil {
-                Button("Chat partner workout") {
+                Button(String(localized: "feeds.calendar.action_partner_workout", bundle: .module)) {
                     viewModel.openPartnerWorkoutFromSelectedDay()
                 }
             }
             
-            Button("Cancel", role: .cancel) {
+            Button(String(localized: "feeds.calendar.cancel", bundle: .module), role: .cancel) {
                 viewModel.clearDayWorkoutChoices()
             }
         }

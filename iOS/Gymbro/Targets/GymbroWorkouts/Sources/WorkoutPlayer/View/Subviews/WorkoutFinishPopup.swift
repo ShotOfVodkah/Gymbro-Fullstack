@@ -26,11 +26,11 @@ struct WorkoutFinishPopup: View {
     private var popupCard: some View {
         VStack(spacing: 0) {
             VStack(spacing: 8) {
-                Text("Workout Complete!")
+                Text(String(localized: "workout.finish.title", bundle: .module))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(.white)
 
-                Text("You crushed it! Choose friends to share with:")
+                Text(String(localized: "workout.finish.subtitle", bundle: .module))
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
@@ -46,7 +46,7 @@ struct WorkoutFinishPopup: View {
             }
             .frame(maxHeight: 220)
 
-            AppButton("Done", size: .xl, action: onDone, wrapContent: false)
+            AppButton(String(localized: "workout.finish.action_done", bundle: .module), size: .xl, action: onDone, wrapContent: false)
                 .padding(.top, 24)
         }
         .padding(.vertical, 32)

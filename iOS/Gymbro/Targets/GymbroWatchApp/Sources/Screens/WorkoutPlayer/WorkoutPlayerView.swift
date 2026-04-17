@@ -53,7 +53,7 @@ struct WorkoutPlayerView: View {
     
     private var actionButton: some View {
         Button(action: { viewModel.advanceOrFinish() }) {
-            Text(viewModel.isLast ? "Finish" : "Next")
+            Text(viewModel.isLast ? String(localized: "watch.player.finish", bundle: .module) : String(localized: "watch.player.next", bundle: .module))
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
@@ -67,9 +67,9 @@ struct WorkoutPlayerView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 32))
                     .foregroundStyle(.green)
-                Text("Saved!")
+                Text(String(localized: "watch.workout.saved", bundle: .module))
                     .font(.headline)
-                Text("Syncing when iPhone is nearby")
+                Text(String(localized: "watch.workout.sync_hint", bundle: .module))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

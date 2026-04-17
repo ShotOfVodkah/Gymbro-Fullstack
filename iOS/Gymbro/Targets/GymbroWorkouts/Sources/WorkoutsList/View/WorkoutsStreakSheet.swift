@@ -20,12 +20,12 @@ struct WorkoutsStreakSheet: View {
         self.current = current
         self.value = value
         self.streakText = (daysLeft <= 2)
-        ? "Your streak is in danger! Let's get to work and keep on pushing!"
-        : "Doing great! Keep those reps going and lock in! \nMaintaining your streak gives you achievements, unlock them all!"
+        ? WorkoutL10n.streakMotivationDanger
+        : WorkoutL10n.streakMotivationSafe
     }
     var body: some View {
         VStack(spacing: 10) {
-            Text("Your streak")
+            Text(String(localized: "workout.streak.title", bundle: .module))
                 .foregroundStyle(.white)
                 .font(.title2)
                 .fontWeight(.bold)
@@ -125,7 +125,7 @@ public struct SegmentedPillProgress: View {
                 }
             }
             
-            Text("\(daysLeft) days left")
+            Text(WorkoutL10n.streakDaysLeft(daysLeft))
                 .foregroundStyle(.white)
                 .font(.subheadline)
                 .fontWeight(.semibold)

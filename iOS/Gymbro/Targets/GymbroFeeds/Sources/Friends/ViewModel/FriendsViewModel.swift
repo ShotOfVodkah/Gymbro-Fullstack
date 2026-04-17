@@ -71,21 +71,21 @@ final class FeedsPeopleViewModel: ObservableObject {
         switch selectedTab {
         case .friends:
             return [
-                ("Friends", filteredFriends),
-                ("Following", filteredFollowingPeople),
-                ("Discover", filteredDiscoverPeople)
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
+                (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople)
             ]
         case .following:
             return [
-                ("Following", filteredFollowingPeople),
-                ("Friends", filteredFriends),
-                ("Discover", filteredDiscoverPeople)
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople)
             ]
         case .discover:
             return [
-                ("Discover", filteredDiscoverPeople),
-                ("Following", filteredFollowingPeople),
-                ("Friends", filteredFriends)
+                (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople),
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
             ]
         }
     }

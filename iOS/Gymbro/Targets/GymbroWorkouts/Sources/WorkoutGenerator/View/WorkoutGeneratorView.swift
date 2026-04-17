@@ -34,7 +34,7 @@ struct WorkoutGeneratorView: View {
                 }
                 .padding(.leading, 16)
                 
-                Text("Generate Workout")
+                Text(String(localized: "workout.generator.title", bundle: .module))
                     .font(.system(.title, design: .rounded).weight(.bold))
                     .foregroundStyle(.white)
             }
@@ -50,7 +50,7 @@ struct WorkoutGeneratorView: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 24) {
             AppTextField(
-                title: "Describe your workout",
+                title: String(localized: "workout.generator.field_prompt_title", bundle: .module),
                 placeholder: "",
                 text: $viewModel.prompt
             )
@@ -59,7 +59,7 @@ struct WorkoutGeneratorView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     injuriesSection
 
-                    AppButton("Generate", size: .l, action: {
+                    AppButton(String(localized: "workout.generator.action_generate", bundle: .module), size: .l, action: {
                         Task { await viewModel.generateWorkout() }
                     }, wrapContent: false)
                 }
@@ -71,9 +71,9 @@ struct WorkoutGeneratorView: View {
         .customAlert(
             isPresented: $viewModel.showAlert,
             data: CustomAlertData(
-                message: "Fill in the prompt before generating",
+                message: String(localized: "workout.generator.alert_empty_prompt", bundle: .module),
                 primaryButton: AppButton(
-                    "Okay",
+                    String(localized: "workout.builder.action_okay", bundle: .module),
                     action: { viewModel.showAlert = false }
                 )
             )
@@ -85,7 +85,7 @@ struct WorkoutGeneratorView: View {
 
     private var injuriesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Injuries and conditions")
+            Text(String(localized: "workout.generator.injuries_label", bundle: .module))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.6))
 
@@ -95,7 +95,7 @@ struct WorkoutGeneratorView: View {
             ) {
                 ForEach(Injury.allCases, id: \.codingValue) { injury in
                     InjuryToggleChip(
-                        label: injury.stringValue,
+                        label: injury.localizedTitle,
                         isSelected: viewModel.selectedInjuries.contains(injury),
                         action: { viewModel.toggleInjury(injury) }
                     )
@@ -119,13 +119,13 @@ struct WorkoutGeneratorView: View {
             }
         case .error:
             VStack {
-                Text("Looks like there is an error generating. Make sure the prompt is correct.")
+                Text(String(localized: "workout.generator.error_prompt", bundle: .module))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                 
                 AppButton(
-                    "Okay",
+                    String(localized: "workout.builder.action_okay", bundle: .module),
                     action: viewModel.dismiss
                 )
             }

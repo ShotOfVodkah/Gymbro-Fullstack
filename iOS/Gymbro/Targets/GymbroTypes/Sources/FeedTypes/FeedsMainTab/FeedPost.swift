@@ -91,9 +91,10 @@ extension FeedPost {
         self.authorName = response.author.name
         self.authorAvatar = response.author.avatar_url
         self.postedAt = Self.formattedDate(response.created_at)
-        self.title = response.workout?.title ?? "Workout"
+        self.title = response.workout?.title ?? String(localized: "chat.fallback.workout", bundle: .module)
         self.coverImageName = "photo"
-        self.category = response.workout?.category.capitalized ?? "Workout"
+        self.category = response.workout?.category.capitalized
+            ?? String(localized: "chat.fallback.workout", bundle: .module)
         self.duration = response.workout.map { "\($0.duration_minutes) min" } ?? "-"
         self.timeAgo = Self.timeAgoString(from: response.created_at)
         self.location = response.location

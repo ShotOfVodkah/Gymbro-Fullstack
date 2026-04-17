@@ -38,4 +38,27 @@ public enum Injury: CaseIterable {
         case .pregnancy: "Pregnancy"
         }
     }
+
+    public var localizedTitle: String {
+        switch self {
+        case .knee:
+            return String(localized: "injury.knee", bundle: .module)
+        case .shoulder:
+            return String(localized: "injury.shoulder", bundle: .module)
+        case .lowerBack:
+            return String(localized: "injury.lower_back", bundle: .module)
+        case .wrist:
+            return String(localized: "injury.wrist", bundle: .module)
+        case .neck:
+            return String(localized: "injury.neck", bundle: .module)
+        case .ankle:
+            return String(localized: "injury.ankle", bundle: .module)
+        case .bloodPressure:
+            return String(localized: "injury.blood_pressure", bundle: .module)
+        case .elbow:
+            return String(localized: "injury.elbow", bundle: .module)
+        case .pregnancy:
+            return String(localized: "injury.pregnancy", bundle: .module)
+        }
+    }
 }

@@ -12,7 +12,7 @@ struct FeedsTopBar: View {
 
             Spacer()
             
-            Text("GymBro")
+            Text(String(localized: "feeds.topbar.title", bundle: .module))
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.white)
 
