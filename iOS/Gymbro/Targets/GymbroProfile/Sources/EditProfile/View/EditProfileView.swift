@@ -15,8 +15,7 @@ struct EditProfileView: View {
             Group {
                 switch viewModel.screenState {
                 case .loading:
-                    ProgressView()
-                        .tint(.white)
+                    EditProfileViewStub()
                     
                 case .loaded:
                     contentView

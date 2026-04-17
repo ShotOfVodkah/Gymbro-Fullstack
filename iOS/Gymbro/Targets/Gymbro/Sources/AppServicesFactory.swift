@@ -105,10 +105,10 @@ final class AppServicesFactory {
             makeProfileMainScreen(mode: mode)
         case .profileEdit:
             makeEditProfileScreen()
+        case .profileSettings:
+            makeSettingsScreen()
             
             // change
-        case .profileSettings:
-            FeedsMockDestinationView(title: "Settings", subtitle: "Mock settings screen")
         case .profileStatistics(let mode):
             FeedsMockDestinationView(
                 title: mode == .myProfile ? "My Statistics" : "User Statistics",
@@ -267,6 +267,14 @@ final class AppServicesFactory {
             analytics: analytics
         )
     }
+    
+    @MainActor
+    func makeSettingsScreen() -> some View {
+        screenFactories.settingsFactory.makeView(
+            router: router,
+            analytics: analytics
+        )
+    }
 }
 
 private struct ScreenFactories {
@@ -291,4 +299,5 @@ private struct ScreenFactories {
     
     lazy var profileMainTabFactory = ProfileMainTabFactoryImpl()
     lazy var editProfileFactory = EditProfileFactoryImpl()
+    lazy var settingsFactory = ProfileSettingsFactoryImpl()
 }
