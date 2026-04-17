@@ -35,26 +35,26 @@ def test_custom_default_range():
         assert 10 <= w <= 20
 
 def test_unknown_exercise_id_returns_none():
-    result = _map_exercise({"exercise_id": "nonexistent"}, [])
+    result = _map_exercise({"exercise_id": "nonexistent"}, [], "en")
     assert result is None
 
 
 def test_contraindicated_exercise_returns_none():
     ai_ex = {"exercise_id": "squat", "sets": 3, "reps": 10, "weight_kg": 60}
-    result = _map_exercise(ai_ex, ["knee_injury"])
+    result = _map_exercise(ai_ex, ["knee_injury"], "en")
     assert result is None
 
 
 def test_valid_exercise_with_explicit_weight():
     ai_ex = {"exercise_id": "squat", "sets": 3, "reps": 10, "weight_kg": 80}
-    result = _map_exercise(ai_ex, [])
+    result = _map_exercise(ai_ex, [], "en")
     assert result is not None
     assert result.weightKg == 80
 
 
 def test_strength_exercise_without_weight_gets_random():
     ai_ex = {"exercise_id": "squat", "sets": 3, "reps": 10, "weight_kg": None}
-    result = _map_exercise(ai_ex, [])
+    result = _map_exercise(ai_ex, [], "en")
     assert result is not None
     assert result.weightKg is not None
     assert result.weightKg >= 0
@@ -67,7 +67,7 @@ def test_cardio_exercise_without_weight_keeps_none():
         "duration_minutes": 30,
         "pace": "jog",
     }
-    result = _map_exercise(ai_ex, [])
+    result = _map_exercise(ai_ex, [], "en")
     assert result is not None
     assert result.weightKg is None
 
@@ -79,7 +79,7 @@ def test_exercise_fields_mapped_correctly():
         "reps": 12,
         "weight_kg": 70,
     }
-    result = _map_exercise(ai_ex, [])
+    result = _map_exercise(ai_ex, [], "ru")
     assert result is not None
     assert result.id == "squat"
     assert result.name == "Приседания"
@@ -96,7 +96,7 @@ def test_cardio_fields_mapped_correctly():
         "duration_minutes": 20,
         "pace": "run",
     }
-    result = _map_exercise(ai_ex, [])
+    result = _map_exercise(ai_ex, [], "en")
     assert result is not None
     assert result.durationMinutes == 20
     assert result.pace == "run"
@@ -110,7 +110,7 @@ def test_yoga_fields_mapped_correctly():
         "hold_seconds": 30,
         "breath_count": 5,
     }
-    result = _map_exercise(ai_ex, [])
+    result = _map_exercise(ai_ex, [], "en")
     assert result is not None
     assert result.holdSeconds == 30
     assert result.breathCount == 5
@@ -118,10 +118,10 @@ def test_yoga_fields_mapped_correctly():
 
 def test_non_contraindicated_injury_allows_exercise():
     ai_ex = {"exercise_id": "deadlift", "sets": 3, "reps": 5, "weight_kg": 100}
-    result = _map_exercise(ai_ex, ["shoulder_injury"])
+    result = _map_exercise(ai_ex, ["shoulder_injury"], "en")
     assert result is not None
 
 
 def test_missing_exercise_id_returns_none():
-    result = _map_exercise({}, [])
+    result = _map_exercise({}, [], "en")
     assert result is None
