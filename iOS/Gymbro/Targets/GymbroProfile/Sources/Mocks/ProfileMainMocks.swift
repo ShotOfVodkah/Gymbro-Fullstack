@@ -92,3 +92,15 @@ enum ProfileMainMocks {
         relationshipState: .following
     )
 }
+
+enum EditProfileMocks {
+    static let profile = EditProfileScreenModel(
+        userID: 1,
+        fullName: "Alexandra Gritsaenko",
+        username: "alexfit",
+        status: "Back in the gym era",
+        subtitle: "Strength training • 4x week",
+        bio: "Training for strength, discipline, and feeling good every week.",
+        avatarSystemName: "person.crop.circle.fill"
+    )
+}
