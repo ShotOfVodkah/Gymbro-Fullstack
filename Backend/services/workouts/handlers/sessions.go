@@ -96,7 +96,7 @@ func (h *sessionHandler) GetSessionPreviewBatch(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	items, err := h.sessionStore.GetSessionPreviewsByIDs(req.IDs)
+	items, err := h.sessionStore.GetSessionPreviewsByIDs(req.IDs, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -132,7 +132,7 @@ func (h *sessionHandler) GetSessionByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	session, err := h.sessionStore.GetSessionByID(id)
+	session, err := h.sessionStore.GetSessionByID(id, requestLocale(r))
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -169,7 +169,7 @@ func (h *sessionHandler) ListSessionsByUser(w http.ResponseWriter, r *http.Reque
 		to = &t
 	}
 
-	sessions, err := h.sessionStore.ListSessionsByUserID(userID, from, to)
+	sessions, err := h.sessionStore.ListSessionsByUserID(userID, from, to, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -195,7 +195,7 @@ func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 	input.UserID = userID
 
-	workout, err := h.workoutStore.GetWorkoutByID(input.WorkoutID)
+	workout, err := h.workoutStore.GetWorkoutByID(input.WorkoutID, types.LocaleEN)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -214,7 +214,7 @@ func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := h.sessionStore.GetSessionByID(input.ID)
+	session, err := h.sessionStore.GetSessionByID(input.ID, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -241,7 +241,7 @@ func (h *sessionHandler) SaveSessionAsWorkout(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	session, err := h.sessionStore.GetSessionByID(req.SessionID)
+	session, err := h.sessionStore.GetSessionByID(req.SessionID, types.LocaleEN)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -288,7 +288,7 @@ func (h *sessionHandler) SaveSessionAsWorkout(w http.ResponseWriter, r *http.Req
 	if newWorkoutID == "" {
 		newWorkoutID = newID()
 	} else {
-		if _, err := h.workoutStore.GetWorkoutByID(newWorkoutID); err == nil {
+		if _, err := h.workoutStore.GetWorkoutByID(newWorkoutID, types.LocaleEN); err == nil {
 			conflict(w, r)
 			return
 		} else if !errors.Is(err, store.ErrNotFound) {
@@ -320,7 +320,7 @@ func (h *sessionHandler) SaveSessionAsWorkout(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	workout, err := h.workoutStore.GetWorkoutByID(newWorkoutID)
+	workout, err := h.workoutStore.GetWorkoutByID(newWorkoutID, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return

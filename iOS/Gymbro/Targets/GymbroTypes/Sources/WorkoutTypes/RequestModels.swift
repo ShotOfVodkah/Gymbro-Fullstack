@@ -120,15 +120,18 @@ public struct GenerateWorkoutRequest: Encodable {
     public let user_input: String
     public let injuries: [String]
     public let user_id: String
-    
+    public let locale: String
+
     public init(
         user_input: String,
         injuries: [String],
-        user_id: String
+        user_id: String,
+        locale: String
     ) {
         self.user_input = user_input
         self.injuries = injuries
         self.user_id = user_id
+        self.locale = locale
     }
 }
 

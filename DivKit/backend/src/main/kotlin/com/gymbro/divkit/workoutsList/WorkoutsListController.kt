@@ -32,7 +32,11 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
-        val workouts = backendClient.getWorkouts(authorization = authorization).map { dto ->
+        val language = Language.fromRequestParam(lang)
+        val workouts = backendClient.getWorkouts(
+            authorization = authorization,
+            locale = language.asString,
+        ).map { dto ->
             WorkoutItem(
                 id = dto.id,
                 name = dto.name,
@@ -44,8 +48,6 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
                 }
             )
         }
-        val language = Language.fromRequestParam(lang)
-
         return ResponseEntity(
             divan {
                 data(

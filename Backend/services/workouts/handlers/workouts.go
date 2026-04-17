@@ -80,7 +80,7 @@ func (h *workoutHandler) GetWorkoutByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	workout, err := h.workoutStore.GetWorkoutByID(id)
+	workout, err := h.workoutStore.GetWorkoutByID(id, requestLocale(r))
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -106,7 +106,7 @@ func (h *workoutHandler) ListWorkoutsByUser(w http.ResponseWriter, r *http.Reque
 	if r.URL.Query().Get("userId") == "premade" {
 		listFor = "premade"
 	}
-	workouts, err := h.workoutStore.ListWorkoutsByUserID(listFor)
+	workouts, err := h.workoutStore.ListWorkoutsByUserID(listFor, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -135,7 +135,7 @@ func (h *workoutHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 		internalServerError(w, r)
 		return
 	}
-	workout, err := h.workoutStore.GetWorkoutByID(input.ID)
+	workout, err := h.workoutStore.GetWorkoutByID(input.ID, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -160,7 +160,7 @@ func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, i
 		badRequest(w, r)
 		return
 	}
-	current, err := h.workoutStore.GetWorkoutByID(id)
+	current, err := h.workoutStore.GetWorkoutByID(id, types.LocaleEN)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -181,7 +181,7 @@ func (h *workoutHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request, i
 		internalServerError(w, r)
 		return
 	}
-	workout, err := h.workoutStore.GetWorkoutByID(id)
+	workout, err := h.workoutStore.GetWorkoutByID(id, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return
@@ -196,7 +196,7 @@ func (h *workoutHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request, i
 		return
 	}
 
-	current, err := h.workoutStore.GetWorkoutByID(id)
+	current, err := h.workoutStore.GetWorkoutByID(id, types.LocaleEN)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -238,7 +238,7 @@ func (h *workoutHandler) CopyPremadeWorkout(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	premade, err := h.workoutStore.GetWorkoutByID(req.PremadeID)
+	premade, err := h.workoutStore.GetWorkoutByID(req.PremadeID, types.LocaleEN)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -276,7 +276,7 @@ func (h *workoutHandler) CopyPremadeWorkout(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	workout, err := h.workoutStore.GetWorkoutByID(newID)
+	workout, err := h.workoutStore.GetWorkoutByID(newID, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
 		return

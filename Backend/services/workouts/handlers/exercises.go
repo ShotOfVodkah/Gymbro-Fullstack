@@ -27,9 +27,10 @@ func (h *exerciseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	exerciseType := r.URL.Query().Get("type")
+	locale := requestLocale(r)
 
 	if exerciseType == "" {
-		exercises, err := h.exerciseStore.ListAll()
+		exercises, err := h.exerciseStore.ListAll(locale)
 		if err != nil {
 			internalServerError(w, r)
 			return
@@ -38,7 +39,7 @@ func (h *exerciseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exercises, err := h.exerciseStore.ListByType(exerciseType)
+	exercises, err := h.exerciseStore.ListByType(exerciseType, locale)
 	if err != nil {
 		internalServerError(w, r)
 		return

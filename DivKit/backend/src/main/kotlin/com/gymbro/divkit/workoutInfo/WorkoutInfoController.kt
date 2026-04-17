@@ -37,6 +37,7 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
         val translations = WorkoutInfoTranslations(language)
         val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
+        val locale = language.asString
 
         val notFound = ResponseEntity(
             divan {
@@ -51,13 +52,13 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
 
         val (workout, sourceKind) = when (type.lowercase()) {
             "session" -> {
-                val dto = backendClient.getSession(id, authorization) ?: return notFound
+                val dto = backendClient.getSession(id, authorization, locale) ?: return notFound
                 val w = dto.toWorkout()
                 val src = if (dto.userId == jwtUserId) "session_mine" else "session_other"
                 w to src
             }
             else -> {
-                val w = backendClient.getWorkout(id, authorization)?.toDomain() ?: return notFound
+                val w = backendClient.getWorkout(id, authorization, locale)?.toDomain() ?: return notFound
                 w to "workout"
             }
         }

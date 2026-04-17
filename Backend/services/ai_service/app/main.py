@@ -30,6 +30,10 @@ class GenerateRequest(BaseModel):
     user_input: str = Field(..., description="Free-text workout request from the user")
     injuries: list[str] = Field(default_factory=list, description="List of injury codes")
     user_id: str = Field(..., description="ID of the requesting user")
+    locale: str = Field(
+        default="en",
+        description='UI language for exercise names and prompts: "ru" or "en" (default en)',
+    )
 
 
 class ExerciseResponse(BaseModel):
@@ -79,6 +83,19 @@ WEIGHT_RANGES: Dict[str, Tuple[int, int]] = {
     "leg_press": (80, 200),
 }
 
+def _normalize_generate_locale(locale: str) -> str:
+    t = (locale or "en").strip().lower()
+    if t == "ru":
+        return "ru"
+    return "en"
+
+
+def _exercise_display_name(catalog_entry: dict, locale: str) -> str:
+    if locale == "ru":
+        return catalog_entry["name"]
+    return catalog_entry.get("name_en") or catalog_entry["name"]
+
+
 def _get_random_weight(exercise_id: str, default_min: int = 5, default_max: int = 50) -> int:
     if exercise_id in WEIGHT_RANGES:
         min_w, max_w = WEIGHT_RANGES[exercise_id]
@@ -87,7 +104,7 @@ def _get_random_weight(exercise_id: str, default_min: int = 5, default_max: int 
         return random.randint(min_w, max_w)
     return random.randint(default_min, default_max)
 
-def _map_exercise(ai_ex: dict, injuries: list[str]) -> Optional[ExerciseResponse]:
+def _map_exercise(ai_ex: dict, injuries: list[str], locale: str) -> Optional[ExerciseResponse]:
     ex_id: str = ai_ex.get("exercise_id", "")
     catalog_entry = lookup(ex_id)
     if catalog_entry is None:
@@ -109,7 +126,7 @@ def _map_exercise(ai_ex: dict, injuries: list[str]) -> Optional[ExerciseResponse
 
     return ExerciseResponse(
         id=ex_id,
-        name=catalog_entry["name"],
+        name=_exercise_display_name(catalog_entry, locale),
         type=catalog_entry["type"],
         muscleGroup=catalog_entry["muscleGroup"],
         sets=ai_ex.get("sets"),
@@ -140,8 +157,9 @@ async def generate_workout(
         raise HTTPException(status_code=403, detail="forbidden")
 
     validate_input(req.user_input, req.injuries)
+    locale = _normalize_generate_locale(req.locale)
 
-    messages = build_messages(req.user_input, req.injuries)
+    messages = build_messages(req.user_input, req.injuries, locale)
 
     try:
         ai_data = ai_model.generate(messages)
@@ -153,7 +171,7 @@ async def generate_workout(
 
     exercises: list[ExerciseResponse] = []
     for raw_ex in ai_data.get("exercises", []):
-        mapped = _map_exercise(raw_ex, req.injuries)
+        mapped = _map_exercise(raw_ex, req.injuries, locale)
         if mapped is not None:
             exercises.append(mapped)
 

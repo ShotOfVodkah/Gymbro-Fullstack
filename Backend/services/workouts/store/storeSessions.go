@@ -20,10 +20,10 @@ func NewSessionStore(db *sqlx.DB) *SessionStore {
 }
 
 type SessionStorer interface {
-	GetSessionByID(id string) (*types.WorkoutSession, error)
+	GetSessionByID(id string, locale string) (*types.WorkoutSession, error)
 	InsertSession(input *types.SessionInput) error
-	ListSessionsByUserID(userID string, from, to *time.Time) ([]types.WorkoutSession, error)
-	GetSessionPreviewsByIDs(ids []string) ([]types.SessionPreviewItem, error)
+	ListSessionsByUserID(userID string, from, to *time.Time, locale string) ([]types.WorkoutSession, error)
+	GetSessionPreviewsByIDs(ids []string, locale string) ([]types.SessionPreviewItem, error)
 	ListCalendarSessionsByUserAndMonth(userID string, month string) ([]types.CalendarWorkoutDayResponse, error)
 	EnsureExercisesFromSessionDictionary(ids []string) error
 }
@@ -91,16 +91,17 @@ func rowToSession(row sessionRow, exercises []types.SessionExercise) types.Worko
 	}
 }
 
-func (ss *SessionStore) loadSessionExercises(sessionID string) ([]types.SessionExercise, error) {
+func (ss *SessionStore) loadSessionExercises(sessionID string, locale string) ([]types.SessionExercise, error) {
+	nameExpr := exerciseDisplayNameExpr("d", locale)
 	var rows []sessionExerciseRow
-	err := ss.db.Select(&rows, `
-		SELECT d.id AS exercise_id, d.name AS exercise_name, d.type AS exercise_type, d.muscle_group,
+	query := `
+		SELECT d.id AS exercise_id, ` + nameExpr + ` AS exercise_name, d.type AS exercise_type, d.muscle_group,
 		       e.sets, e.reps, e.weight_kg, e.duration_minutes, e.pace, e.hold_seconds, e.breath_count
 		FROM workout_session_exercise_entries e
 		JOIN session_exercises d ON d.id = e.exercise_id
 		WHERE e.session_id = $1
-		ORDER BY e.position
-	`, sessionID)
+		ORDER BY e.position`
+	err := ss.db.Select(&rows, query, sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("loadSessionExercises: %w", err)
 	}
@@ -124,7 +125,7 @@ func (ss *SessionStore) loadSessionExercises(sessionID string) ([]types.SessionE
 	return exercises, nil
 }
 
-func (ss *SessionStore) GetSessionByID(id string) (*types.WorkoutSession, error) {
+func (ss *SessionStore) GetSessionByID(id string, locale string) (*types.WorkoutSession, error) {
 	var row sessionRow
 	err := ss.db.Get(&row, `
 		SELECT id, user_id, workout_id, workout_name, workout_type, completed_at
@@ -137,7 +138,7 @@ func (ss *SessionStore) GetSessionByID(id string) (*types.WorkoutSession, error)
 		return nil, fmt.Errorf("GetSessionByID: %w", err)
 	}
 
-	exercises, err := ss.loadSessionExercises(id)
+	exercises, err := ss.loadSessionExercises(id, locale)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,7 @@ func (ss *SessionStore) GetSessionByID(id string) (*types.WorkoutSession, error)
 	return &s, nil
 }
 
-func (ss *SessionStore) ListSessionsByUserID(userID string, from, to *time.Time) ([]types.WorkoutSession, error) {
+func (ss *SessionStore) ListSessionsByUserID(userID string, from, to *time.Time, locale string) ([]types.WorkoutSession, error) {
 	query := `SELECT id, user_id, workout_id, workout_name, workout_type, completed_at
 		FROM workout_sessions WHERE user_id = $1`
 	args := []any{userID}
@@ -169,7 +170,7 @@ func (ss *SessionStore) ListSessionsByUserID(userID string, from, to *time.Time)
 
 	sessions := make([]types.WorkoutSession, 0, len(rows))
 	for _, row := range rows {
-		exercises, err := ss.loadSessionExercises(row.ID)
+		exercises, err := ss.loadSessionExercises(row.ID, locale)
 		if err != nil {
 			return nil, err
 		}
@@ -209,24 +210,27 @@ func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
 	}
 
 	for i, ex := range input.Exercises {
-		var exName, exType, muscleGroup string
+		var exName, exNameEn, exType, muscleGroup string
 		err := tx.QueryRow(
-			`SELECT name, type, muscle_group FROM exercises WHERE id = $1`, ex.ExerciseID,
-		).Scan(&exName, &exType, &muscleGroup)
+			`SELECT name, name_en, type, muscle_group FROM exercises WHERE id = $1`, ex.ExerciseID,
+		).Scan(&exName, &exNameEn, &exType, &muscleGroup)
 		if errors.Is(err, sql.ErrNoRows) {
 			err = tx.QueryRow(
-				`SELECT name, type, muscle_group FROM session_exercises WHERE id = $1`, ex.ExerciseID,
-			).Scan(&exName, &exType, &muscleGroup)
+				`SELECT name, name_en, type, muscle_group FROM session_exercises WHERE id = $1`, ex.ExerciseID,
+			).Scan(&exName, &exNameEn, &exType, &muscleGroup)
 		}
 		if err != nil {
 			return fmt.Errorf("InsertSession resolve exercise %s: %w", ex.ExerciseID, err)
 		}
+		if exNameEn == "" {
+			exNameEn = exName
+		}
 
 		_, err = tx.Exec(`
-			INSERT INTO session_exercises (id, name, type, muscle_group)
-			VALUES ($1, $2, $3, $4)
+			INSERT INTO session_exercises (id, name, type, muscle_group, name_en)
+			VALUES ($1, $2, $3, $4, $5)
 			ON CONFLICT (id) DO NOTHING`,
-			ex.ExerciseID, exName, exType, muscleGroup,
+			ex.ExerciseID, exName, exType, muscleGroup, exNameEn,
 		)
 		if err != nil {
 			return fmt.Errorf("InsertSession upsert session exercise %s: %w", ex.ExerciseID, err)
@@ -250,7 +254,7 @@ func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
 	return tx.Commit()
 }
 
-func (ss *SessionStore) GetSessionPreviewsByIDs(ids []string) ([]types.SessionPreviewItem, error) {
+func (ss *SessionStore) GetSessionPreviewsByIDs(ids []string, locale string) ([]types.SessionPreviewItem, error) {
 	if len(ids) == 0 {
 		return []types.SessionPreviewItem{}, nil
 	}
@@ -277,11 +281,12 @@ func (ss *SessionStore) GetSessionPreviewsByIDs(ids []string) ([]types.SessionPr
 		return nil, fmt.Errorf("GetSessionPreviewsByIDs select previews: %w", err)
 	}
 
+	nameExpr := exerciseDisplayNameExpr("d", locale)
 	exQuery, exArgs, err := sqlx.In(`
 		SELECT
 			e.session_id,
 			d.id AS exercise_id,
-			d.name AS exercise_name,
+			`+nameExpr+` AS exercise_name,
 			d.type AS exercise_type,
 			d.muscle_group,
 			e.position,
@@ -381,8 +386,8 @@ func (ss *SessionStore) EnsureExercisesFromSessionDictionary(ids []string) error
 	}
 
 	_, err := ss.db.Exec(`
-		INSERT INTO exercises (id, name, type, muscle_group)
-		SELECT se.id, se.name, se.type, se.muscle_group
+		INSERT INTO exercises (id, name, type, muscle_group, name_en)
+		SELECT se.id, se.name, se.type, se.muscle_group, se.name_en
 		FROM session_exercises se
 		WHERE se.id = ANY($1)
 		  AND NOT EXISTS (SELECT 1 FROM exercises e WHERE e.id = se.id)
