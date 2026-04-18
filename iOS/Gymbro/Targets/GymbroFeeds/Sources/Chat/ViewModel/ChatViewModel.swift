@@ -1,5 +1,6 @@
 import Foundation
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 @MainActor
@@ -93,7 +94,12 @@ final class ChatViewModel: ObservableObject {
     func didTapHeaderTitle() {
         switch input.presentationStyle {
         case .direct(let person):
-            router.navigate(to: .feedsProfile(title: person.name))
+            guard let userID = Int(person.id) else {
+                print("Invalid userID: \(person.id)")
+                return
+            }
+            router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+            print("\(userID)")
         case .group:
             loadAvailablePeopleToAdd()
             isShowingGroupInfo = true
@@ -283,6 +289,21 @@ final class ChatViewModel: ObservableObject {
                 print("Failed to load available people for group:", error)
                 availablePeopleToAdd = []
             }
+        }
+    }
+    
+    func didTapParticipantProfile(_ participant: ChatParticipant) {
+        guard let userID = Int(participant.id) else {
+            print("Invalid userID: \(participant.id)")
+            return
+        }
+        
+        isShowingGroupInfo = false
+        
+        if let currentUserID = Int(AppMicroservices.tokens.userId ?? ""), currentUserID == userID {
+            router.navigate(to: .profileMain(mode: .myProfile))
+        } else {
+            router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
         }
     }
 }

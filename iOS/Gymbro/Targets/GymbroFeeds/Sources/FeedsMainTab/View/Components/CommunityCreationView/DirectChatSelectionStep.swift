@@ -15,10 +15,10 @@ struct DirectChatSelectionStep: View {
                     ForEach(viewModel.directChatSelectablePeople) { person in
                         PersonRowView(
                             person: person,
+                            isCurrentUser: person.id == viewModel.currentUserID,
+                            isFollowEnabled: false,
                             onTap: { viewModel.didSelectDirectPerson(person) },
-                            onFollowTap: {
-//                                viewModel.toggleFollowInChatCreation(for: person.id)
-                            }
+                            onFollowTap: { }
                         )
                     }
                 }

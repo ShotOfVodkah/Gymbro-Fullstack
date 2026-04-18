@@ -40,6 +40,16 @@ public final class FeedsClient {
             responseType: [FeedCommentResponse].self
         )
     }
+    
+    public func fetchPostsByUser(userID: String) async throws -> [FeedPostItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "feed/users/\(userID)/posts",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [FeedPostItemResponse].self
+        )
+    }
 
     public func createPostComment(postID: String, text: String) async throws -> FeedCommentResponse {
         try await client.request(
@@ -164,6 +174,26 @@ public final class FeedsClient {
             path: "people/\(id)/follow",
             body: Optional<EmptyBody>.none,
             requiresAuth: true
+        )
+    }
+    
+    public func fetchFriendsByUser(userID: String) async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/\(userID)/friends",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
+    public func fetchFollowingByUser(userID: String) async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/\(userID)/following",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
         )
     }
     

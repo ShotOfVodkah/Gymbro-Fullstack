@@ -4,6 +4,8 @@ import GymbroTypes
 struct PersonRowView: View {
     
     let person: PersonItem
+    let isCurrentUser: Bool
+    let isFollowEnabled: Bool
     let onTap: () -> Void
     let onFollowTap: () -> Void
     
@@ -68,19 +70,32 @@ struct PersonRowView: View {
     }
     
     private var followButton: some View {
-        Button(action: onFollowTap) {
-            Text(person.isFollowing ? String(localized: "feeds.following", bundle: .module) : String(localized: "feeds.follow", bundle: .module))
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(
-                    person.isFollowing
-                    ? Color.white.opacity(0.10)
-                    : Color.purple.opacity(0.7)
-                )
-                .clipShape(Capsule())
+        Group {
+            if !isCurrentUser {
+                Button(action: onFollowTap) {
+                    Text(person.isFollowing ? String(localized: "feeds.following", bundle: .module) : String(localized: "feeds.follow", bundle: .module))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(
+                            person.isFollowing
+                            ? Color.white.opacity(0.10)
+                            : Color.purple.opacity(0.7)
+                        )
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .disabled(!isFollowEnabled)
+            } else {
+                Text("You")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.white.opacity(0.10))
+                    .clipShape(Capsule())
+            }
         }
-        .buttonStyle(.plain)
     }
 }

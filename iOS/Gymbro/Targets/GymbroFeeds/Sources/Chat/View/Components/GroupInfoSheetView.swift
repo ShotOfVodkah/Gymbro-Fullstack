@@ -14,6 +14,7 @@ struct GroupInfoSheetView: View {
     let onDelete: () -> Void
     let onRemovePerson: (String) -> Void
     let onAddPeople: ([ChatParticipant]) -> Void
+    let onParticipantTap: (ChatParticipant) -> Void
     
     init(
         info: ChatGroupInfo,
@@ -21,7 +22,8 @@ struct GroupInfoSheetView: View {
         onUpdate: @escaping (String, String) -> Void,
         onDelete: @escaping () -> Void,
         onRemovePerson: @escaping (String) -> Void,
-        onAddPeople: @escaping ([ChatParticipant]) -> Void
+        onAddPeople: @escaping ([ChatParticipant]) -> Void,
+        onParticipantTap: @escaping (ChatParticipant) -> Void
     ) {
         self.info = info
         self.allPeople = allPeople
@@ -29,6 +31,7 @@ struct GroupInfoSheetView: View {
         self.onDelete = onDelete
         self.onRemovePerson = onRemovePerson
         self.onAddPeople = onAddPeople
+        self.onParticipantTap = onParticipantTap
         
         _title = State(initialValue: info.title)
         _description = State(initialValue: info.description)
@@ -51,7 +54,7 @@ struct GroupInfoSheetView: View {
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.white)
                     
-                    VStack(spacing: 10) {
+                    List {
                         ForEach(info.participants) { participant in
                             HStack(spacing: 12) {
                                 Circle()
@@ -68,17 +71,27 @@ struct GroupInfoSheetView: View {
                                     .foregroundStyle(.white)
                                 
                                 Spacer()
-                                
-                                Button(String(localized: "feeds.group.remove", bundle: .module)) {
-                                    onRemovePerson(participant.id)
-                                }
-                                .foregroundStyle(.red.opacity(0.85))
                             }
-                            .padding(14)
-                            .background(Color.white.opacity(0.05))
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                onParticipantTap(participant)
+                            }
+                            .padding(.vertical, 8)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                            .listRowBackground(Color.clear)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    onRemovePerson(participant.id)
+                                } label: {
+                                    Label(String(localized: "feeds.group.remove", bundle: .module), systemImage: "trash")
+                                }
+                            }
                         }
                     }
+                    .listStyle(.plain)
+                    .frame(height: CGFloat(info.participants.count) * 70)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.clear)
                     
                     AppButton(String(localized: "feeds.group.add_people", bundle: .module), size: .l, action: {
                         isShowingAddPeopleSheet = true

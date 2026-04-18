@@ -24,9 +24,10 @@ public struct AuthView: View {
         }
         .customAlert(isPresented: $vm.isAlertPresented, data: vm.alertData)
         .sheet(isPresented: $vm.isLegalSheetPresented) {
-            LegalDocScreen(type: vm.legalSheetType, isAlreadyAccepted: vm.consent.isAccepted(vm.legalSheetType)) {
-                vm.acceptCurrentLegal()
-            }
+            LegalDocScreen(
+                type: vm.legalSheetType,
+                mode: .acceptance(isAlreadyAccepted: vm.consent.isAccepted(vm.legalSheetType),
+                                  onAccept: vm.acceptCurrentLegal))
             .preferredColorScheme(.dark)
         }
     }

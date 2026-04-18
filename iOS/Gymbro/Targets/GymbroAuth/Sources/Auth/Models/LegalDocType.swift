@@ -1,6 +1,6 @@
 import Foundation
 
-enum LegalDocType {
+public enum LegalDocType {
     case terms
     case privacy
 
@@ -10,4 +10,9 @@ enum LegalDocType {
         case .privacy: return String(localized: "legal.title.privacy", bundle: .module)
         }
     }
+}
+
+public enum LegalDocMode {
+    case acceptance(isAlreadyAccepted: Bool, onAccept: () -> Void)
+    case readOnly
 }

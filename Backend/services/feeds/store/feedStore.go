@@ -236,3 +236,87 @@ func (fs *FeedStore) GetPostLikeState(postID string, userID int) (*types.FeedLik
 	resp.PostID = postID
 	return &resp, nil
 }
+
+func (fs *FeedStore) ListPostsByAuthorID(authorID string, currentUserID int) ([]types.FeedPostRow, error) {
+	query := `
+		SELECT
+			p.id,
+			p.author_id::text AS author_id,
+			p.community_id,
+			c.title AS community_title,
+			p.session_id,
+			p.kind,
+			p.description,
+			p.location,
+			p.created_at,
+			COALESCE((
+				SELECT COUNT(*)
+				FROM post_reactions pr
+				WHERE pr.post_id = p.id
+			), 0) AS likes_count,
+			COALESCE((
+				SELECT COUNT(*)
+				FROM post_comments pc
+				WHERE pc.post_id = p.id
+			), 0) AS comments_count,
+			EXISTS(
+				SELECT 1
+				FROM post_reactions pr2
+				WHERE pr2.post_id = p.id
+				  AND pr2.user_id = $2
+			) AS is_liked,
+			EXISTS(
+				SELECT 1
+				FROM user_follows uf
+				WHERE uf.follower_id = $2
+				  AND uf.followee_id = p.author_id
+			) AS is_from_following,
+			EXISTS(
+				SELECT 1
+				FROM communities dc
+				JOIN community_members me
+					ON me.community_id = dc.id
+				   AND me.user_id = $2
+				JOIN community_members other_member
+					ON other_member.community_id = dc.id
+				   AND other_member.user_id = p.author_id
+				WHERE dc.kind = 'direct'
+			) AS is_from_direct_chat,
+			EXISTS(
+				SELECT 1
+				FROM communities gc
+				JOIN community_members me2
+					ON me2.community_id = gc.id
+				   AND me2.user_id = $2
+				WHERE gc.id = p.community_id
+				  AND gc.kind = 'joined_group'
+			) AS is_from_group_community
+		FROM posts p
+		LEFT JOIN communities c
+			ON c.id = p.community_id
+		WHERE p.author_id::text = $1
+		ORDER BY p.created_at DESC
+		LIMIT 50
+	`
+
+	var rows []types.FeedPostRow
+	if err := fs.db.Select(&rows, query, authorID, currentUserID); err != nil {
+		return nil, fmt.Errorf("ListPostsByAuthorID: %w", err)
+	}
+
+	return rows, nil
+}
+
+func (ps *PeopleStore) ListFollowingIDsForUserAny(userID int) ([]int, error) {
+	query := `
+		SELECT followee_id
+		FROM user_follows
+		WHERE follower_id = $1
+		ORDER BY followee_id
+	`
+	var ids []int
+	if err := ps.db.Select(&ids, query, userID); err != nil {
+		return nil, fmt.Errorf("ListFollowingIDsForUserAny: %w", err)
+	}
+	return ids, nil
+}

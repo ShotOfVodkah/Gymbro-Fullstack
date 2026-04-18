@@ -39,7 +39,8 @@ struct ChatView: View {
                     onUpdate: viewModel.updateGroupInfo(title:description:),
                     onDelete: viewModel.deleteGroup,
                     onRemovePerson: viewModel.removePersonFromGroup(_:),
-                    onAddPeople: viewModel.addPeopleToGroup(_:)
+                    onAddPeople: viewModel.addPeopleToGroup(_:),
+                    onParticipantTap: viewModel.didTapParticipantProfile(_:)
                 )
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)

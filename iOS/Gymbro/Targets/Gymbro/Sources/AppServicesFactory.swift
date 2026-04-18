@@ -93,16 +93,24 @@ final class AppServicesFactory {
             makeWorkoutGeneratorScreen()
         
             // feeds
-        case .feedsPeople:
-            makeFeedsPeopleScreen()
+        case .feedsPeople(let input):
+            makeFeedsPeopleScreen(input: input)
         case .feedsCalendar(let context):
             makeFeedsCalendarScreen(context: context)
         case .feedsChat(let input):
             makeFeedsChatScreen(input: input)
+        case .feedsPosts(let input):
+            makePostsScreen(input: input)
             
-            // change
-        case .feedsProfile(let title):
-            FeedsMockDestinationView(title: title, subtitle: "Mock profile screen")
+            // profile
+        case .profileMain(let mode):
+            makeProfileMainScreen(mode: mode)
+        case .profileEdit:
+            makeEditProfileScreen()
+        case .profileSettings:
+            makeSettingsScreen()
+        case .profileStatistics(let mode):
+            makeStatisticsScreen(mode: mode)
         }
     }
     
@@ -196,12 +204,21 @@ final class AppServicesFactory {
     
     @MainActor
     func makeFeedsMainTab() -> some View {
-        screenFactories.feedsMainTabFactory.makeView(router: router, analytics: analytics)
+        screenFactories.feedsMainTabFactory.makeView(
+            router: router,
+            client: AppMicroservices.feeds,
+            analytics: analytics
+        )
     }
     
     @MainActor
-    func makeFeedsPeopleScreen() -> some View {
-        screenFactories.feedsPeopleFactory.makeView(router: router, analytics: analytics)
+    func makeFeedsPeopleScreen(input: PeopleScreenInput) -> some View {
+        screenFactories.feedsPeopleFactory.makeView(
+            input: input,
+            router: router,
+            client: AppMicroservices.feeds,
+            analytics: analytics
+        )
     }
     
     @MainActor
@@ -209,6 +226,7 @@ final class AppServicesFactory {
         screenFactories.feedsCalendarFactory.makeView(
             input: CalendarScreenInput(context: context),
             router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -218,6 +236,17 @@ final class AppServicesFactory {
         screenFactories.feedsChatFactory.makeView(
             input: input,
             router: router,
+            client: AppMicroservices.feeds,
+            analytics: analytics
+        )
+    }
+    
+    @MainActor
+    func makePostsScreen(input: PostsScreenInput) -> some View {
+        screenFactories.feedsPostsFactory.makeView(
+            input: input,
+            router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -226,7 +255,46 @@ final class AppServicesFactory {
     
     @MainActor
     func makeProfileMainTab() -> some View {
-        screenFactories.profileMainTabFactory.makeView(analytics: analytics)
+        makeProfileMainScreen(mode: .myProfile)
+    }
+    
+    @MainActor
+    func makeProfileMainScreen(mode: ProfileViewMode) -> some View {
+        
+        screenFactories.profileMainTabFactory.makeView(
+            router: router,
+            mode: mode,
+            gateway: ProfileGatewayImpl(profileClient: AppMicroservices.profile, feedsClient: AppMicroservices.feeds),
+            analytics: analytics
+        )
+    }
+    
+    @MainActor
+    func makeEditProfileScreen() -> some View {
+        screenFactories.editProfileFactory.makeView(
+            router: router,
+            client: AppMicroservices.profile,
+            analytics: analytics
+        )
+    }
+    
+    @MainActor
+    func makeSettingsScreen() -> some View {
+        screenFactories.settingsFactory.makeView(
+            router: router,
+            client: AppMicroservices.profile,
+            analytics: analytics
+        )
+    }
+    
+    @MainActor
+    func makeStatisticsScreen(mode: ProfileViewMode) -> some View {
+        screenFactories.statisticsFactory.makeView(
+            mode: mode,
+            router: router,
+            client: AppMicroservices.profile,
+            analytics: analytics
+        )
     }
 }
 
@@ -247,8 +315,12 @@ private struct ScreenFactories {
     lazy var feedsPeopleFactory = FeedsPeopleFactoryImpl()
     lazy var feedsCalendarFactory = FeedsCalendarFactoryImpl()
     lazy var feedsChatFactory = FeedsChatFactoryImpl()
+    lazy var feedsPostsFactory = FeedsProfilePostsFactoryImpl()
     
     // Profile factories
     
     lazy var profileMainTabFactory = ProfileMainTabFactoryImpl()
+    lazy var editProfileFactory = EditProfileFactoryImpl()
+    lazy var settingsFactory = ProfileSettingsFactoryImpl()
+    lazy var statisticsFactory = ProfileStatisticsFactoryImpl()
 }

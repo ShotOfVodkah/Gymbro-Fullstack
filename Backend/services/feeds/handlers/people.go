@@ -32,21 +32,35 @@ func (h *PeopleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && r.URL.Path == "/people/friends":
 		h.GetFriends(w, r)
 		return
+
 	case r.Method == http.MethodGet && r.URL.Path == "/people/following":
 		h.GetFollowing(w, r)
 		return
+
 	case r.Method == http.MethodGet && r.URL.Path == "/people/discover":
 		h.GetDiscover(w, r)
 		return
+
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/people/") && strings.HasSuffix(r.URL.Path, "/friends"):
+		h.GetUserFriends(w, r)
+		return
+
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/people/") && strings.HasSuffix(r.URL.Path, "/following"):
+		h.GetUserFollowing(w, r)
+		return
+
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/people/") && !strings.HasSuffix(r.URL.Path, "/follow"):
 		h.GetPerson(w, r)
 		return
+
 	case r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/follow"):
 		h.FollowPerson(w, r)
 		return
+
 	case r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/follow"):
 		h.UnfollowPerson(w, r)
 		return
+
 	default:
 		http.NotFound(w, r)
 	}
@@ -232,6 +246,60 @@ func (h *PeopleHandler) UnfollowPerson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (h *PeopleHandler) GetUserFriends(w http.ResponseWriter, r *http.Request) {
+
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	targetUserID, ok := personIDFromPeopleListPath(r.URL.Path, "/friends")
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	ids, err := h.store.ListFriendIDsForUser(targetUserID)
+	if err != nil {
+		http.Error(w, "failed to load user friends", http.StatusInternalServerError)
+		return
+	}
+	resp, err := h.buildPeopleResponse(r, claims.UserID, ids)
+	if err != nil {
+		http.Error(w, "failed to build user friends response", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+
+}
+
+func (h *PeopleHandler) GetUserFollowing(w http.ResponseWriter, r *http.Request) {
+
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	targetUserID, ok := personIDFromPeopleListPath(r.URL.Path, "/following")
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	ids, err := h.store.ListFollowingIDsForUserAny(targetUserID)
+	if err != nil {
+		http.Error(w, "failed to load user following", http.StatusInternalServerError)
+		return
+	}
+	resp, err := h.buildPeopleResponse(r, claims.UserID, ids)
+	if err != nil {
+		http.Error(w, "failed to build user following response", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+
+}
+
 func (h *PeopleHandler) buildPeopleResponse(
 	r *http.Request,
 	currentUserID int,
@@ -282,6 +350,16 @@ func (h *PeopleHandler) buildPeopleResponse(
 
 func personIDFromFollowPath(path string) (int, bool) {
 	path = strings.TrimSuffix(path, "/follow")
+	path = strings.TrimPrefix(path, "/people/")
+	id, err := strconv.Atoi(path)
+	if err != nil {
+		return 0, false
+	}
+	return id, true
+}
+
+func personIDFromPeopleListPath(path string, suffix string) (int, bool) {
+	path = strings.TrimSuffix(path, suffix)
 	path = strings.TrimPrefix(path, "/people/")
 	id, err := strconv.Atoi(path)
 	if err != nil {

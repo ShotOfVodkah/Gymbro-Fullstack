@@ -1,5 +1,6 @@
 import Foundation
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 @MainActor
@@ -37,6 +38,8 @@ final class FeedsMainTabViewModel: ObservableObject {
     private let service: any FeedsMainTabService
     private let analytics: any AnalyticsService
     
+    let currentUserID: String
+    
     init(
         router: any Router,
         service: any FeedsMainTabService,
@@ -45,6 +48,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         self.router = router
         self.service = service
         self.analytics = analytics
+        self.currentUserID = AppMicroservices.tokens.userId ?? ""
         reload()
         analytics.track(.screenViewed(screen: .feedsMain))
     }
@@ -57,7 +61,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     func didTapOpenFriends() {
-        router.navigate(to: .feedsPeople)
+        router.navigate(to: .feedsPeople(input: .mine))
     }
     
     func didTapCalendarButton() {
@@ -66,7 +70,9 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func didTapAuthor(_ post: FeedPost) {
         analytics.track(.feedsPostAuthorTapped(postId: post.id))
-        router.navigate(to: .feedsProfile(title: post.authorName))
+        guard let userID = Int(post.authorID) else { return }
+        router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+        print("\(userID)")
     }
     
     var shouldShowCommunities: Bool {
@@ -207,11 +213,6 @@ final class FeedsMainTabViewModel: ObservableObject {
                 print("Failed to create group chat:", error)
             }
         }
-    }
-    
-    func toggleFollowInChatCreation(for personID: String) {
-        guard let index = chatCreationPeople.firstIndex(where: { $0.id == personID }) else { return }
-        chatCreationPeople[index] = chatCreationPeople[index].toggledFollow()
     }
     
     func didTapCommunity(_ community: FeedCommunity) {

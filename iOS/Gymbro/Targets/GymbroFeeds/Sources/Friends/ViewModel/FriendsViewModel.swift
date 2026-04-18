@@ -1,6 +1,7 @@
 import SwiftUI
 import Foundation
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 @MainActor
@@ -19,19 +20,26 @@ final class FeedsPeopleViewModel: ObservableObject {
     @Published var followingPeople: [PersonItem] = []
     @Published var discoverPeople: [PersonItem] = []
     @Published var selectedPerson: PersonItem?
+    @Published var shouldShowDiscover: Bool = true
     
+    private let input: PeopleScreenInput
     private let router: any Router
     private let service: any FeedsPeopleService
     private let analytics: any AnalyticsService
     
+    let currentUserID: String
+    
     init(
+        input: PeopleScreenInput,
         router: any Router,
         service: any FeedsPeopleService,
         analytics: any AnalyticsService
     ) {
+        self.input = input
         self.router = router
         self.analytics = analytics
         self.service = service
+        self.currentUserID = AppMicroservices.tokens.userId ?? ""
         reload()
         analytics.track(.screenViewed(screen: .feedsPeople))
     }
@@ -47,11 +55,16 @@ final class FeedsPeopleViewModel: ObservableObject {
         screenState = .loading
         
         do {
-            let result = try await service.fetchScreen()
+            let result = try await service.fetchScreen(input: input)
             
             friends = result.friends
             followingPeople = result.following
             discoverPeople = result.discover
+            shouldShowDiscover = result.shouldShowDiscover
+            
+            if !shouldShowDiscover && selectedTab == .discover {
+                selectedTab = .friends
+            }
             
             screenState = .loaded
         } catch {
@@ -70,24 +83,51 @@ final class FeedsPeopleViewModel: ObservableObject {
     var orderedSections: [(title: String, people: [PersonItem])] {
         switch selectedTab {
         case .friends:
-            return [
+            var sections: [(String, [PersonItem])] = [
                 (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
-                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
-                (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople)
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
             ]
+            if shouldShowDiscover {
+                sections.append((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
+            }
+            return sections
+            
         case .following:
-            return [
+            var sections: [(String, [PersonItem])] = [
                 (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
-                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
-                (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople)
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
             ]
+            if shouldShowDiscover {
+                sections.append((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
+            }
+            return sections
+            
         case .discover:
+            guard shouldShowDiscover else {
+                return [
+                    (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                    (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
+                ]
+            }
             return [
                 (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople),
                 (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
                 (String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
             ]
         }
+    }
+    
+    var title: String {
+        switch input {
+        case .mine:
+            return "People"
+        case .user(_, let userName):
+            return "\(userName)'s People"
+        }
+    }
+    
+    var availableTabs: [PeopleTab] {
+        shouldShowDiscover ? [.friends, .following, .discover] : [.friends, .following]
     }
     
     func didTapPerson(_ person: PersonItem) {
@@ -127,9 +167,14 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     func didTapViewProfile(for person: PersonItem) {
+        guard let userID = Int(person.id) else {
+            print("Invalid userID: \(person.id)")
+            return
+        }
+        router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+        print("\(userID)")
         analytics.track(.peopleProfileOpened(personId: person.id))
         selectedPerson = nil
-        router.navigate(to: .feedsProfile(title: person.name))
     }
     
     func didTapViewMessage(for person: PersonItem) {

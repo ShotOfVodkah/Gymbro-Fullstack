@@ -60,14 +60,17 @@ struct FeedsPeopleView: View {
                     
                     PeopleSegmentPicker(
                         selectedTab: viewModel.selectedTab,
+                        availableTabs: viewModel.availableTabs,
                         onSelectTab: viewModel.didSelectTab(_:)
                     )
+                    
                     VStack(spacing: 18) {
                         ForEach(viewModel.orderedSections, id: \.title) { section in
                             if !section.people.isEmpty {
                                 PeopleSectionView(
                                     title: section.title,
                                     people: section.people,
+                                    currentUserID: viewModel.currentUserID,
                                     onPersonTap: viewModel.didTapPerson(_ :),
                                     onFollowTap: { person in
                                         viewModel.toggleFollow(for: person.id)
@@ -103,7 +106,7 @@ struct FeedsPeopleView: View {
             }
             .buttonStyle(.plain)
             
-            Text(String(localized: "feeds.people.title", bundle: .module))
+            Text(viewModel.title)
                 .font(.system(size: 30, weight: .bold))
                 .foregroundStyle(.white)
             
