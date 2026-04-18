@@ -85,6 +85,7 @@ struct FeedsMainTabView: View {
                     ForEach(viewModel.visiblePosts) { post in
                         PostCardView(
                             post: post,
+                            mode: .full,
                             onAuthorTap: { viewModel.didTapAuthor(post) },
                             onLikeTap: { viewModel.toggleLike(for: post.id) },
                             onCommentTap: { viewModel.didTapComments(for: post) },

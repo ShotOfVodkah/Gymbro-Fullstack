@@ -31,6 +31,10 @@ func (h *FeedHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.GetFeed(w, r)
 		return
 
+	case r.Method == http.MethodGet && len(r.URL.Path) > len("/feed/users/") && hasSuffix(r.URL.Path, "/posts"):
+		h.GetUserPosts(w, r)
+		return
+
 	case r.Method == http.MethodGet && r.URL.Path == "/communities":
 		h.GetCommunities(w, r)
 		return
@@ -95,6 +99,103 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 				authorAvatar = profile.AvatarSystemName
 			}
 		}
+		item := types.FeedPostItemResponse{
+			ID: row.ID,
+			Author: types.FeedAuthorPreview{
+				ID:        row.AuthorID,
+				Name:      authorName,
+				AvatarURL: authorAvatar,
+			},
+			Description:          row.Description,
+			Location:             row.Location,
+			CreatedAt:            row.CreatedAt,
+			LikesCount:           row.LikesCount,
+			CommentsCount:        row.CommentsCount,
+			IsLiked:              row.IsLiked,
+			Kind:                 row.Kind,
+			IsFromFollowing:      row.IsFromFollowing,
+			IsFromDirectChat:     row.IsFromDirectChat,
+			IsFromGroupCommunity: row.IsFromGroupCommunity,
+		}
+
+		if row.CommunityID != nil {
+			title := "Community"
+			if row.CommunityTitle != nil && *row.CommunityTitle != "" {
+				title = *row.CommunityTitle
+			}
+
+			item.Community = &types.FeedCommunityPreview{
+				ID:    *row.CommunityID,
+				Title: title,
+			}
+		}
+
+		if row.SessionID != nil {
+			if preview, ok := sessionMap[*row.SessionID]; ok {
+				item.Workout = &types.FeedWorkoutPreview{
+					ID:               preview.ID,
+					Title:            preview.Title,
+					Category:         preview.Category,
+					DurationMinutes:  preview.DurationMinutes,
+					ExerciseCount:    preview.ExerciseCount,
+					ExercisesPreview: mapSessionExercises(preview.ExercisesPreview),
+				}
+			}
+		}
+
+		resp = append(resp, item)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *FeedHandler) GetUserPosts(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userIDStr := extractUserIDFromFeedPostsPath(r.URL.Path)
+	if userIDStr == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	rows, err := h.store.ListPostsByAuthorID(userIDStr, claims.UserID)
+	if err != nil {
+		http.Error(w, "failed to load user posts", http.StatusInternalServerError)
+		return
+	}
+
+	sessionIDs := uniqueSessionIDs(rows)
+	sessionMap, err := h.workoutsClient.FetchSessionPreviews(r.Context(), sessionIDs)
+	if err != nil {
+		http.Error(w, "failed to fetch session previews", http.StatusInternalServerError)
+		return
+	}
+
+	authorIDs := uniqueAuthorIDs(rows)
+	profilesMap, err := h.profileClient.FetchProfilesBatch(r.Context(), authorIDs)
+	if err != nil {
+		http.Error(w, "failed to fetch author profiles", http.StatusInternalServerError)
+		return
+	}
+
+	resp := make([]types.FeedPostItemResponse, 0, len(rows))
+	for _, row := range rows {
+		authorName := "Unknown user"
+		authorAvatar := "person.circle"
+
+		authorIDInt, err := strconv.Atoi(row.AuthorID)
+		if err == nil {
+			if profile, ok := profilesMap[authorIDInt]; ok {
+				authorName = profile.Name
+				authorAvatar = profile.AvatarSystemName
+			}
+		}
+
 		item := types.FeedPostItemResponse{
 			ID: row.ID,
 			Author: types.FeedAuthorPreview{
@@ -498,4 +599,20 @@ func extractPostID(path string, suffix string) string {
 		return ""
 	}
 	return value
+}
+
+func extractUserIDFromFeedPostsPath(path string) string {
+
+	prefix := "/feed/users/"
+	suffix := "/posts"
+	if len(path) <= len(prefix)+len(suffix) {
+		return ""
+	}
+	value := path[len(prefix):]
+	value = value[:len(value)-len(suffix)]
+	if value == "" {
+		return ""
+	}
+	return value
+
 }

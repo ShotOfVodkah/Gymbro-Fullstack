@@ -14,20 +14,22 @@ public final class FeedsCalendarFactoryImpl {
     public func makeView(
         input: CalendarScreenInput,
         router: any Router,
+        client: FeedsClient,
         analytics: any AnalyticsService
     ) -> some View {
         if let cached = viewModelCache[input] {
             return FeedsCalendarView(viewModel: cached)
-        } else {
-            let service = FeedsCalendarServiceImpl(client: AppMicroservices.feeds)
-            let viewModel = FeedsCalendarViewModel(
-                input: input,
-                router: router,
-                service: service,
-                analytics: analytics
-            )
-            viewModelCache[input] = viewModel
-            return FeedsCalendarView(viewModel: viewModel)
         }
+        
+        let service = FeedsCalendarServiceImpl(client: client)
+        let viewModel = FeedsCalendarViewModel(
+            input: input,
+            router: router,
+            service: service,
+            analytics: analytics
+        )
+        viewModelCache[input] = viewModel
+        
+        return FeedsCalendarView(viewModel: viewModel)
     }
 }

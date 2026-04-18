@@ -1,6 +1,7 @@
 import Foundation
 import GymbroAuth
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 @MainActor
@@ -96,6 +97,8 @@ final class ProfileMainTabViewModel: ObservableObject {
             didTapEditProfile()
         case .settings:
             didTapSettings()
+        case .posts:
+            didTapPosts()
         case .friends:
             didTapFriends()
         case .workoutCalendar:
@@ -119,6 +122,24 @@ final class ProfileMainTabViewModel: ObservableObject {
     
     func didTapFriends() {
         router.navigate(to: .feedsPeople)
+    }
+    
+    func didTapPosts() {
+        guard isOwnProfile,
+              let userIDString = AppMicroservices.tokens.userId,
+              let userID = Int(userIDString),
+              let header = screenModel?.header
+        else { return }
+        
+        router.navigate(
+            to: .feedsPosts(
+                input: PostsScreenInput(
+                    userID: userID,
+                    userName: header.fullName,
+                    isOwnProfile: true
+                )
+            )
+        )
     }
     
     func didTapFollowButton() {
@@ -153,8 +174,10 @@ final class ProfileMainTabViewModel: ObservableObject {
     }
     
     func didTapViewPosts() {
-        guard case .otherUserProfile(let userID) = mode, let userName = screenModel?.header.fullName else { return }
-        router.navigate(to: .profilePosts(userID: userID, userName: userName))
+        guard case .otherUserProfile(let userID) = mode,
+              let userName = screenModel?.header.fullName
+        else { return }
+        router.navigate(to: .feedsPosts(input: PostsScreenInput(userID: userID, userName: userName, isOwnProfile: false)))
     }
     
     func didTapWorkoutCalendar() {

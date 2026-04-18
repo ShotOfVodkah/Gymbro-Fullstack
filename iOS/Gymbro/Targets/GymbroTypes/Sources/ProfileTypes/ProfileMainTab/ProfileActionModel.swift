@@ -22,6 +22,7 @@ public struct ProfileActionModel: Identifiable, Equatable, Hashable {
 public enum ProfileActionKind: Equatable, Hashable {
     case editProfile
     case settings
+    case posts
     case friends
     case workoutCalendar
     case statistics

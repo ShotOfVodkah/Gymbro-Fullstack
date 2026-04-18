@@ -99,6 +99,8 @@ final class AppServicesFactory {
             makeFeedsCalendarScreen(context: context)
         case .feedsChat(let input):
             makeFeedsChatScreen(input: input)
+        case .feedsPosts(let input):
+            makePostsScreen(input: input)
             
             // profile
         case .profileMain(let mode):
@@ -109,14 +111,6 @@ final class AppServicesFactory {
             makeSettingsScreen()
         case .profileStatistics(let mode):
             makeStatisticsScreen(mode: mode)
-            
-            // change
-
-        case .profilePosts(let userID, let userName):
-            FeedsMockDestinationView(
-                title: "\(userName)'s Posts",
-                subtitle: "Mock posts screen for userID: \(userID)"
-            )
         }
     }
     
@@ -212,6 +206,7 @@ final class AppServicesFactory {
     func makeFeedsMainTab() -> some View {
         screenFactories.feedsMainTabFactory.makeView(
             router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -220,6 +215,7 @@ final class AppServicesFactory {
     func makeFeedsPeopleScreen() -> some View {
         screenFactories.feedsPeopleFactory.makeView(
             router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -229,6 +225,7 @@ final class AppServicesFactory {
         screenFactories.feedsCalendarFactory.makeView(
             input: CalendarScreenInput(context: context),
             router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -238,6 +235,17 @@ final class AppServicesFactory {
         screenFactories.feedsChatFactory.makeView(
             input: input,
             router: router,
+            client: AppMicroservices.feeds,
+            analytics: analytics
+        )
+    }
+    
+    @MainActor
+    func makePostsScreen(input: PostsScreenInput) -> some View {
+        screenFactories.feedsPostsFactory.makeView(
+            input: input,
+            router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -301,6 +309,7 @@ private struct ScreenFactories {
     lazy var feedsPeopleFactory = FeedsPeopleFactoryImpl()
     lazy var feedsCalendarFactory = FeedsCalendarFactoryImpl()
     lazy var feedsChatFactory = FeedsChatFactoryImpl()
+    lazy var feedsPostsFactory = FeedsProfilePostsFactoryImpl()
     
     // Profile factories
     

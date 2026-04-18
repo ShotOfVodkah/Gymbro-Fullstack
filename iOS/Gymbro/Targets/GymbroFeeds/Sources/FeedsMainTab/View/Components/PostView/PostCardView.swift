@@ -1,52 +1,62 @@
 import SwiftUI
 import GymbroTypes
 
+enum PostCardMode {
+    case full
+    case exerciseOnly
+}
+
 struct PostCardView: View {
     
-    let post: FeedPost
-    let onAuthorTap: () -> Void
-//    let onTap: () -> Void
-    let onLikeTap: () -> Void
-    let onCommentTap: () -> Void
-    let onExerciseTap: (ExerciseItem) -> Void
-
+    init(
+        post: FeedPost,
+        mode: PostCardMode = .full,
+        onAuthorTap: @escaping () -> Void = {},
+        onLikeTap: @escaping () -> Void = {},
+        onCommentTap: @escaping () -> Void = {},
+        onExerciseTap: @escaping (ExerciseItem) -> Void
+    ) {
+        self.post = post
+        self.mode = mode
+        self.onAuthorTap = onAuthorTap
+        self.onLikeTap = onLikeTap
+        self.onCommentTap = onCommentTap
+        self.onExerciseTap = onExerciseTap
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            PostHeaderView(
-                avatar: post.authorAvatar,
-                authorName: post.authorName,
-                postedAt: post.postedAt,
-                onAuthorTap: onAuthorTap
-            )
-
-//            Button(action: onTap) {
-//                feedImage(post.coverImageName)
-//                    .frame(height: 130)
-//                    .clipShape(RoundedRectangle(cornerRadius: 26))
-//            }
-//            .buttonStyle(.plain)
-
+            if mode == .full {
+                PostHeaderView(
+                    avatar: post.authorAvatar,
+                    authorName: post.authorName,
+                    postedAt: post.postedAt,
+                    onAuthorTap: onAuthorTap
+                )
+            }
+            
             VStack(alignment: .leading, spacing: 14) {
                 Text(post.title)
                     .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(.white)
-
+                
                 PostMetaTagsView(
                     category: post.category,
                     duration: post.duration,
                     timeAgo: post.timeAgo
                 )
-
+                
                 if let location = post.location {
                     HStack(spacing: 8) {
                         Image(systemName: "location.fill")
                             .foregroundStyle(.gray)
+                        
                         Text(location)
                             .font(.system(size: 16, weight: .medium))
                             .foregroundStyle(.gray)
                     }
                 }
-
+                
                 Text(post.description)
                     .font(.system(size: 17, weight: .medium))
                     .foregroundStyle(.white.opacity(0.95))
@@ -56,7 +66,7 @@ struct PostCardView: View {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.7))
                     .textCase(.uppercase)
-
+                
                 VStack(spacing: 12) {
                     ForEach(Array(post.exercises.prefix(2).enumerated()), id: \.element.id) { index, exercise in
                         ExercisePreviewCardView(
@@ -66,7 +76,7 @@ struct PostCardView: View {
                             onExerciseTap(exercise)
                         }
                     }
-
+                    
                     if post.totalExercisesCount > 2 {
                         Button {
                             print("Mock: show all exercises")
@@ -82,17 +92,19 @@ struct PostCardView: View {
                         .buttonStyle(.plain)
                     }
                 }
-
-                Divider()
-                    .overlay(Color.white.opacity(0.8))
-
-                PostActionsView(
-                    likesCount: post.likesCount,
-                    commentsCount: post.commentsCount,
-                    isLiked: post.isLiked,
-                    onLikeTap: onLikeTap,
-                    onCommentTap: onCommentTap
-                )
+                
+                if mode == .full {
+                    Divider()
+                        .overlay(Color.white.opacity(0.8))
+                    
+                    PostActionsView(
+                        likesCount: post.likesCount,
+                        commentsCount: post.commentsCount,
+                        isLiked: post.isLiked,
+                        onLikeTap: onLikeTap,
+                        onCommentTap: onCommentTap
+                    )
+                }
             }
         }
         .padding(18)
@@ -103,39 +115,23 @@ struct PostCardView: View {
                 .stroke(Color.white.opacity(0.06), lineWidth: 1)
         )
     }
-
+    
     private var cardBackground: some View {
         LinearGradient(
             colors: [
-                Color(red: 18/255, green: 24/255, blue: 42/255),
-                Color(red: 19/255, green: 30/255, blue: 56/255)
+                Color(red: 18 / 255, green: 24 / 255, blue: 42 / 255),
+                Color(red: 19 / 255, green: 30 / 255, blue: 56 / 255)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         .opacity(0.7)
     }
-
-//    @ViewBuilder
-//    private func feedImage(_ name: String) -> some View {
-//        if UIImage(named: name) != nil {
-//            Image(name)
-//                .resizable()
-//                .scaledToFill()
-//        } else {
-//            Rectangle()
-//                .fill(
-//                    LinearGradient(
-//                        colors: [Color.gray.opacity(0.6), Color.appPurple.opacity(0.5)],
-//                        startPoint: .topLeading,
-//                        endPoint: .bottomTrailing
-//                    )
-//                )
-//                .overlay(
-//                    Image(systemName: "photo")
-//                        .font(.system(size: 34))
-//                        .foregroundStyle(.white.opacity(0.8))
-//                )
-//        }
-//    }
+    
+    private let post: FeedPost
+    private let mode: PostCardMode
+    private let onAuthorTap: () -> Void
+    private let onLikeTap: () -> Void
+    private let onCommentTap: () -> Void
+    private let onExerciseTap: (ExerciseItem) -> Void
 }

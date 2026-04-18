@@ -40,6 +40,16 @@ public final class FeedsClient {
             responseType: [FeedCommentResponse].self
         )
     }
+    
+    public func fetchPostsByUser(userID: String) async throws -> [FeedPostItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "feed/users/\(userID)/posts",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [FeedPostItemResponse].self
+        )
+    }
 
     public func createPostComment(postID: String, text: String) async throws -> FeedCommentResponse {
         try await client.request(

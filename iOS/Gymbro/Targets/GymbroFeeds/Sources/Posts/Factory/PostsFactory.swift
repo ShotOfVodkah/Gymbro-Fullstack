@@ -4,32 +4,32 @@ import GymbroNavigation
 import GymbroNetwork
 import GymbroTypes
 
-public final class FeedsChatFactoryImpl {
+public final class FeedsProfilePostsFactoryImpl {
     
-    private var viewModelCache: [ChatSessionInput: ChatViewModel] = [:]
+    private var viewModelCache: [PostsScreenInput: FeedsProfilePostsViewModel] = [:]
     
     public init() {}
     
     @MainActor
     public func makeView(
-        input: ChatSessionInput,
+        input: PostsScreenInput,
         router: any Router,
         client: FeedsClient,
         analytics: any AnalyticsService
     ) -> some View {
         if let cached = viewModelCache[input] {
-            return ChatView(viewModel: cached)
+            return FeedsProfilePostsView(viewModel: cached)
         }
         
-        let service = ChatServiceImpl(client: client)
-        let viewModel = ChatViewModel(
+        let service = FeedsProfilePostsServiceImpl(client: client)
+        let viewModel = FeedsProfilePostsViewModel(
             input: input,
             router: router,
             service: service,
             analytics: analytics
         )
-        viewModelCache[input] = viewModel
         
-        return ChatView(viewModel: viewModel)
+        viewModelCache[input] = viewModel
+        return FeedsProfilePostsView(viewModel: viewModel)
     }
 }

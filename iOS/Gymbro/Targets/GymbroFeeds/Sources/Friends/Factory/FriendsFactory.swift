@@ -11,9 +11,13 @@ public final class FeedsPeopleFactoryImpl {
     public init() {}
     
     @MainActor
-    public func makeView(router: any Router, analytics: any AnalyticsService) -> some View {
+    public func makeView(
+        router: any Router,
+        client: FeedsClient,
+        analytics: any AnalyticsService
+    ) -> some View {
         guard let viewModelCache else {
-            let service = FeedsPeopleServiceImpl(client: AppMicroservices.feeds)
+            let service = FeedsPeopleServiceImpl(client: client)
             let viewModel = FeedsPeopleViewModel(
                 router: router,
                 service: service,
@@ -22,6 +26,7 @@ public final class FeedsPeopleFactoryImpl {
             self.viewModelCache = viewModel
             return FeedsPeopleView(viewModel: viewModel)
         }
+        
         return FeedsPeopleView(viewModel: viewModelCache)
     }
 }

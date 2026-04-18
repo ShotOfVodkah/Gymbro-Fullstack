@@ -18,12 +18,12 @@ public enum NavigationRoute: Hashable {
     case feedsPeople
     case feedsCalendar(context: CalendarContext)
     case feedsChat(input: ChatSessionInput)
+    case feedsPosts(input: PostsScreenInput)
     
     case profileMain(mode: ProfileViewMode)
     case profileEdit
     case profileSettings
     case profileStatistics(mode: ProfileViewMode)
-    case profilePosts(userID: Int, userName: String)
     
     // другие маршруты
 }

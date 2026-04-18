@@ -16,6 +16,7 @@ enum ProfileMainMocks {
         actions: [
             ProfileActionModel(id: "edit", title: "Edit Profile", iconSystemName: "pencil", kind: .editProfile),
             ProfileActionModel(id: "settings", title: "Settings", iconSystemName: "gearshape", kind: .settings),
+            ProfileActionModel(id: "posts", title: "My Posts", iconSystemName: "square.and.pencil", kind: .posts),
             ProfileActionModel(id: "friends", title: "Friends", iconSystemName: "person.2", kind: .friends),
             ProfileActionModel(id: "calendar", title: "Workout Calendar", iconSystemName: "calendar", kind: .workoutCalendar),
             ProfileActionModel(id: "statistics", title: "Statistics", iconSystemName: "chart.bar", kind: .statistics),
