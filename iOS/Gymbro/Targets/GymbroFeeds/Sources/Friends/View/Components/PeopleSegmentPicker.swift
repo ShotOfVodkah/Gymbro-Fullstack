@@ -4,11 +4,12 @@ import GymbroTypes
 struct PeopleSegmentPicker: View {
     
     let selectedTab: PeopleTab
+    let availableTabs: [PeopleTab]
     let onSelectTab: (PeopleTab) -> Void
     
     var body: some View {
         HStack(spacing: 10) {
-            ForEach(PeopleTab.allCases) { tab in
+            ForEach(availableTabs) { tab in
                 Button {
                     onSelectTab(tab)
                 } label: {

@@ -93,8 +93,8 @@ final class AppServicesFactory {
             makeWorkoutGeneratorScreen()
         
             // feeds
-        case .feedsPeople:
-            makeFeedsPeopleScreen()
+        case .feedsPeople(let input):
+            makeFeedsPeopleScreen(input: input)
         case .feedsCalendar(let context):
             makeFeedsCalendarScreen(context: context)
         case .feedsChat(let input):
@@ -212,8 +212,9 @@ final class AppServicesFactory {
     }
     
     @MainActor
-    func makeFeedsPeopleScreen() -> some View {
+    func makeFeedsPeopleScreen(input: PeopleScreenInput) -> some View {
         screenFactories.feedsPeopleFactory.makeView(
+            input: input,
             router: router,
             client: AppMicroservices.feeds,
             analytics: analytics

@@ -121,7 +121,14 @@ final class ProfileMainTabViewModel: ObservableObject {
     }
     
     func didTapFriends() {
-        router.navigate(to: .feedsPeople)
+        switch mode {
+        case .myProfile:
+            router.navigate(to: .feedsPeople(input: .mine))
+            
+        case .otherUserProfile(let userID):
+            guard let userName = screenModel?.header.fullName else { return }
+            router.navigate(to: .feedsPeople(input: .user(userID: userID, userName: userName)))
+        }
     }
     
     func didTapPosts() {

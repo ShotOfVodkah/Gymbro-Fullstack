@@ -177,6 +177,26 @@ public final class FeedsClient {
         )
     }
     
+    public func fetchFriendsByUser(userID: String) async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/\(userID)/friends",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
+    public func fetchFollowingByUser(userID: String) async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/\(userID)/following",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+    
     public func createDirectChat(participantID: String) async throws -> ChatRoomResponse {
         try await client.request(
             method: .POST,

@@ -15,7 +15,7 @@ public enum NavigationRoute: Hashable {
     case workoutBuilderForType(type: String?, workoutId: String?)
     case workoutGenerator
     
-    case feedsPeople
+    case feedsPeople(input: PeopleScreenInput)
     case feedsCalendar(context: CalendarContext)
     case feedsChat(input: ChatSessionInput)
     case feedsPosts(input: PostsScreenInput)

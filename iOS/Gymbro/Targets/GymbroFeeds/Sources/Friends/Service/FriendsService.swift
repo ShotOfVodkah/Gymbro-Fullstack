@@ -3,7 +3,7 @@ import GymbroNetwork
 import GymbroTypes
 
 protocol FeedsPeopleService {
-    func fetchScreen() async throws -> FeedsPeopleScreenData
+    func fetchScreen(input: PeopleScreenInput) async throws -> FeedsPeopleScreenData
     func fetchPerson(id: String) async throws -> PersonItem
     func toggleFollow(for person: PersonItem) async throws
     func createDirectChat(with personID: String) async throws -> ChatSessionInput
@@ -13,6 +13,7 @@ struct FeedsPeopleScreenData {
     let friends: [PersonItem]
     let following: [PersonItem]
     let discover: [PersonItem]
+    let shouldShowDiscover: Bool
 }
 
 final class FeedsPeopleServiceImpl: FeedsPeopleService {
@@ -21,25 +22,45 @@ final class FeedsPeopleServiceImpl: FeedsPeopleService {
         self.client = client
     }
     
-    func fetchScreen() async throws -> FeedsPeopleScreenData {
-        async let friendsResponse = client.fetchFriends()
-        async let followingResponse = client.fetchFollowing()
-        async let discoverResponse = client.fetchDiscoverPeople()
-        
-        let friends = try await friendsResponse.map(PersonItem.init(response:))
-        let following = try await followingResponse.map(PersonItem.init(response:))
-        let discover = try await discoverResponse.map(PersonItem.init(response:))
-        
-        let friendIDs = Set(friends.map(\.id))
-        let followingIDs = Set(following.map(\.id))
-        
-        return FeedsPeopleScreenData(
-            friends: friends,
-            following: following.filter { !friendIDs.contains($0.id) },
-            discover: discover.filter {
-                !friendIDs.contains($0.id) && !followingIDs.contains($0.id)
-            }
-        )
+    func fetchScreen(input: PeopleScreenInput) async throws -> FeedsPeopleScreenData {
+        switch input {
+        case .mine:
+            async let friendsResponse = client.fetchFriends()
+            async let followingResponse = client.fetchFollowing()
+            async let discoverResponse = client.fetchDiscoverPeople()
+            
+            let friends = try await friendsResponse.map(PersonItem.init(response:))
+            let following = try await followingResponse.map(PersonItem.init(response:))
+            let discover = try await discoverResponse.map(PersonItem.init(response:))
+            
+            let friendIDs = Set(friends.map(\.id))
+            let followingIDs = Set(following.map(\.id))
+            
+            return FeedsPeopleScreenData(
+                friends: friends,
+                following: following.filter { !friendIDs.contains($0.id) },
+                discover: discover.filter {
+                    !friendIDs.contains($0.id) && !followingIDs.contains($0.id)
+                },
+                shouldShowDiscover: true
+            )
+            
+        case .user(let userID, _):
+            async let friendsResponse = client.fetchFriendsByUser(userID: String(userID))
+            async let followingResponse = client.fetchFollowingByUser(userID: String(userID))
+            
+            let friends = try await friendsResponse.map(PersonItem.init(response:))
+            let following = try await followingResponse.map(PersonItem.init(response:))
+            
+            let friendIDs = Set(friends.map(\.id))
+            
+            return FeedsPeopleScreenData(
+                friends: friends,
+                following: following.filter { !friendIDs.contains($0.id) },
+                discover: [],
+                shouldShowDiscover: false
+            )
+        }
     }
     
     func fetchPerson(id: String) async throws -> PersonItem {

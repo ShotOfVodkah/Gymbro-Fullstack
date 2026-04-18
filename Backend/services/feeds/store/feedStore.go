@@ -306,3 +306,17 @@ func (fs *FeedStore) ListPostsByAuthorID(authorID string, currentUserID int) ([]
 
 	return rows, nil
 }
+
+func (ps *PeopleStore) ListFollowingIDsForUserAny(userID int) ([]int, error) {
+	query := `
+		SELECT followee_id
+		FROM user_follows
+		WHERE follower_id = $1
+		ORDER BY followee_id
+	`
+	var ids []int
+	if err := ps.db.Select(&ids, query, userID); err != nil {
+		return nil, fmt.Errorf("ListFollowingIDsForUserAny: %w", err)
+	}
+	return ids, nil
+}
