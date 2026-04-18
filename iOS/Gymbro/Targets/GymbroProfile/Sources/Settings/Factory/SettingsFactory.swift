@@ -14,13 +14,14 @@ public final class ProfileSettingsFactoryImpl {
     @MainActor
     public func makeView(
         router: any Router,
+        client: ProfileClient,
         analytics: any AnalyticsService
     ) -> some View {
         if let viewModelCache {
             return ProfileSettingsView(viewModel: viewModelCache)
         }
         
-        let service = SettingsService()
+        let service = SettingsService(client: client)
         let viewModel = ProfileSettingsViewModel(
             router: router,
             service: service,
@@ -28,7 +29,6 @@ public final class ProfileSettingsFactoryImpl {
         )
         
         self.viewModelCache = viewModel
-        
         return ProfileSettingsView(viewModel: viewModel)
     }
 }

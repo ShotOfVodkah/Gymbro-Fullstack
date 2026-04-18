@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 
-import GymbroNetwork
 import GymbroNavigation
 import GymbroTypes
 
@@ -12,12 +11,17 @@ public final class ProfileMainTabFactoryImpl {
     public init() {}
     
     @MainActor
-    public func makeView(router: any Router, mode: ProfileViewMode, analytics: any AnalyticsService) -> some View {
+    public func makeView(
+        router: any Router,
+        mode: ProfileViewMode,
+        gateway: any ProfileGateway,
+        analytics: any AnalyticsService
+    ) -> some View {
         if let cachedViewModel = viewModelCache[mode] {
             return ProfileMainTabView(viewModel: cachedViewModel)
         }
         
-        let service = ProfileMainServiceImpl(client: AppMicroservices.feeds)
+        let service = ProfileMainServiceImpl(gateway: gateway)
         let viewModel = ProfileMainTabViewModel(
             router: router,
             mode: mode,

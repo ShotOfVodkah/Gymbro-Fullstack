@@ -92,6 +92,10 @@ final class ProfileStatisticsViewModel: ObservableObject {
     }
     
     func reload() {
+        selectedWeeklyBarID = nil
+        selectedMonthlyPointID = nil
+        selectedMonthCountID = nil
+        visibleSectionIDs = []
         load()
     }
     

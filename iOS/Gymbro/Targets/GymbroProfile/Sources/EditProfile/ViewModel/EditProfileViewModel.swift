@@ -102,12 +102,24 @@ final class EditProfileViewModel: ObservableObject {
         
         Task {
             do {
-                try await service.saveProfile(form)
-                initialForm = form
+                let savedProfile = try await service.saveProfile(form)
+                
+                let savedForm = EditProfileForm(
+                    fullName: savedProfile.fullName,
+                    username: savedProfile.username,
+                    status: savedProfile.status,
+                    subtitle: savedProfile.subtitle,
+                    bio: savedProfile.bio,
+                    avatarSystemName: savedProfile.avatarSystemName
+                )
+                
+                form = savedForm
+                initialForm = savedForm
                 validationErrors = []
                 didSaveSuccessfully = true
                 isSaving = false
-//                analytics.track(.profileEditSaved)
+                
+                router.pop()
             } catch {
                 isSaving = false
                 screenState = .error

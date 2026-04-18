@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import GymbroNetwork
 import GymbroNavigation
 import GymbroTypes
 
@@ -13,13 +14,14 @@ public final class ProfileStatisticsFactoryImpl {
     public func makeView(
         mode: ProfileViewMode,
         router: any Router,
+        client: ProfileClient,
         analytics: any AnalyticsService
     ) -> some View {
-        if let cachedViewModel = viewModelCache[mode] {
-            return ProfileStatisticsView(viewModel: cachedViewModel)
+        if let cached = viewModelCache[mode] {
+            return ProfileStatisticsView(viewModel: cached)
         }
         
-        let service = ProfileStatisticsService()
+        let service = ProfileStatisticsService(client: client)
         let viewModel = ProfileStatisticsViewModel(
             mode: mode,
             service: service,
@@ -28,7 +30,6 @@ public final class ProfileStatisticsFactoryImpl {
         )
         
         viewModelCache[mode] = viewModel
-        
         return ProfileStatisticsView(viewModel: viewModel)
     }
 }

@@ -14,6 +14,13 @@ final class ProfileSettingsViewModel: ObservableObject {
     
     @Published var screenState: ScreenState = .loading
     @Published var sections: [SettingsSection] = []
+    @Published var state = ProfilePrivacySettingsState(
+        pushNotificationsEnabled: true,
+        workoutRemindersEnabled: true,
+        privateAccountEnabled: false,
+        showActivityEnabled: true,
+        discoverVisibilityEnabled: true
+    )
     
     @Published var legalSheetType: LegalDocType = .terms
     @Published var isLegalSheetPresented: Bool = false
@@ -45,7 +52,8 @@ final class ProfileSettingsViewModel: ObservableObject {
         screenState = .loading
         
         do {
-            sections = try await service.fetchSettings()
+            state = try await service.fetchState()
+            sections = SettingsSectionsBuilder.makeSections(state: state)
             screenState = .loaded
         } catch {
             screenState = .error
@@ -56,7 +64,7 @@ final class ProfileSettingsViewModel: ObservableObject {
         legalSheetType = type
         isLegalSheetPresented = true
     }
-
+    
     func openAppVersionInfo() {
         isShowingAppVersionAlert = true
     }
@@ -114,16 +122,56 @@ final class ProfileSettingsViewModel: ObservableObject {
     func toggle(_ item: SettingsItem) {
         guard case let .toggle(isOn) = item.type else { return }
         
-        if let sectionIndex = sections.firstIndex(where: { $0.items.contains(item) }),
-           let itemIndex = sections[sectionIndex].items.firstIndex(of: item) {
-            
-            sections[sectionIndex].items[itemIndex] = SettingsItem(
+        let oldState = state
+        let newValue = !isOn
+        
+        switch item.id {
+        case "push":
+            state.pushNotificationsEnabled = newValue
+        case "workout_reminders":
+            state.workoutRemindersEnabled = newValue
+        case "private_account":
+            state.privateAccountEnabled = newValue
+        case "show_activity":
+            state.showActivityEnabled = newValue
+        case "discover_visibility":
+            state.discoverVisibilityEnabled = newValue
+        case "dark_mode":
+            sections = rebuildSectionsKeepingLocalDarkMode(itemID: item.id, value: newValue)
+            return
+        default:
+            return
+        }
+        
+        sections = SettingsSectionsBuilder.makeSections(state: state)
+        
+        Task {
+            do {
+                state = try await service.updateState(state)
+                sections = SettingsSectionsBuilder.makeSections(state: state)
+            } catch {
+                state = oldState
+                sections = SettingsSectionsBuilder.makeSections(state: state)
+                print("Failed to update settings:", error)
+            }
+        }
+    }
+    
+    private func rebuildSectionsKeepingLocalDarkMode(itemID: String, value: Bool) -> [SettingsSection] {
+        var updatedSections = sections
+        
+        if let sectionIndex = updatedSections.firstIndex(where: { $0.items.contains(where: { $0.id == itemID }) }),
+           let itemIndex = updatedSections[sectionIndex].items.firstIndex(where: { $0.id == itemID }) {
+            let item = updatedSections[sectionIndex].items[itemIndex]
+            updatedSections[sectionIndex].items[itemIndex] = SettingsItem(
                 id: item.id,
                 title: item.title,
                 icon: item.icon,
-                type: .toggle(isOn: !isOn)
+                type: .toggle(isOn: value)
             )
         }
+        
+        return updatedSections
     }
     
     private func logout() {

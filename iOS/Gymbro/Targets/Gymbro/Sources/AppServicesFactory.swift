@@ -260,9 +260,11 @@ final class AppServicesFactory {
     
     @MainActor
     func makeProfileMainScreen(mode: ProfileViewMode) -> some View {
+        
         screenFactories.profileMainTabFactory.makeView(
             router: router,
             mode: mode,
+            gateway: ProfileGatewayImpl(profileClient: AppMicroservices.profile, feedsClient: AppMicroservices.feeds),
             analytics: analytics
         )
     }
@@ -271,6 +273,7 @@ final class AppServicesFactory {
     func makeEditProfileScreen() -> some View {
         screenFactories.editProfileFactory.makeView(
             router: router,
+            client: AppMicroservices.profile,
             analytics: analytics
         )
     }
@@ -279,6 +282,7 @@ final class AppServicesFactory {
     func makeSettingsScreen() -> some View {
         screenFactories.settingsFactory.makeView(
             router: router,
+            client: AppMicroservices.profile,
             analytics: analytics
         )
     }
@@ -288,6 +292,7 @@ final class AppServicesFactory {
         screenFactories.statisticsFactory.makeView(
             mode: mode,
             router: router,
+            client: AppMicroservices.profile,
             analytics: analytics
         )
     }

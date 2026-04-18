@@ -21,8 +21,17 @@ struct ProfileSettingsView: View {
                     contentView
                     
                 case .error:
-                    Text("Error")
-                        .foregroundStyle(.white)
+                    VStack(alignment: .center) {
+                        Text("Something went wrong, oopsie...")
+                            .font(.title3)
+                            .foregroundStyle(.white)
+                        
+                        AppButton("Refresh", size: .xl) {
+                            viewModel.reload()
+                        }
+                    }
+                    .padding(.horizontal, 40)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
             }
         }

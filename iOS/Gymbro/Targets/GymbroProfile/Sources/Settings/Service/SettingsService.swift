@@ -1,165 +1,49 @@
 import Foundation
+import GymbroNetwork
 import GymbroTypes
 
 protocol SettingsServiceProtocol {
-    func fetchSettings() async throws -> [SettingsSection]
+    func fetchState() async throws -> ProfilePrivacySettingsState
+    func updateState(_ state: ProfilePrivacySettingsState) async throws -> ProfilePrivacySettingsState
 }
 
 final class SettingsService: SettingsServiceProtocol {
     
-    func fetchSettings() async throws -> [SettingsSection] {
-        try await Task.sleep(nanoseconds: 300_000_000)
-        
-        return [
-            SettingsSection(
-                id: "account",
-                title: "Account",
-                items: [
-                    .init(
-                        id: "change_password",
-                        title: "Change Password",
-                        icon: "key.fill",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "devices",
-                        title: "Connected Devices",
-                        icon: "iphone.and.arrow.forward",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "language",
-                        title: "Language",
-                        icon: "globe",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "delete_account",
-                        title: "Delete Account",
-                        icon: "trash.fill",
-                        type: .destructive
-                    )
-                ]
-            ),
-            
-            SettingsSection(
-                id: "notifications",
-                title: "Notifications",
-                items: [
-                    .init(
-                        id: "push",
-                        title: "Push Notifications",
-                        icon: "bell.fill",
-                        type: .toggle(isOn: true)
-                    ),
-                    .init(
-                        id: "workout_reminders",
-                        title: "Workout Reminders",
-                        icon: "figure.run",
-                        type: .toggle(isOn: true)
-                    )
-                ]
-            ),
-            
-            SettingsSection(
-                id: "appearance",
-                title: "Appearance",
-                items: [
-                    .init(
-                        id: "dark_mode",
-                        title: "Dark Mode",
-                        icon: "moon.fill",
-                        type: .toggle(isOn: true)
-                    ),
-                    .init(
-                        id: "app_icon",
-                        title: "App Icon",
-                        icon: "app.fill",
-                        type: .navigation
-                    )
-                ]
-            ),
-            
-            SettingsSection(
-                id: "privacy",
-                title: "Privacy",
-                items: [
-                    .init(
-                        id: "private_account",
-                        title: "Private Account",
-                        icon: "lock.fill",
-                        type: .toggle(isOn: false)
-                    ),
-                    .init(
-                        id: "show_activity",
-                        title: "Show Activity to Friends",
-                        icon: "eye.fill",
-                        type: .toggle(isOn: true)
-                    ),
-                    .init(
-                        id: "discover_visibility",
-                        title: "Show Profile in Discover",
-                        icon: "magnifyingglass",
-                        type: .toggle(isOn: true)
-                    ),
-                    .init(
-                        id: "blocked_users",
-                        title: "Blocked Users",
-                        icon: "hand.raised.fill",
-                        type: .navigation
-                    )
-                ]
-            ),
-            
-            SettingsSection(
-                id: "help_about",
-                title: "Help & About",
-                items: [
-                    .init(
-                        id: "help_center",
-                        title: "Help Center",
-                        icon: "questionmark.circle",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "support",
-                        title: "Contact Support",
-                        icon: "message.fill",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "terms",
-                        title: "Terms of Service",
-                        icon: "doc.text.fill",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "privacy_policy",
-                        title: "Privacy Policy",
-                        icon: "shield.fill",
-                        type: .navigation
-                    ),
-                    .init(
-                        id: "app_version",
-                        title: "App Version",
-                        icon: "info.circle.fill",
-                        type: .navigation
-                    )
-                ]
-            ),
-            
-            SettingsSection(
-                id: "logout",
-                title: "",
-                items: [
-                    .init(
-                        id: "logout",
-                        title: "Log Out",
-                        icon: "rectangle.portrait.and.arrow.right",
-                        type: .destructive
-                    )
-                ]
-            )
-        ]
+    init(client: ProfileClient) {
+        self.client = client
     }
+    
+    func fetchState() async throws -> ProfilePrivacySettingsState {
+        let response = try await client.fetchMySettings()
+        
+        return ProfilePrivacySettingsState(
+            pushNotificationsEnabled: response.push_notifications_enabled,
+            workoutRemindersEnabled: response.workout_reminders,
+            privateAccountEnabled: response.private_account,
+            showActivityEnabled: response.show_activity,
+            discoverVisibilityEnabled: response.discover_visibility
+        )
+    }
+    
+    func updateState(_ state: ProfilePrivacySettingsState) async throws -> ProfilePrivacySettingsState {
+        let request = UpdateProfileSettingsRequest(
+            push_notifications_enabled: state.pushNotificationsEnabled,
+            workout_reminders: state.workoutRemindersEnabled,
+            private_account: state.privateAccountEnabled,
+            show_activity: state.showActivityEnabled,
+            discover_visibility: state.discoverVisibilityEnabled
+        )
+        
+        let response = try await client.updateMySettings(request)
+        
+        return ProfilePrivacySettingsState(
+            pushNotificationsEnabled: response.push_notifications_enabled,
+            workoutRemindersEnabled: response.workout_reminders,
+            privateAccountEnabled: response.private_account,
+            showActivityEnabled: response.show_activity,
+            discoverVisibilityEnabled: response.discover_visibility
+        )
+    }
+    
+    private let client: ProfileClient
 }

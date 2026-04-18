@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 public final class EditProfileFactoryImpl {
@@ -10,12 +11,16 @@ public final class EditProfileFactoryImpl {
     public init() {}
     
     @MainActor
-    public func makeView(router: any Router, analytics: any AnalyticsService) -> some View {
+    public func makeView(
+        router: any Router,
+        client: ProfileClient,
+        analytics: any AnalyticsService
+    ) -> some View {
         if let viewModelCache {
             return EditProfileView(viewModel: viewModelCache)
         }
         
-        let service = EditProfileServiceImpl()
+        let service = EditProfileServiceImpl(client: client)
         let viewModel = EditProfileViewModel(
             router: router,
             service: service,

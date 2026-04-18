@@ -1,5 +1,4 @@
 import Foundation
-import GymbroNetwork
 import GymbroTypes
 
 protocol ProfileMainTabService {
@@ -10,36 +9,79 @@ protocol ProfileMainTabService {
 
 final class ProfileMainServiceImpl: ProfileMainTabService {
     
-    private let client: FeedsClient // change
-    
-    init(client: FeedsClient) {
-        self.client = client
+    init(gateway: any ProfileGateway) {
+        self.gateway = gateway
     }
     
     func fetchScreen(mode: ProfileViewMode) async throws -> ProfileMainScreenModel {
-        try await Task.sleep(nanoseconds: 300_000_000)
+        let response = try await gateway.fetchMainProfile(mode: mode)
         
+        let isOwnProfile: Bool
         switch mode {
         case .myProfile:
-            return ProfileMainMocks.ownProfile
-            
+            isOwnProfile = true
         case .otherUserProfile:
-            return ProfileMainMocks.otherProfile
+            isOwnProfile = false
         }
+        
+        return ProfileMainScreenModel(
+            header: ProfileHeaderModel(
+                userID: response.user_id,
+                fullName: response.name,
+                username: "@\(response.username)",
+                status: response.status,
+                subtitle: response.subtitle,
+                avatarSystemName: response.avatar_system_name,
+                badge: response.badge
+            ),
+            actions: isOwnProfile
+            ? [
+                .init(id: "edit_profile", title: "Edit Profile", iconSystemName: "square.and.pencil", kind: .editProfile),
+                .init(id: "settings", title: "Settings", iconSystemName: "gearshape.fill", kind: .settings),
+                .init(id: "posts", title: "Posts", iconSystemName: "square.grid.2x2.fill", kind: .posts),
+                .init(id: "friends", title: "Friends", iconSystemName: "person.2.fill", kind: .friends),
+                .init(id: "calendar", title: "Workout Calendar", iconSystemName: "calendar", kind: .workoutCalendar),
+                .init(id: "statistics", title: "Statistics", iconSystemName: "chart.bar.fill", kind: .statistics),
+                .init(id: "logout", title: "Log Out", iconSystemName: "rectangle.portrait.and.arrow.right", kind: .logout)
+            ]
+            : [
+                .init(id: "friends", title: "Friends", iconSystemName: "person.2.fill", kind: .friends),
+                .init(id: "calendar", title: "Workout Calendar", iconSystemName: "calendar", kind: .workoutCalendar),
+                .init(id: "statistics", title: "Statistics", iconSystemName: "chart.bar.fill", kind: .statistics)
+            ],
+            statsPreview: ProfileStatsPreviewModel(
+                workoutsThisMonth: response.workouts_this_month,
+                totalWorkouts: response.total_workouts,
+                totalHours: response.total_hours,
+                favoriteWorkoutType: response.favorite_workout_type,
+                mostActiveWeekday: response.most_active_weekday,
+                consistencyPercent: response.consistency_percent
+            ),
+            about: ProfileAboutModel(
+                bio: response.bio
+            ),
+            quickInsights: [],
+            weeklyActivity: response.weekly_activity.map {
+                ProfileWeeklyActivityItem(
+                    id: $0.id,
+                    dayTitle: $0.day_title,
+                    value: $0.value,
+                    maxValue: $0.max_value
+                )
+            },
+            relationshipState: isOwnProfile
+            ? nil
+            : ((response.is_following ?? false) ? .following : .notFollowing)
+        )
     }
     
     func createDirectChat(with personID: String) async throws -> ChatSessionInput {
-        let room = try await client.createDirectChat(participantID: personID)
-        return ChatSessionInput(response: room)
+        try await gateway.createDirectChat(with: personID)
     }
     
     func toggleFollow(for userID: Int, isFollowing: Bool) async throws {
-        let personID = String(userID)
-        
-        if isFollowing {
-            try await client.unfollowPerson(id: personID)
-        } else {
-            try await client.followPerson(id: personID)
-        }
+        try await gateway.toggleFollow(userID: userID, isFollowing: isFollowing)
     }
+    
+    private let gateway: any ProfileGateway
 }

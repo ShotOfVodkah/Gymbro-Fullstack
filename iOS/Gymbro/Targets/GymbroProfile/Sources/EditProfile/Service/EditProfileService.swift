@@ -4,29 +4,51 @@ import GymbroTypes
 
 protocol EditProfileService {
     func fetchProfile() async throws -> EditProfileScreenModel
-    func saveProfile(_ form: EditProfileForm) async throws
+    func saveProfile(_ form: EditProfileForm) async throws -> EditProfileScreenModel
 }
 
 final class EditProfileServiceImpl: EditProfileService {
     
-    private var storedProfile: EditProfileScreenModel = EditProfileMocks.profile
-    
-    func fetchProfile() async throws -> EditProfileScreenModel {
-        try await Task.sleep(nanoseconds: 250_000_000)
-        return storedProfile
+    init(client: ProfileClient) {
+        self.client = client
     }
     
-    func saveProfile(_ form: EditProfileForm) async throws {
-        try await Task.sleep(nanoseconds: 300_000_000)
+    func fetchProfile() async throws -> EditProfileScreenModel {
+        let response = try await client.fetchMyProfileForEdit()
         
-        storedProfile = EditProfileScreenModel(
-            userID: storedProfile.userID,
-            fullName: form.fullName,
+        return EditProfileScreenModel(
+            userID: response.user_id,
+            fullName: response.name,
+            username: response.username,
+            status: response.status,
+            subtitle: response.subtitle,
+            bio: response.bio,
+            avatarSystemName: response.avatar_system_name
+        )
+    }
+    
+    func saveProfile(_ form: EditProfileForm) async throws -> EditProfileScreenModel {
+        let request = UpdateProfileRequest(
+            name: form.fullName,
             username: form.username,
             status: form.status,
             subtitle: form.subtitle,
             bio: form.bio,
-            avatarSystemName: form.avatarSystemName
+            avatar_system_name: form.avatarSystemName
+        )
+        
+        let response = try await client.updateMyProfile(request)
+        
+        return EditProfileScreenModel(
+            userID: response.user_id,
+            fullName: response.name,
+            username: response.username,
+            status: response.status,
+            subtitle: response.subtitle,
+            bio: response.bio,
+            avatarSystemName: response.avatar_system_name
         )
     }
+    
+    private let client: ProfileClient
 }
