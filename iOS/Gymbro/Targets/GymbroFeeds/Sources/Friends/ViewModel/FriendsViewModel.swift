@@ -84,29 +84,29 @@ final class FeedsPeopleViewModel: ObservableObject {
         switch selectedTab {
         case .friends:
             var sections: [(String, [PersonItem])] = [
-                ((String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
-                ((String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
             ]
             if shouldShowDiscover {
-                sections.append(((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
+                sections.append((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
             }
             return sections
             
         case .following:
             var sections: [(String, [PersonItem])] = [
-                ((String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
-                ((String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
             ]
             if shouldShowDiscover {
-                sections.append(((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
+                sections.append((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
             }
             return sections
             
         case .discover:
             guard shouldShowDiscover else {
                 return [
-                    ((String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
-                    ((String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
+                    (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                    (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
                 ]
             }
             return [

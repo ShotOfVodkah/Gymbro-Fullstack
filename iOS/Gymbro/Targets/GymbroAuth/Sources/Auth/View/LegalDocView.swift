@@ -59,7 +59,7 @@ public struct LegalDocScreen: View {
             EmptyView()
             
         case .acceptance(let isAlreadyAccepted, let onAccept):
-            AppButton(isAlreadyAccepted ? String(localized: "legal.accepted", bundle: .module) : String(localized: "legal.accepted", bundle: .module) : String(localized: "legal.agree", bundle: .module), size: .xl) {
+            AppButton(isAlreadyAccepted ? String(localized: "legal.accepted", bundle: .module) : String(localized: "legal.agree", bundle: .module), size: .xl) {
                 onAccept()
                 dismiss()
             }
