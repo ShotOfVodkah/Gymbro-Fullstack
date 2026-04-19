@@ -41,8 +41,8 @@ final class EditProfileViewModel: ObservableObject {
         self.service = service
         self.analytics = analytics
         
-        reload()
-//        analytics.track(.screenViewed(screen: .profileEdit))
+        analytics.track(.screenViewed(screen: .profileEdit))
+        Task { await loadProfile() }
     }
     
     var hasUnsavedChanges: Bool {
@@ -58,6 +58,7 @@ final class EditProfileViewModel: ObservableObject {
     
     func reload() {
         Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.profileEdit.rawValue))
             await loadProfile()
         }
     }
@@ -119,10 +120,17 @@ final class EditProfileViewModel: ObservableObject {
                 didSaveSuccessfully = true
                 isSaving = false
                 
+                analytics.track(.profileEditSaved)
                 router.pop()
             } catch {
                 isSaving = false
                 screenState = .error
+                analytics.track(
+                    .errorOccurred(
+                        screen: AnalyticsScreen.profileEdit.rawValue,
+                        message: error.localizedDescription
+                    )
+                )
             }
         }
     }
@@ -171,6 +179,12 @@ final class EditProfileViewModel: ObservableObject {
             screenState = .loaded
         } catch {
             screenState = .error
+            analytics.track(
+                .errorOccurred(
+                    screen: AnalyticsScreen.profileEdit.rawValue,
+                    message: error.localizedDescription
+                )
+            )
         }
     }
     

@@ -5,7 +5,7 @@ public struct AnalyticsEventDTO: Codable, Sendable {
     public let properties: [String: String]
     public let timestamp: Date
     public let sessionId: String
-    public let userId: String?
+    public let userId: String
     public let platform: String
     public let appVersion: String
 
@@ -14,7 +14,7 @@ public struct AnalyticsEventDTO: Codable, Sendable {
         properties: [String: String],
         timestamp: Date,
         sessionId: String,
-        userId: String?,
+        userId: String,
         platform: String,
         appVersion: String
     ) {
@@ -29,7 +29,7 @@ public struct AnalyticsEventDTO: Codable, Sendable {
 }
 
 public extension AnalyticsEvent {
-    func toDTO(sessionId: String, userId: String?) -> AnalyticsEventDTO {
+    func toDTO(sessionId: String, userId: String) -> AnalyticsEventDTO {
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
         return AnalyticsEventDTO(
             eventName: eventName,
@@ -84,6 +84,15 @@ public extension AnalyticsEvent {
         case .calendarDayTapped: return "calendar_day_tapped"
         case .calendarMyWorkoutOpened: return "calendar_my_workout_opened"
         case .calendarPartnerWorkoutOpened: return "calendar_partner_workout_opened"
+        case .profilePrimaryActionTapped: return "profile_primary_action_tapped"
+        case .profileRelationshipFollowTapped: return "profile_relationship_follow_tapped"
+        case .profileRelationshipMessageTapped: return "profile_relationship_message_tapped"
+        case .profileRelationshipPostsTapped: return "profile_relationship_posts_tapped"
+        case .profileEditSaved: return "profile_edit_saved"
+        case .settingsRowOpened: return "settings_row_opened"
+        case .settingsToggleChanged: return "settings_toggle_changed"
+        case .profileStatisticsScreenViewed: return "screen_viewed"
+        case .statisticsChartSelected: return "statistics_chart_selected"
         case .errorOccurred: return "error_occurred"
         case .errorRetryTapped: return "error_retry_tapped"
         }
@@ -157,6 +166,30 @@ public extension AnalyticsEvent {
             return ["has_my_workout": "\(hasMyWorkout)", "has_partner_workout": "\(hasPartnerWorkout)"]
         case .calendarMyWorkoutOpened, .calendarPartnerWorkoutOpened:
             return [:]
+        case .profilePrimaryActionTapped(let action, let isOwnProfile):
+            return ["action": action, "is_own_profile": "\(isOwnProfile)"]
+        case .profileRelationshipFollowTapped(let targetUserId, let isFollowingAfter):
+            return ["target_user_id": targetUserId, "is_following_after": "\(isFollowingAfter)"]
+        case .profileRelationshipMessageTapped(let targetUserId):
+            return ["target_user_id": targetUserId]
+        case .profileRelationshipPostsTapped(let targetUserId, let isOwnProfile):
+            return [
+                "target_user_id": targetUserId,
+                "is_own_profile": "\(isOwnProfile)"
+            ]
+        case .profileEditSaved:
+            return [:]
+        case .settingsRowOpened(let itemId):
+            return ["item_id": itemId]
+        case .settingsToggleChanged(let itemId, let isOn):
+            return ["item_id": itemId, "is_on": "\(isOn)"]
+        case .profileStatisticsScreenViewed(let isOwnProfile):
+            return [
+                "screen": AnalyticsScreen.profileStatistics.rawValue,
+                "is_own_profile": "\(isOwnProfile)"
+            ]
+        case .statisticsChartSelected(let chartKind, let selectionId):
+            return ["chart_kind": chartKind, "selection_id": selectionId]
         case .errorOccurred(let screen, let message):
             return ["screen": screen, "message": message]
         case .errorRetryTapped(let screen):

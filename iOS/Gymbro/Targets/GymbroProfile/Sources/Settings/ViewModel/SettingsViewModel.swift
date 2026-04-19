@@ -39,11 +39,13 @@ final class ProfileSettingsViewModel: ObservableObject {
         self.service = service
         self.analytics = analytics
         
-        reload()
+        analytics.track(.screenViewed(screen: .profileSettings))
+        Task { await load() }
     }
     
     func reload() {
         Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.profileSettings.rawValue))
             await load()
         }
     }
@@ -57,6 +59,12 @@ final class ProfileSettingsViewModel: ObservableObject {
             screenState = .loaded
         } catch {
             screenState = .error
+            analytics.track(
+                .errorOccurred(
+                    screen: AnalyticsScreen.profileSettings.rawValue,
+                    message: error.localizedDescription
+                )
+            )
         }
     }
     
@@ -77,6 +85,7 @@ final class ProfileSettingsViewModel: ObservableObject {
     }
     
     func handleTap(_ item: SettingsItem) {
+        analytics.track(.settingsRowOpened(itemId: item.id))
         switch item.id {
         case "change_password":
             print("Open change password")
@@ -149,10 +158,17 @@ final class ProfileSettingsViewModel: ObservableObject {
             do {
                 state = try await service.updateState(state)
                 sections = SettingsSectionsBuilder.makeSections(state: state)
+                analytics.track(.settingsToggleChanged(itemId: item.id, isOn: newValue))
             } catch {
                 state = oldState
                 sections = SettingsSectionsBuilder.makeSections(state: state)
                 print("Failed to update settings:", error)
+                analytics.track(
+                    .errorOccurred(
+                        screen: AnalyticsScreen.profileSettings.rawValue,
+                        message: error.localizedDescription
+                    )
+                )
             }
         }
     }

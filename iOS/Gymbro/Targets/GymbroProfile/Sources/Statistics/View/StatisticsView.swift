@@ -36,6 +36,21 @@ struct ProfileStatisticsView: View {
         }
         .navigationTitle(viewModel.navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: viewModel.selectedWeeklyBarID) { _, newValue in
+            if let newValue {
+                viewModel.reportChartSelection(chartKind: "weekly_activity", selectionId: newValue)
+            }
+        }
+        .onChange(of: viewModel.selectedMonthlyPointID) { _, newValue in
+            if let newValue {
+                viewModel.reportChartSelection(chartKind: "monthly_trend", selectionId: newValue)
+            }
+        }
+        .onChange(of: viewModel.selectedMonthCountID) { _, newValue in
+            if let newValue {
+                viewModel.reportChartSelection(chartKind: "workouts_by_month", selectionId: newValue)
+            }
+        }
     }
     
     private var contentView: some View {

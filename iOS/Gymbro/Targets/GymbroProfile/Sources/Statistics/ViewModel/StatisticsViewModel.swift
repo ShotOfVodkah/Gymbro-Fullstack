@@ -34,7 +34,8 @@ final class ProfileStatisticsViewModel: ObservableObject {
         self.router = router
         self.analytics = analytics
         
-        load()
+        analytics.track(.profileStatisticsScreenViewed(isOwnProfile: mode == .myProfile))
+        Task { await loadStatistics() }
     }
     
     var summary: StatisticsSummaryModel? {
@@ -92,25 +93,40 @@ final class ProfileStatisticsViewModel: ObservableObject {
     }
     
     func reload() {
+        Task {
+            analytics.track(.errorRetryTapped(screen: AnalyticsScreen.profileStatistics.rawValue))
+            await loadStatisticsAfterResettingSelection()
+        }
+    }
+
+    func reportChartSelection(chartKind: String, selectionId: String) {
+        analytics.track(.statisticsChartSelected(chartKind: chartKind, selectionId: selectionId))
+    }
+    
+    private func loadStatisticsAfterResettingSelection() async {
         selectedWeeklyBarID = nil
         selectedMonthlyPointID = nil
         selectedMonthCountID = nil
         visibleSectionIDs = []
-        load()
+        await loadStatistics()
     }
     
-    private func load() {
-        Task {
-            screenState = .loading
-            
-            do {
-                model = try await service.fetchStatistics(mode: mode)
-                screenState = .loaded
-                animateSectionsIn()
-            } catch {
-                model = nil
-                screenState = .error
-            }
+    private func loadStatistics() async {
+        screenState = .loading
+        
+        do {
+            model = try await service.fetchStatistics(mode: mode)
+            screenState = .loaded
+            animateSectionsIn()
+        } catch {
+            model = nil
+            screenState = .error
+            analytics.track(
+                .errorOccurred(
+                    screen: AnalyticsScreen.profileStatistics.rawValue,
+                    message: error.localizedDescription
+                )
+            )
         }
     }
 }

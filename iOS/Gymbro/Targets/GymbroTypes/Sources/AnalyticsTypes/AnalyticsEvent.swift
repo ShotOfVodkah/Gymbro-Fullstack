@@ -50,6 +50,16 @@ public enum AnalyticsEvent {
     case calendarMyWorkoutOpened
     case calendarPartnerWorkoutOpened
 
+    case profilePrimaryActionTapped(action: String, isOwnProfile: Bool)
+    case profileRelationshipFollowTapped(targetUserId: String, isFollowingAfter: Bool)
+    case profileRelationshipMessageTapped(targetUserId: String)
+    case profileRelationshipPostsTapped(targetUserId: String, isOwnProfile: Bool)
+    case profileEditSaved
+    case settingsRowOpened(itemId: String)
+    case settingsToggleChanged(itemId: String, isOn: Bool)
+    case profileStatisticsScreenViewed(isOwnProfile: Bool)
+    case statisticsChartSelected(chartKind: String, selectionId: String)
+
     case errorOccurred(screen: String, message: String)
     case errorRetryTapped(screen: String)
 }
@@ -66,6 +76,9 @@ public enum AnalyticsScreen: String {
     case feedsChat
     case feedsCalendar
     case profile
+    case profileEdit = "profile_edit"
+    case profileSettings = "profile_settings"
+    case profileStatistics = "profile_statistics"
     case auth
     case home
 }
