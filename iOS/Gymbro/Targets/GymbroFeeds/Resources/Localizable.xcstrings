@@ -1,6 +1,22 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "@%@" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@. %2$@"
+          }
+        }
+      }
+    },
     "feeds.calendar.action_my_workout" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -952,6 +968,12 @@
           }
         }
       }
+    },
+    "Something went wrong, oopsie..." : {
+
+    },
+    "You" : {
+
     }
   },
   "version" : "1.0"

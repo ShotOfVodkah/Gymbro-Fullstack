@@ -6,24 +6,19 @@ public final class AnalyticsServiceImpl: AnalyticsService {
     private let client: AnalyticsClient
     private let sessionId: String
     private let lock = NSLock()
-    private var _userId: String?
     private var _buffer: [AnalyticsEventDTO] = []
     private let bufferLimit = 20
     private var flushTask: Task<Void, Never>?
 
-    public init(client: AnalyticsClient, userId: String? = nil) {
+    public init(client: AnalyticsClient) {
         self.client = client
         self.sessionId = UUID().uuidString
-        self._userId = userId
         schedulePeriodicFlush()
     }
 
-    public func setUserId(_ userId: String?) {
-        lock.withLock { _userId = userId }
-    }
-
     public func track(_ event: AnalyticsEvent) {
-        let (sessionId, userId) = lock.withLock { (self.sessionId, self._userId) }
+        guard let userId = AppMicroservices.tokens.userId, !userId.isEmpty else { return }
+        let sessionId = lock.withLock { self.sessionId }
         let dto = event.toDTO(sessionId: sessionId, userId: userId)
         let shouldFlush = lock.withLock { () -> Bool in
             _buffer.append(dto)

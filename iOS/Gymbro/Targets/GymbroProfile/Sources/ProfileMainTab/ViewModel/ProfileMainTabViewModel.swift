@@ -35,8 +35,8 @@ final class ProfileMainTabViewModel: ObservableObject {
         self.service = service
         self.analytics = analytics
         
-        reload()
         analytics.track(.screenViewed(screen: .profile))
+        Task { await loadProfile() }
     }
     
     var isOwnProfile: Bool {
@@ -92,6 +92,12 @@ final class ProfileMainTabViewModel: ObservableObject {
     }
     
     func handleAction(_ action: ProfileActionKind) {
+        analytics.track(
+            .profilePrimaryActionTapped(
+                action: Self.analyticsActionID(action),
+                isOwnProfile: isOwnProfile
+            )
+        )
         switch action {
         case .editProfile:
             didTapEditProfile()
@@ -138,6 +144,12 @@ final class ProfileMainTabViewModel: ObservableObject {
               let header = screenModel?.header
         else { return }
         
+        analytics.track(
+            .profileRelationshipPostsTapped(
+                targetUserId: userIDString,
+                isOwnProfile: true
+            )
+        )
         router.navigate(
             to: .feedsPosts(
                 input: PostsScreenInput(
@@ -153,6 +165,13 @@ final class ProfileMainTabViewModel: ObservableObject {
         guard case .otherUserProfile(let userID) = mode else { return }
         let oldState = relationshipState ?? .notFollowing
         relationshipState = (oldState == .following) ? .notFollowing : .following
+        let isFollowingAfter = relationshipState == .following
+        analytics.track(
+            .profileRelationshipFollowTapped(
+                targetUserId: "\(userID)",
+                isFollowingAfter: isFollowingAfter
+            )
+        )
         
         Task {
             do {
@@ -169,6 +188,7 @@ final class ProfileMainTabViewModel: ObservableObject {
     
     func didTapWrite() {
         guard case .otherUserProfile(let userID) = mode else { return }
+        analytics.track(.profileRelationshipMessageTapped(targetUserId: "\(userID)"))
         
         Task {
             do {
@@ -184,6 +204,12 @@ final class ProfileMainTabViewModel: ObservableObject {
         guard case .otherUserProfile(let userID) = mode,
               let userName = screenModel?.header.fullName
         else { return }
+        analytics.track(
+            .profileRelationshipPostsTapped(
+                targetUserId: "\(userID)",
+                isOwnProfile: false
+            )
+        )
         router.navigate(to: .feedsPosts(input: PostsScreenInput(userID: userID, userName: userName, isOwnProfile: false)))
     }
     
@@ -227,6 +253,24 @@ final class ProfileMainTabViewModel: ObservableObject {
             print("Failed to load profile:", error)
             screenModel = nil
             screenState = .error
+            analytics.track(
+                .errorOccurred(
+                    screen: AnalyticsScreen.profile.rawValue,
+                    message: error.localizedDescription
+                )
+            )
+        }
+    }
+
+    private static func analyticsActionID(_ kind: ProfileActionKind) -> String {
+        switch kind {
+        case .editProfile: return "edit_profile"
+        case .settings: return "settings"
+        case .posts: return "posts"
+        case .friends: return "friends"
+        case .workoutCalendar: return "workout_calendar"
+        case .statistics: return "statistics"
+        case .logout: return "logout"
         }
     }
 }
