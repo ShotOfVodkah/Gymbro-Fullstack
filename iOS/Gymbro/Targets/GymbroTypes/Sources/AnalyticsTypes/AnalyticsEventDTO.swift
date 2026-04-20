@@ -49,6 +49,20 @@ public extension AnalyticsEvent {
         case .workoutPremadeAdded: return "workout_premade_added"
         case .workoutCompleted: return "workout_completed"
         case .workoutGenerated: return "workout_generated"
+        case .workoutShareOpened: return "workout_share_opened"
+        case .workoutShareClosed: return "workout_share_closed"
+        case .workoutShareStepViewed: return "workout_share_step_viewed"
+        case .workoutShareStepNextTapped: return "workout_share_step_next_tapped"
+        case .workoutShareStepBackTapped: return "workout_share_step_back_tapped"
+        case .workoutShareFeedToggled: return "workout_share_feed_toggled"
+        case .workoutShareDestinationToggled: return "workout_share_destination_toggled"
+        case .workoutShareCaptionEdited: return "workout_share_caption_edited"
+        case .workoutShareLocationEdited: return "workout_share_location_edited"
+        case .workoutShareSubmitTapped: return "workout_share_submit_tapped"
+        case .workoutShareSubmitSucceeded: return "workout_share_submit_succeeded"
+        case .workoutShareSubmitFailed: return "workout_share_submit_failed"
+        case .workoutShareSuccessViewed: return "workout_share_success_viewed"
+        case .workoutShareDoneTapped: return "workout_share_done_tapped"
         case .userLoggedIn: return "user_logged_in"
         case .userLoggedOut: return "user_logged_out"
         case .userRegistered: return "user_registered"
@@ -110,6 +124,66 @@ public extension AnalyticsEvent {
             return ["workout_id": workoutId, "duration_seconds": "\(durationSeconds)", "exercise_count": "\(exerciseCount)"]
         case .workoutGenerated(let promptLength, let exerciseCount):
             return ["prompt_length": "\(promptLength)", "exercise_count": "\(exerciseCount)"]
+        case .workoutShareOpened(let sessionId):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "session_id": sessionId]
+        case .workoutShareClosed(let step, let selectedDestinationsCount):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "step": step,
+                    "selected_destinations_count": "\(selectedDestinationsCount)"]
+        case .workoutShareStepViewed(let step):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "step": step]
+        case .workoutShareStepNextTapped(let step):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "step": step]
+        case .workoutShareStepBackTapped(let step):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "step": step]
+        case .workoutShareFeedToggled(let isEnabled):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "is_enabled": "\(isEnabled)"]
+        case .workoutShareDestinationToggled(let kind, let isSelected, let selectedCount):
+            return [
+                "screen": AnalyticsScreen.workoutShare.rawValue,
+                "kind": kind,
+                "is_selected": "\(isSelected)",
+                "selected_count": "\(selectedCount)"
+            ]
+        case .workoutShareCaptionEdited(let length):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "length": "\(length)"]
+        case .workoutShareLocationEdited(let isFilled):
+            return ["screen": AnalyticsScreen.workoutShare.rawValue, "is_filled": "\(isFilled)"]
+        case .workoutShareSubmitTapped(
+            let publishToFeed,
+            let existingChatsCount,
+            let directUsersCount,
+            let hasCaption,
+            let hasLocation
+        ):
+            return [
+                "screen": AnalyticsScreen.workoutShare.rawValue,
+                "publish_to_feed": "\(publishToFeed)",
+                "existing_chats_count": "\(existingChatsCount)",
+                "direct_users_count": "\(directUsersCount)",
+                "has_caption": "\(hasCaption)",
+                "has_location": "\(hasLocation)"
+            ]
+        case .workoutShareSubmitSucceeded(let createdPost, let deliveredChatsCount, let createdChatsCount):
+            return [
+                "screen": AnalyticsScreen.workoutShare.rawValue,
+                "created_post": "\(createdPost)",
+                "delivered_chats_count": "\(deliveredChatsCount)",
+                "created_chats_count": "\(createdChatsCount)"
+            ]
+        case .workoutShareSubmitFailed(let message):
+            return [
+                "screen": AnalyticsScreen.workoutShare.rawValue,
+                "message": message
+            ]
+        case .workoutShareSuccessViewed(let createdPost, let deliveredChatsCount, let createdChatsCount):
+            return [
+                "screen": AnalyticsScreen.workoutShare.rawValue,
+                "created_post": "\(createdPost)",
+                "delivered_chats_count": "\(deliveredChatsCount)",
+                "created_chats_count": "\(createdChatsCount)"
+            ]
+        case .workoutShareDoneTapped:
+            return ["screen": AnalyticsScreen.workoutShare.rawValue]
         case .userLoggedIn, .userLoggedOut, .userRegistered:
             return [:]
         case .feedsTabSelected(let tab):

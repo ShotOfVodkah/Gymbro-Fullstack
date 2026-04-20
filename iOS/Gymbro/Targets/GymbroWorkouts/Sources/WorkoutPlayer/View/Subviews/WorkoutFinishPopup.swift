@@ -2,6 +2,9 @@ import SwiftUI
 import GymbroCommonUI
 
 struct WorkoutFinishPopup: View {
+    @Binding var isPresented: Bool
+    var onSaveOnly: () -> Void
+    var onShareWorkout: () -> Void
 
     var body: some View {
         ZStack {
@@ -19,9 +22,6 @@ struct WorkoutFinishPopup: View {
             }
         }
     }
-    
-    @Binding var isPresented: Bool
-    var onDone: () -> Void
 
     private var popupCard: some View {
         VStack(spacing: 0) {
@@ -35,37 +35,34 @@ struct WorkoutFinishPopup: View {
                     .foregroundColor(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
             }
-            .padding(.bottom, 20)
+            .padding(.bottom, 24)
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 10) {
-                    ForEach(Self.mockFriends) { friend in
-                        FriendActivityCard(friend: friend)
-                    }
-                }
+            VStack(spacing: 12) {
+                AppButton(
+                    String(localized: "workout.finish.action_save_only", bundle: .module),
+                    size: .xl,
+                    action: onSaveOnly,
+                    wrapContent: false
+                )
+
+                AppButton(
+                    String(localized: "workout.finish.action_share", bundle: .module),
+                    size: .xl,
+                    action: onShareWorkout,
+                    wrapContent: false
+                )
             }
-            .frame(maxHeight: 220)
-
-            AppButton(String(localized: "workout.finish.action_done", bundle: .module), size: .xl, action: onDone, wrapContent: false)
-                .padding(.top, 24)
         }
         .padding(.vertical, 32)
         .padding(.horizontal, 24)
         .frame(maxWidth: 400)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(.black))
+                .fill(Color.black)
                 .shadow(color: .black.opacity(0.4), radius: 24, x: 0, y: 12)
         )
         .padding(.horizontal, 24)
     }
-    
-    @State private var opacity: Double = 0.0
 
-    private static let mockFriends: [FriendActivity] = [
-        FriendActivity(id: "1", name: "Alex R.", workoutName: "Chest Day"),
-        FriendActivity(id: "2", name: "Maria K.", workoutName: "Morning Cardio"),
-        FriendActivity(id: "3", name: "Denis P.", workoutName: "Leg Day"),
-        FriendActivity(id: "4", name: "Sofya M.", workoutName: "Full Body"),
-    ]
+    @State private var opacity: Double = 0.0
 }

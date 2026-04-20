@@ -59,6 +59,25 @@ public enum AnalyticsEvent {
     case settingsToggleChanged(itemId: String, isOn: Bool)
     case profileStatisticsScreenViewed(isOwnProfile: Bool)
     case statisticsChartSelected(chartKind: String, selectionId: String)
+    
+    case workoutShareOpened(sessionId: String)
+    case workoutShareClosed(step: String, selectedDestinationsCount: Int)
+
+    case workoutShareStepViewed(step: String)
+    case workoutShareStepNextTapped(step: String)
+    case workoutShareStepBackTapped(step: String)
+
+    case workoutShareFeedToggled(isEnabled: Bool)
+    case workoutShareDestinationToggled(kind: String, isSelected: Bool, selectedCount: Int)
+
+    case workoutShareCaptionEdited(length: Int)
+    case workoutShareLocationEdited(isFilled: Bool)
+
+    case workoutShareSubmitTapped(publishToFeed: Bool, existingChatsCount: Int, directUsersCount: Int, hasCaption: Bool, hasLocation: Bool)
+    case workoutShareSubmitSucceeded(createdPost: Bool, deliveredChatsCount: Int, createdChatsCount: Int)
+    case workoutShareSubmitFailed(message: String)
+    case workoutShareSuccessViewed(createdPost: Bool, deliveredChatsCount: Int, createdChatsCount: Int)
+    case workoutShareDoneTapped
 
     case errorOccurred(screen: String, message: String)
     case errorRetryTapped(screen: String)
@@ -71,6 +90,7 @@ public enum AnalyticsScreen: String {
     case workoutInfo
     case workoutPlayer
     case workoutGenerator
+    case workoutShare = "workout_share"
     case feedsMain
     case feedsPeople
     case feedsChat

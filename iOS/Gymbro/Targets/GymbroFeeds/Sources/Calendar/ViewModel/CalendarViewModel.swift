@@ -18,7 +18,6 @@ final class FeedsCalendarViewModel: ObservableObject {
     @Published var availablePeople: [CalendarPerson] = []
     @Published var days: [CalendarDayItem] = []
     @Published var selectedDayForActions: CalendarDayItem?
-    @Published var isShowingDayWorkoutChoices: Bool = false
     
     private let input: CalendarScreenInput
     private let router: any Router
@@ -54,6 +53,7 @@ final class FeedsCalendarViewModel: ObservableObject {
     func didTapPreviousMonth() {
         guard let previous = Calendar.current.date(byAdding: .month, value: -1, to: currentMonthDate) else { return }
         currentMonthDate = previous
+        selectedDayForActions = nil
         analytics.track(.calendarMonthChanged(direction: "prev"))
         Task {
             await reloadMonthOnly()
@@ -63,6 +63,7 @@ final class FeedsCalendarViewModel: ObservableObject {
     func didTapNextMonth() {
         guard let next = Calendar.current.date(byAdding: .month, value: 1, to: currentMonthDate) else { return }
         currentMonthDate = next
+        selectedDayForActions = nil
         analytics.track(.calendarMonthChanged(direction: "next"))
         Task {
             await reloadMonthOnly()
@@ -71,49 +72,64 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     func didSelectPerson(_ person: CalendarPerson) {
         selectedPerson = person
+        selectedDayForActions = nil
         analytics.track(.calendarPersonSelected(personId: person.id))
         Task {
             await reloadMonthOnly()
         }
     }
     
-    func openMyWorkoutFromSelectedDay() {
-        guard let workoutID = selectedDayForActions?.myWorkoutID else { return }
-        router.navigate(to: .workoutInfo(id: workoutID, type: .session))
-        analytics.track(.calendarMyWorkoutOpened)
-    }
-
-    func openPartnerWorkoutFromSelectedDay() {
-        guard let workoutID = selectedDayForActions?.partnerWorkoutID else { return }
-        router.navigate(to: .workoutInfo(id: workoutID, type: .session))
-        analytics.track(.calendarPartnerWorkoutOpened)
+    func openWorkout(_ workout: CalendarWorkoutPreview, owner: CalendarWorkoutOwner) {
+        selectedDayForActions = nil
+        rebuildSelection()
+        router.navigate(to: .workoutInfo(id: workout.id, type: .session))
+        
+        switch owner {
+        case .mine:
+            analytics.track(.calendarMyWorkoutOpened)
+        case .partner:
+            analytics.track(.calendarPartnerWorkoutOpened)
+        }
     }
 
     func clearDayWorkoutChoices() {
         selectedDayForActions = nil
+        rebuildSelection()
     }
     
     func didTapDay(_ day: CalendarDayItem) {
-        let hasMy = day.myWorkoutID != nil
-        let hasPartner = day.partnerWorkoutID != nil
-
+        let hasMy = !day.myWorkouts.isEmpty
+        let hasPartner = !day.partnerWorkouts.isEmpty
+        
         analytics.track(.calendarDayTapped(hasMyWorkout: hasMy, hasPartnerWorkout: hasPartner))
-
-        if hasMy && hasPartner {
+        
+        guard hasMy || hasPartner else {
+            selectedDayForActions = nil
+            rebuildSelection()
+            return
+        }
+        
+        if selectedDayForActions?.date == day.date {
+            selectedDayForActions = nil
+        } else {
             selectedDayForActions = day
-            isShowingDayWorkoutChoices = true
-            return
         }
         
-        if let partnerWorkoutID = day.partnerWorkoutID {
-            analytics.track(.calendarPartnerWorkoutOpened)
-            router.navigate(to: .workoutInfo(id: partnerWorkoutID, type: .session))
-            return
-        }
-        
-        if let myWorkoutID = day.myWorkoutID {
-            analytics.track(.calendarMyWorkoutOpened)
-            router.navigate(to: .workoutInfo(id: myWorkoutID, type: .session))
+        rebuildSelection()
+    }
+    
+    private func rebuildSelection() {
+        let selectedDate = selectedDayForActions?.date
+        days = days.map { day in
+            CalendarDayItem(
+                date: day.date,
+                dayNumber: day.dayNumber,
+                isInCurrentMonth: day.isInCurrentMonth,
+                myWorkouts: day.myWorkouts,
+                partnerWorkouts: day.partnerWorkouts,
+                isToday: day.isToday,
+                isSelected: selectedDate == day.date
+            )
         }
     }
     
@@ -165,8 +181,8 @@ final class FeedsCalendarViewModel: ObservableObject {
     }
 
     private func rebuildCalendar(
-        myWorkoutMap: [Date: String],
-        selectedPersonWorkoutMap: [Date: String]
+        myWorkoutMap: [Date: [CalendarWorkoutPreview]],
+        selectedPersonWorkoutMap: [Date: [CalendarWorkoutPreview]]
     ) {
         guard let monthInterval = calendar.dateInterval(of: .month, for: currentMonthDate),
               let firstWeekInterval = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start),
@@ -187,20 +203,19 @@ final class FeedsCalendarViewModel: ObservableObject {
             
             let normalizedDate = calendar.startOfDay(for: cursor)
             
-            let myWorkoutID = myWorkoutMap[normalizedDate]
-            let partnerWorkoutID = selectedPersonWorkoutMap[normalizedDate]
+            let myWorkouts = myWorkoutMap[normalizedDate] ?? []
+            let partnerWorkouts = selectedPersonWorkoutMap[normalizedDate] ?? []
+            let isSelected = selectedDayForActions?.date == normalizedDate
             
             result.append(
                 CalendarDayItem(
                     date: normalizedDate,
                     dayNumber: dayNumber,
                     isInCurrentMonth: isInCurrentMonth,
-                    hasMyWorkout: myWorkoutID != nil,
-                    myWorkoutID: myWorkoutID,
-                    hasPartnerWorkout: partnerWorkoutID != nil,
-                    partnerWorkoutID: partnerWorkoutID,
+                    myWorkouts: myWorkouts,
+                    partnerWorkouts: partnerWorkouts,
                     isToday: isToday,
-                    isSelected: false
+                    isSelected: isSelected
                 )
             )
             

@@ -20,17 +20,16 @@ struct FeedsProfilePostsView: View {
                     contentView
                     
                 case .error:
-                    VStack(alignment: .center, spacing: 16) {
-                        Text("Something went wrong, oopsie...")
+                    VStack(alignment: .center) {
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.white)
                         
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.reload()
                         }
                     }
                     .padding(.horizontal, 40)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
             }
         }
@@ -45,7 +44,7 @@ struct FeedsProfilePostsView: View {
                     PostCardView(
                         post: post,
                         mode: .exerciseOnly,
-                        onExerciseTap: { _ in }
+                        onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) }
                     )
                 }
             }

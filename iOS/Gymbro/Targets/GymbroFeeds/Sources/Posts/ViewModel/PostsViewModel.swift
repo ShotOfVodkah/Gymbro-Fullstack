@@ -51,8 +51,13 @@ final class FeedsProfilePostsViewModel: ObservableObject {
         }
     }
     
-    func didTapAuthor(_ post: FeedPost) {
-        guard let userID = Int(post.authorID) else { return }
-        router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+    func didTapExercise(_ exercise: ExerciseItem, in post: FeedPost) {
+        guard let sessionID = post.sessionID else { return }
+        router.navigate(to: .workoutInfo(id: sessionID, type: .session))
     }
+    
+//    func didTapAuthor(_ post: FeedPost) {
+//        guard let userID = Int(post.authorID) else { return }
+//        router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
+//    }
 }

@@ -266,8 +266,16 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
     
-    func didTapExercise(_ exercise: ExerciseItem) {
-        print("workout info")
+    func didTapExercise(_ exercise: ExerciseItem, in post: FeedPost) {
+        guard let sessionID = post.sessionID else { return }
+        print(sessionID)
+        router.navigate(to: .workoutInfo(id: sessionID, type: .session))
+    }
+    
+    func didTapShowAllExercises(in post: FeedPost) {
+        guard let sessionID = post.sessionID else { return }
+        print(sessionID)
+        router.navigate(to: .workoutInfo(id: sessionID, type: .session))
     }
     
     func toggleLike(for postID: String) {

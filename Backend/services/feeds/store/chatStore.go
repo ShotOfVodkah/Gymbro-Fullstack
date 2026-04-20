@@ -560,3 +560,26 @@ func nullableString(v string) *string {
 	s := v
 	return &s
 }
+
+func (cs *ChatStore) FindOrCreateDirectCommunity(userA, userB int) (*Community, bool, error) {
+	community, err := cs.FindDirectCommunityBetweenUsers(userA, userB)
+	if err == nil {
+		return community, false, nil
+	}
+	if !errors.Is(err, ErrNotFound) {
+		return nil, false, fmt.Errorf("FindOrCreateDirectCommunity find: %w", err)
+	}
+
+	directTitle := "Direct chat"
+
+	community, err = cs.CreateCommunity("direct", &directTitle, nil, userA)
+	if err != nil {
+		return nil, false, fmt.Errorf("FindOrCreateDirectCommunity create: %w", err)
+	}
+
+	if err := cs.AddCommunityMembers(community.ID, []int{userA, userB}); err != nil {
+		return nil, false, fmt.Errorf("FindOrCreateDirectCommunity add members: %w", err)
+	}
+
+	return community, true, nil
+}

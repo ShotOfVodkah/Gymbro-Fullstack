@@ -93,6 +93,8 @@ final class AppServicesFactory {
             makeWorkoutGeneratorScreen()
         
             // feeds
+        case .workoutShare(input: let input):
+            makeWorkoutsShareScreen(input: input)
         case .feedsPeople(let input):
             makeFeedsPeopleScreen(input: input)
         case .feedsCalendar(let context):
@@ -188,8 +190,6 @@ final class AppServicesFactory {
         )
     }
     
-    // Feeds
-    
     @MainActor
     func makeWorkoutGeneratorScreen() -> some View {
         screenFactories.workoutGeneratorFactory.makeView(
@@ -198,6 +198,18 @@ final class AppServicesFactory {
             actionsRepository: actionsRepository,
             workoutsRepository: workoutsRepository,
             client: AppMicroservices.workouts,
+            analytics: analytics
+        )
+    }
+    
+    // Feeds
+    
+    @MainActor
+    func makeWorkoutsShareScreen(input: WorkoutShareInput) -> some View {
+        screenFactories.workoutsShareFactory.makeView(
+            input: input,
+            router: router,
+            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -311,6 +323,7 @@ private struct ScreenFactories {
     
     // Feeds factories
     
+    lazy var workoutsShareFactory = WorkoutShareFactoryImpl()
     lazy var feedsMainTabFactory = FeedsMainTabFactoryImpl()
     lazy var feedsPeopleFactory = FeedsPeopleFactoryImpl()
     lazy var feedsCalendarFactory = FeedsCalendarFactoryImpl()

@@ -89,9 +89,8 @@ struct FeedsMainTabView: View {
                             onAuthorTap: { viewModel.didTapAuthor(post) },
                             onLikeTap: { viewModel.toggleLike(for: post.id) },
                             onCommentTap: { viewModel.didTapComments(for: post) },
-                            onExerciseTap: { exercise in
-                                viewModel.didTapExercise(exercise)
-                            }
+                            onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) },
+                            onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) }
                         )
                     }
                 }
