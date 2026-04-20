@@ -1,41 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%@" : {
-
-    },
-    "%@ workouts" : {
-
-    },
-    "%@/%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@/%2$@"
-          }
-        }
-      }
-    },
-    "%@%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@%2$@"
-          }
-        }
-      }
-    },
-    "• %@" : {
-
-    },
-    "Monthly Trend" : {
-
-    },
-    "Profile saved" : {
-
-    },
     "profile.loading" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -103,18 +68,6 @@
           }
         }
       }
-    },
-    "Something went wrong, oopsie..." : {
-
-    },
-    "Weekly Activity" : {
-
-    },
-    "Year summary" : {
-
-    },
-    "Your changes will be lost." : {
-
     }
   },
   "version" : "1.0"

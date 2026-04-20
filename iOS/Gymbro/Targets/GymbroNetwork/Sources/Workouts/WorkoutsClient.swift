@@ -224,7 +224,7 @@ public final class WorkoutsClient {
         workoutId: String,
         completedAt: String = ISO8601DateFormatter().string(from: Date()),
         exercises: [WorkoutExerciseRequest]
-    ) async throws {
+    ) async throws -> WorkoutSessionResponse {
         let userId = try requireUserId()
         let body = CreateSessionRequest(
             id: UUID().uuidString,
@@ -233,11 +233,13 @@ public final class WorkoutsClient {
             completedAt: completedAt,
             exercises: exercises
         )
-        try await client.requestVoid(
+
+        return try await client.request(
             method: .POST,
             path: "sessions",
             body: body,
-            requiresAuth: true
+            requiresAuth: true,
+            responseType: WorkoutSessionResponse.self
         )
     }
 

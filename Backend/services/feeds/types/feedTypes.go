@@ -137,10 +137,35 @@ type FeedLikeResponse struct {
 	IsLiked    bool   `json:"is_liked" db:"is_liked"`
 }
 
+type CreateFeedPostResponse struct {
+	ID                   string                `json:"id"`
+	Author               FeedAuthorPreview     `json:"author"`
+	Community            *FeedCommunityPreview `json:"community,omitempty"`
+	Workout              *FeedWorkoutPreview   `json:"workout,omitempty"`
+	Description          string                `json:"description"`
+	Location             *string               `json:"location,omitempty"`
+	CreatedAt            time.Time             `json:"created_at"`
+	LikesCount           int                   `json:"likes_count"`
+	CommentsCount        int                   `json:"comments_count"`
+	IsLiked              bool                  `json:"is_liked"`
+	Kind                 string                `json:"kind"`
+	IsFromFollowing      bool                  `json:"is_from_following"`
+	IsFromDirectChat     bool                  `json:"is_from_direct_chat"`
+	IsFromGroupCommunity bool                  `json:"is_from_group_community"`
+
+}
+
 type SessionPreviewBatchRequest struct {
 	IDs []string `json:"ids"`
 }
 
 type CreateFeedCommentRequest struct {
 	Text string `json:"text"`
+}
+
+type CreateFeedPostRequest struct {
+	SessionID   string  `json:"session_id"`
+	Description string  `json:"description"`
+	Location    *string `json:"location,omitempty"`
+	CommunityID *string `json:"community_id,omitempty"`
 }

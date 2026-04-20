@@ -7,6 +7,8 @@ import (
 
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/handlers"
+	"github.com/alexandra-gritsaenko/gymbro-feeds/handlers/chats"
+	"github.com/alexandra-gritsaenko/gymbro-feeds/handlers/feeds"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -48,10 +50,10 @@ func main() {
 	peopleStore := store.NewPeopleStore(db)
 	chatStore := store.NewChatStore(db)
 
-	feedH := handlers.NewFeedHandler(feedStore, workoutsClient, profileClient)
+	feedH := feeds.NewFeedHandler(feedStore, chatStore, workoutsClient, profileClient)
 	calendarH := handlers.NewCalendarHandler(calendarStore, profileClient, workoutsCalendarClient)
 	peopleH := handlers.NewPeopleHandler(peopleStore, profileClient)
-	chatH := handlers.NewChatHandler(chatStore, profileClient, workoutsClient)
+	chatH := chats.NewChatHandler(chatStore, profileClient, workoutsClient)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	mux := http.NewServeMux()
@@ -75,6 +77,8 @@ func main() {
 	mux.Handle("/chats/group", authMiddleware(chatH))
 	mux.Handle("/chats/", authMiddleware(chatH))
 	mux.Handle("/messages/", authMiddleware(chatH))
+
+	mux.Handle("/shares/workout", authMiddleware(feedH))
 
 	log.Println("feeds service listening on :8083")
 	log.Fatal(http.ListenAndServe(":8083", mux))

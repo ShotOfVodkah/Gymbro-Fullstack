@@ -89,10 +89,18 @@ struct WorkoutPlayerView: View {
                 })
             )
         )
+        .customAlert(
+            isPresented: $viewModel.showFinishMessage,
+            data: CustomAlertData(
+                message: viewModel.finishMessage,
+                primaryButton: AppButton("OK", action: { viewModel.showFinishMessage = false })
+            )
+        )
         .overlay {
             WorkoutFinishPopup(
                 isPresented: $viewModel.showFinishPopup,
-                onDone: { viewModel.finishWorkout() }
+                onSaveOnly: { viewModel.finishWorkout(action: .saveOnly) },
+                onShareWorkout: { viewModel.finishWorkout(action: .shareWorkout) }
             )
         }
         .overlay {

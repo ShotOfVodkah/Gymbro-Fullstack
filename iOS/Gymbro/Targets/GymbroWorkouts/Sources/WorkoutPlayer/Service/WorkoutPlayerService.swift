@@ -11,7 +11,7 @@ protocol WorkoutPlayerService {
         workoutType: WorkoutType,
         exercises: [ExerciseItem],
         weightUpdates: [String: Double]
-    ) async
+    ) async -> WorkoutCompletionResult
 }
 
 final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
@@ -52,7 +52,7 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
         workoutType: WorkoutType,
         exercises: [ExerciseItem],
         weightUpdates: [String: Double]
-    ) async {
+    ) async -> WorkoutCompletionResult {
         let sessionExercises: [WorkoutExerciseRequest] = exercises.map { item in
             switch item {
             case .strength(let e):
@@ -80,10 +80,17 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
             }
         }
 
+        let completionResult: WorkoutCompletionResult
+
         do {
-            try await client.createSession(workoutId: workoutId, exercises: sessionExercises)
+            let sessionResponse = try await client.createSession(
+                workoutId: workoutId,
+                exercises: sessionExercises
+            )
+            completionResult = .completed(session: CompletedSession(response: sessionResponse))
         } catch {
             actionsRepository.enqueueSmart(.completedWorkout(id: workoutId, exercises: sessionExercises))
+            completionResult = .queuedOffline
         }
 
         let updatedExercises: [any Exercise] = exercises.map { item in
@@ -91,21 +98,34 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
             case .strength(let e):
                 let w = weightUpdates[e.id] ?? e.weightKg
                 return StrengthExercise(
-                    id: e.id, name: e.name, muscleGroup: e.muscleGroup,
-                    sets: e.sets, reps: e.reps, weightKg: w
+                    id: e.id,
+                    name: e.name,
+                    muscleGroup: e.muscleGroup,
+                    sets: e.sets,
+                    reps: e.reps,
+                    weightKg: w
                 )
             default:
                 return item.exercise
             }
         }
-        let workout = Workout(id: workoutId, name: workoutName, type: workoutType,
-                              exercises: updatedExercises)
+
+        let workout = Workout(
+            id: workoutId,
+            name: workoutName,
+            type: workoutType,
+            exercises: updatedExercises
+        )
+
         workoutsRepository.upsertWorkout(key: "user", workout: workout)
+
         do {
             try await client.editWorkout(workout)
         } catch {
             actionsRepository.enqueueSmart(.editedWorkout(workout: WorkoutDTO(from: workout)))
         }
+
+        return completionResult
     }
 
     private let client: WorkoutsClient

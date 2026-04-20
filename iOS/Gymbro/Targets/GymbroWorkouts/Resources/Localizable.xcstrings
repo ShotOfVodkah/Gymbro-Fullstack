@@ -1,12 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "·" : {
-
-    },
-    "%@" : {
-
-    },
     "workout.available_exercises" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -415,19 +409,53 @@
         }
       }
     },
+    "workout.finish.action_save_only" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save only"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить"
+          }
+        }
+      }
+    },
+    "workout.finish.action_share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поделиться"
+          }
+        }
+      }
+    },
     "workout.finish.subtitle" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You crushed it! Choose friends to share with:"
+            "value" : "You crushed it! Choose next actions:"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Отлично! Выберите друзей, чтобы поделиться:"
+            "state" : "needs_review",
+            "value" : "Отлично! Выберите дальнейшие действия:"
           }
         }
       }

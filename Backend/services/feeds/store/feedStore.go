@@ -320,3 +320,60 @@ func (ps *PeopleStore) ListFollowingIDsForUserAny(userID int) ([]int, error) {
 	}
 	return ids, nil
 }
+
+func (fs *FeedStore) InsertPost(authorID int, sessionID string, description string, location *string, communityID *string, kind string,) (*types.FeedPostRow, error) {
+	query := `
+		INSERT INTO posts (
+			id,
+			author_id,
+			community_id,
+			session_id,
+			kind,
+			description,
+			location,
+			created_at
+		)
+		VALUES (
+			gen_random_uuid(),
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			NOW()
+		)
+		RETURNING
+			id,
+			author_id::text AS author_id,
+			community_id,
+			NULL::text AS community_title,
+			session_id,
+			kind,
+			description,
+			location,
+			created_at,
+			0 AS likes_count,
+			0 AS comments_count,
+			false AS is_liked,
+			false AS is_from_following,
+			false AS is_from_direct_chat,
+			false AS is_from_group_community
+	`
+
+	var row types.FeedPostRow
+	if err := fs.db.Get(
+		&row,
+		query,
+		authorID,
+		communityID,
+		sessionID,
+		kind,
+		description,
+		location,
+	); err != nil {
+		return nil, fmt.Errorf("InsertPost: %w", err)
+	}
+
+	return &row, nil
+}

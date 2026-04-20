@@ -267,6 +267,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     func didTapExercise(_ exercise: ExerciseItem) {
+//        router.navigate(to: .workoutInfo(id: workoutID, type: .session))
         print("workout info")
     }
     

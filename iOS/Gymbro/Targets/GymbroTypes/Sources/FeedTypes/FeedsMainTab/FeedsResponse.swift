@@ -52,13 +52,31 @@ public struct FeedPostItemResponse: Decodable {
 }
 
 public struct FeedCommunityItemResponse: Decodable {
-    let id: String
-    let title: String
-    let display_title: String
-    let kind: String
-    let icon: String
-    let is_system_image: Bool
-    let members_count: Int
+    public let id: String
+    public let title: String
+    public let display_title: String
+    public let kind: String
+    public let icon: String
+    public let is_system_image: Bool
+    public let members_count: Int
+
+    public init(
+        id: String,
+        title: String,
+        display_title: String,
+        kind: String,
+        icon: String,
+        is_system_image: Bool,
+        members_count: Int
+    ) {
+        self.id = id
+        self.title = title
+        self.display_title = display_title
+        self.kind = kind
+        self.icon = icon
+        self.is_system_image = is_system_image
+        self.members_count = members_count
+    }
 }
 
 public struct FeedCommentResponse: Decodable {

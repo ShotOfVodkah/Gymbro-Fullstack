@@ -69,7 +69,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
         weightUpdates[exerciseId] = weight
     }
 
-    func finishWorkout() {
+    func finishWorkout(action: WorkoutFinishAction) {
         guard !isSubmitting else { return }
         isSubmitting = true
         let id = workoutId
@@ -78,7 +78,7 @@ final class WorkoutPlayerViewModel: ObservableObject {
         let exerciseCount = exercises.count
         let startTime = workoutStartTime
         Task {
-            await service.submitSession(
+            let result = await service.submitSession(
                 workoutId: id,
                 workoutName: name,
                 workoutType: type,
@@ -94,7 +94,28 @@ final class WorkoutPlayerViewModel: ObservableObject {
             isSubmitting = false
             showFinishPopup = false
             modelModifier.events.send(.workoutEdited(id: id))
-            router.popToRoot()
+            switch result {
+            case .completed(let session):
+                switch action {
+                case .saveOnly:
+                    router.popToRoot()
+                    
+                case .shareWorkout:
+                    let input = WorkoutShareInput(session: session, workoutName: name, workoutType: type)
+                    router.navigate(to: .workoutShare(input: input))
+                }
+                
+            case .queuedOffline:
+                switch action {
+                case .saveOnly:
+                    finishMessage = "Workout saved locally."
+                case .shareWorkout:
+                    finishMessage = "Workout saved locally. Sharing is now unavailable."
+                }
+                showFinishMessage = true
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                router.popToRoot()
+            }
         }
     }
 
@@ -106,6 +127,8 @@ final class WorkoutPlayerViewModel: ObservableObject {
     @Published var showAlert = false
     @Published var showFinishPopup = false
     @Published private(set) var isSubmitting = false
+    @Published var showFinishMessage = false
+    @Published var finishMessage: String = ""
 
     // MARK: - helpers
 

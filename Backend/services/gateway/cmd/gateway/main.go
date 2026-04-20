@@ -54,8 +54,10 @@ func main() {
 		{Prefix: "/chats", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
 		{Prefix: "/messages", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
 		{Prefix: "/posts", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
+		{Prefix: "/shares", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
 
 		{Prefix: "/profiles", EnvKey: "PROFILE_URL", Default: "http://profile_service:8084"},
+
 		{Prefix: "/ai", EnvKey: "AI_URL", Default: "http://ai_service:8085"},
 	}
 

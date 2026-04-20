@@ -99,6 +99,7 @@ services:
       - postgres_profile
     expose:
       - "8084"
+
   ai_service:
     build:
       context: ..

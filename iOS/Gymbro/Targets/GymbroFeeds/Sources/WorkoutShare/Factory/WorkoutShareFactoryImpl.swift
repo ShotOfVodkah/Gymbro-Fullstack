@@ -1,0 +1,27 @@
+import Foundation
+import SwiftUI
+import GymbroNavigation
+import GymbroNetwork
+import GymbroTypes
+
+public final class WorkoutShareFactoryImpl {
+    
+    public init() {}
+
+    @MainActor
+    public func makeView(
+        input: WorkoutShareInput,
+        router: any Router,
+        client: FeedsClient,
+        analytics: any AnalyticsService
+    ) -> some View {
+        let service = WorkoutShareServiceImpl(feedsClient: client)
+        let viewModel = WorkoutShareViewModel(
+            input: input,
+            router: router,
+            service: service,
+            analytics: analytics
+        )
+        return WorkoutShareView(viewModel: viewModel)
+    }
+}
