@@ -105,7 +105,7 @@ public extension AnalyticsEvent {
         case .profileEditSaved: return "profile_edit_saved"
         case .settingsRowOpened: return "settings_row_opened"
         case .settingsToggleChanged: return "settings_toggle_changed"
-        case .profileStatisticsScreenViewed: return "screen_viewed"
+        case .profileStatisticsScreenViewed: return "statistics_screen_viewed"
         case .statisticsChartSelected: return "statistics_chart_selected"
         case .errorOccurred: return "error_occurred"
         case .errorRetryTapped: return "error_retry_tapped"

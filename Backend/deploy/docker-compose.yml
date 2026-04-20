@@ -106,18 +106,43 @@ services:
     expose:
       - "8084"
 
-  ai_service:
-    build:
-      context: ../services/ai_service
-      dockerfile: Dockerfile
-    container_name: ai_service
+  # ai_service:
+  #   build:
+  #     context: ../services/ai_service
+  #     dockerfile: Dockerfile
+  #   container_name: ai_service
+  #   environment:
+  #     JWT_SECRET: "supersecret_noone_will_get_out"
+  #     LLAMA_N_THREADS: "4"
+  #   expose:
+  #     - "8085"
+  #   mem_limit: "8g"
+  #   memswap_limit: "8g"
+
+  postgres_analytics:
+    image: postgres:14
+    container_name: postgres_analytics
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_analytics
+    volumes:
+      - pg_analytics_data:/var/lib/postgresql/data
+
+  analytics_service:
+    build:
+      context: ..
+      dockerfile: deploy/analytics.Dockerfile
+    container_name: analytics_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_analytics:5432/gymbro_analytics?sslmode=disable"
       JWT_SECRET: "supersecret_noone_will_get_out"
-      LLAMA_N_THREADS: "4"
+      PGHOST: postgres_analytics
+      PGPORT: 5432
+    depends_on:
+      - postgres_analytics
     expose:
-      - "8085"
-    mem_limit: "8g"
-    memswap_limit: "8g"
+      - "8086"
 
   gateway:
     build:
@@ -129,13 +154,15 @@ services:
       WORKOUTS_URL: "http://workouts_service:8082"
       FEEDS_URL: "http://feeds_service:8083"
       PROFILE_URL: "http://profile_service:8084"
-      AI_URL: "http://ai_service:8085"
+      # AI_URL: "http://ai_service:8085"
+      ANALYTICS_URL: "http://analytics_service:8086"
     depends_on:
       - auth_service
       - workouts_service
       - feeds_service
       - profile_service
-      - ai_service
+      # - ai_service
+      - analytics_service
     ports:
       - "8080:8080"
 
@@ -144,3 +171,4 @@ volumes:
   pg_workouts_data:
   pg_feeds_data:
   pg_profile_data:
+  pg_analytics_data:
