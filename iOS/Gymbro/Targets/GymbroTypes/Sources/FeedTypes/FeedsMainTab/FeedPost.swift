@@ -3,6 +3,7 @@ import Foundation
 public struct FeedPost: Identifiable, Hashable {
     public let id: String
     public let serverID: String
+    public let sessionID: String?
     public let createdAt: Date
     
     public let authorID: String
@@ -32,6 +33,7 @@ public struct FeedPost: Identifiable, Hashable {
     public init(
         id: String,
         serverID: String,
+        sessionID: String?,
         createdAt: Date,
         authorID: String,
         authorName: String,
@@ -57,6 +59,7 @@ public struct FeedPost: Identifiable, Hashable {
         self.id = id
         self.serverID = serverID
         self.createdAt = createdAt
+        self.sessionID = sessionID
         self.authorID = authorID
         self.authorName = authorName
         self.authorAvatar = authorAvatar
@@ -90,6 +93,7 @@ extension FeedPost {
     public init(response: FeedPostItemResponse) {
         self.id = response.id
         self.serverID = response.id
+        self.sessionID = response.workout?.id
         self.createdAt = response.created_at
         self.authorID = response.author.id
         self.authorName = response.author.name

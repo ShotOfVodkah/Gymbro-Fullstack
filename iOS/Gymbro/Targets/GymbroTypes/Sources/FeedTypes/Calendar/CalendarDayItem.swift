@@ -6,11 +6,11 @@ public struct CalendarDayItem: Identifiable, Hashable {
     public let dayNumber: Int
     public let isInCurrentMonth: Bool
     
-    public let hasMyWorkout: Bool
-    public let myWorkoutID: String?
+    public var hasMyWorkout: Bool { !myWorkouts.isEmpty }
+    public let myWorkouts: [CalendarWorkoutPreview]
     
-    public let hasPartnerWorkout: Bool
-    public let partnerWorkoutID: String?
+    public var hasPartnerWorkout: Bool { !partnerWorkouts.isEmpty }
+    public let partnerWorkouts: [CalendarWorkoutPreview]
     
     public let isToday: Bool
     public let isSelected: Bool
@@ -20,10 +20,8 @@ public struct CalendarDayItem: Identifiable, Hashable {
         date: Date,
         dayNumber: Int,
         isInCurrentMonth: Bool,
-        hasMyWorkout: Bool = false,
-        myWorkoutID: String? = nil,
-        hasPartnerWorkout: Bool = false,
-        partnerWorkoutID: String? = nil,
+        myWorkouts: [CalendarWorkoutPreview],
+        partnerWorkouts: [CalendarWorkoutPreview],
         isToday: Bool = false,
         isSelected: Bool = false
     ) {
@@ -31,10 +29,8 @@ public struct CalendarDayItem: Identifiable, Hashable {
         self.date = date
         self.dayNumber = dayNumber
         self.isInCurrentMonth = isInCurrentMonth
-        self.hasMyWorkout = hasMyWorkout
-        self.myWorkoutID = myWorkoutID
-        self.hasPartnerWorkout = hasPartnerWorkout
-        self.partnerWorkoutID = partnerWorkoutID
+        self.myWorkouts = myWorkouts
+        self.partnerWorkouts = partnerWorkouts
         self.isToday = isToday
         self.isSelected = isSelected
     }

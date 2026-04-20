@@ -14,3 +14,8 @@ public enum CalendarContext: Hashable {
     case directChat(chatID: String, participantIDs: [String], initialPersonID: String?)
     case groupChat(chatID: String, groupID: String, initialPersonID: String?)
 }
+
+public enum CalendarWorkoutOwner {
+    case mine
+    case partner
+}

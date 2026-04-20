@@ -15,8 +15,8 @@ struct FeedsCalendarScreenData {
 
 struct FeedsCalendarMonthData {
     let monthTitle: String
-    let myWorkoutMap: [Date: String]
-    let partnerWorkoutMap: [Date: String]
+    let myWorkoutMap: [Date: [CalendarWorkoutPreview]]
+    let partnerWorkoutMap: [Date: [CalendarWorkoutPreview]]
 }
 
 final class FeedsCalendarServiceImpl: FeedsCalendarService {
@@ -99,17 +99,29 @@ final class FeedsCalendarServiceImpl: FeedsCalendarService {
         }
     }
     
-    private func makeWorkoutMap(from items: [CalendarWorkoutDayResponse]) -> [Date: String] {
+    private func makeWorkoutMap(from items: [CalendarWorkoutDayResponse]) -> [Date: [CalendarWorkoutPreview]] {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         
-        var result: [Date: String] = [:]
+        var result: [Date: [CalendarWorkoutPreview]] = [:]
+        
         for item in items {
-            guard let date = formatter.date(from: item.date) else { continue }
+            guard
+                let date = formatter.date(from: item.date),
+                let preview = CalendarWorkoutPreview(response: item)
+            else {
+                continue
+            }
+            
             let normalizedDate = calendar.startOfDay(for: date)
-            result[normalizedDate] = item.workout_id
+            result[normalizedDate, default: []].append(preview)
         }
+        
+        for key in result.keys {
+            result[key]?.sort { $0.completedAt < $1.completedAt }
+        }
+        
         return result
     }
 }

@@ -68,7 +68,10 @@ struct CalendarDayCellView: View {
     }
     
     private var textColor: Color {
-        if day.hasMyWorkout || day.hasPartnerWorkout || day.isSelected {
+        if day.isSelected {
+            return .white
+        }
+        if day.hasMyWorkout || day.hasPartnerWorkout {
             return .white
         }
         return .white.opacity(0.8)

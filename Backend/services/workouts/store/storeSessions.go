@@ -353,7 +353,15 @@ func (ss *SessionStore) ListCalendarSessionsByUserAndMonth(userID string, month 
 	query := `
 		SELECT
 			TO_CHAR(completed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS date,
-			id AS workout_id
+			id AS workout_id,
+			workout_name AS title,
+			workout_type AS category,
+			COALESCE((
+				SELECT SUM(COALESCE(e.duration_minutes, 0))
+				FROM workout_session_exercise_entries e
+				WHERE e.session_id = workout_sessions.id
+			), 0) AS duration_minutes,
+			TO_CHAR(completed_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS completed_at
 		FROM workout_sessions
 		WHERE user_id = $1
 		  AND TO_CHAR(completed_at AT TIME ZONE 'UTC', 'YYYY-MM') = $2

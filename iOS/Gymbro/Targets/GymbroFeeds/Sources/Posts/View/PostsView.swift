@@ -44,7 +44,7 @@ struct FeedsProfilePostsView: View {
                     PostCardView(
                         post: post,
                         mode: .exerciseOnly,
-                        onExerciseTap: { _ in }
+                        onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) }
                     )
                 }
             }

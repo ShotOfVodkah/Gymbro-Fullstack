@@ -33,27 +33,6 @@ struct FeedsCalendarView: View {
                 }
             }
         }
-        .confirmationDialog(
-            "Choose workout",
-            isPresented: $viewModel.isShowingDayWorkoutChoices,
-            titleVisibility: .visible
-        ) {
-            if viewModel.selectedDayForActions?.myWorkoutID != nil {
-                Button(String(localized: "feeds.calendar.action_my_workout", bundle: .module)) {
-                    viewModel.openMyWorkoutFromSelectedDay()
-                }
-            }
-            
-            if viewModel.selectedDayForActions?.partnerWorkoutID != nil {
-                Button(String(localized: "feeds.calendar.action_partner_workout", bundle: .module)) {
-                    viewModel.openPartnerWorkoutFromSelectedDay()
-                }
-            }
-            
-            Button(String(localized: "feeds.calendar.cancel", bundle: .module), role: .cancel) {
-                viewModel.clearDayWorkoutChoices()
-            }
-        }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -88,14 +67,24 @@ struct FeedsCalendarView: View {
                     )
                     
                     CalendarLegendView()
+                    
+                    if let selectedDay = viewModel.selectedDayForActions,
+                       !selectedDay.myWorkouts.isEmpty || !selectedDay.partnerWorkouts.isEmpty {
+                        CalendarWorkoutChoicesView(
+                            day: selectedDay,
+                            onWorkoutTap: viewModel.openWorkout(_:owner:),
+                            onCloseTap: viewModel.clearDayWorkoutChoices
+                        )
+                        .padding(.horizontal, -4)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
+                .animation(.spring(response: 0.32, dampingFraction: 0.86), value: viewModel.selectedDayForActions?.date)
                 .padding(18)
-                .background(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(Color.white.opacity(0.04))
-                )
+                .background(cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 28))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    RoundedRectangle(cornerRadius: 28)
                         .stroke(Color.white.opacity(0.06), lineWidth: 1)
                 )
                 .padding(.horizontal, 16)
@@ -105,6 +94,18 @@ struct FeedsCalendarView: View {
             .padding(.top, 12)
             .padding(.bottom, 24)
         }
+    }
+    
+    private var cardBackground: some View {
+        LinearGradient(
+            colors: [
+                Color(red: 18 / 255, green: 24 / 255, blue: 42 / 255),
+                Color(red: 19 / 255, green: 30 / 255, blue: 56 / 255)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .opacity(0.7)
     }
     
     private var backgroundView: some View {

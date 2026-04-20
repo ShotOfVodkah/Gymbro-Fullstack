@@ -14,7 +14,8 @@ struct PostCardView: View {
         onAuthorTap: @escaping () -> Void = {},
         onLikeTap: @escaping () -> Void = {},
         onCommentTap: @escaping () -> Void = {},
-        onExerciseTap: @escaping (ExerciseItem) -> Void
+        onExerciseTap: @escaping (ExerciseItem) -> Void,
+        onShowAllExercisesTap: @escaping () -> Void = {}
     ) {
         self.post = post
         self.mode = mode
@@ -22,6 +23,7 @@ struct PostCardView: View {
         self.onLikeTap = onLikeTap
         self.onCommentTap = onCommentTap
         self.onExerciseTap = onExerciseTap
+        self.onShowAllExercisesTap = onShowAllExercisesTap
     }
     
     var body: some View {
@@ -57,11 +59,13 @@ struct PostCardView: View {
                     }
                 }
                 
-                Text(post.description)
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.95))
-                    .fixedSize(horizontal: false, vertical: true)
-
+                if !post.description.isEmpty {
+                    Text(post.description)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.95))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                
                 Text(String(localized: "feeds.post.exercises", bundle: .module))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.7))
@@ -79,7 +83,7 @@ struct PostCardView: View {
                     
                     if post.totalExercisesCount > 2 {
                         Button {
-                            print("Mock: show all exercises")
+                            onShowAllExercisesTap()
                         } label: {
                             Text(String(localized: "feeds.post.show_all", bundle: .module))
                                 .font(.system(size: 15, weight: .semibold))
@@ -134,4 +138,5 @@ struct PostCardView: View {
     private let onLikeTap: () -> Void
     private let onCommentTap: () -> Void
     private let onExerciseTap: (ExerciseItem) -> Void
+    private let onShowAllExercisesTap: () -> Void
 }

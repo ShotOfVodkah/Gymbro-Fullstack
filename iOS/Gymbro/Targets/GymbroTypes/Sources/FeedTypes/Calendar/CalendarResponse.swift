@@ -8,7 +8,11 @@ public struct CalendarPersonResponse: Decodable {
 
 public struct CalendarWorkoutDayResponse: Decodable {
     public let date: String
-    public let workout_id: String
+    let workout_id: String
+    let title: String
+    let category: String
+    let duration_minutes: Int
+    let completed_at: String
 }
 
 public struct CalendarMonthResponse: Decodable {
