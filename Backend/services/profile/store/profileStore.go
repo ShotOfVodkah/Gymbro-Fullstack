@@ -12,12 +12,25 @@ import (
 
 var ErrNotFound = errors.New("not found")
 
+type ProfileStorer interface {
+	GetByUserID(userID int) (*types.Profile, error)
+	ListByUserIDs(ids []int) ([]types.Profile, error)
+	ListAll() ([]types.Profile, error)
+	PatchProfile(userID int, p types.PatchMeRequest) error
+	GetSettings(userID int) (*types.ProfileSettings, error)
+	PatchSettings(userID int, p types.PatchSettingsRequest) error
+	GetStatisticsRaw(userID int) ([]byte, bool, error)
+	UpsertStatisticsPayload(userID int, payloadJSON []byte) error
+}
+
+var _ ProfileStorer = (*ProfileStore)(nil)
+
 type ProfileStore struct {
 	db *sqlx.DB
 }
 
-func NewProfileStore(db *sqlx.DB) ProfileStore {
-	return ProfileStore{db: db}
+func NewProfileStore(db *sqlx.DB) *ProfileStore {
+	return &ProfileStore{db: db}
 }
 
 const profileSelectCols = `user_id, name, username, status, subtitle, bio, avatar_system_name, badge, workouts_this_month`

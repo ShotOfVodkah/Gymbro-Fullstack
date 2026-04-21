@@ -1,24 +1,18 @@
 package stats
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestConsistencyFromWeekHits(t *testing.T) {
-	if g := ConsistencyFromWeekHits(6, 12); g != 50 {
-		t.Fatalf("got %d want 50", g)
-	}
-	if g := ConsistencyFromWeekHits(12, 12); g != 100 {
-		t.Fatalf("got %d want 100", g)
-	}
-	if g := ConsistencyFromWeekHits(0, 12); g != 0 {
-		t.Fatalf("got %d want 0", g)
-	}
-	if g := ConsistencyFromWeekHits(1, 0); g != 0 {
-		t.Fatalf("got %d want 0", g)
-	}
+	require.Equal(t, 50, ConsistencyFromWeekHits(6, 12))
+	require.Equal(t, 100, ConsistencyFromWeekHits(12, 12))
+	require.Equal(t, 0, ConsistencyFromWeekHits(0, 12))
+	require.Equal(t, 0, ConsistencyFromWeekHits(1, 0))
 }
 
 func TestCompletionRateV1(t *testing.T) {
-	if CompletionRateV1() != 0 {
-		t.Fatal("expected 0")
-	}
+	require.Equal(t, 0, CompletionRateV1())
 }

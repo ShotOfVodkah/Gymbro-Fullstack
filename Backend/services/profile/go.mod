@@ -7,6 +7,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
+	github.com/stretchr/testify v1.11.1
 )
 
 replace github.com/alexandra-gritsaenko/gymbro-authmw => ../../pkg/authmw

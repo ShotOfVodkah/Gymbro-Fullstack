@@ -1,25 +1,25 @@
-name: Workouts CI
+name: Profile CI
 
 on:
   push:
     paths:
-      - 'Backend/services/workouts/**'
-      - '.github/workflows/workouts-ci.yml'
+      - 'Backend/services/profile/**'
+      - '.github/workflows/profile-ci.yml'
   pull_request:
 
 jobs:
   test:
-    name: Go tests — workouts service
+    name: Go tests — profile service
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: Backend/services/workouts
+        working-directory: Backend/services/profile
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
-          go-version-file: Backend/services/workouts/go.mod
+          go-version-file: Backend/services/profile/go.mod
 
       - name: Download dependencies
         run: go mod download

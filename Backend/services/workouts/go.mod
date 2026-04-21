@@ -3,6 +3,7 @@ module github.com/alexandra-gritsaenko/gymbro-workouts
 go 1.22.12
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/alexandra-gritsaenko/gymbro-authmw v0.0.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.11.2

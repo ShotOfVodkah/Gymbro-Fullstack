@@ -21,13 +21,13 @@ var (
 )
 
 type ProfileHandler struct {
-	store          store.ProfileStore
+	store          store.ProfileStorer
 	jwtSecret      []byte
 	feeds          *clients.FeedsPeopleClient
 	internalSecret string
 }
 
-func NewProfileHandler(s store.ProfileStore, jwtSecret []byte, feeds *clients.FeedsPeopleClient, internalSecret string) *ProfileHandler {
+func NewProfileHandler(s store.ProfileStorer, jwtSecret []byte, feeds *clients.FeedsPeopleClient, internalSecret string) *ProfileHandler {
 	return &ProfileHandler{store: s, jwtSecret: jwtSecret, feeds: feeds, internalSecret: internalSecret}
 }
 
