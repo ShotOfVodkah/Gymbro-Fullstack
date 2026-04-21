@@ -42,6 +42,8 @@ services:
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres_workouts:5432/gymbro_workouts?sslmode=disable"
       JWT_SECRET: "supersecret_noone_will_get_out"
+      PROFILE_SERVICE_URL: "http://profile_service:8084"
+      INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
       PGHOST: postgres_workouts
       PGPORT: 5432
     depends_on:
@@ -93,17 +95,21 @@ services:
     container_name: profile_service
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres_profile:5432/gymbro_profile?sslmode=disable"
+      JWT_SECRET: "supersecret_noone_will_get_out"
+      INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
+      FEEDS_SERVICE_URL: "http://feeds_service:8083"
       PGHOST: postgres_profile
       PGPORT: 5432
     depends_on:
       - postgres_profile
+      - feeds_service
     expose:
       - "8084"
 
   ai_service:
     build:
-      context: ..
-      dockerfile: deploy/ai.Dockerfile
+      context: ../services/ai_service
+      dockerfile: Dockerfile
     container_name: ai_service
     environment:
       JWT_SECRET: "supersecret_noone_will_get_out"

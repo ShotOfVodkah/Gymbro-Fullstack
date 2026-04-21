@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+workout_lora_model/
+workout_merged_model/
+workout_f16.gguf
+scripts/
+tests/
+*.md

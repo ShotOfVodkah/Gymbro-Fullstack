@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/alexandra-gritsaenko/gymbro-profile/clients"
 	"github.com/alexandra-gritsaenko/gymbro-profile/handlers"
 	"github.com/alexandra-gritsaenko/gymbro-profile/store"
 	"github.com/jmoiron/sqlx"
@@ -12,6 +13,11 @@ import (
 )
 
 func main() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		log.Fatal("JWT_SECRET is not set")
+	}
+
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		log.Fatal("DATABASE_URL is not set")
@@ -22,7 +28,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	profileH := handlers.NewProfileHandler(store.NewProfileStore(db))
+	feedsURL := os.Getenv("FEEDS_SERVICE_URL")
+	feedsClient := clients.NewFeedsPeopleClient(feedsURL)
+	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
+
+	profileH := handlers.NewProfileHandler(store.NewProfileStore(db), []byte(secret), feedsClient, internalSecret)
 
 	mux := http.NewServeMux()
 	mux.Handle("/profiles", profileH)

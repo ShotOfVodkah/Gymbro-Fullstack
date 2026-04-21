@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/alexandra-gritsaenko/gymbro-workouts/clients"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/handlers"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/jmoiron/sqlx"
@@ -25,7 +26,11 @@ func main() {
 
 	workoutH := handlers.NewWorkoutHandler(store.NewWorkoutStore(db))
 	exerciseH := handlers.NewExerciseHandler(db)
-	sessionH := handlers.NewSessionHandler(db)
+
+	profileURL := os.Getenv("PROFILE_SERVICE_URL")
+	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
+	profileStatsClient := clients.NewProfileStatsClient(profileURL, internalSecret)
+	sessionH := handlers.NewSessionHandler(db, profileStatsClient)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	mux := http.NewServeMux()
