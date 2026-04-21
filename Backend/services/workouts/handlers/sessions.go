@@ -1,13 +1,17 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 
+	"github.com/alexandra-gritsaenko/gymbro-workouts/clients"
+	"github.com/alexandra-gritsaenko/gymbro-workouts/stats"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/store"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/types"
 	"github.com/jmoiron/sqlx"
@@ -17,14 +21,18 @@ import (
 var reSessionByID = regexp.MustCompile(`^/sessions/([^/]+)$`)
 
 type sessionHandler struct {
-	sessionStore store.SessionStorer
-	workoutStore store.WorkoutStorer
+	sessionStore  store.SessionStorer
+	workoutStore  store.WorkoutStorer
+	statsBuilder  *stats.Builder
+	profileStats  *clients.ProfileStatsClient
 }
 
-func NewSessionHandler(db *sqlx.DB) *sessionHandler {
+func NewSessionHandler(db *sqlx.DB, profileStats *clients.ProfileStatsClient) *sessionHandler {
 	return &sessionHandler{
 		sessionStore: store.NewSessionStore(db),
 		workoutStore: store.NewWorkoutStore(db),
+		statsBuilder: stats.NewBuilder(db),
+		profileStats: profileStats,
 	}
 }
 
@@ -214,6 +222,8 @@ func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.pushProfileStats(r.Context(), userID)
+
 	session, err := h.sessionStore.GetSessionByID(input.ID, requestLocale(r))
 	if err != nil {
 		internalServerError(w, r)
@@ -222,6 +232,28 @@ func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(session)
+}
+
+func (h *sessionHandler) pushProfileStats(ctx context.Context, userID string) {
+	if h.statsBuilder == nil {
+		return
+	}
+	uid, err := strconv.Atoi(userID)
+	if err != nil {
+		log.Printf("profile stats: skip non-numeric user_id %q", userID)
+		return
+	}
+	payload, err := h.statsBuilder.BuildPayloadJSON(userID, time.Now())
+	if err != nil {
+		log.Printf("profile stats build: %v", err)
+		return
+	}
+	if h.profileStats == nil {
+		return
+	}
+	if err := h.profileStats.UpsertStatistics(ctx, uid, payload); err != nil {
+		log.Printf("profile stats upsert: %v", err)
+	}
 }
 
 func (h *sessionHandler) SaveSessionAsWorkout(w http.ResponseWriter, r *http.Request) {

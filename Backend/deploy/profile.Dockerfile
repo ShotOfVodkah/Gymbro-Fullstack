@@ -1,9 +1,10 @@
-FROM golang:1.25 as build
+FROM golang:1.25 AS build
 
 WORKDIR /app
 
-COPY services/profile/go.mod services/profile/go.sum ./
-RUN go mod download
+COPY pkg/authmw ./pkg/authmw
+COPY services/profile/go.mod services/profile/go.sum ./services/profile/
+RUN cd services/profile && go mod download
 COPY services/profile ./services/profile
 RUN cd services/profile && go build -o /bin/profileserver ./cmd/profileserver
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
