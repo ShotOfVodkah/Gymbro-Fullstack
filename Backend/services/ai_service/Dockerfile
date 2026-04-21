@@ -1,3 +1,4 @@
+# Build with context = this directory (see Backend/deploy/docker-compose.yml: ai_service).
 FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,16 +11,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY services/ai_service/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir llama-cpp-python==0.3.8 \
  && pip install --no-cache-dir -r requirements.txt
 
-COPY services/ai_service/app ./app
-COPY services/ai_service/exercises.json ./exercises.json
-COPY services/ai_service/schema.json ./schema.json
+COPY app ./app
+COPY exercises.json ./exercises.json
+COPY schema.json ./schema.json
 
-COPY services/ai_service/workout_q4km.gguf ./workout_q4km.gguf
+COPY workout_q4km.gguf ./workout_q4km.gguf
 
 ENV PYTHONUNBUFFERED=1
 

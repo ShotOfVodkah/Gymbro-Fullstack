@@ -102,8 +102,8 @@ services:
 
   ai_service:
     build:
-      context: ..
-      dockerfile: deploy/ai.Dockerfile
+      context: ../services/ai_service
+      dockerfile: Dockerfile
     container_name: ai_service
     environment:
       JWT_SECRET: "supersecret_noone_will_get_out"
