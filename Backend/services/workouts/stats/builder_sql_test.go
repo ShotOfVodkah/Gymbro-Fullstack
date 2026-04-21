@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestBuildPayloadJSON_SqlMock exercises the full DB call sequence (order-sensitive).
+
 func TestBuildPayloadJSON_SqlMock(t *testing.T) {
-	sqlDB, mock, err := sqlmock.New(sqlmock.QueryMatcherRegexp)
+	sqlDB, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	defer sqlDB.Close()
 
@@ -92,7 +92,7 @@ func TestBuildPayloadJSON_NilDB(t *testing.T) {
 }
 
 func TestBuildPayloadJSON_TopWorkoutTypeNoRows(t *testing.T) {
-	sqlDB, mock, err := sqlmock.New(sqlmock.QueryMatcherRegexp)
+	sqlDB, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	defer sqlDB.Close()
 
