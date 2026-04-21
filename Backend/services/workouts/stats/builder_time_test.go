@@ -8,9 +8,9 @@ import (
 )
 
 func TestStartOfUTCWeekMonday(t *testing.T) {
-	wed := time.Date(2026, 4, 21, 15, 30, 0, 0, time.UTC)
-	got := startOfUTCWeekMonday(wed)
-	want := time.Date(2026, 4, 19, 0, 0, 0, 0, time.UTC)
+	tue := time.Date(2026, 4, 21, 15, 30, 0, 0, time.UTC)
+	got := startOfUTCWeekMonday(tue)
+	want := time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC)
 	require.Equal(t, want, got)
 }
 
