@@ -41,6 +41,13 @@ func main() {
 	queryH := handlers.NewQueryHandler(analyticsStore)
 	adminH := handlers.NewAdminHandler(analyticsStore)
 
+	demoH := handlers.NewDemoHandler(analyticsStore)
+	researchH := handlers.NewResearchHandler(analyticsStore)
+	dashboardPageH, err := handlers.NewDashboardPageHandler()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	agg := aggregator.New(analyticsStore)
@@ -75,13 +82,24 @@ func main() {
 	mux.Handle("/analytics/users/", authMiddleware(queryH))
 
 	mux.Handle("/analytics/admin/privacy/cleanup", authMiddleware(adminH))
-	mux.Handle("/analytics/admin/pipeline/overview", authMiddleware(adminH))
 	mux.Handle("/analytics/admin/batches/", authMiddleware(adminH))
-	mux.Handle("/analytics/admin/invalid-events", authMiddleware(adminH))
-	mux.Handle("/analytics/admin/data-quality/summary", authMiddleware(adminH))
-	mux.Handle("/analytics/admin/data-quality/app-versions", authMiddleware(adminH))
-	mux.Handle("/analytics/admin/materialized-views/refresh", authMiddleware(adminH))
-	mux.Handle("/analytics/admin/dashboard/overview-fast", authMiddleware(adminH))
+
+	// authMiddleware
+	mux.Handle("/analytics/admin/dashboard", dashboardPageH) 
+	mux.Handle("/analytics/demo/dashboard", demoH)
+
+	mux.Handle("/analytics/research/social-vs-non-social", researchH)
+	mux.Handle("/analytics/research/sharing-vs-non-sharing", researchH)
+	mux.Handle("/analytics/research/workout-completion-engagement", researchH)
+	mux.Handle("/analytics/research/errors-vs-dropoff", researchH)
+	mux.Handle("/analytics/research/feature-retention", researchH)
+
+	mux.Handle("/analytics/admin/pipeline/overview", adminH)
+	mux.Handle("/analytics/admin/invalid-events", adminH)
+	mux.Handle("/analytics/admin/data-quality/summary", adminH)
+	mux.Handle("/analytics/admin/data-quality/app-versions", adminH)
+	mux.Handle("/analytics/admin/dashboard/overview-fast", adminH)
+	mux.Handle("/analytics/admin/materialized-views/refresh", adminH)
 
 	log.Println("analytics service listening on :8086")
 	log.Fatal(http.ListenAndServe(":8086", mux))

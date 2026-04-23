@@ -154,14 +154,14 @@ services:
       WORKOUTS_URL: "http://workouts_service:8082"
       FEEDS_URL: "http://feeds_service:8083"
       PROFILE_URL: "http://profile_service:8084"
-      # AI_URL: "http://ai_service:8085"
+      AI_URL: "http://ai_service:8085"
       ANALYTICS_URL: "http://analytics_service:8086"
     depends_on:
       - auth_service
       - workouts_service
       - feeds_service
       - profile_service
-      # - ai_service
+      - ai_service
       - analytics_service
     ports:
       - "8080:8080"
