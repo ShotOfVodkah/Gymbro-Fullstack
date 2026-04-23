@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GymBro Analytics Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0c0616;
+      --bg-2: #140a24;
+      --panel: rgba(35, 16, 64, 0.92);
+      --panel-2: rgba(53, 24, 93, 0.92);
+      --panel-3: rgba(74, 33, 130, 0.22);
+      --text: #f6f0ff;
+      --muted: #c8b8eb;
+      --muted-2: #a089cb;
+      --border: rgba(186, 152, 255, 0.14);
+      --accent: #9b6dff;
+      --accent-2: #c084fc;
+      --accent-3: #7c3aed;
+      --danger: #ff7aa2;
+      --warning: #ffcb6b;
+      --success: #73f0bf;
+      --shadow: 0 18px 44px rgba(4, 0, 18, 0.36);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 28%),
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.16), transparent 24%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 22px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(59, 7, 100, 0.08)),
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 860px;
+      line-height: 1.55;
+    }
+
+    .hero-note {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.18s ease, opacity 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.98;
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, rgba(88, 28, 135, 0.65), rgba(76, 29, 149, 0.55));
+      border: 1px solid var(--border);
+    }
+
+    .stamp {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .section {
+      margin-top: 28px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-header p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 900px;
+    }
+
+    .section-intro {
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      color: var(--muted);
+      background: rgba(140, 82, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.kpis {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
+        linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .card-head {
+      margin-bottom: 12px;
+    }
+
+    .card-subtitle {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi-sub {
+      margin-top: 8px;
+      color: var(--muted-2);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+    }
+
+    .chart-wrap.small {
+      height: 260px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted-2);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      color: var(--text);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+    }
+
+    .danger { color: var(--danger); }
+    .warning { color: var(--warning); }
+    .success { color: var(--success); }
+
+    .loading, .error-box {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+
+    .funnel-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .funnel-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 90px 90px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .funnel-label {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .funnel-bar {
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      height: 12px;
+      position: relative;
+    }
+
+    .funnel-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 18px rgba(155, 109, 255, 0.35);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .empty-note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1200px) {
+      .grid.kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid.two, .grid.three { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        flex-direction: column;
+      }
+
+      .grid.kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .funnel-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div>
+        <h1>GymBro Analytics Dashboard</h1>
+        <p>
+          This internal analytics console turns raw product telemetry into a readable story about usage, engagement,
+          retention, funnels, reliability, feature adoption, and product hypotheses. The layout moves from the broad
+          health of the system to deeper behavioral insights, so each section explains a different layer of the product.
+        </p>
+        <div class="hero-note">
+          <span class="pill">Overview first</span>
+          <span class="pill">Engagement & retention</span>
+          <span class="pill">Funnels & drop-off</span>
+          <span class="pill">Feature adoption</span>
+          <span class="pill">Reliability & data quality</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button id="refreshDashboard">Refresh dashboard</button>
+        <button id="refreshMV" class="secondary">Refresh materialized views</button>
+        <div class="stamp" id="generatedAt">Loading...</div>
+      </div>
+    </div>
+
+    <div id="statusBox" class="loading">Loading analytics dashboard…</div>
+
+    <div id="dashboardRoot" style="display:none;">
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>1. Executive Overview</h2>
+            <p>This section gives the fastest summary of what is happening in the product right now: activity volume, reliability, data quality, and overall operational health.</p>
+          </div>
+        </div>
+        <div class="section-intro">
+          Start here first. These charts and KPI cards answer the question: <strong>is the product active, stable, and healthy enough to trust the deeper analysis below?</strong>
+        </div>
+        <div class="grid kpis" id="overviewKpis"></div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Most Viewed Screens</h3>
+              <div class="card-subtitle">Shows which screens attract the most attention and where user traffic concentrates.</div>
+            </div>
+            <div class="chart-wrap"><canvas id="topScreensChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Most Frequent Events</h3>
+              <div class="card-subtitle">Highlights the product actions users trigger most often across the application.</div>
+            </div>
+            <div class="chart-wrap"><canvas id="topEventsChart"></canvas></div>
+          </div>
+        </div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>App Version Distribution</h3>
+              <div class="card-subtitle">Shows which versions of the client are currently active and how usage is distributed between releases.</div>
+            </div>
+            <div class="chart-wrap small"><canvas id="appVersionsChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Operational Snapshot</h3>
+              <div class="card-subtitle">A compact summary of processing lag, backlog, failures, and freshness of the current analytics snapshot.</div>
+            </div>
+            <div id="reliabilitySnapshot"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>2. Engagement & Retention</h2>
+            <p>This section explains how deeply users engage with the product and whether they come back over time.</p>
+          </div>
+        </div>
+        <div class="section-intro">
+          Here we move from general product health to user behavior. These metrics show intensity of usage, habit formation, and retention quality.
+        </div>
+        <div class="grid kpis" id="engagementKpis"></div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Retention by Cohort</h3>
+              <div class="card-subtitle">Tracks return behavior for different user cohorts across D1, D7, D14, and D30 windows.</div>
+            </div>
+            <div class="chart-wrap"><canvas id="retentionChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Feature Usage by Product Area</h3>
+              <div class="card-subtitle">Shows which product domains are most actively used and where user attention accumulates.</div>
+            </div>
+            <div class="chart-wrap"><canvas id="featureUsageChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>3. Funnels & User Journeys</h2>
+            <p>This section shows how users move through important scenarios and where drop-off appears in multi-step flows.</p>
+          </div>
+        </div>
+        <div class="section-intro">
+          Funnels help answer a very practical question: <strong>where do users successfully progress and where do they lose momentum?</strong>
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head">
+              <h3>Workout Sharing Funnel</h3>
+              <div class="card-subtitle">Measures how many users move from opening the sharing flow to successfully finishing it.</div>
+            </div>
+            <div id="funnelWorkoutShare" class="funnel-grid"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Registration to First Workout</h3>
+              <div class="card-subtitle">Shows the path from creating an account to reaching the first meaningful training milestone.</div>
+            </div>
+            <div id="funnelRegistration" class="funnel-grid"></div>
+          </div>
+        </div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Feed Entry to Interaction</h3>
+              <div class="card-subtitle">Shows whether opening the feed leads to real interaction with posts and social content.</div>
+            </div>
+            <div id="funnelFeeds" class="funnel-grid"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Profile Entry to Relationship Action</h3>
+              <div class="card-subtitle">Measures whether profile views convert into follows, messages, or deeper social actions.</div>
+            </div>
+            <div id="funnelProfile" class="funnel-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>4. Research & Product Hypotheses</h2>
+            <p>This section acts as a small product laboratory and compares meaningful user groups against each other.</p>
+          </div>
+        </div>
+        <div class="section-intro">
+          Instead of only counting usage, these comparisons help test product assumptions: whether social activity, sharing, and workout completion are associated with stronger engagement.
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head">
+              <h3>Social Activity vs Non-Social Activity</h3>
+              <div class="card-subtitle">Compares engagement depth between users who perform social actions and those who do not.</div>
+            </div>
+            <div class="chart-wrap small"><canvas id="socialVsNonSocialChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Sharing vs Non-Sharing Users</h3>
+              <div class="card-subtitle">Shows whether workout sharing is associated with broader and more frequent product usage.</div>
+            </div>
+            <div class="chart-wrap small"><canvas id="sharingVsNonSharingChart"></canvas></div>
+          </div>
+        </div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Workout Completion vs Engagement</h3>
+              <div class="card-subtitle">Explores whether completing workouts is linked to deeper overall engagement with the app.</div>
+            </div>
+            <div class="chart-wrap small"><canvas id="workoutCompletionChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Feature Groups vs Retention Proxy</h3>
+              <div class="card-subtitle">Shows which product areas appear most associated with active usage and retention-related behavior.</div>
+            </div>
+            <div class="chart-wrap small"><canvas id="featureRetentionChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2>5. Reliability, Data Quality & Pipeline</h2>
+            <p>This section focuses on trust: whether the system is stable, whether analytics data is clean, and whether the ingestion pipeline behaves as expected.</p>
+          </div>
+        </div>
+        <div class="section-intro">
+          These charts help verify not only the product, but also the analytics subsystem itself. This is the place to inspect errors, invalid events, quality drift, and processing issues.
+        </div>
+        <div class="grid kpis" id="pipelineKpis"></div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Error Hot Spots by Screen</h3>
+              <div class="card-subtitle">Shows where errors concentrate most strongly and which product surfaces deserve investigation first.</div>
+            </div>
+            <div class="chart-wrap"><canvas id="errorHotSpotsChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Data Quality by App Version</h3>
+              <div class="card-subtitle">Highlights versions that produce more invalid payloads, unknown events, or broken contracts.</div>
+            </div>
+            <div class="chart-wrap"><canvas id="dataQualityChart"></canvas></div>
+          </div>
+        </div>
+        <div class="grid two" style="margin-top: 16px;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Recent Invalid Events</h3>
+              <div class="card-subtitle">Shows the newest rejected events with reasons, useful for debugging client contract drift.</div>
+            </div>
+            <div id="recentInvalidTable"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>Errors vs Drop-Off Proxy</h3>
+              <div class="card-subtitle">Compares behavior of sessions with errors and sessions without errors to estimate potential drop-off pressure.</div>
+            </div>
+            <div class="chart-wrap small"><canvas id="errorsVsDropoffChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const charts = new Map();
+
+    const DISPLAY_NAMES = {
+      workout_list: "Workout List",
+      workout_builder: "Workout Builder",
+      workout_builder_for_type: "Workout Builder by Type",
+      workout_info: "Workout Details",
+      workout_player: "Workout Player",
+      workout_generator: "Workout Generator",
+      workout_share: "Workout Sharing",
+      feeds_main: "Main Feed",
+      feeds_people: "People Feed",
+      feeds_chat: "Chat",
+      feeds_calendar: "Shared Calendar",
+      profile: "Profile",
+      profile_edit: "Edit Profile",
+      profile_settings: "Profile Settings",
+      profile_statistics: "Profile Statistics",
+      auth: "Authentication",
+      home: "Home",
+      screen_viewed: "Screen Viewed",
+      workout_created: "Workout Created",
+      workout_premade_added: "Preset Workout Added",
+      workout_completed: "Workout Completed",
+      workout_generated: "Workout Generated",
+      workout_share_opened: "Sharing Opened",
+      workout_share_closed: "Sharing Closed",
+      workout_share_step_viewed: "Sharing Step Viewed",
+      workout_share_step_next_tapped: "Sharing Next Step",
+      workout_share_step_back_tapped: "Sharing Previous Step",
+      workout_share_feed_toggled: "Share to Feed Toggled",
+      workout_share_destination_toggled: "Destination Toggled",
+      workout_share_caption_edited: "Caption Edited",
+      workout_share_location_edited: "Location Edited",
+      workout_share_submit_tapped: "Share Submit Tapped",
+      workout_share_submit_succeeded: "Share Submit Succeeded",
+      workout_share_submit_failed: "Share Submit Failed",
+      workout_share_success_viewed: "Sharing Success Viewed",
+      workout_share_done_tapped: "Sharing Done Tapped",
+      user_logged_in: "User Logged In",
+      user_logged_out: "User Logged Out",
+      user_registered: "User Registered",
+      feeds_tab_selected: "Feed Tab Selected",
+      feeds_post_liked: "Post Liked",
+      feeds_post_author_tapped: "Post Author Opened",
+      feeds_post_comment_tapped: "Post Comments Opened",
+      feeds_post_exercise_tapped: "Post Exercise Opened",
+      feeds_post_show_all_exercises: "All Post Exercises Opened",
+      feeds_chat_creation_opened: "Chat Creation Opened",
+      feeds_chat_creation_dismissed: "Chat Creation Dismissed",
+      feeds_chat_type_selected: "Chat Type Selected",
+      feeds_direct_chat_person_selected: "Direct Chat Person Selected",
+      feeds_group_chat_created: "Group Chat Created",
+      feeds_group_member_toggled: "Group Member Toggled",
+      feeds_community_opened: "Community Opened",
+      people_segment_selected: "People Segment Selected",
+      people_person_opened: "Person Profile Opened",
+      people_follow_toggled: "Follow Toggled",
+      people_profile_opened: "External Profile Opened",
+      people_message_opened: "Direct Message Opened",
+      chat_message_sent: "Message Sent",
+      chat_reaction_added: "Reaction Added",
+      chat_reaction_toggled: "Reaction Toggled",
+      chat_workout_message_tapped: "Workout Message Opened",
+      chat_group_info_opened: "Group Info Opened",
+      chat_group_info_saved: "Group Info Saved",
+      chat_group_participant_removed: "Group Participant Removed",
+      chat_group_people_added: "Group Participants Added",
+      chat_group_deleted: "Group Deleted",
+      calendar_month_changed: "Calendar Month Changed",
+      calendar_person_selected: "Calendar Person Selected",
+      calendar_day_tapped: "Calendar Day Selected",
+      calendar_my_workout_opened: "My Calendar Workout Opened",
+      calendar_partner_workout_opened: "Partner Calendar Workout Opened",
+      profile_primary_action_tapped: "Profile Primary Action",
+      profile_relationship_follow_tapped: "Profile Follow Action",
+      profile_relationship_message_tapped: "Profile Message Action",
+      profile_relationship_posts_tapped: "Profile Posts Opened",
+      profile_edit_saved: "Profile Saved",
+      settings_row_opened: "Settings Item Opened",
+      settings_toggle_changed: "Settings Toggle Changed",
+      statistics_chart_selected: "Statistics Chart Selected",
+      error_occurred: "Error Occurred",
+      error_retry_tapped: "Error Retry Tapped",
+      workout: "Workout",
+      social: "Social",
+      chat: "Chat",
+      calendar: "Calendar",
+      profile_feature: "Profile",
+      settings: "Settings",
+      sharing: "Sharing"
+    };
+
+    function destroyChart(id) {
+      const existing = charts.get(id);
+      if (existing) {
+        existing.destroy();
+        charts.delete(id);
+      }
+    }
+
+    function buildChart(id, config) {
+      destroyChart(id);
+      const ctx = document.getElementById(id).getContext("2d");
+      const chart = new Chart(ctx, config);
+      charts.set(id, chart);
+    }
+
+    function safeNumber(value, digits = 0) {
+      const num = Number(value || 0);
+      if (digits === 0) return String(Math.round(num));
+      return num.toFixed(digits);
+    }
+
+    function percent(value) {
+      return `${(Number(value || 0) * 100).toFixed(1)}%`;
+    }
+
+    function prettifyLabel(value) {
+      if (!value) return "Unknown";
+      const normalized = String(value).trim();
+      if (DISPLAY_NAMES[normalized]) return DISPLAY_NAMES[normalized];
+
+      return normalized
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    function kpiCard(label, value, sub = "") {
+      return `
+        <div class="card">
+          <div class="kpi-label">${label}</div>
+          <div class="kpi-value">${value}</div>
+          <div class="kpi-sub">${sub}</div>
+        </div>
+      `;
+    }
+
+    function renderKpis(containerId, items) {
+      document.getElementById(containerId).innerHTML = items.join("");
+    }
+
+    function commonChartOptions(extra = {}) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: "#e9defb"
+            }
+          },
+          tooltip: {
+            backgroundColor: "rgba(35,16,64,0.96)",
+            borderColor: "rgba(186,152,255,0.14)",
+            borderWidth: 1,
+            titleColor: "#ffffff",
+            bodyColor: "#e9defb"
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: "#c8b8eb" },
+            grid: { color: "rgba(186,152,255,0.08)" }
+          },
+          y: {
+            ticks: { color: "#c8b8eb" },
+            grid: { color: "rgba(186,152,255,0.08)" }
+          }
+        },
+        ...extra
+      };
+    }
+
+    function renderOverview(data) {
+      const summary = data.overview?.summary || {};
+      renderKpis("overviewKpis", [
+        kpiCard("Daily Active Users", safeNumber(summary.dau), "Users active in the latest summarized day"),
+        kpiCard("Events Received", safeNumber(summary.events_received), "Total incoming analytics events in the overview snapshot"),
+        kpiCard("Events Accepted", safeNumber(summary.events_accepted), "Events successfully normalized and included in analytics"),
+        kpiCard("Total Errors", safeNumber(summary.total_errors), "Tracked application error events across error aggregates"),
+        kpiCard("Invalid Event Rate", percent(summary.invalid_rate), "Rejected or malformed analytics payload share"),
+        kpiCard("Failed Backlog", safeNumber(summary.backlog_failed), "Events that still require investigation or recovery")
+      ]);
+
+      const topScreens = (data.overview?.top_screens || []).slice(0, 8);
+      buildChart("topScreensChart", {
+        type: "bar",
+        data: {
+          labels: topScreens.map(x => prettifyLabel(x.screen)),
+          datasets: [{
+            label: "Screen Views",
+            data: topScreens.map(x => x.views_count || 0),
+            backgroundColor: "rgba(155,109,255,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions({
+          plugins: { legend: { display: false } }
+        })
+      });
+
+      const topEvents = (data.overview?.top_events || []).slice(0, 8);
+      buildChart("topEventsChart", {
+        type: "bar",
+        data: {
+          labels: topEvents.map(x => prettifyLabel(x.event_name)),
+          datasets: [{
+            label: "Event Count",
+            data: topEvents.map(x => x.total_count || 0),
+            backgroundColor: "rgba(192,132,252,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions({
+          plugins: { legend: { display: false } }
+        })
+      });
+
+      const appVersions = data.overview?.app_versions || [];
+      buildChart("appVersionsChart", {
+        type: "bar",
+        data: {
+          labels: appVersions.map(x => x.app_version || "Unknown"),
+          datasets: [{
+            label: "Unique Users",
+            data: appVersions.map(x => x.unique_users || 0),
+            backgroundColor: "rgba(124,58,237,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions()
+      });
+
+      document.getElementById("reliabilitySnapshot").innerHTML = `
+        <table>
+          <tbody>
+            <tr><th>Average processing lag</th><td>${safeNumber(summary.avg_processing_lag_seconds, 1)} sec</td></tr>
+            <tr><th>Maximum processing lag</th><td>${safeNumber(summary.max_processing_lag_seconds, 1)} sec</td></tr>
+            <tr><th>Processing failures</th><td>${safeNumber(summary.processing_failures)}</td></tr>
+            <tr><th>Backlog pending</th><td>${safeNumber(summary.backlog_pending)}</td></tr>
+            <tr><th>Backlog in progress</th><td>${safeNumber(summary.backlog_processing)}</td></tr>
+            <tr><th>Snapshot date</th><td>${summary.event_date || "n/a"}</td></tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderEngagement(data) {
+      const engagement = data.engagement || {};
+      renderKpis("engagementKpis", [
+        kpiCard("Average Active Days (7d)", safeNumber(engagement.average_active_days_last_7, 1), "Average number of active days per user in the last 7 days"),
+        kpiCard("Average Active Days (30d)", safeNumber(engagement.average_active_days_last_30, 1), "Average number of active days per user in the last 30 days"),
+        kpiCard("Average Sessions per User", safeNumber(engagement.average_sessions_per_user, 1), "Session intensity across the user base"),
+        kpiCard("Users with Workout Activity", safeNumber(engagement.users_with_workout_activity), "Users who interacted with workout-related functionality"),
+        kpiCard("Users with Social Activity", safeNumber(engagement.users_with_social_activity), "Users active in social, chat, or sharing actions"),
+        kpiCard("Retention Cohorts", safeNumber((data.retention?.cohorts || []).length), "Number of cohorts available for retention analysis")
+      ]);
+
+      const cohorts = (data.retention?.cohorts || []).slice(0, 8).reverse();
+      buildChart("retentionChart", {
+        type: "line",
+        data: {
+          labels: cohorts.map(x => x.cohort_date),
+          datasets: [
+            { label: "D1", data: cohorts.map(x => (x.retention_d1 || 0) * 100), borderColor: "#c084fc", backgroundColor: "rgba(192,132,252,0.18)", tension: 0.34 },
+            { label: "D7", data: cohorts.map(x => (x.retention_d7 || 0) * 100), borderColor: "#9b6dff", backgroundColor: "rgba(155,109,255,0.18)", tension: 0.34 },
+            { label: "D14", data: cohorts.map(x => (x.retention_d14 || 0) * 100), borderColor: "#7c3aed", backgroundColor: "rgba(124,58,237,0.18)", tension: 0.34 },
+            { label: "D30", data: cohorts.map(x => (x.retention_d30 || 0) * 100), borderColor: "#e879f9", backgroundColor: "rgba(232,121,249,0.18)", tension: 0.34 }
+          ]
+        },
+        options: commonChartOptions()
+      });
+
+      const featureUsage = data.feature_adoption?.feature_usage || [];
+      buildChart("featureUsageChart", {
+        type: "bar",
+        data: {
+          labels: featureUsage.map(x => prettifyLabel(x.feature_name || x.category)),
+          datasets: [{
+            label: "Unique Users",
+            data: featureUsage.map(x => x.unique_users || 0),
+            backgroundColor: "rgba(155,109,255,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions({
+          indexAxis: "y",
+          plugins: { legend: { display: false } }
+        })
+      });
+    }
+
+    function renderFunnel(containerId, items) {
+      const maxUsers = Math.max(...(items || []).map(x => x.users_count || 0), 1);
+      const html = (items || []).map(item => {
+        const width = ((item.users_count || 0) / maxUsers) * 100;
+        return `
+          <div class="funnel-row">
+            <div class="funnel-label">${prettifyLabel(item.step_name)}</div>
+            <div class="funnel-bar"><div class="funnel-fill" style="width:${width}%"></div></div>
+            <div class="muted">${safeNumber(item.users_count)}</div>
+            <div class="muted">${percent(item.conversion_from_start)}</div>
+          </div>
+        `;
+      }).join("");
+      document.getElementById(containerId).innerHTML = html || `<div class="empty-note">No funnel data is available yet for this flow.</div>`;
+    }
+
+    function renderFunnels(data) {
+      renderFunnel("funnelWorkoutShare", data.funnels?.workout_share || []);
+      renderFunnel("funnelRegistration", data.funnels?.registration_to_first_workout || []);
+      renderFunnel("funnelFeeds", data.funnels?.feeds_open_to_interaction || []);
+      renderFunnel("funnelProfile", data.funnels?.profile_open_to_relationship_action || []);
+    }
+
+    function comparisonChart(id, response, metricKey, metricLabel) {
+      const groups = response?.groups || [];
+      buildChart(id, {
+        type: "bar",
+        data: {
+          labels: groups.map(x => prettifyLabel(x.group_name)),
+          datasets: [{
+            label: metricLabel,
+            data: groups.map(x => x[metricKey] || 0),
+            backgroundColor: "rgba(192,132,252,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions({
+          plugins: { legend: { display: false } }
+        })
+      });
+    }
+
+    function renderResearch(data) {
+      comparisonChart(
+        "socialVsNonSocialChart",
+        data.research?.social_vs_non_social,
+        "average_active_days_last_7",
+        "Average Active Days (7d)"
+      );
+
+      comparisonChart(
+        "sharingVsNonSharingChart",
+        data.research?.sharing_vs_non_sharing,
+        "average_sessions_count",
+        "Average Sessions"
+      );
+
+      comparisonChart(
+        "workoutCompletionChart",
+        data.research?.workout_completion_engagement,
+        "average_active_days_last_30",
+        "Average Active Days (30d)"
+      );
+
+      const featureRetention = data.research?.feature_retention?.items || [];
+      buildChart("featureRetentionChart", {
+        type: "bar",
+        data: {
+          labels: featureRetention.map(x => prettifyLabel(x.feature_name)),
+          datasets: [{
+            label: "Average Active Days (7d)",
+            data: featureRetention.map(x => x.average_active_days_last_7 || 0),
+            backgroundColor: "rgba(124,58,237,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions({
+          indexAxis: "y",
+          plugins: { legend: { display: false } }
+        })
+      });
+
+      comparisonChart(
+        "errorsVsDropoffChart",
+        data.research?.errors_vs_dropoff,
+        "average_sessions_count",
+        "Average Sessions"
+      );
+    }
+
+    function renderReliability(data) {
+      const pipeline = data.admin?.pipeline_overview || {};
+      renderKpis("pipelineKpis", [
+        kpiCard("Batches Received", safeNumber(pipeline.batches_received), "Number of batches ingested into the pipeline"),
+        kpiCard("Rejected Events", safeNumber(pipeline.events_rejected), "Events rejected during validation or ingestion"),
+        kpiCard("Backlog Pending", safeNumber(pipeline.backlog_pending), "Accepted events still waiting for processing"),
+        kpiCard("Backlog Failed", safeNumber(pipeline.backlog_failed), "Events that failed processing and need inspection"),
+        kpiCard("Average Lag", `${safeNumber(pipeline.avg_processing_lag_seconds, 1)}s`, "Average pipeline processing latency"),
+        kpiCard("Invalid Event Rate", percent(data.reliability?.data_quality_summary?.invalid_rate), "Overall data quality status")
+      ]);
+
+      const errorMetrics = (data.reliability?.error_metrics || []).slice(0, 8);
+      buildChart("errorHotSpotsChart", {
+        type: "bar",
+        data: {
+          labels: errorMetrics.map(x => prettifyLabel(x.screen)),
+          datasets: [{
+            label: "Error Count",
+            data: errorMetrics.map(x => x.error_count || 0),
+            backgroundColor: "rgba(255,122,162,0.82)",
+            borderRadius: 10
+          }]
+        },
+        options: commonChartOptions({
+          indexAxis: "y",
+          plugins: { legend: { display: false } }
+        })
+      });
+
+      const dq = data.reliability?.data_quality_by_app_version || [];
+      buildChart("dataQualityChart", {
+        type: "bar",
+        data: {
+          labels: dq.map(x => x.app_version || "Unknown"),
+          datasets: [
+            {
+              label: "Invalid Rate %",
+              data: dq.map(x => (x.invalid_rate || 0) * 100),
+              backgroundColor: "rgba(155,109,255,0.82)",
+              borderRadius: 10
+            },
+            {
+              label: "Unknown Event Rate %",
+              data: dq.map(x => (x.unknown_events_rate || 0) * 100),
+              backgroundColor: "rgba(255,203,107,0.82)",
+              borderRadius: 10
+            }
+          ]
+        },
+        options: commonChartOptions()
+      });
+
+      const recentInvalid = data.admin?.recent_invalid_events || [];
+      document.getElementById("recentInvalidTable").innerHTML = recentInvalid.length === 0
+        ? `<div class="empty-note">No recent invalid events were found. This is a good sign for analytics contract health.</div>`
+        : `
+          <table>
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Reason</th>
+                <th>Batch</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentInvalid.map(item => `
+                <tr>
+                  <td>${prettifyLabel(item.event_name || "")}</td>
+                  <td>${item.reason || ""}</td>
+                  <td>${item.batch_id || ""}</td>
+                  <td>${item.received_at || ""}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+    }
+
+    async function fetchJSON(url, options = {}) {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function refreshMaterializedViews() {
+      await fetchJSON("/analytics/admin/materialized-views/refresh", { method: "POST" });
+    }
+
+    async function loadDashboard() {
+      const statusBox = document.getElementById("statusBox");
+      const root = document.getElementById("dashboardRoot");
+      statusBox.className = "loading";
+      statusBox.textContent = "Loading analytics dashboard…";
+      statusBox.style.display = "block";
+      root.style.display = "none";
+
+      try {
+        const data = await fetchJSON("/analytics/demo/dashboard");
+
+        document.getElementById("generatedAt").textContent =
+          `Generated at: ${data.generated_at || "n/a"}`;
+
+        renderOverview(data);
+        renderEngagement(data);
+        renderFunnels(data);
+        renderResearch(data);
+        renderReliability(data);
+
+        statusBox.style.display = "none";
+        root.style.display = "block";
+      } catch (err) {
+        statusBox.className = "error-box";
+        statusBox.textContent = `Failed to load dashboard: ${err.message}`;
+        root.style.display = "none";
+      }
+    }
+
+    document.getElementById("refreshDashboard").addEventListener("click", async () => {
+      await loadDashboard();
+    });
+
+    document.getElementById("refreshMV").addEventListener("click", async () => {
+      const statusBox = document.getElementById("statusBox");
+      statusBox.className = "loading";
+      statusBox.textContent = "Refreshing materialized views…";
+      statusBox.style.display = "block";
+      try {
+        await refreshMaterializedViews();
+        await loadDashboard();
+      } catch (err) {
+        statusBox.className = "error-box";
+        statusBox.textContent = `Failed to refresh materialized views: ${err.message}`;
+      }
+    });
+
+    loadDashboard();
+  </script>
+</body>
+</html>

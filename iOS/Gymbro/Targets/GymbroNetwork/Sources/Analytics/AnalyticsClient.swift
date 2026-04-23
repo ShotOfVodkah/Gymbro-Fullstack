@@ -9,12 +9,11 @@ public final class AnalyticsClient {
     }
 
     public func sendBatch(_ events: [AnalyticsEventDTO]) async throws {
-        print(events)
-//        try await networkClient.requestVoid(
-//            method: .POST,
-//            path: "analytics/events",
-//            body: events,
-//            requiresAuth: false
-//        )
+        try await networkClient.requestVoid(
+            method: .POST,
+            path: "analytics/events",
+            body: events,
+            requiresAuth: true
+        )
     }
 }

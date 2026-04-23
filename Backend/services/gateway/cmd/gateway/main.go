@@ -59,6 +59,8 @@ func main() {
 		{Prefix: "/profiles", EnvKey: "PROFILE_URL", Default: "http://profile_service:8084"},
 
 		{Prefix: "/ai", EnvKey: "AI_URL", Default: "http://ai_service:8085"},
+
+		{Prefix: "/analytics", EnvKey: "ANALYTICS_URL", Default: "http://analytics_service:8086"},
 	}
 
 	mux := http.NewServeMux()
