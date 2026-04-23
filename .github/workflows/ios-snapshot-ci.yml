@@ -1,0 +1,44 @@
+
+name: iOS snapshot tests
+
+on:
+  push:
+    paths:
+      - "iOS/Gymbro/**"
+      - ".github/workflows/ios-snapshot-ci.yml"
+  pull_request:
+    paths:
+      - "iOS/Gymbro/**"
+      - ".github/workflows/ios-snapshot-ci.yml"
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install Tuist
+        run: curl -Ls https://install.tuist.io | bash
+        env:
+          TUIST_CI: 1
+
+      - name: Generate and test
+        working-directory: iOS/Gymbro
+        run: |
+          set -euo pipefail
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          tuist install
+          tuist generate --no-open
+          # Keep destination aligned with the simulator used when recording __Snapshots__ (iPhone 16, iOS 18.x)
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroWorkouts \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.1' \
+            -only-testing:GymbroWorkoutsTests \
+            test
