@@ -52,6 +52,10 @@ func (a *Aggregator) Aggregate(ctx context.Context, events []models.ProcessableE
 		return err
 	}
 
+	if err := a.store.RebuildPipelineDaily(ctx); err != nil {
+		return err
+	}
+
 	for _, event := range events {
 		var properties map[string]string
 		if len(event.Properties) > 0 {

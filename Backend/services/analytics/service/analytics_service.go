@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/alexandra-gritsaenko/gymbro-analytics/models"
 	"github.com/alexandra-gritsaenko/gymbro-analytics/store"
@@ -53,15 +54,16 @@ func (s *AnalyticsService) IngestBatch(
 	rejected := 0
 
 	for _, event := range events {
-		valid, reason, rawSize, propsSize := s.validator.ValidateEvent(event)
+		safeEvent := SanitizeEventForStorage(event)
+		valid, reason, rawSize, propsSize := s.validator.ValidateEvent(safeEvent)
 
-		normalized := normalizeEvent(userID, event)
+		normalized := normalizeEvent(userID, safeEvent)
 		normalized.IsValid = valid
 		normalized.RejectReason = reason
 		normalized.RawPayloadSize = rawSize
 		normalized.PropertiesSize = propsSize
-		normalized.NormalizedName = models.NormalizeEventName(event.EventName)
-		normalized.NormalizedPlatform = event.Platform
+		normalized.NormalizedName = models.NormalizeEventName(safeEvent.EventName)
+		normalized.NormalizedPlatform = safeEvent.Platform
 
 		if valid {
 			accepted++
@@ -74,6 +76,11 @@ func (s *AnalyticsService) IngestBatch(
 
 	result, err := s.store.SaveBatch(ctx, requestID, batchID, batchFingerprint, userID, prepared)
 	if err != nil {
+		return nil, err
+	}
+
+	qualityDates := []string{time.Now().UTC().Format("2006-01-02")}
+	if err := s.store.RebuildDataQualityDailyForDates(ctx, qualityDates); err != nil {
 		return nil, err
 	}
 
@@ -98,7 +105,7 @@ func normalizeEvent(userID int64, event models.AnalyticsEventDTO) models.Ingeste
 		screen = &v
 	}
 
-	entityType, entityID := extractEntity(event.Properties)
+	entities := ExtractEntities(event.Properties)
 
 	def, ok := models.ResolveEventDefinition(event.EventName)
 	if !ok {
@@ -115,35 +122,19 @@ func normalizeEvent(userID int64, event models.AnalyticsEventDTO) models.Ingeste
 		Screen:             screen,
 		EventCategory:      def.Category,
 		IsErrorEvent:       def.IsErrorEvent,
-		EntityType:         entityType,
-		EntityID:           entityID,
+
+		EntityType:         entities.EntityType,
+		EntityID:           entities.EntityID,
+
+		WorkoutID:          entities.WorkoutID,
+		PostID:             entities.PostID,
+		PersonID:           entities.PersonID,
+		TargetUserID:       entities.TargetUserID,
+		CommunityID:        entities.CommunityID,
+
 		NormalizedTime:     normalizedTime,
 		NormalizedName:     models.NormalizeEventName(event.EventName),
 		NormalizedPlatform: event.Platform,
 		EventFingerprint:   BuildEventFingerprint(userID, event),
 	}
-}
-
-func extractEntity(properties map[string]string) (*string, *string) {
-	if v, ok := properties["post_id"]; ok && v != "" {
-		t := "post"
-		return &t, &v
-	}
-	if v, ok := properties["workout_id"]; ok && v != "" {
-		t := "workout"
-		return &t, &v
-	}
-	if v, ok := properties["person_id"]; ok && v != "" {
-		t := "person"
-		return &t, &v
-	}
-	if v, ok := properties["community_id"]; ok && v != "" {
-		t := "community"
-		return &t, &v
-	}
-	if v, ok := properties["target_user_id"]; ok && v != "" {
-		t := "user"
-		return &t, &v
-	}
-	return nil, nil
 }

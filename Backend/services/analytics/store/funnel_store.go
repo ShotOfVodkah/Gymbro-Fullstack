@@ -211,11 +211,10 @@ func (s *AnalyticsStore) insertFeedsOpenToInteractionFunnel(ctx context.Context,
 				event_date,
 				user_id,
 				event_name,
-				properties->>'screen' AS prop_screen
+				screen
 			FROM analytics_events
 			WHERE event_date::text = ANY($1)
-			  AND (
-				(event_name = 'screen_viewed' AND properties->>'screen' = 'feedsMain')
+			AND ((event_name = 'screen_viewed' AND screen = 'feedsMain')
 				OR event_name IN (
 					'feeds_post_author_tapped',
 					'feeds_post_liked',
@@ -223,14 +222,14 @@ func (s *AnalyticsStore) insertFeedsOpenToInteractionFunnel(ctx context.Context,
 					'feeds_post_exercise_tapped',
 					'feeds_post_show_all_exercises'
 				)
-			  )
-			GROUP BY event_date, user_id, event_name, properties->>'screen'
+			)
+			GROUP BY event_date, user_id, event_name, screen
 		),
 		user_steps AS (
 			SELECT
 				event_date,
 				user_id,
-				BOOL_OR(event_name = 'screen_viewed' AND prop_screen = 'feedsMain') AS has_step_1,
+				BOOL_OR(event_name = 'screen_viewed' AND screen = 'feedsMain') AS has_step_1,
 				BOOL_OR(event_name = 'feeds_post_author_tapped') AS has_step_2,
 				BOOL_OR(event_name = 'feeds_post_liked') AS has_step_3,
 				BOOL_OR(event_name = 'feeds_post_comment_tapped') AS has_step_4
@@ -286,24 +285,24 @@ func (s *AnalyticsStore) insertProfileOpenToRelationshipActionFunnel(ctx context
 				event_date,
 				user_id,
 				event_name,
-				properties->>'screen' AS prop_screen
+				screen
 			FROM analytics_events
 			WHERE event_date::text = ANY($1)
-			  AND (
-				(event_name = 'screen_viewed' AND properties->>'screen' = 'profile')
+			AND (
+				(event_name = 'screen_viewed' AND screen = 'profile')
 				OR event_name IN (
 					'profile_relationship_follow_tapped',
 					'profile_relationship_message_tapped',
 					'profile_relationship_posts_tapped'
 				)
-			  )
-			GROUP BY event_date, user_id, event_name, properties->>'screen'
+			)
+			GROUP BY event_date, user_id, event_name, screen
 		),
 		user_steps AS (
 			SELECT
 				event_date,
 				user_id,
-				BOOL_OR(event_name = 'screen_viewed' AND prop_screen = 'profile') AS has_step_1,
+				BOOL_OR(event_name = 'screen_viewed' AND screen = 'profile') AS has_step_1,
 				BOOL_OR(event_name = 'profile_relationship_follow_tapped') AS has_step_2,
 				BOOL_OR(event_name = 'profile_relationship_message_tapped') AS has_step_3,
 				BOOL_OR(event_name = 'profile_relationship_posts_tapped') AS has_step_4
@@ -350,32 +349,6 @@ func (s *AnalyticsStore) insertProfileOpenToRelationshipActionFunnel(ctx context
 		ORDER BY event_date, step_order
 	`, pq.Array(dates))
 	return err
-}
-
-func (s *AnalyticsStore) GetLatestWorkoutShareFunnel(ctx context.Context) ([]models.FunnelDailyItem, error) {
-	items := []models.FunnelDailyItem{}
-	err := s.db.SelectContext(ctx, &items, `
-		SELECT
-			event_date::text AS event_date,
-			funnel_name,
-			step_order,
-			step_name,
-			users_count,
-			conversion_from_prev,
-			conversion_from_start
-		FROM analytics_funnel_daily
-		WHERE funnel_name = 'workout_share'
-		  AND event_date = (
-			  SELECT MAX(event_date)
-			  FROM analytics_funnel_daily
-			  WHERE funnel_name = 'workout_share'
-		  )
-		ORDER BY step_order
-	`)
-	if err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 func (s *AnalyticsStore) GetLatestFunnel(ctx context.Context, funnelName string) ([]models.FunnelDailyItem, error) {

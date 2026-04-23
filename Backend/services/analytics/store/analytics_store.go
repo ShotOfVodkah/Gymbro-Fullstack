@@ -188,11 +188,16 @@ func (s *AnalyticsStore) SaveBatch(
 				is_error_event,
 				entity_type,
 				entity_id,
+				workout_id,
+				post_id,
+				person_id,
+				target_user_id,
+				community_id,
 				properties,
 				processing_status
 			)
 			VALUES (
-				$1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+				$1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
 			)
 			ON CONFLICT DO NOTHING
 			RETURNING id
@@ -213,6 +218,11 @@ func (s *AnalyticsStore) SaveBatch(
 			item.IsErrorEvent,
 			item.EntityType,
 			item.EntityID,
+			item.WorkoutID,
+			item.PostID,
+			item.PersonID,
+			item.TargetUserID,
+			item.CommunityID,
 			propertiesJSON,
 			"pending",
 		).Scan(&insertedEventID)

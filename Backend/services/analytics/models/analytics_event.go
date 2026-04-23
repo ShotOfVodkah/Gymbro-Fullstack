@@ -29,6 +29,13 @@ type IngestedEvent struct {
 	IsErrorEvent       bool
 	EntityType         *string
 	EntityID           *string
+
+	WorkoutID          *string
+	PostID             *string
+	PersonID           *string
+	TargetUserID       *string
+	CommunityID        *string
+
 	NormalizedTime     time.Time
 	RawPayloadSize     int
 	PropertiesSize     int

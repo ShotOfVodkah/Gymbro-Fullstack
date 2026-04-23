@@ -39,13 +39,14 @@ func main() {
 	analyticsStore := store.NewAnalyticsStore(db)
 	analyticsH := handlers.NewAnalyticsHandler(analyticsStore)
 	queryH := handlers.NewQueryHandler(analyticsStore)
+	adminH := handlers.NewAdminHandler(analyticsStore)
 
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	agg := aggregator.New(analyticsStore)
 	proc := processor.New(analyticsStore, agg, 5*time.Second, 100,)
 	ctx := context.Background()
-	sched := scheduler.New(proc)
+	sched := scheduler.New(proc, analyticsStore)
 	sched.Start(ctx)
 
 	mux := http.NewServeMux()
@@ -71,7 +72,16 @@ func main() {
 
 	mux.Handle("/analytics/retention/cohorts", authMiddleware(queryH))
 	mux.Handle("/analytics/app-versions", authMiddleware(queryH))
-	mux.Handle("/analytics/users/", (queryH)) // authMiddleware
+	mux.Handle("/analytics/users/", authMiddleware(queryH))
+
+	mux.Handle("/analytics/admin/privacy/cleanup", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/pipeline/overview", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/batches/", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/invalid-events", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/data-quality/summary", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/data-quality/app-versions", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/materialized-views/refresh", authMiddleware(adminH))
+	mux.Handle("/analytics/admin/dashboard/overview-fast", authMiddleware(adminH))
 
 	log.Println("analytics service listening on :8086")
 	log.Fatal(http.ListenAndServe(":8086", mux))
