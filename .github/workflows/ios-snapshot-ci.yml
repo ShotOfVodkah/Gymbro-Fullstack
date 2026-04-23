@@ -24,18 +24,17 @@ jobs:
           xcode-version: latest-stable
 
       - name: Install Tuist
-        run: curl -Ls https://install.tuist.io | bash
-        env:
-          TUIST_CI: 1
+        run: |
+          set -euo pipefail
+          brew tap tuist/tuist
+          brew install tuist
 
       - name: Generate and test
         working-directory: iOS/Gymbro
         run: |
           set -euo pipefail
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
           tuist install
           tuist generate --no-open
-          # Keep destination aligned with the simulator used when recording __Snapshots__ (iPhone 16, iOS 18.x)
           xcodebuild \
             -workspace Gymbro.xcworkspace \
             -scheme GymbroWorkouts \
