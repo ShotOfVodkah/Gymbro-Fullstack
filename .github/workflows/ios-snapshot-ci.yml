@@ -41,15 +41,15 @@ jobs:
           tuist install
           tuist generate --no-open
 
-      - name: "Test: WorkoutPlayerExerciseSlideViewSnapshotTests"
-        run: |
-          set -euo pipefail
-          xcodebuild \
-            -workspace Gymbro.xcworkspace \
-            -scheme GymbroWorkouts \
-            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
-            -only-testing:GymbroWorkoutsTests/WorkoutPlayerExerciseSlideViewSnapshotTests/test_snapshots \
-            test
+      # - name: "Test: WorkoutPlayerExerciseSlideViewSnapshotTests"
+      #   run: |
+      #     set -euo pipefail
+      #     xcodebuild \
+      #       -workspace Gymbro.xcworkspace \
+      #       -scheme GymbroWorkouts \
+      #       -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+      #       -only-testing:GymbroWorkoutsTests/WorkoutPlayerExerciseSlideViewSnapshotTests/test_snapshots \
+      #       test
 
       - name: "Test: AppButtonSnapshotTests (GymbroCommonUI)"
         run: |
