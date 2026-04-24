@@ -50,3 +50,13 @@ jobs:
             -destination "${{ env.XCODEBUILD_DESTINATION }}" \
             -only-testing:GymbroWorkoutsTests/WorkoutPlayerExerciseSlideViewSnapshotTests/test_snapshots \
             test
+
+      - name: "Test: AppButtonSnapshotTests (GymbroCommonUI)"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroCommonUITests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroCommonUITests/AppButtonSnapshotTests/test_snapshots \
+            test

@@ -79,6 +79,21 @@ let navigationTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let gymbroCommonUITests: ProjectDescription.Target = .target(
+    name: "GymbroCommonUITests",
+    destinations: .iOS,
+    product: .unitTests,
+    bundleId: "\(bundleId).GymbroCommonUITests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroCommonUI/Tests/**"],
+    dependencies: [
+        .target(name: "GymbroCommonUI"),
+        .external(name: "SnapshotTesting")
+    ],
+    settings: baseSettings()
+)
+
 let commonUITarget: ProjectDescription.Target = .target(
     name: "GymbroCommonUI",
     destinations: .iOS,
@@ -272,6 +287,7 @@ let project = Project(
         gymbroWorkoutsTests,
         navigationTarget,
         commonUITarget,
+        gymbroCommonUITests,
         typesTarget,
         feedsTarget,
         authTarget,
