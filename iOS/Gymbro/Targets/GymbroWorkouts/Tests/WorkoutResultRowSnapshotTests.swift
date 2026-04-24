@@ -51,7 +51,6 @@ private func assertWorkoutResultCard(
             traits: traits
         ),
         named: name,
-        record: .all,
         file: file,
         testName: testName,
         line: line
