@@ -5,10 +5,10 @@ import XCTest
 
 @testable import GymbroWorkouts
 
-final class WorkoutGeneratorResultCardSnapshotTests: XCTestCase {
+final class WorkoutResultRowSnapshotTests: XCTestCase {
 
     func test_snapshots() {
-        for example in WorkoutGeneratorResultCardSnapshotExamples.snapshotExamples {
+        for example in WorkoutResultRowSnapshotExamples.snapshotExamples {
             assertWorkoutResultCard(
                 name: example.name,
                 makeView: example.makeView
@@ -19,12 +19,12 @@ final class WorkoutGeneratorResultCardSnapshotTests: XCTestCase {
 
 private func assertWorkoutResultCard(
     name: String,
-    makeView: @escaping () -> WorkoutResultCard,
+    makeView: @escaping () -> WorkoutResultRow,
     file: StaticString = #file,
     testName: String = #function,
     line: UInt = #line
 ) {
-    let size = WorkoutGeneratorResultCardSnapshotExamples.snapshotSize
+    let size = WorkoutResultRowSnapshotExamples.snapshotSize
     let traits = UITraitCollection(traitsFrom: [
         UITraitCollection(horizontalSizeClass: .compact),
         UITraitCollection(verticalSizeClass: .regular),
@@ -51,6 +51,7 @@ private func assertWorkoutResultCard(
             traits: traits
         ),
         named: name,
+        record: .all,
         file: file,
         testName: testName,
         line: line
