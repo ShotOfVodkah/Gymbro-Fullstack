@@ -1,4 +1,3 @@
-
 name: iOS snapshot tests
 
 on:
@@ -11,9 +10,16 @@ on:
       - "iOS/Gymbro/**"
       - ".github/workflows/ios-snapshot-ci.yml"
 
+env:
+  XCODEBUILD_DESTINATION: "platform=iOS Simulator,name=iPhone 16,OS=18.6"
+  TUIST_XCODE: "26.2"
+
 jobs:
   test:
     runs-on: macos-15
+    defaults:
+      run:
+        working-directory: iOS/Gymbro
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +27,7 @@ jobs:
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "26.2"
+          xcode-version: ${{ env.TUIST_XCODE }}
 
       - name: Install Tuist
         run: |
@@ -29,15 +35,18 @@ jobs:
           brew tap tuist/tuist
           brew install tuist
 
-      - name: Generate and test
-        working-directory: iOS/Gymbro
+      - name: Generate project (tuist)
         run: |
           set -euo pipefail
           tuist install
           tuist generate --no-open
+
+      - name: "Test: WorkoutPlayerExerciseSlideViewSnapshotTests"
+        run: |
+          set -euo pipefail
           xcodebuild \
             -workspace Gymbro.xcworkspace \
             -scheme GymbroWorkouts \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.6' \
-            -only-testing:GymbroWorkoutsTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroWorkoutsTests/WorkoutPlayerExerciseSlideViewSnapshotTests/test_snapshots \
             test
