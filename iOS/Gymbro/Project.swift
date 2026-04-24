@@ -275,6 +275,22 @@ let watchOSTarget: ProjectDescription.Target = .target(
     dependencies: []
 )
 
+// Schemes
+
+let gymbroWorkoutsTestsScheme: Scheme = .scheme(
+    name: "GymbroWorkoutsTests",
+    shared: true,
+    buildAction: .buildAction(
+        targets: [TargetReference(stringLiteral: "GymbroWorkoutsTests")],
+        preActions: [],
+        postActions: []
+    ),
+    testAction: .targets(
+        [TestableTarget(stringLiteral: "GymbroWorkoutsTests")],
+        configuration: .debug
+    )
+)
+
 // Project
 
 let project = Project(
@@ -294,7 +310,8 @@ let project = Project(
         profileTarget,
         analyticsTarget,
         watchOSTarget
-    ]
+    ],
+    schemes: [gymbroWorkoutsTestsScheme]
 )
 
 // Helpers

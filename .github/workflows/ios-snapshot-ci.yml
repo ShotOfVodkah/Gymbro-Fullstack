@@ -60,3 +60,13 @@ jobs:
             -destination "${{ env.XCODEBUILD_DESTINATION }}" \
             -only-testing:GymbroWorkoutsTests/WorkoutGeneratorInjuryToggleSnapshotTests/test_snapshots \
             test
+        
+      - name: "Test: WorkoutGeneratorResultCardSnapshotTests"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroWorkoutsTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroWorkoutsTests/WorkoutGeneratorResultCardSnapshotTests/test_snapshots \
+            test
