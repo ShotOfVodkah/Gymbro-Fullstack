@@ -5,11 +5,11 @@ import XCTest
 
 @testable import GymbroWorkouts
 
-final class WorkoutPlayerExerciseSlideViewSnapshotTests: XCTestCase {
+final class WorkoutGeneratorInjuryToggleSnapshotTests: XCTestCase {
 
     func test_snapshots() {
-        for example in WorkoutPlayerExerciseSlideViewSnapshotExamples.snapshotExamples {
-            assertWorkoutPlayerSlide(
+        for example in WorkoutGeneratorInjuryToggleSnapshotExamples.snapshotExamples {
+            assertGeneratorInjuryToggle(
                 name: example.name,
                 makeView: example.makeView
             )
@@ -17,14 +17,14 @@ final class WorkoutPlayerExerciseSlideViewSnapshotTests: XCTestCase {
     }
 }
 
-private func assertWorkoutPlayerSlide(
+private func assertGeneratorInjuryToggle(
     name: String,
-    makeView: @escaping () -> WorkoutPlayerExerciseSlideView,
+    makeView: @escaping () -> InjuryToggleChip,
     file: StaticString = #file,
     testName: String = #function,
     line: UInt = #line
 ) {
-    let size = WorkoutPlayerExerciseSlideViewSnapshotExamples.snapshotSize
+    let size = WorkoutGeneratorInjuryToggleSnapshotExamples.snapshotSize
     let traits = UITraitCollection(traitsFrom: [
         UITraitCollection(horizontalSizeClass: .compact),
         UITraitCollection(verticalSizeClass: .regular),
