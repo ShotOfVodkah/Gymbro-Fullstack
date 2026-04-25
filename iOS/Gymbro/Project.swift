@@ -190,6 +190,21 @@ let feedsTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let gymbroFeedsTests: ProjectDescription.Target = .target(
+    name: "GymbroFeedsTests",
+    destinations: .iOS,
+    product: .unitTests,
+    bundleId: "\(bundleId).GymbroFeedsTests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroFeeds/Tests/**"],
+    dependencies: [
+        .target(name: "GymbroFeeds"),
+        .external(name: "SnapshotTesting")
+    ],
+    settings: baseSettings()
+)
+
 let authTarget: ProjectDescription.Target = .target(
     name: "GymbroAuth",
     destinations: .iOS,
@@ -291,6 +306,20 @@ let gymbroWorkoutsTestsScheme: Scheme = .scheme(
     )
 )
 
+let gymbroFeedsTestsScheme: Scheme = .scheme(
+    name: "GymbroFeedsTests",
+    shared: true,
+    buildAction: .buildAction(
+        targets: [TargetReference(stringLiteral: "GymbroFeedsTests")],
+        preActions: [],
+        postActions: []
+    ),
+    testAction: .targets(
+        [TestableTarget(stringLiteral: "GymbroFeedsTests")],
+        configuration: .debug
+    )
+)
+
 // Project
 
 let project = Project(
@@ -306,12 +335,13 @@ let project = Project(
         gymbroCommonUITests,
         typesTarget,
         feedsTarget,
+        gymbroFeedsTests,
         authTarget,
         profileTarget,
         analyticsTarget,
         watchOSTarget
     ],
-    schemes: [gymbroWorkoutsTestsScheme]
+    schemes: [gymbroWorkoutsTestsScheme, gymbroFeedsTestsScheme]
 )
 
 // Helpers

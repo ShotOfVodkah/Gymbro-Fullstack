@@ -59,5 +59,18 @@ jobs:
             -scheme GymbroWorkoutsTests \
             -destination "${{ env.XCODEBUILD_DESTINATION }}" \
             -only-testing:GymbroWorkoutsTests/WorkoutGeneratorInjuryToggleSnapshotTests/test_snapshots \
-            -only-testing:GymbroWorkoutsTests/WorkoutGeneratorResultCardSnapshotTests/test_snapshots \
+            -only-testing:GymbroWorkoutsTests/WorkoutResultRowSnapshotTests/test_snapshots \
+            test
+
+      - name: "Test: Feeds snapshot tests"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroFeedsTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroFeedsTests/PostHeaderViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroFeedsTests/PostMetaTagsViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroFeedsTests/CalendarLegendViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroFeedsTests/ChatTextMessageBubbleViewSnapshotTests/test_snapshots \
             test
