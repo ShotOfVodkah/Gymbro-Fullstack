@@ -17,13 +17,15 @@ public final class WorkoutPlayerFactoryImpl {
         workoutsRepository: WorkoutsCacheRepository,
         actionsRepository: OfflineActionsRepository,
         client: WorkoutsClient,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        streakWidget: StreakWidgetControlling
     ) -> some View {
         guard let viewModelCache, id == idCache else {
             let service = WorkoutPlayerServiceImpl(
                 client: client,
                 workoutsRepository: workoutsRepository,
-                actionsRepository: actionsRepository
+                actionsRepository: actionsRepository,
+                streakWidget: streakWidget
             )
             let viewModel = WorkoutPlayerViewModel(
                 id: id,

@@ -22,6 +22,7 @@ final class AppServicesFactory {
     let localMapper: WorkoutsLocalMapper
 
     let analytics: AnalyticsServiceImpl
+    private let streakWidget: StreakWidgetControlling
 
     private let offlineSyncService: OfflineSyncService
     private var screenFactories = ScreenFactories()
@@ -34,6 +35,11 @@ final class AppServicesFactory {
         container: ModelContainer
     ) {
         self.router = router
+
+        let store = StreakWidgetStore()
+        let reloader = StreakWidgetCenterTimelineReloader()
+        let streakService = StreakWidgetControllingService(store: store, reloader: reloader)
+        self.streakWidget = streakService
         
         let cacheDS = WorkoutsDivCacheDataSource(container: container)
         self.divLocalRepository = DivCacheRepository(dataSource: cacheDS)
@@ -55,9 +61,13 @@ final class AppServicesFactory {
         self.offlineSyncService = OfflineSyncService(
             actionsRepository: actionsRepository,
             networkClient: AppMicroservices.workouts,
-            modelModifier: workoutsModelModifier
+            modelModifier: workoutsModelModifier,
+            streakWidget: streakService
         )
-        self.watchConnectivityService = WatchConnectivityService(workoutsRepository: workoutsRepository)
+        self.watchConnectivityService = WatchConnectivityService(
+            workoutsRepository: workoutsRepository,
+            streakWidget: streakService
+        )
         let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
         self.analytics = AnalyticsServiceImpl(client: analyticsClient)
         watchConnectivityService.activate()
@@ -128,7 +138,8 @@ final class AppServicesFactory {
             modelModifier: workoutsModelModifier,
             client: AppMicroservices.workouts,
             localMapper: localMapper,
-            analytics: analytics
+            analytics: analytics,
+            streakWidget: streakWidget
         )
     }
     
@@ -156,7 +167,8 @@ final class AppServicesFactory {
             workoutsRepository: workoutsRepository,
             actionsRepository: actionsRepository,
             client: AppMicroservices.workouts,
-            analytics: analytics
+            analytics: analytics,
+            streakWidget: streakWidget
         )
     }
     

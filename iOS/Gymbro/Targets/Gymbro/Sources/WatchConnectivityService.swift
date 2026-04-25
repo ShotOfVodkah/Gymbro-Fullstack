@@ -7,9 +7,11 @@ import GymbroTypes
 final class WatchConnectivityService: NSObject {
 
     init(
-        workoutsRepository: WorkoutsCacheRepository
+        workoutsRepository: WorkoutsCacheRepository,
+        streakWidget: StreakWidgetControlling
     ) {
         self.workoutsRepository = workoutsRepository
+        self.streakWidget = streakWidget
     }
 
     func activate() {
@@ -31,6 +33,7 @@ final class WatchConnectivityService: NSObject {
     }
     
     private let workoutsRepository: WorkoutsCacheRepository
+    private let streakWidget: StreakWidgetControlling
 }
 
 extension WatchConnectivityService: WCSessionDelegate {
@@ -72,12 +75,17 @@ extension WatchConnectivityService: WCSessionDelegate {
             )
         }
 
-        Task { @MainActor in
-            try? await AppMicroservices.workouts.createSession(
-                workoutId: payload.workoutId,
-                completedAt: payload.completedAt,
-                exercises: exercises
-            )
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await AppMicroservices.workouts.createSession(
+                    workoutId: payload.workoutId,
+                    completedAt: payload.completedAt,
+                    exercises: exercises
+                )
+                await self.streakWidget.incrementAfterSessionSuccessfullyCreated()
+            } catch {
+            }
         }
     }
 

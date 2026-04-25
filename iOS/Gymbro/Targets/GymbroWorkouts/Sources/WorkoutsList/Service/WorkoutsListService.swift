@@ -17,13 +17,15 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
-        localMapper: WorkoutsLocalMapper
+        localMapper: WorkoutsLocalMapper,
+        streakWidget: StreakWidgetControlling
     ) {
         self.networkClient = networkClient
         self.divLocalRepository = divLocalRepository
         self.workoutsRepository = workoutsRepository
         self.exercisesRepository = exercisesRepository
         self.localMapper = localMapper
+        self.streakWidget = streakWidget
     }
 
     func fetchScreen() async throws -> (Data, ScreenState) {
@@ -81,6 +83,7 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     private let workoutsRepository: WorkoutsCacheRepository
     private let exercisesRepository: ExercisesRepository
     private let localMapper: WorkoutsLocalMapper
+    private let streakWidget: StreakWidgetControlling
 
     private func seedInitialData() async throws {
         let workouts = try await networkClient.fetchUserWorkouts()
@@ -95,5 +98,8 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
 
         let premadeWorkouts = try await networkClient.fetchPremadeWorkouts()
         workoutsRepository.saveWorkouts(key: "premade", workouts: premadeWorkouts)
+        
+        let streakData = StreakWidgetPayload(weeklyTarget: 5, weeklyProgress: 4, streakValue: 10, daysUntilBurn: 5)
+        await streakWidget.applySnapshotFromWorkoutsListLoaded(with: streakData)
     }
 }

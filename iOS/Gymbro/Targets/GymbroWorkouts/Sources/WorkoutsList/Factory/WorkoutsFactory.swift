@@ -18,7 +18,8 @@ public final class WorkoutsListFactoryImpl {
         modelModifier: WorkoutsModelModifier,
         client: WorkoutsClient,
         localMapper: WorkoutsLocalMapper,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        streakWidget: StreakWidgetControlling
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutsListServiceImpl(
@@ -26,7 +27,8 @@ public final class WorkoutsListFactoryImpl {
                 divLocalRepository: divLocalRepository,
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,
-                localMapper: localMapper
+                localMapper: localMapper,
+                streakWidget: streakWidget
             )
             let viewModel = WorkoutsListViewModel(
                 service: service,

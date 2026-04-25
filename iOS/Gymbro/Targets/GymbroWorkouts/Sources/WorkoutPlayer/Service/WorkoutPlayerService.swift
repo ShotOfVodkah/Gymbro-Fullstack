@@ -19,11 +19,13 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
     init(
         client: WorkoutsClient,
         workoutsRepository: WorkoutsCacheRepository,
-        actionsRepository: OfflineActionsRepository
+        actionsRepository: OfflineActionsRepository,
+        streakWidget: StreakWidgetControlling
     ) {
         self.client = client
         self.workoutsRepository = workoutsRepository
         self.actionsRepository = actionsRepository
+        self.streakWidget = streakWidget
     }
 
     func fetchWorkout(id: String) async throws -> (WorkoutPlayerViewState, ScreenState) {
@@ -87,6 +89,7 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
                 workoutId: workoutId,
                 exercises: sessionExercises
             )
+            await streakWidget.incrementAfterSessionSuccessfullyCreated()
             completionResult = .completed(session: CompletedSession(response: sessionResponse))
         } catch {
             actionsRepository.enqueueSmart(.completedWorkout(id: workoutId, exercises: sessionExercises))
@@ -131,4 +134,5 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
     private let client: WorkoutsClient
     private let workoutsRepository: WorkoutsCacheRepository
     private let actionsRepository: OfflineActionsRepository
+    private let streakWidget: StreakWidgetControlling
 }

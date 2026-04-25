@@ -8,11 +8,13 @@ public final class OfflineSyncService {
     public init(
         actionsRepository: OfflineActionsRepository,
         networkClient: WorkoutsClient,
-        modelModifier: WorkoutsModelModifier
+        modelModifier: WorkoutsModelModifier,
+        streakWidget: StreakWidgetControlling
     ) {
         self.actionsRepository = actionsRepository
         self.networkClient = networkClient
         self.modelModifier = modelModifier
+        self.streakWidget = streakWidget
     }
 
     public func start() {
@@ -28,6 +30,7 @@ public final class OfflineSyncService {
     private let actionsRepository: OfflineActionsRepository
     private let networkClient: WorkoutsClient
     private let modelModifier: WorkoutsModelModifier
+    private let streakWidget: StreakWidgetControlling
     private var cancellables = Set<AnyCancellable>()
 
     private func flush() async {
@@ -57,6 +60,7 @@ public final class OfflineSyncService {
             _ = try await networkClient.addPremadeWorkout(premadeId: id)
         case .completedWorkout(let id, let exercises):
             try await networkClient.createSession(workoutId: id, exercises: exercises)
+            await streakWidget.incrementAfterSessionSuccessfullyCreated()
         }
     }
 }
