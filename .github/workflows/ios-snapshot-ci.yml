@@ -1,0 +1,86 @@
+name: iOS snapshot tests
+
+on:
+  push:
+    paths:
+      - "iOS/Gymbro/**"
+      - ".github/workflows/ios-snapshot-ci.yml"
+  pull_request:
+    paths:
+      - "iOS/Gymbro/**"
+      - ".github/workflows/ios-snapshot-ci.yml"
+
+env:
+  XCODEBUILD_DESTINATION: "platform=iOS Simulator,name=iPhone 16,OS=18.6"
+  TUIST_XCODE: "26.2"
+
+jobs:
+  test:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: iOS/Gymbro
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.TUIST_XCODE }}
+
+      - name: Install Tuist
+        run: |
+          set -euo pipefail
+          brew tap tuist/tuist
+          brew install tuist
+
+      - name: Generate project (tuist)
+        run: |
+          set -euo pipefail
+          tuist install
+          tuist generate --no-open
+
+      - name: "Test: CommonUI snapshot tests"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroCommonUITests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroCommonUITests/AppButtonSnapshotTests/test_snapshots \
+            test
+        
+      - name: "Test: Workout snapshot tests "
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroWorkoutsTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroWorkoutsTests/WorkoutGeneratorInjuryToggleSnapshotTests/test_snapshots \
+            test
+
+      - name: "Test: Feeds snapshot tests"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroFeedsTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroFeedsTests/PostHeaderViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroFeedsTests/PostMetaTagsViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroFeedsTests/ChatTextMessageBubbleViewSnapshotTests/test_snapshots \
+            test
+
+      - name: "Test: Profile snapshot tests"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroProfileTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroProfileTests/SettingsRowSnapshotTests/test_snapshots \
+            -only-testing:GymbroProfileTests/ProfileStatChipViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroProfileTests/StatisticsSummaryCardSnapshotTests/test_snapshots \
+            test

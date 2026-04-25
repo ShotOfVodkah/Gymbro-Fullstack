@@ -79,6 +79,21 @@ let navigationTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let gymbroCommonUITests: ProjectDescription.Target = .target(
+    name: "GymbroCommonUITests",
+    destinations: .iOS,
+    product: .unitTests,
+    bundleId: "\(bundleId).GymbroCommonUITests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroCommonUI/Tests/**"],
+    dependencies: [
+        .target(name: "GymbroCommonUI"),
+        .external(name: "SnapshotTesting")
+    ],
+    settings: baseSettings()
+)
+
 let commonUITarget: ProjectDescription.Target = .target(
     name: "GymbroCommonUI",
     destinations: .iOS,
@@ -138,6 +153,21 @@ let workoutsTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let gymbroWorkoutsTests: ProjectDescription.Target = .target(
+    name: "GymbroWorkoutsTests",
+    destinations: .iOS,
+    product: .unitTests,
+    bundleId: "\(bundleId).GymbroWorkoutsTests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroWorkouts/Tests/**"],
+    dependencies: [
+        .target(name: "GymbroWorkouts"),
+        .external(name: "SnapshotTesting")
+    ],
+    settings: baseSettings()
+)
+
 let feedsTarget: ProjectDescription.Target = .target(
     name: "GymbroFeeds",
     destinations: .iOS,
@@ -156,6 +186,21 @@ let feedsTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroNavigation"),
         .target(name: "GymbroCommonUI"),
         .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
+let gymbroFeedsTests: ProjectDescription.Target = .target(
+    name: "GymbroFeedsTests",
+    destinations: .iOS,
+    product: .unitTests,
+    bundleId: "\(bundleId).GymbroFeedsTests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroFeeds/Tests/**"],
+    dependencies: [
+        .target(name: "GymbroFeeds"),
+        .external(name: "SnapshotTesting")
     ],
     settings: baseSettings()
 )
@@ -205,6 +250,21 @@ let profileTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let gymbroProfileTests: ProjectDescription.Target = .target(
+    name: "GymbroProfileTests",
+    destinations: .iOS,
+    product: .unitTests,
+    bundleId: "\(bundleId).GymbroProfileTests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroProfile/Tests/**"],
+    dependencies: [
+        .target(name: "GymbroProfile"),
+        .external(name: "SnapshotTesting")
+    ],
+    settings: baseSettings()
+)
+
 let analyticsTarget: ProjectDescription.Target = .target(
     name: "GymbroAnalytics",
     destinations: .iOS,
@@ -245,6 +305,50 @@ let watchOSTarget: ProjectDescription.Target = .target(
     dependencies: []
 )
 
+// Schemes
+
+let gymbroWorkoutsTestsScheme: Scheme = .scheme(
+    name: "GymbroWorkoutsTests",
+    shared: true,
+    buildAction: .buildAction(
+        targets: [TargetReference(stringLiteral: "GymbroWorkoutsTests")],
+        preActions: [],
+        postActions: []
+    ),
+    testAction: .targets(
+        [TestableTarget(stringLiteral: "GymbroWorkoutsTests")],
+        configuration: .debug
+    )
+)
+
+let gymbroFeedsTestsScheme: Scheme = .scheme(
+    name: "GymbroFeedsTests",
+    shared: true,
+    buildAction: .buildAction(
+        targets: [TargetReference(stringLiteral: "GymbroFeedsTests")],
+        preActions: [],
+        postActions: []
+    ),
+    testAction: .targets(
+        [TestableTarget(stringLiteral: "GymbroFeedsTests")],
+        configuration: .debug
+    )
+)
+
+let gymbroProfileTestsScheme: Scheme = .scheme(
+    name: "GymbroProfileTests",
+    shared: true,
+    buildAction: .buildAction(
+        targets: [TargetReference(stringLiteral: "GymbroProfileTests")],
+        preActions: [],
+        postActions: []
+    ),
+    testAction: .targets(
+        [TestableTarget(stringLiteral: "GymbroProfileTests")],
+        configuration: .debug
+    )
+)
+
 // Project
 
 let project = Project(
@@ -254,15 +358,20 @@ let project = Project(
         mainAppTarget,
         networkTarget,
         workoutsTarget,
+        gymbroWorkoutsTests,
         navigationTarget,
         commonUITarget,
+        gymbroCommonUITests,
         typesTarget,
         feedsTarget,
+        gymbroFeedsTests,
         authTarget,
         profileTarget,
+        gymbroProfileTests,
         analyticsTarget,
         watchOSTarget
-    ]
+    ],
+    schemes: [gymbroWorkoutsTestsScheme, gymbroFeedsTestsScheme, gymbroProfileTestsScheme]
 )
 
 // Helpers
