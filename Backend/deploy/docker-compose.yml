@@ -106,18 +106,18 @@ services:
     expose:
       - "8084"
 
-  # ai_service:
-  #   build:
-  #     context: ../services/ai_service
-  #     dockerfile: Dockerfile
-  #   container_name: ai_service
-  #   environment:
-  #     JWT_SECRET: "supersecret_noone_will_get_out"
-  #     LLAMA_N_THREADS: "4"
-  #   expose:
-  #     - "8085"
-  #   mem_limit: "8g"
-  #   memswap_limit: "8g"
+  ai_service:
+    build:
+      context: ../services/ai_service
+      dockerfile: Dockerfile
+    container_name: ai_service
+    environment:
+      JWT_SECRET: "supersecret_noone_will_get_out"
+      LLAMA_N_THREADS: "4"
+    expose:
+      - "8085"
+    mem_limit: "8g"
+    memswap_limit: "8g"
 
   postgres_analytics:
     image: postgres:14
