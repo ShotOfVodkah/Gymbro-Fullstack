@@ -70,6 +70,17 @@ jobs:
             -destination "${{ env.XCODEBUILD_DESTINATION }}" \
             -only-testing:GymbroFeedsTests/PostHeaderViewSnapshotTests/test_snapshots \
             -only-testing:GymbroFeedsTests/PostMetaTagsViewSnapshotTests/test_snapshots \
-            -only-testing:GymbroFeedsTests/CalendarLegendViewSnapshotTests/test_snapshots \
             -only-testing:GymbroFeedsTests/ChatTextMessageBubbleViewSnapshotTests/test_snapshots \
+            test
+
+      - name: "Test: Profile snapshot tests"
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroProfileTests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -only-testing:GymbroProfileTests/SettingsRowSnapshotTests/test_snapshots \
+            -only-testing:GymbroProfileTests/ProfileStatChipViewSnapshotTests/test_snapshots \
+            -only-testing:GymbroProfileTests/StatisticsSummaryCardSnapshotTests/test_snapshots \
             test

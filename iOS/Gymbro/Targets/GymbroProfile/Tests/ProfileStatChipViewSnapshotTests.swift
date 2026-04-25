@@ -3,13 +3,13 @@ import SwiftUI
 import UIKit
 import XCTest
 
-@testable import GymbroFeeds
+@testable import GymbroProfile
 
-final class CalendarLegendViewSnapshotTests: XCTestCase {
+final class ProfileStatChipViewSnapshotTests: XCTestCase {
 
     func test_snapshots() {
-        for example in CalendarLegendViewSnapshotExamples.snapshotExamples {
-            assertCalendarLegend(
+        for example in ProfileStatChipViewSnapshotExamples.snapshotExamples {
+            assertProfileStatChip(
                 name: example.name,
                 makeView: example.makeView
             )
@@ -17,14 +17,14 @@ final class CalendarLegendViewSnapshotTests: XCTestCase {
     }
 }
 
-private func assertCalendarLegend(
+private func assertProfileStatChip(
     name: String,
-    makeView: @escaping () -> CalendarLegendView,
+    makeView: @escaping () -> ProfileStatChipView,
     file: StaticString = #file,
     testName: String = #function,
     line: UInt = #line
 ) {
-    let size = CalendarLegendViewSnapshotExamples.snapshotSize
+    let size = ProfileStatChipViewSnapshotExamples.snapshotSize
     let traits = UITraitCollection(traitsFrom: [
         UITraitCollection(horizontalSizeClass: .compact),
         UITraitCollection(verticalSizeClass: .regular),
