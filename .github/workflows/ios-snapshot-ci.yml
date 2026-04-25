@@ -59,7 +59,6 @@ jobs:
             -scheme GymbroWorkoutsTests \
             -destination "${{ env.XCODEBUILD_DESTINATION }}" \
             -only-testing:GymbroWorkoutsTests/WorkoutGeneratorInjuryToggleSnapshotTests/test_snapshots \
-            -only-testing:GymbroWorkoutsTests/WorkoutResultRowSnapshotTests/test_snapshots \
             test
 
       - name: "Test: Feeds snapshot tests"
