@@ -51,7 +51,7 @@ final class WorkoutsListViewModel: ObservableObject {
                 case .premadeWorkoutAdded(let id): handleAdd(id: id, fromPremade: true)
                 case .workoutAdded(let id): handleAdd(id: id, fromPremade: false)
                 case .forceReload: fetchData()
-                case .workoutEdited: break
+                case .workoutEdited: fetchData()
                 }
             }
             .store(in: &cancellables)

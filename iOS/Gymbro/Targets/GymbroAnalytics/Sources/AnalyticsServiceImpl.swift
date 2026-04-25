@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import GymbroTypes
 import GymbroNetwork
 
@@ -9,11 +10,19 @@ public final class AnalyticsServiceImpl: AnalyticsService {
     private var _buffer: [AnalyticsEventDTO] = []
     private let bufferLimit = 20
     private var flushTask: Task<Void, Never>?
+    private var backgroundObserver: NSObjectProtocol?
 
     public init(client: AnalyticsClient) {
         self.client = client
         self.sessionId = UUID().uuidString
         schedulePeriodicFlush()
+        backgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.flush()
+        }
     }
 
     public func track(_ event: AnalyticsEvent) {
@@ -61,6 +70,9 @@ public final class AnalyticsServiceImpl: AnalyticsService {
     }
 
     deinit {
+        if let backgroundObserver {
+            NotificationCenter.default.removeObserver(backgroundObserver)
+        }
         flushTask?.cancel()
     }
 }
