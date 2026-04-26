@@ -18,12 +18,18 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
 
     init(
         client: WorkoutsClient,
+        feedsClient: FeedsClient,
         workoutsRepository: WorkoutsCacheRepository,
-        actionsRepository: OfflineActionsRepository
+        actionsRepository: OfflineActionsRepository,
+        streakWidget: StreakWidgetControlling,
+        activityCalendarWidget: ActivityCalendarWidgetControlling
     ) {
         self.client = client
+        self.feedsClient = feedsClient
         self.workoutsRepository = workoutsRepository
         self.actionsRepository = actionsRepository
+        self.streakWidget = streakWidget
+        self.activityCalendarWidget = activityCalendarWidget
     }
 
     func fetchWorkout(id: String) async throws -> (WorkoutPlayerViewState, ScreenState) {
@@ -87,6 +93,8 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
                 workoutId: workoutId,
                 exercises: sessionExercises
             )
+            await streakWidget.incrementAfterSessionSuccessfullyCreated()
+            await applyActivityCalendarSnapshotIfPossible()
             completionResult = .completed(session: CompletedSession(response: sessionResponse))
         } catch {
             actionsRepository.enqueueSmart(.completedWorkout(id: workoutId, exercises: sessionExercises))
@@ -129,6 +137,22 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
     }
 
     private let client: WorkoutsClient
+    private let feedsClient: FeedsClient
     private let workoutsRepository: WorkoutsCacheRepository
     private let actionsRepository: OfflineActionsRepository
+    private let streakWidget: StreakWidgetControlling
+    private let activityCalendarWidget: ActivityCalendarWidgetControlling
+
+    private func applyActivityCalendarSnapshotIfPossible() async {
+        do {
+            let response = try await feedsClient.fetchCalendarMonth(
+                context: .mine,
+                month: Date(),
+                selectedPersonID: nil
+            )
+            let payload = ActivityCalendarWidgetPayload(response: response)
+            await activityCalendarWidget.applySnapshot(with: payload)
+        } catch {
+        }
+    }
 }

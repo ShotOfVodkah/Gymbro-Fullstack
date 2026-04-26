@@ -22,6 +22,8 @@ final class AppServicesFactory {
     let localMapper: WorkoutsLocalMapper
 
     let analytics: AnalyticsServiceImpl
+    private let streakWidget: StreakWidgetControlling
+    private let activityCalendarWidget: ActivityCalendarWidgetControlling
 
     private let offlineSyncService: OfflineSyncService
     private var screenFactories = ScreenFactories()
@@ -34,6 +36,19 @@ final class AppServicesFactory {
         container: ModelContainer
     ) {
         self.router = router
+
+        let store = StreakWidgetStore()
+        let reloader = StreakWidgetCenterTimelineReloader()
+        let streakService = StreakWidgetControllingService(store: store, reloader: reloader)
+        self.streakWidget = streakService
+
+        let activityCalendarStore = ActivityCalendarWidgetStore()
+        let activityCalendarReloader = ActivityCalendarWidgetCenterTimelineReloader()
+        let activityCalendarService = ActivityCalendarWidgetControllingService(
+            store: activityCalendarStore,
+            reloader: activityCalendarReloader
+        )
+        self.activityCalendarWidget = activityCalendarService
         
         let cacheDS = WorkoutsDivCacheDataSource(container: container)
         self.divLocalRepository = DivCacheRepository(dataSource: cacheDS)
@@ -55,9 +70,17 @@ final class AppServicesFactory {
         self.offlineSyncService = OfflineSyncService(
             actionsRepository: actionsRepository,
             networkClient: AppMicroservices.workouts,
-            modelModifier: workoutsModelModifier
+            feedsClient: AppMicroservices.feeds,
+            modelModifier: workoutsModelModifier,
+            streakWidget: streakService,
+            activityCalendarWidget: activityCalendarService
         )
-        self.watchConnectivityService = WatchConnectivityService(workoutsRepository: workoutsRepository)
+        self.watchConnectivityService = WatchConnectivityService(
+            workoutsRepository: workoutsRepository,
+            feedsClient: AppMicroservices.feeds,
+            streakWidget: streakService,
+            activityCalendarWidget: activityCalendarService
+        )
         let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
         self.analytics = AnalyticsServiceImpl(client: analyticsClient)
         watchConnectivityService.activate()
@@ -127,8 +150,11 @@ final class AppServicesFactory {
             exercisesRepository: exercisesRepository,
             modelModifier: workoutsModelModifier,
             client: AppMicroservices.workouts,
+            feedsClient: AppMicroservices.feeds,
             localMapper: localMapper,
-            analytics: analytics
+            analytics: analytics,
+            streakWidget: streakWidget,
+            activityCalendarWidget: activityCalendarWidget
         )
     }
     
@@ -156,7 +182,10 @@ final class AppServicesFactory {
             workoutsRepository: workoutsRepository,
             actionsRepository: actionsRepository,
             client: AppMicroservices.workouts,
-            analytics: analytics
+            feedsClient: AppMicroservices.feeds,
+            analytics: analytics,
+            streakWidget: streakWidget,
+            activityCalendarWidget: activityCalendarWidget
         )
     }
     

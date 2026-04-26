@@ -8,11 +8,17 @@ public final class OfflineSyncService {
     public init(
         actionsRepository: OfflineActionsRepository,
         networkClient: WorkoutsClient,
-        modelModifier: WorkoutsModelModifier
+        feedsClient: FeedsClient,
+        modelModifier: WorkoutsModelModifier,
+        streakWidget: StreakWidgetControlling,
+        activityCalendarWidget: ActivityCalendarWidgetControlling
     ) {
         self.actionsRepository = actionsRepository
         self.networkClient = networkClient
+        self.feedsClient = feedsClient
         self.modelModifier = modelModifier
+        self.streakWidget = streakWidget
+        self.activityCalendarWidget = activityCalendarWidget
     }
 
     public func start() {
@@ -27,7 +33,10 @@ public final class OfflineSyncService {
 
     private let actionsRepository: OfflineActionsRepository
     private let networkClient: WorkoutsClient
+    private let feedsClient: FeedsClient
     private let modelModifier: WorkoutsModelModifier
+    private let streakWidget: StreakWidgetControlling
+    private let activityCalendarWidget: ActivityCalendarWidgetControlling
     private var cancellables = Set<AnyCancellable>()
 
     private func flush() async {
@@ -57,6 +66,21 @@ public final class OfflineSyncService {
             _ = try await networkClient.addPremadeWorkout(premadeId: id)
         case .completedWorkout(let id, let exercises):
             try await networkClient.createSession(workoutId: id, exercises: exercises)
+            await streakWidget.incrementAfterSessionSuccessfullyCreated()
+            await applyActivityCalendarSnapshotIfPossible()
+        }
+    }
+
+    private func applyActivityCalendarSnapshotIfPossible() async {
+        do {
+            let response = try await feedsClient.fetchCalendarMonth(
+                context: .mine,
+                month: Date(),
+                selectedPersonID: nil
+            )
+            let payload = ActivityCalendarWidgetPayload(response: response)
+            await activityCalendarWidget.applySnapshot(with: payload)
+        } catch {
         }
     }
 }

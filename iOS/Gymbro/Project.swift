@@ -36,9 +36,10 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroAuth"),
         .target(name: "GymbroProfile"),
         .target(name: "GymbroAnalytics"),
-        .target(name: "GymBroWatch")
+        .target(name: "GymBroWatch"),
+        .target(name: "GymbroWidgetExtension")
     ],
-    settings: baseSettings()
+    settings: baseSettings(entitlements: "\(basePath)/Gymbro/Gymbro.entitlements")
 )
 
 let networkTarget: ProjectDescription.Target = .target(
@@ -305,6 +306,31 @@ let watchOSTarget: ProjectDescription.Target = .target(
     dependencies: []
 )
 
+let widgetExtensionTarget: ProjectDescription.Target = .target(
+    name: "GymbroWidgetExtension",
+    destinations: .iOS,
+    product: .appExtension,
+    bundleId: "\(bundleId).widget",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "CFBundleDevelopmentRegion": "en",
+            "CFBundleLocalizations": ["en", "ru"],
+            "CFBundleAllowMixedLocalizations": true,
+            "NSExtension": [
+                "NSExtensionPointIdentifier": "com.apple.widgetkit-extension"
+            ]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroWidgetExtension/Sources/**"],
+    resources: ["\(basePath)/GymbroWidgetExtension/Resources/**"],
+    dependencies: [
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings(entitlements: "\(basePath)/GymbroWidgetExtension/GymbroWidgetExtension.entitlements")
+)
+
 // Schemes
 
 let gymbroWorkoutsTestsScheme: Scheme = .scheme(
@@ -369,7 +395,8 @@ let project = Project(
         profileTarget,
         gymbroProfileTests,
         analyticsTarget,
-        watchOSTarget
+        watchOSTarget,
+        widgetExtensionTarget
     ],
     schemes: [gymbroWorkoutsTestsScheme, gymbroFeedsTestsScheme, gymbroProfileTestsScheme]
 )
@@ -382,8 +409,11 @@ private func makeConfigurations() -> [Configuration] {
     return [debug, release]
 }
 
-private func baseSettings() -> Settings {
+private func baseSettings(entitlements: String? = nil) -> Settings {
     var settings = SettingsDictionary()
+    if let entitlements {
+        settings["CODE_SIGN_ENTITLEMENTS"] = .string(entitlements)
+    }
     return Settings.settings(
         base: settings,
         configurations: [],

@@ -14,16 +14,22 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
 
     init(
         networkClient: WorkoutsClient,
+        feedsClient: FeedsClient,
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
-        localMapper: WorkoutsLocalMapper
+        localMapper: WorkoutsLocalMapper,
+        streakWidget: StreakWidgetControlling,
+        activityCalendarWidget: ActivityCalendarWidgetControlling
     ) {
         self.networkClient = networkClient
+        self.feedsClient = feedsClient
         self.divLocalRepository = divLocalRepository
         self.workoutsRepository = workoutsRepository
         self.exercisesRepository = exercisesRepository
         self.localMapper = localMapper
+        self.streakWidget = streakWidget
+        self.activityCalendarWidget = activityCalendarWidget
     }
 
     func fetchScreen() async throws -> (Data, ScreenState) {
@@ -77,10 +83,13 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     // MARK: - Private
 
     private let networkClient: WorkoutsClient
+    private let feedsClient: FeedsClient
     private let divLocalRepository: DivCacheRepository
     private let workoutsRepository: WorkoutsCacheRepository
     private let exercisesRepository: ExercisesRepository
     private let localMapper: WorkoutsLocalMapper
+    private let streakWidget: StreakWidgetControlling
+    private let activityCalendarWidget: ActivityCalendarWidgetControlling
 
     private func seedInitialData() async throws {
         let workouts = try await networkClient.fetchUserWorkouts()
@@ -95,5 +104,16 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
 
         let premadeWorkouts = try await networkClient.fetchPremadeWorkouts()
         workoutsRepository.saveWorkouts(key: "premade", workouts: premadeWorkouts)
+        
+        let streakData = StreakWidgetPayload(weeklyTarget: 5, weeklyProgress: 4, streakValue: 10, daysUntilBurn: 5)
+        await streakWidget.applySnapshotFromWorkoutsListLoaded(with: streakData)
+
+        let monthResponse = try await feedsClient.fetchCalendarMonth(
+            context: .mine,
+            month: Date(),
+            selectedPersonID: nil
+        )
+        let calendarPayload = ActivityCalendarWidgetPayload(response: monthResponse)
+        await activityCalendarWidget.applySnapshot(with: calendarPayload)
     }
 }
