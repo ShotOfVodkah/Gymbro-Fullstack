@@ -19,5 +19,6 @@ struct StreakWidget: Widget {
 struct GymbroWidgetBundle: WidgetBundle {
     var body: some Widget {
         StreakWidget()
+        ActivityCalendarWidget()
     }
 }

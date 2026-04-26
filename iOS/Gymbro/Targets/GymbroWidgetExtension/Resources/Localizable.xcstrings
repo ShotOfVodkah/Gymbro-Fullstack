@@ -4,6 +4,57 @@
     "%@" : {
 
     },
+    "widget.activity_calendar.configuration.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your workout days in the current month."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дни тренировок в текущем месяце."
+          }
+        }
+      }
+    },
+    "widget.activity_calendar.configuration.display_name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activity calendar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Календарь активности"
+          }
+        }
+      }
+    },
+    "widget.activity_calendar.widgetHeader" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My activity"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Моя активность"
+          }
+        }
+      }
+    },
     "widget.configuration.description" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33,7 +84,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Напоминание о серии"
+            "value" : "Напоминание о стрике"
           }
         }
       }

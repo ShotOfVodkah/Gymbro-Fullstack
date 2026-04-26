@@ -17,18 +17,22 @@ public final class WorkoutsListFactoryImpl {
         exercisesRepository: ExercisesRepository,
         modelModifier: WorkoutsModelModifier,
         client: WorkoutsClient,
+        feedsClient: FeedsClient,
         localMapper: WorkoutsLocalMapper,
         analytics: any AnalyticsService,
-        streakWidget: StreakWidgetControlling
+        streakWidget: StreakWidgetControlling,
+        activityCalendarWidget: ActivityCalendarWidgetControlling
     ) -> some View {
         guard let viewModelCache else {
             let service = WorkoutsListServiceImpl(
                 networkClient: client,
+                feedsClient: feedsClient,
                 divLocalRepository: divLocalRepository,
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,
                 localMapper: localMapper,
-                streakWidget: streakWidget
+                streakWidget: streakWidget,
+                activityCalendarWidget: activityCalendarWidget
             )
             let viewModel = WorkoutsListViewModel(
                 service: service,

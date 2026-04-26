@@ -8,10 +8,14 @@ final class WatchConnectivityService: NSObject {
 
     init(
         workoutsRepository: WorkoutsCacheRepository,
-        streakWidget: StreakWidgetControlling
+        feedsClient: FeedsClient,
+        streakWidget: StreakWidgetControlling,
+        activityCalendarWidget: ActivityCalendarWidgetControlling
     ) {
         self.workoutsRepository = workoutsRepository
+        self.feedsClient = feedsClient
         self.streakWidget = streakWidget
+        self.activityCalendarWidget = activityCalendarWidget
     }
 
     func activate() {
@@ -33,7 +37,9 @@ final class WatchConnectivityService: NSObject {
     }
     
     private let workoutsRepository: WorkoutsCacheRepository
+    private let feedsClient: FeedsClient
     private let streakWidget: StreakWidgetControlling
+    private let activityCalendarWidget: ActivityCalendarWidgetControlling
 }
 
 extension WatchConnectivityService: WCSessionDelegate {
@@ -84,6 +90,7 @@ extension WatchConnectivityService: WCSessionDelegate {
                     exercises: exercises
                 )
                 await self.streakWidget.incrementAfterSessionSuccessfullyCreated()
+                await self.applyActivityCalendarSnapshotIfPossible()
             } catch {
             }
         }
@@ -93,5 +100,18 @@ extension WatchConnectivityService: WCSessionDelegate {
 
     func sessionDidDeactivate(_ session: WCSession) {
         WCSession.default.activate()
+    }
+
+    private func applyActivityCalendarSnapshotIfPossible() async {
+        do {
+            let response = try await feedsClient.fetchCalendarMonth(
+                context: .mine,
+                month: Date(),
+                selectedPersonID: nil
+            )
+            let payload = ActivityCalendarWidgetPayload(response: response)
+            await activityCalendarWidget.applySnapshot(with: payload)
+        } catch {
+        }
     }
 }
