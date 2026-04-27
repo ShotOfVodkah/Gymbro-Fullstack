@@ -9,6 +9,8 @@ import GymbroFeeds
 import GymbroProfile
 import GymbroTypes
 import GymbroAnalytics
+import GymbroPerks
+import GymbroChallenges
 
 final class AppServicesFactory {
     let router: AppRouter
@@ -301,7 +303,6 @@ final class AppServicesFactory {
     
     @MainActor
     func makeProfileMainScreen(mode: ProfileViewMode) -> some View {
-        
         screenFactories.profileMainTabFactory.makeView(
             router: router,
             mode: mode,
@@ -337,6 +338,28 @@ final class AppServicesFactory {
             analytics: analytics
         )
     }
+    
+    // Perks
+    
+    @MainActor
+    func makePerksMainTab() -> some View {
+        screenFactories.perksMainTabFactory.makeView(
+            router: router,
+//            client: AppMicroservices.feeds,
+            analytics: analytics
+        )
+    }
+    
+    // Challenges
+    
+    @MainActor
+    func makeChallengesMainTab() -> some View {
+        screenFactories.challengesMainTabFactory.makeView(
+            router: router,
+//            client: AppMicroservices.feeds,
+            analytics: analytics
+        )
+    }
 }
 
 private struct ScreenFactories {
@@ -365,4 +388,12 @@ private struct ScreenFactories {
     lazy var editProfileFactory = EditProfileFactoryImpl()
     lazy var settingsFactory = ProfileSettingsFactoryImpl()
     lazy var statisticsFactory = ProfileStatisticsFactoryImpl()
+    
+    // Perks factories
+    
+    lazy var perksMainTabFactory = PerksMainTabFactoryImpl()
+    
+    // Challenges factories
+    
+    lazy var challengesMainTabFactory = ChallengesMainTabFactoryImpl()
 }
