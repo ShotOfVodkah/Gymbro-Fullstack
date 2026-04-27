@@ -36,6 +36,8 @@ let mainAppTarget: ProjectDescription.Target = .target(
         .target(name: "GymbroAuth"),
         .target(name: "GymbroProfile"),
         .target(name: "GymbroAnalytics"),
+        .target(name: "GymbroPerks"),
+        .target(name: "GymbroChallenges"),
         .target(name: "GymBroWatch"),
         .target(name: "GymbroWidgetExtension")
     ],
@@ -266,6 +268,50 @@ let gymbroProfileTests: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let perksTarget: ProjectDescription.Target = .target(
+    name: "GymbroPerks",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).perks",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroPerks/Sources/**"],
+    resources: ["\(basePath)/GymbroPerks/Resources/**"],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroNavigation"),
+        .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
+let challengesTarget: ProjectDescription.Target = .target(
+    name: "GymbroChallenges",
+    destinations: .iOS,
+    product: .staticFramework,
+    bundleId: "\(bundleId).challenges",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(
+        with: [
+            "UILaunchScreen": [:]
+        ]
+    ),
+    sources: ["\(basePath)/GymbroChallenges/Sources/**"],
+    resources: ["\(basePath)/GymbroChallenges/Resources/**"],
+    dependencies: [
+        .target(name: "GymbroNetwork"),
+        .target(name: "GymbroCommonUI"),
+        .target(name: "GymbroNavigation"),
+        .target(name: "GymbroTypes")
+    ],
+    settings: baseSettings()
+)
+
 let analyticsTarget: ProjectDescription.Target = .target(
     name: "GymbroAnalytics",
     destinations: .iOS,
@@ -393,6 +439,8 @@ let project = Project(
         gymbroFeedsTests,
         authTarget,
         profileTarget,
+        perksTarget,
+        challengesTarget,
         gymbroProfileTests,
         analyticsTarget,
         watchOSTarget,
