@@ -9,11 +9,6 @@ import (
 	"github.com/alexandra-gritsaenko/gymbro-authmw"
 )
 
-const (
-	HeaderBduiSecret = "X-BDUI-Secret"
-	HeaderBduiUserID = "X-User-Id"
-)
-
 type testUserIDKey struct{}
 type bduiUserIDKey struct{}
 
@@ -24,11 +19,19 @@ func AuthMiddleware(secret []byte) func(http.Handler) http.Handler {
 	})
 }
 
-func WorkoutsAuthMiddleware(jwtSecret []byte, bduiSecret string) func(http.Handler) http.Handler {
+func WorkoutsAuthMiddleware(cfg WorkoutsAuthConfig) func(http.Handler) http.Handler {
 	jwtMW := authmw.Middleware(authmw.Config{
-		Secret:       jwtSecret,
+		Secret:       cfg.UserJWTSecret,
 		Unauthorized: unauthorized,
 	})
+	iss := strings.TrimSpace(cfg.BduiM2MISS)
+	if iss == "" {
+		iss = DefaultBduiM2MISS
+	}
+	aud := strings.TrimSpace(cfg.BduiM2MAud)
+	if aud == "" {
+		aud = DefaultBduiM2MAud
+	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			auth := r.Header.Get("Authorization")
@@ -36,25 +39,29 @@ func WorkoutsAuthMiddleware(jwtSecret []byte, bduiSecret string) func(http.Handl
 			if auth != "" && strings.HasPrefix(auth, "Bearer ") {
 				tokenString = strings.TrimSpace(strings.TrimPrefix(auth, "Bearer "))
 			}
-			if tokenString != "" {
+			if tokenString == "" {
+				unauthorized(w, r)
+				return
+			}
+			alg, err := jwtAlgorithm(tokenString)
+			if err != nil {
+				unauthorized(w, r)
+				return
+			}
+			switch alg {
+			case "HS256":
 				jwtMW(next).ServeHTTP(w, r)
-				return
-			}
-			if strings.TrimSpace(bduiSecret) == "" {
+			case "RS256":
+				uid, vErr := verifyBduiM2MRS256(tokenString, cfg.BduiM2MPublic, iss, aud)
+				if vErr != nil {
+					unauthorized(w, r)
+					return
+				}
+				ctx := context.WithValue(r.Context(), bduiUserIDKey{}, uid)
+				next.ServeHTTP(w, r.WithContext(ctx))
+			default:
 				unauthorized(w, r)
-				return
 			}
-			if r.Header.Get(HeaderBduiSecret) != bduiSecret {
-				unauthorized(w, r)
-				return
-			}
-			uid := strings.TrimSpace(r.Header.Get(HeaderBduiUserID))
-			if uid == "" {
-				unauthorized(w, r)
-				return
-			}
-			ctx := context.WithValue(r.Context(), bduiUserIDKey{}, uid)
-			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

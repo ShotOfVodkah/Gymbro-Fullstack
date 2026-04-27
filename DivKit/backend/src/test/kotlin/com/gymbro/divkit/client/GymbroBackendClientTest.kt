@@ -4,6 +4,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
@@ -16,13 +19,16 @@ class GymbroBackendClientTest {
 
     private lateinit var restTemplate: RestTemplate
     private lateinit var mockServer: MockRestServiceServer
+    private lateinit var m2mJwt: BduiM2mJwtService
     private lateinit var client: GymbroBackendClient
 
     @BeforeEach
     fun setUp() {
+        m2mJwt = mock(BduiM2mJwtService::class.java)
+        `when`(m2mJwt.createTokenForUserId("1")).thenReturn("m2m.jwt.token")
         restTemplate = RestTemplate()
         mockServer = MockRestServiceServer.bindTo(restTemplate).build()
-        client = GymbroBackendClient(restTemplate, "http://localhost:8080", "test-bdui-secret")
+        client = GymbroBackendClient(restTemplate, "http://localhost:8080", m2mJwt)
     }
 
     @AfterEach
@@ -33,8 +39,7 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout fetches single workout for non premade id`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/user-1?locale=en"))
-            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
-            .andExpect(header("X-User-Id", "1"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer m2m.jwt.token"))
             .andRespond(
                 withSuccess(
                     """{"id":"user-1","name":"W","type":"strength","exercises":[]}""",
@@ -50,8 +55,7 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout premade id loads from catalog list`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
-            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
-            .andExpect(header("X-User-Id", "1"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer m2m.jwt.token"))
             .andRespond(
                 withSuccess(
                     """
@@ -72,8 +76,7 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout premade id returns null when not in catalog`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
-            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
-            .andExpect(header("X-User-Id", "1"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer m2m.jwt.token"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON))
         assertThat(client.getWorkout("premade-2", "1", "en")).isNull()
     }
@@ -81,8 +84,7 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout returns null on HTTP error for single workout`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/user-1?locale=en"))
-            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
-            .andExpect(header("X-User-Id", "1"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer m2m.jwt.token"))
             .andRespond(withServerError())
         assertThat(client.getWorkout("user-1", "1", "en")).isNull()
     }
@@ -90,8 +92,7 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout premade returns null when catalog request fails`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
-            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
-            .andExpect(header("X-User-Id", "1"))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer m2m.jwt.token"))
             .andRespond(withServerError())
         assertThat(client.getWorkout("premade-2", "1", "en")).isNull()
     }

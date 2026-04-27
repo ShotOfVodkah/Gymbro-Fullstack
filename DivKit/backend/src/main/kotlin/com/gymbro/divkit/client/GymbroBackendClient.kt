@@ -13,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder
 class GymbroBackendClient(
     private val restTemplate: RestTemplate,
     @Value("\${gymbro.backend.url}") private val backendUrl: String,
-    @Value("\${gymbro.bdui.to.workouts.secret:}") private val bduiToWorkoutsSecret: String,
+    private val bduiM2mJwtService: BduiM2mJwtService,
 ) {
 
     fun getWorkouts(userId: String, premadeCatalog: Boolean = false, locale: String): List<WorkoutDto> {
@@ -22,7 +22,7 @@ class GymbroBackendClient(
             urlBuilder.queryParam("userId", "premade")
         }
         val url = urlBuilder.queryParam("locale", locale).toUriString()
-        val entity = HttpEntity<Void>(bduiHeaders(userId))
+        val entity = HttpEntity<Void>(m2mAuthHeaders(userId))
         return restTemplate.exchange(
             url,
             HttpMethod.GET,
@@ -43,7 +43,7 @@ class GymbroBackendClient(
             val url = UriComponentsBuilder.fromHttpUrl("$backendUrl/workouts/$id")
                 .queryParam("locale", locale)
                 .toUriString()
-            val entity = HttpEntity<Void>(bduiHeaders(userId))
+            val entity = HttpEntity<Void>(m2mAuthHeaders(userId))
             restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -60,7 +60,7 @@ class GymbroBackendClient(
             val url = UriComponentsBuilder.fromHttpUrl("$backendUrl/sessions/$id")
                 .queryParam("locale", locale)
                 .toUriString()
-            val entity = HttpEntity<Void>(bduiHeaders(userId))
+            val entity = HttpEntity<Void>(m2mAuthHeaders(userId))
             restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -85,15 +85,9 @@ class GymbroBackendClient(
         ).body ?: emptyList()
     }
 
-    private fun bduiHeaders(userId: String): HttpHeaders {
+    private fun m2mAuthHeaders(userId: String): HttpHeaders {
         val h = HttpHeaders()
-        h[HEADER_BDUI_SECRET] = listOf(bduiToWorkoutsSecret.trim())
-        h[HEADER_USER_ID] = listOf(userId)
+        h[HttpHeaders.AUTHORIZATION] = listOf("Bearer ${bduiM2mJwtService.createTokenForUserId(userId)}")
         return h
-    }
-
-    private companion object {
-        const val HEADER_BDUI_SECRET = "X-BDUI-Secret"
-        const val HEADER_USER_ID = "X-User-Id"
     }
 }
