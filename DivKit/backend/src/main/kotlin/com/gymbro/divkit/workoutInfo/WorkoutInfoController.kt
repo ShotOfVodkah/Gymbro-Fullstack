@@ -10,7 +10,6 @@ import divkit.dsl.container
 import divkit.dsl.data
 import divkit.dsl.divan
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,7 +35,6 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
         val language = Language.fromRequestParam(lang)
         val translations = WorkoutInfoTranslations(language)
         val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
-        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
         val locale = language.asString
 
         val notFound = ResponseEntity(
@@ -52,13 +50,13 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
 
         val (workout, sourceKind) = when (type.lowercase()) {
             "session" -> {
-                val dto = backendClient.getSession(id, authorization, locale) ?: return notFound
+                val dto = backendClient.getSession(id, jwtUserId, locale) ?: return notFound
                 val w = dto.toWorkout()
                 val src = if (dto.userId == jwtUserId) "session_mine" else "session_other"
                 w to src
             }
             else -> {
-                val w = backendClient.getWorkout(id, authorization, locale)?.toDomain() ?: return notFound
+                val w = backendClient.getWorkout(id, jwtUserId, locale)?.toDomain() ?: return notFound
                 w to "workout"
             }
         }

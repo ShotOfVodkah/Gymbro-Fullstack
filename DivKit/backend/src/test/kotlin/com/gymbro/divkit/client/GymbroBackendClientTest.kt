@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.match.MockRestRequestMatchers.header
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
@@ -21,7 +22,7 @@ class GymbroBackendClientTest {
     fun setUp() {
         restTemplate = RestTemplate()
         mockServer = MockRestServiceServer.bindTo(restTemplate).build()
-        client = GymbroBackendClient(restTemplate, "http://localhost:8080")
+        client = GymbroBackendClient(restTemplate, "http://localhost:8080", "test-bdui-secret")
     }
 
     @AfterEach
@@ -32,13 +33,15 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout fetches single workout for non premade id`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/user-1?locale=en"))
+            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
+            .andExpect(header("X-User-Id", "1"))
             .andRespond(
                 withSuccess(
                     """{"id":"user-1","name":"W","type":"strength","exercises":[]}""",
                     MediaType.APPLICATION_JSON,
                 ),
             )
-        val dto = client.getWorkout("user-1", "Bearer token", "en")
+        val dto = client.getWorkout("user-1", "1", "en")
         assertThat(dto).isNotNull
         assertThat(dto!!.id).isEqualTo("user-1")
         assertThat(dto.name).isEqualTo("W")
@@ -47,6 +50,8 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout premade id loads from catalog list`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
+            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
+            .andExpect(header("X-User-Id", "1"))
             .andRespond(
                 withSuccess(
                     """
@@ -58,7 +63,7 @@ class GymbroBackendClientTest {
                     MediaType.APPLICATION_JSON,
                 ),
             )
-        val dto = client.getWorkout("premade-2", "Bearer x", "en")
+        val dto = client.getWorkout("premade-2", "1", "en")
         assertThat(dto).isNotNull
         assertThat(dto!!.id).isEqualTo("premade-2")
         assertThat(dto.name).isEqualTo("B")
@@ -67,21 +72,27 @@ class GymbroBackendClientTest {
     @Test
     fun `getWorkout premade id returns null when not in catalog`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
+            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
+            .andExpect(header("X-User-Id", "1"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON))
-        assertThat(client.getWorkout("premade-2", "Bearer x", "en")).isNull()
+        assertThat(client.getWorkout("premade-2", "1", "en")).isNull()
     }
 
     @Test
     fun `getWorkout returns null on HTTP error for single workout`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/user-1?locale=en"))
+            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
+            .andExpect(header("X-User-Id", "1"))
             .andRespond(withServerError())
-        assertThat(client.getWorkout("user-1", "Bearer x", "en")).isNull()
+        assertThat(client.getWorkout("user-1", "1", "en")).isNull()
     }
 
     @Test
     fun `getWorkout premade returns null when catalog request fails`() {
         mockServer.expect(requestTo("http://localhost:8080/workouts/?userId=premade&locale=en"))
+            .andExpect(header("X-BDUI-Secret", "test-bdui-secret"))
+            .andExpect(header("X-User-Id", "1"))
             .andRespond(withServerError())
-        assertThat(client.getWorkout("premade-2", "Bearer x", "en")).isNull()
+        assertThat(client.getWorkout("premade-2", "1", "en")).isNull()
     }
 }

@@ -42,6 +42,7 @@ services:
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres_workouts:5432/gymbro_workouts?sslmode=disable"
       JWT_SECRET: "supersecret_noone_will_get_out"
+      BDUI_TO_WORKOUTS_SECRET: "bdui_to_workouts_dev_change_me"
       PROFILE_SERVICE_URL: "http://profile_service:8084"
       INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
       PGHOST: postgres_workouts

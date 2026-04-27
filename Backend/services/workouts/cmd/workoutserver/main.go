@@ -31,7 +31,11 @@ func main() {
 	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
 	profileStatsClient := clients.NewProfileStatsClient(profileURL, internalSecret)
 	sessionH := handlers.NewSessionHandler(db, profileStatsClient)
-	authMiddleware := handlers.AuthMiddleware(secretKey)
+	bduiSecret := os.Getenv("BDUI_TO_WORKOUTS_SECRET")
+	if bduiSecret == "" {
+		bduiSecret = "bdui_to_workouts_dev_change_me"
+	}
+	authMiddleware := handlers.WorkoutsAuthMiddleware(secretKey, bduiSecret)
 
 	mux := http.NewServeMux()
 	mux.Handle("/workouts/", authMiddleware(workoutH))
