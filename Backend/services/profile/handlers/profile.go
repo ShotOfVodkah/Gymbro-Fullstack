@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -21,14 +22,15 @@ var (
 )
 
 type ProfileHandler struct {
-	store          store.ProfileStorer
-	jwtSecret      []byte
-	feeds          *clients.FeedsPeopleClient
-	internalSecret string
+	store            store.ProfileStorer
+	jwtSecret        []byte
+	feeds            *clients.FeedsPeopleClient
+	internalSecret   string
+	workoutsTemporal *clients.WorkoutsTemporalClient
 }
 
-func NewProfileHandler(s store.ProfileStorer, jwtSecret []byte, feeds *clients.FeedsPeopleClient, internalSecret string) *ProfileHandler {
-	return &ProfileHandler{store: s, jwtSecret: jwtSecret, feeds: feeds, internalSecret: internalSecret}
+func NewProfileHandler(s store.ProfileStorer, jwtSecret []byte, feeds *clients.FeedsPeopleClient, internalSecret string, workoutsTemporal *clients.WorkoutsTemporalClient) *ProfileHandler {
+	return &ProfileHandler{store: s, jwtSecret: jwtSecret, feeds: feeds, internalSecret: internalSecret, workoutsTemporal: workoutsTemporal}
 }
 
 func (h *ProfileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -289,6 +291,13 @@ func (h *ProfileHandler) writeStatisticsForUser(w http.ResponseWriter, r *http.R
 		return
 	}
 	doc := types.ParseStoredStatisticsPayload(raw)
+	if h.workoutsTemporal != nil {
+		var merr error
+		doc, merr = h.workoutsTemporal.MergeTemporalInto(r.Context(), targetUserID, doc)
+		if merr != nil {
+			log.Printf("workouts temporal merge (user %d): %v", targetUserID, merr)
+		}
+	}
 	out := doc.ToStatisticsResponse(targetUserID)
 	_ = json.NewEncoder(w).Encode(out)
 }
@@ -339,6 +348,13 @@ func (h *ProfileHandler) writeMainForUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 	doc := types.ParseStoredStatisticsPayload(raw)
+	if h.workoutsTemporal != nil {
+		var merr error
+		doc, merr = h.workoutsTemporal.MergeTemporalInto(r.Context(), targetUserID, doc)
+		if merr != nil {
+			log.Printf("workouts temporal merge main (user %d): %v", targetUserID, merr)
+		}
+	}
 
 	var isFollowing *bool
 	if isSelf {
@@ -422,7 +438,7 @@ func buildMainResponse(profile *types.Profile, doc types.StoredStatisticsPayload
 		AvatarSystemName:    profile.AvatarSystemName,
 		Badge:               profile.Badge,
 		IsFollowing:         isFollowing,
-		WorkoutsThisMonth:   profile.WorkoutsThisMonth,
+		WorkoutsThisMonth:   doc.Summary.WorkoutsThisMonth,
 		TotalWorkouts:       doc.Summary.TotalWorkouts,
 		TotalHours:          doc.Summary.TotalDurationHours,
 		FavoriteWorkoutType: favType,

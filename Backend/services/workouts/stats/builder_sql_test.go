@@ -11,11 +11,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func expectNoRollupRow(mock sqlmock.Sqlmock, userID string) {
+	mock.ExpectQuery(`SELECT user_id, total_sessions, sum_exercise_minutes, dow_counts, muscle_group_counts, workout_type_counts, updated_at\s+FROM user_workout_statistics WHERE user_id = \$1`).
+		WithArgs(userID).
+		WillReturnRows(sqlmock.NewRows([]string{"user_id", "total_sessions", "sum_exercise_minutes", "dow_counts", "muscle_group_counts", "workout_type_counts", "updated_at"}))
+}
+
 
 func TestBuildPayloadJSON_SqlMock(t *testing.T) {
 	sqlDB, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	defer sqlDB.Close()
+
+	expectNoRollupRow(mock, "1")
 
 	mock.ExpectQuery(`SELECT COUNT\(\*\) FROM workout_sessions WHERE user_id = \$1`).
 		WithArgs("1").
@@ -95,6 +103,8 @@ func TestBuildPayloadJSON_TopWorkoutTypeNoRows(t *testing.T) {
 	sqlDB, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	defer sqlDB.Close()
+
+	expectNoRollupRow(mock, "9")
 
 	mock.ExpectQuery(`SELECT COUNT\(\*\) FROM workout_sessions WHERE user_id = \$1`).
 		WithArgs("9").

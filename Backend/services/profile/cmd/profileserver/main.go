@@ -31,8 +31,10 @@ func main() {
 	feedsURL := os.Getenv("FEEDS_SERVICE_URL")
 	feedsClient := clients.NewFeedsPeopleClient(feedsURL)
 	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
+	workoutsURL := os.Getenv("WORKOUTS_SERVICE_URL")
+	workoutsTemporal := clients.NewWorkoutsTemporalClient(workoutsURL, internalSecret)
 
-	profileH := handlers.NewProfileHandler(store.NewProfileStore(db), []byte(secret), feedsClient, internalSecret)
+	profileH := handlers.NewProfileHandler(store.NewProfileStore(db), []byte(secret), feedsClient, internalSecret, workoutsTemporal)
 
 	mux := http.NewServeMux()
 	mux.Handle("/profiles", profileH)

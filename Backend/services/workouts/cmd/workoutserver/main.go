@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/rsa"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/alexandra-gritsaenko/gymbro-workouts/clients"
 	"github.com/alexandra-gritsaenko/gymbro-workouts/handlers"
@@ -19,6 +21,23 @@ func main() {
 	}
 	secretKey := []byte(secret)
 
+	var bduiPub *rsa.PublicKey
+	if pemStr := strings.TrimSpace(os.Getenv("BDUI_M2M_JWT_PUBLIC_KEY_PEM")); pemStr != "" {
+		pk, err := handlers.ParseRSAPublicKeyFromPEM([]byte(pemStr))
+		if err != nil {
+			log.Fatalf("BDUI_M2M_JWT_PUBLIC_KEY_PEM: %v", err)
+		}
+		bduiPub = pk
+	}
+
+	authCfg := handlers.WorkoutsAuthConfig{
+		UserJWTSecret: secretKey,
+		BduiM2MPublic: bduiPub,
+		BduiM2MISS:    os.Getenv("BDUI_M2M_JWT_ISS"),
+		BduiM2MAud:    os.Getenv("BDUI_M2M_JWT_AUD"),
+	}
+	authMiddleware := handlers.WorkoutsAuthMiddleware(authCfg)
+
 	db, err := sqlx.Connect("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +50,6 @@ func main() {
 	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
 	profileStatsClient := clients.NewProfileStatsClient(profileURL, internalSecret)
 	sessionH := handlers.NewSessionHandler(db, profileStatsClient)
-	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	mux := http.NewServeMux()
 	mux.Handle("/workouts/", authMiddleware(workoutH))
@@ -43,6 +61,10 @@ func main() {
 	mux.Handle("/sessions/calendar", sessionH)
 	mux.Handle("/sessions", authMiddleware(sessionH))
 	mux.Handle("/sessions/", authMiddleware(sessionH))
+
+	if internalSecret != "" {
+		mux.Handle("/internal/statistics/temporal", handlers.NewInternalTemporalHandler(db, internalSecret))
+	}
 
 	log.Println("workouts service listening on :8082")
 	log.Fatal(http.ListenAndServe(":8082", mux))

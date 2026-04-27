@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.http.HttpHeaders
-
 @RestController
 @RequestMapping("/workoutsList")
 class WorkoutsListController(private val backendClient: GymbroBackendClient) {
@@ -31,10 +29,9 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
         if (userId != jwtUserId) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
         }
-        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
         val language = Language.fromRequestParam(lang)
         val workouts = backendClient.getWorkouts(
-            authorization = authorization,
+            userId = jwtUserId,
             locale = language.asString,
         ).map { dto ->
             WorkoutItem(

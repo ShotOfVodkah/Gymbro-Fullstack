@@ -13,15 +13,16 @@ import org.springframework.web.util.UriComponentsBuilder
 class GymbroBackendClient(
     private val restTemplate: RestTemplate,
     @Value("\${gymbro.backend.url}") private val backendUrl: String,
+    private val bduiM2mJwtService: BduiM2mJwtService,
 ) {
 
-    fun getWorkouts(authorization: String, premadeCatalog: Boolean = false, locale: String): List<WorkoutDto> {
+    fun getWorkouts(userId: String, premadeCatalog: Boolean = false, locale: String): List<WorkoutDto> {
         val urlBuilder = UriComponentsBuilder.fromHttpUrl("$backendUrl/workouts/")
         if (premadeCatalog) {
             urlBuilder.queryParam("userId", "premade")
         }
         val url = urlBuilder.queryParam("locale", locale).toUriString()
-        val entity = HttpEntity<Void>(headers(authorization))
+        val entity = HttpEntity<Void>(m2mAuthHeaders(userId))
         return restTemplate.exchange(
             url,
             HttpMethod.GET,
@@ -30,10 +31,10 @@ class GymbroBackendClient(
         ).body ?: emptyList()
     }
 
-    fun getWorkout(id: String, authorization: String, locale: String): WorkoutDto? {
+    fun getWorkout(id: String, userId: String, locale: String): WorkoutDto? {
         if (id.startsWith("premade-")) {
             return try {
-                getWorkouts(authorization, premadeCatalog = true, locale).find { it.id == id }
+                getWorkouts(userId, premadeCatalog = true, locale).find { it.id == id }
             } catch (_: Exception) {
                 null
             }
@@ -42,7 +43,7 @@ class GymbroBackendClient(
             val url = UriComponentsBuilder.fromHttpUrl("$backendUrl/workouts/$id")
                 .queryParam("locale", locale)
                 .toUriString()
-            val entity = HttpEntity<Void>(headers(authorization))
+            val entity = HttpEntity<Void>(m2mAuthHeaders(userId))
             restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -54,12 +55,12 @@ class GymbroBackendClient(
         }
     }
 
-    fun getSession(id: String, authorization: String, locale: String): WorkoutSessionDto? {
+    fun getSession(id: String, userId: String, locale: String): WorkoutSessionDto? {
         return try {
             val url = UriComponentsBuilder.fromHttpUrl("$backendUrl/sessions/$id")
                 .queryParam("locale", locale)
                 .toUriString()
-            val entity = HttpEntity<Void>(headers(authorization))
+            val entity = HttpEntity<Void>(m2mAuthHeaders(userId))
             restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -84,9 +85,9 @@ class GymbroBackendClient(
         ).body ?: emptyList()
     }
 
-    private fun headers(authorization: String): HttpHeaders {
+    private fun m2mAuthHeaders(userId: String): HttpHeaders {
         val h = HttpHeaders()
-        h[HttpHeaders.AUTHORIZATION] = listOf(authorization)
+        h[HttpHeaders.AUTHORIZATION] = listOf("Bearer ${bduiM2mJwtService.createTokenForUserId(userId)}")
         return h
     }
 }

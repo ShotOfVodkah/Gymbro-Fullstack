@@ -1,6 +1,7 @@
 package com.gymbro.divkit.workoutBuilderSheet
 
 import com.gymbro.divkit.Language
+import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
 import com.gymbro.divkit.client.toDomain
 import divkit.dsl.Divan
@@ -14,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.http.HttpHeaders
-
 @RestController
 @RequestMapping("/workoutBuilderSheet")
 class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClient) {
@@ -26,9 +25,9 @@ class WorkoutBuilderSheetController(private val backendClient: GymbroBackendClie
         @RequestParam(name = "lang", required = false, defaultValue = "en") lang: String,
         request: HttpServletRequest,
     ): ResponseEntity<Divan> {
-        val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)!!
+        val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
         val language = Language.fromRequestParam(lang)
-        val workout = backendClient.getWorkout(id, authorization, language.asString)?.toDomain()
+        val workout = backendClient.getWorkout(id, jwtUserId, language.asString)?.toDomain()
 
         if (workout == null) {
             return ResponseEntity(
