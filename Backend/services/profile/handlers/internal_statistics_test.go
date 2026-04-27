@@ -93,7 +93,7 @@ func TestServeHTTP_PostInternalStatistics_OK(t *testing.T) {
 		},
 	}
 
-	h := NewProfileHandler(st, []byte("jwt-secret"), nil, "internal-secret")
+	h := NewProfileHandler(st, []byte("jwt-secret"), nil, "internal-secret", nil)
 
 	body := map[string]any{
 		"user_id": 42,
@@ -122,7 +122,7 @@ func TestServeHTTP_PostInternalStatistics_WrongSecret(t *testing.T) {
 			return nil
 		},
 	}
-	h := NewProfileHandler(st, []byte("jwt"), nil, "good")
+	h := NewProfileHandler(st, []byte("jwt"), nil, "good", nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/profiles/internal/statistics", bytes.NewReader([]byte(`{"user_id":1,"payload":{}}`)))
 	req.Header.Set("X-Internal-Secret", "bad")
@@ -139,7 +139,7 @@ func TestServeHTTP_PostInternalStatistics_EmptySecretOnServer(t *testing.T) {
 			return nil
 		},
 	}
-	h := NewProfileHandler(st, []byte("jwt"), nil, "")
+	h := NewProfileHandler(st, []byte("jwt"), nil, "", nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/profiles/internal/statistics", bytes.NewReader([]byte(`{"user_id":1,"payload":{}}`)))
 	req.Header.Set("X-Internal-Secret", "anything")
@@ -155,7 +155,7 @@ func TestServeHTTP_PostInternalStatistics_StoreError(t *testing.T) {
 			return errors.New("db unavailable")
 		},
 	}
-	h := NewProfileHandler(st, []byte("jwt"), nil, "internal-secret")
+	h := NewProfileHandler(st, []byte("jwt"), nil, "internal-secret", nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/profiles/internal/statistics", bytes.NewReader([]byte(`{"user_id":1,"payload":{"a":1}}`)))
 	req.Header.Set("X-Internal-Secret", "internal-secret")

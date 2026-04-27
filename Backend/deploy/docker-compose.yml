@@ -108,11 +108,13 @@ services:
       JWT_SECRET: "supersecret_noone_will_get_out"
       INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
       FEEDS_SERVICE_URL: "http://feeds_service:8083"
+      WORKOUTS_SERVICE_URL: "http://workouts_service:8082"
       PGHOST: postgres_profile
       PGPORT: 5432
     depends_on:
       - postgres_profile
       - feeds_service
+      - workouts_service
     expose:
       - "8084"
 

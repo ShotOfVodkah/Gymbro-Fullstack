@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -209,6 +210,9 @@ func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
 		return fmt.Errorf("InsertSession insert session: %w", err)
 	}
 
+	var sumExerciseMinutes int
+	exerciseMuscles := make([]string, 0, len(input.Exercises))
+
 	for i, ex := range input.Exercises {
 		var exName, exNameEn, exType, muscleGroup string
 		err := tx.QueryRow(
@@ -225,6 +229,10 @@ func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
 		if exNameEn == "" {
 			exNameEn = exName
 		}
+		if ex.DurationMinutes != nil {
+			sumExerciseMinutes += *ex.DurationMinutes
+		}
+		exerciseMuscles = append(exerciseMuscles, muscleGroup)
 
 		_, err = tx.Exec(`
 			INSERT INTO session_exercises (id, name, type, muscle_group, name_en)
@@ -249,6 +257,10 @@ func (ss *SessionStore) InsertSession(input *types.SessionInput) error {
 		if err != nil {
 			return fmt.Errorf("InsertSession insert exercise pos %d: %w", i, err)
 		}
+	}
+
+	if err := ApplyNewSessionToRollup(context.Background(), tx, input.UserID, workoutType, completedAt, exerciseMuscles, sumExerciseMinutes); err != nil {
+		return err
 	}
 
 	return tx.Commit()

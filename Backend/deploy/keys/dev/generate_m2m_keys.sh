@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Генерация пары RSA для dev M2M (DivKit → Workouts). Запускать из этой папки или с любого cwd.
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
 TMP="$DIR/.tmp_m2m.key"

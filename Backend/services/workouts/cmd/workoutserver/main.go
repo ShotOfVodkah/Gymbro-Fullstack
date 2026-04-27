@@ -62,6 +62,10 @@ func main() {
 	mux.Handle("/sessions", authMiddleware(sessionH))
 	mux.Handle("/sessions/", authMiddleware(sessionH))
 
+	if internalSecret != "" {
+		mux.Handle("/internal/statistics/temporal", handlers.NewInternalTemporalHandler(db, internalSecret))
+	}
+
 	log.Println("workouts service listening on :8082")
 	log.Fatal(http.ListenAndServe(":8082", mux))
 }

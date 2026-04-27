@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Запуск DivKit с dev-приватным ключом M2M (тот же, что пара к public в Backend/deploy/keys/dev).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -11,7 +10,7 @@ if [[ ! -f "$PEM" ]]; then
   exit 1
 fi
 export BDUI_M2M_JWT_PRIVATE_KEY_PEM="$(cat "$PEM")"
-exec podman run --rm -p 8090:8090 \
+exec docker run --rm -p 8090:8090 \
   -e JWT_SECRET="${JWT_SECRET:-supersecret_noone_will_get_out}" \
   -e GYMBRO_BACKEND_URL="${GYMBRO_BACKEND_URL:-http://host.docker.internal:8080}" \
   -e BDUI_M2M_JWT_PRIVATE_KEY_PEM \

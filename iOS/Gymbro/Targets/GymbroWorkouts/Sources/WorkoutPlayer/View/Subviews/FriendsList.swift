@@ -1,8 +1,5 @@
 import SwiftUI
 
-
-// BIG FAT TODO
-
 struct FriendActivityCard: View {
     let friend: FriendActivity
 
