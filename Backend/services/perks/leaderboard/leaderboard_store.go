@@ -16,17 +16,20 @@ type Store struct {
 	db          *sqlx.DB
 	perksBase  *store.PerksStore
 	feedsClient *clients.FeedsClient
+	profileClient *clients.ProfileClient
 }
 
 func NewStore(
 	db *sqlx.DB,
 	perksBase *store.PerksStore,
 	feedsClient *clients.FeedsClient,
+	profileClient *clients.ProfileClient,
 ) *Store {
 	return &Store{
 		db:          db,
 		perksBase:  perksBase,
 		feedsClient: feedsClient,
+		profileClient: profileClient,
 	}
 }
 
@@ -85,7 +88,7 @@ func (s *Store) queryAllLeaderboard(
 		return nil, err
 	}
 
-	return mapRows(rows, currentUserID, "all"), nil
+	return s.mapRows(rows, currentUserID, "all"), nil
 }
 
 func (s *Store) queryScopedLeaderboard(
@@ -116,7 +119,7 @@ func (s *Store) queryScopedLeaderboard(
 		return nil, err
 	}
 
-	return mapRows(rows, currentUserID, filter), nil
+	return s.mapRows(rows, currentUserID, filter), nil
 }
 
 type leaderboardRow struct {
@@ -134,23 +137,46 @@ func leaderboardOrderBy(sort string) string {
 	}
 }
 
-func mapRows(
+func (s *Store) mapRows(
 	rows []leaderboardRow,
 	currentUserID int64,
 	filter string,
 ) []types.LeaderboardResponse {
+	userIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		userIDs = append(userIDs, row.UserID)
+	}
+
+	profiles := map[int64]clients.ProfilePreview{}
+	if s.profileClient != nil {
+		loadedProfiles, err := s.profileClient.FetchProfilesBatch(userIDs)
+		if err == nil {
+			profiles = loadedProfiles
+		}
+	}
+
 	result := make([]types.LeaderboardResponse, 0, len(rows))
 
 	for index, row := range rows {
 		isCurrentUser := row.UserID == currentUserID
 
+		name := fmt.Sprintf("User %d", row.UserID)
+		username := fmt.Sprintf("user%d", row.UserID)
+		avatar := "person.fill"
+
+		if profile, ok := profiles[row.UserID]; ok {
+			name = profile.Name
+			username = profile.Username
+			avatar = profile.AvatarSystemName
+		}
+
 		result = append(result, types.LeaderboardResponse{
 			ID:                 fmt.Sprintf("%d", row.UserID),
 			Rank:               index + 1,
 			UserID:             fmt.Sprintf("%d", row.UserID),
-			Name:               displayName(row.UserID, isCurrentUser),
-			Username:           displayUsername(row.UserID, isCurrentUser),
-			AvatarSystemName:   "person.fill",
+			Name:               name,
+			Username:           username,
+			AvatarSystemName:   avatar,
 			CurrentStreakWeeks: row.CurrentStreakWeeks,
 			CompletedWorkouts:  row.CompletedWorkouts,
 			IsCurrentUser:      isCurrentUser,
@@ -160,18 +186,4 @@ func mapRows(
 	}
 
 	return result
-}
-
-func displayName(userID int64, isCurrentUser bool) string {
-	if isCurrentUser {
-		return "You"
-	}
-	return fmt.Sprintf("User %d", userID)
-}
-
-func displayUsername(userID int64, isCurrentUser bool) string {
-	if isCurrentUser {
-		return "you"
-	}
-	return fmt.Sprintf("user%d", userID)
 }

@@ -64,8 +64,64 @@ func (s *PerksStore) EnsureUser(ctx context.Context, userID int64) error {
 		WHERE is_active = TRUE
 		ON CONFLICT (user_id, achievement_code) DO NOTHING
 	`, userID)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return s.GrantMonthlyFreezesIfNeeded(ctx, userID)
+}
+
+func (s *PerksStore) GrantMonthlyFreezesIfNeeded(ctx context.Context, userID int64) error {
+	currentMonth := time.Now().Format("2006-01")
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var lastGrantMonth *string
+	err = tx.GetContext(ctx, &lastGrantMonth, `
+		SELECT last_freeze_grant_month
+		FROM user_perks
+		WHERE user_id = $1
+		FOR UPDATE
+	`, userID)
+	if err != nil {
+		return err
+	}
+
+	if lastGrantMonth != nil && *lastGrantMonth == currentMonth {
+		return tx.Commit()
+	}
+
+	for i := 0; i < 2; i++ {
+		_, err = tx.ExecContext(ctx, `
+			INSERT INTO streak_freezes (
+				user_id,
+				status,
+				source,
+				created_at
+			)
+			VALUES ($1, 'available', 'monthly_grant', NOW())
+		`, userID)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		UPDATE user_perks
+		SET
+			last_freeze_grant_month = $2,
+			updated_at = NOW()
+		WHERE user_id = $1
+	`, userID, currentMonth)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (s *PerksStore) SaveEvent(ctx context.Context, userID int64, request types.PerksEventRequest) error {
