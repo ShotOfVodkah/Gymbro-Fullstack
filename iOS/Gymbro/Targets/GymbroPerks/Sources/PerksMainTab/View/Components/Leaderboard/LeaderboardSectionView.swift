@@ -5,49 +5,13 @@ struct LeaderboardSectionView: View {
     
     let entries: [LeaderboardEntry]
     let myRank: MyRank?
-    
-    let onFilterChanged: (LeaderboardFilter) -> Void
-    let onSortChanged: (LeaderboardSort) -> Void
+    let onSelectionChanged: (LeaderboardFilter, LeaderboardSort) -> Void
     
     @State private var selectedFilter: LeaderboardFilter = .all
     @State private var selectedSort: LeaderboardSort = .streak
     
     private var visibleEntries: [LeaderboardEntry] {
-        let filteredEntries: [LeaderboardEntry]
-        
-        switch selectedFilter {
-        case .all:
-            filteredEntries = entries
-        case .following:
-            filteredEntries = entries.filter { $0.isFollowing || $0.isCurrentUser }
-        case .friends:
-            filteredEntries = entries.filter { $0.isFriend || $0.isCurrentUser }
-        }
-        
-        let sortedEntries: [LeaderboardEntry]
-        
-        switch selectedSort {
-        case .streak:
-            sortedEntries = filteredEntries.sorted { $0.currentStreakWeeks > $1.currentStreakWeeks }
-        case .workouts:
-            sortedEntries = filteredEntries.sorted { $0.completedWorkouts > $1.completedWorkouts }
-        }
-        
-        return sortedEntries.enumerated().map { index, entry in
-            LeaderboardEntry(
-                id: entry.id,
-                rank: index + 1,
-                userID: entry.userID,
-                name: entry.name,
-                username: entry.username,
-                avatarSystemName: entry.avatarSystemName,
-                currentStreakWeeks: entry.currentStreakWeeks,
-                completedWorkouts: entry.completedWorkouts,
-                isCurrentUser: entry.isCurrentUser,
-                isFollowing: entry.isFollowing,
-                isFriend: entry.isFriend
-            )
-        }
+        entries
     }
     
     var body: some View {
@@ -92,7 +56,7 @@ struct LeaderboardSectionView: View {
                     isSelected: selectedFilter == filter
                 ) {
                     selectedFilter = filter
-                    onFilterChanged(filter)
+                    onSelectionChanged(selectedFilter, selectedSort)
                 }
             }
         }
@@ -106,7 +70,7 @@ struct LeaderboardSectionView: View {
                     isSelected: selectedSort == sort
                 ) {
                     selectedSort = sort
-                    onSortChanged(sort)
+                    onSelectionChanged(selectedFilter, selectedSort)
                 }
             }
         }

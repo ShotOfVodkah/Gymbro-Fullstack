@@ -249,6 +249,8 @@ final class ProfileMainTabViewModel: ObservableObject {
             screenModel = model
             relationshipState = model.relationshipState
             screenState = .loaded
+
+            await service.trackProfileOpened(mode: mode)
         } catch {
             print("Failed to load profile:", error)
             screenModel = nil

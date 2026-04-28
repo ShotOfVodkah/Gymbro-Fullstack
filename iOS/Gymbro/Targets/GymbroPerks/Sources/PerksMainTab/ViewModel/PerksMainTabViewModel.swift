@@ -111,6 +111,24 @@ final class PerksMainTabViewModel: ObservableObject {
         ))
     }
     
+    func updateLeaderboard(
+        filter: LeaderboardFilter,
+        sort: LeaderboardSort
+    ) {
+        Task {
+            do {
+                let entries = try await service.fetchLeaderboard(
+                    filter: filter,
+                    sort: sort
+                )
+
+                dashboard?.leaderboardPreview = entries
+            } catch {
+                print("Failed to update leaderboard:", error)
+            }
+        }
+    }
+    
     func refresh() async {
         await loadDashboard()
     }

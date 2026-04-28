@@ -187,7 +187,8 @@ final class AppServicesFactory {
             feedsClient: AppMicroservices.feeds,
             analytics: analytics,
             streakWidget: streakWidget,
-            activityCalendarWidget: activityCalendarWidget
+            activityCalendarWidget: activityCalendarWidget,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -217,7 +218,8 @@ final class AppServicesFactory {
             сlient: AppMicroservices.workouts,
             type: type,
             workoutId: workoutId,
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -241,7 +243,8 @@ final class AppServicesFactory {
             input: input,
             router: router,
             client: AppMicroservices.feeds,
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -250,7 +253,8 @@ final class AppServicesFactory {
         screenFactories.feedsMainTabFactory.makeView(
             router: router,
             client: AppMicroservices.feeds,
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -307,7 +311,8 @@ final class AppServicesFactory {
             router: router,
             mode: mode,
             gateway: ProfileGatewayImpl(profileClient: AppMicroservices.profile, feedsClient: AppMicroservices.feeds),
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     

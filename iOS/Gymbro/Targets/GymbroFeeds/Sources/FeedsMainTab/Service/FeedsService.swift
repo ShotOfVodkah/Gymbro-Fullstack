@@ -23,8 +23,9 @@ struct FeedsMainTabScreenData {
 
 final class FeedsMainTabServiceImpl: FeedsMainTabService {
     
-    init(client: FeedsClient) {
+    init(client: FeedsClient, perksEvents: any PerksEventTrackingService) {
         self.client = client
+        self.perksEvents = perksEvents
     }
     
     func fetchScreen() async throws -> FeedsMainTabScreenData {
@@ -78,10 +79,12 @@ final class FeedsMainTabServiceImpl: FeedsMainTabService {
     
     func createComment(postID: String, text: String) async throws -> FeedComment {
         let response = try await client.createPostComment(postID: postID, text: text)
+        await perksEvents.trackFriendWorkoutCommented()
         return FeedComment(response: response)
     }
     
     private let client: FeedsClient
+    private let perksEvents: any PerksEventTrackingService
     
     private func uniquePeople(_ people: [PersonItem]) -> [PersonItem] {
         var seen = Set<String>()

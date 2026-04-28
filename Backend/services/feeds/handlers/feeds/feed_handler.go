@@ -12,14 +12,22 @@ type FeedHandler struct {
 	workoutsClient *clients.WorkoutsClient
 	profileClient  *clients.ProfileClient
 	shareService   *ShareService
+	perksClient    *clients.PerksClient
 }
 
-func NewFeedHandler(store store.FeedStore, chatStore store.ChatStore, workoutsClient *clients.WorkoutsClient, profileClient *clients.ProfileClient) *FeedHandler {
+func NewFeedHandler(
+	store store.FeedStore, 
+	chatStore store.ChatStore, 
+	workoutsClient *clients.WorkoutsClient, 
+	profileClient *clients.ProfileClient, 
+	perksClient *clients.PerksClient,
+	) *FeedHandler {
 	return &FeedHandler{
 		store:          store,
 		workoutsClient: workoutsClient,
 		profileClient:  profileClient,
 		shareService:   NewShareService(store, chatStore),
+		perksClient:    perksClient,
 	}
 }
 

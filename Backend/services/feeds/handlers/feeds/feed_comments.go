@@ -81,6 +81,7 @@ func (h *FeedHandler) CreatePostComment(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "failed to create comment", http.StatusInternalServerError)
 		return
 	}
+	h.sendPostCommentReceivedEvent(postID, claims.UserID)
 
 	resp, err := h.buildCommentResponses(r, []types.FeedCommentRow{*row})
 	if err != nil || len(resp) == 0 {
@@ -137,4 +138,30 @@ func (h *FeedHandler) buildCommentResponses(r *http.Request, rows []types.FeedCo
 	}
 
 	return resp, nil
+}
+
+func (h *FeedHandler) sendPostCommentReceivedEvent(postID string, commenterID int) {
+	if h.perksClient == nil {
+		return
+	}
+
+	postAuthorID, err := h.store.GetPostAuthorID(postID)
+	if err != nil {
+		return
+	}
+
+	if postAuthorID == commenterID {
+		return
+	}
+
+	go func() {
+		_ = h.perksClient.SendEventForUser(
+			postAuthorID,
+			"post_comment_received",
+			map[string]string{
+				"post_id":      postID,
+				"commenter_id": strconv.Itoa(commenterID),
+			},
+		)
+	}()
 }

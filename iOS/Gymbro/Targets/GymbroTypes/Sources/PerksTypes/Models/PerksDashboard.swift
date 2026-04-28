@@ -4,7 +4,7 @@ public struct PerksDashboard: Equatable {
     public let streak: StreakState
     public let recentUnlocks: [Achievement]
     public let achievements: [Achievement]
-    public let leaderboardPreview: [LeaderboardEntry]
+    public var leaderboardPreview: [LeaderboardEntry]
     public let myRank: MyRank?
     
     public init(
