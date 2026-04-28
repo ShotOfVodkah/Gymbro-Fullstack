@@ -7,6 +7,9 @@ struct PerksDashboardView: View {
     let onOpenStreakSettings: () -> Void
     let onUseStreakFreeze: () -> Void
     let onRefresh: () async -> Void
+    let onLeaderboardFilterChanged: (LeaderboardFilter) -> Void
+    let onLeaderboardSortChanged: (LeaderboardSort) -> Void
+    let onAchievementOpened: (Achievement) -> Void
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -55,13 +58,16 @@ struct PerksDashboardView: View {
     }
     
     private var achievementsSection: some View {
-        AchievementsSectionView(achievements: dashboard.achievements)
+        AchievementsSectionView(achievements: dashboard.achievements,
+                                onAchievementOpened: onAchievementOpened)
     }
     
     private var leaderboardSection: some View {
         LeaderboardSectionView(
             entries: dashboard.leaderboardPreview,
-            myRank: dashboard.myRank
+            myRank: dashboard.myRank,
+            onFilterChanged: onLeaderboardFilterChanged,
+            onSortChanged: onLeaderboardSortChanged
         )
     }
     

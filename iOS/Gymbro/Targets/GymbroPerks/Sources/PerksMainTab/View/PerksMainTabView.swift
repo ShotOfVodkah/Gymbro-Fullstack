@@ -22,7 +22,10 @@ struct PerksMainTabView: View {
                         PerksDashboardView(dashboard: dashboard,
                                            onOpenStreakSettings: { viewModel.openStreakSettings() },
                                            onUseStreakFreeze: { viewModel.useStreakFreeze()},
-                                           onRefresh: { await viewModel.refresh() })
+                                           onRefresh: { await viewModel.refresh() },
+                                           onLeaderboardFilterChanged: { filter in viewModel.trackLeaderboardFilterChanged(filter) },
+                                           onLeaderboardSortChanged: { sort in viewModel.trackLeaderboardSortChanged(sort) },
+                                           onAchievementOpened: { achievement in viewModel.trackAchievementOpened(achievement) })
                     } else {
                         PerksViewStub()
                     }

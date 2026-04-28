@@ -6,6 +6,9 @@ struct LeaderboardSectionView: View {
     let entries: [LeaderboardEntry]
     let myRank: MyRank?
     
+    let onFilterChanged: (LeaderboardFilter) -> Void
+    let onSortChanged: (LeaderboardSort) -> Void
+    
     @State private var selectedFilter: LeaderboardFilter = .all
     @State private var selectedSort: LeaderboardSort = .streak
     
@@ -89,6 +92,7 @@ struct LeaderboardSectionView: View {
                     isSelected: selectedFilter == filter
                 ) {
                     selectedFilter = filter
+                    onFilterChanged(filter)
                 }
             }
         }
@@ -102,6 +106,7 @@ struct LeaderboardSectionView: View {
                     isSelected: selectedSort == sort
                 ) {
                     selectedSort = sort
+                    onSortChanged(sort)
                 }
             }
         }

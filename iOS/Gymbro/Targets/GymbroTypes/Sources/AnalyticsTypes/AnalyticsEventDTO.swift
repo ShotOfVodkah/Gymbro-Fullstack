@@ -109,6 +109,11 @@ public extension AnalyticsEvent {
         case .statisticsChartSelected: return "statistics_chart_selected"
         case .errorOccurred: return "error_occurred"
         case .errorRetryTapped: return "error_retry_tapped"
+        case .perksWeeklyGoalChanged: return "perks_weekly_goal_changed"
+        case .perksStreakFreezeUsed: return "perks_streak_freeze_used"
+        case .perksLeaderboardFilterChanged: return "perks_leaderboard_filter_changed"
+        case .perksLeaderboardSortChanged: return "perks_leaderboard_sort_changed"
+        case .perksAchievementOpened: return "perks_achievement_opened"
         }
     }
 
@@ -268,6 +273,37 @@ public extension AnalyticsEvent {
             return ["screen": screen, "message": message]
         case .errorRetryTapped(let screen):
             return ["screen": screen]
+        case .perksWeeklyGoalChanged(let goal):
+            return [
+                "screen": AnalyticsScreen.perks.rawValue,
+                "goal": "\(goal)"
+            ]
+
+        case .perksStreakFreezeUsed:
+            return [
+                "screen": AnalyticsScreen.perks.rawValue
+            ]
+
+        case .perksLeaderboardFilterChanged(let filter):
+            return [
+                "screen": AnalyticsScreen.perks.rawValue,
+                "filter": filter
+            ]
+
+        case .perksLeaderboardSortChanged(let sort):
+            return [
+                "screen": AnalyticsScreen.perks.rawValue,
+                "sort": sort
+            ]
+
+        case .perksAchievementOpened(let code, let name, let rarity, let isUnlocked):
+            return [
+                "screen": AnalyticsScreen.perks.rawValue,
+                "code": code,
+                "name": name,
+                "rarity": rarity,
+                "is_unlocked": "\(isUnlocked)"
+            ]
         }
     }
 }

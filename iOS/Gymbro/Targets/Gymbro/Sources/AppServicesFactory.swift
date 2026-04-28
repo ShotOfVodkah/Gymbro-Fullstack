@@ -345,7 +345,7 @@ final class AppServicesFactory {
     func makePerksMainTab() -> some View {
         screenFactories.perksMainTabFactory.makeView(
             router: router,
-//            client: AppMicroservices.feeds,
+            client: AppMicroservices.perks,
             analytics: analytics
         )
     }

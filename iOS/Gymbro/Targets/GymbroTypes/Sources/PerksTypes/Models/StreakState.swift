@@ -52,3 +52,23 @@ public struct StreakState: Equatable {
         self.wasFreezeUsedThisWeek = wasFreezeUsedThisWeek
     }
 }
+
+public extension StreakResponse {
+    
+    func toModel() -> StreakState {
+        StreakState(
+            currentStreakWeeks: currentStreakWeeks,
+            bestStreakWeeks: bestStreakWeeks,
+            weeklyGoal: weeklyGoal,
+            nextWeeklyGoal: nextWeeklyGoal,
+            completedThisWeek: completedThisWeek,
+            remainingToGoal: remainingToGoal,
+            weekStartDate: weekStartDate,
+            weekEndDate: weekEndDate,
+            isGoalCompleted: isGoalCompleted,
+            streakFreezeCount: streakFreezeCount,
+            canUseStreakFreeze: canUseStreakFreeze,
+            wasFreezeUsedThisWeek: wasFreezeUsedThisWeek
+        )
+    }
+}

@@ -55,3 +55,23 @@ public struct Achievement: Identifiable, Hashable {
         self.isSecret = isSecret
     }
 }
+
+public extension AchievementResponse {
+    
+    func toModel() -> Achievement {
+        Achievement(
+            id: id,
+            code: code,
+            name: name,
+            description: description,
+            iconName: iconName,
+            category: category,
+            rarity: rarity,
+            status: status,
+            progressCurrent: progressCurrent,
+            progressTarget: progressTarget,
+            unlockedAt: unlockedAt,
+            isSecret: isSecret
+        )
+    }
+}

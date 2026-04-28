@@ -44,6 +44,25 @@ public struct LeaderboardEntry: Identifiable, Hashable {
     }
 }
 
+public extension LeaderboardResponse {
+    
+    func toModel() -> LeaderboardEntry {
+        LeaderboardEntry(
+            id: id,
+            rank: rank,
+            userID: userID,
+            name: name,
+            username: username,
+            avatarSystemName: avatarSystemName,
+            currentStreakWeeks: currentStreakWeeks,
+            completedWorkouts: completedWorkouts,
+            isCurrentUser: isCurrentUser,
+            isFollowing: isFollowing,
+            isFriend: isFriend
+        )
+    }
+}
+
 public struct MyRank: Equatable {
     public let rank: Int
     public let currentStreakWeeks: Int
@@ -57,5 +76,16 @@ public struct MyRank: Equatable {
         self.rank = rank
         self.currentStreakWeeks = currentStreakWeeks
         self.completedWorkouts = completedWorkouts
+    }
+}
+
+public extension MyRankResponse {
+    
+    func toModel() -> MyRank {
+        MyRank(
+            rank: rank,
+            currentStreakWeeks: currentStreakWeeks,
+            completedWorkouts: completedWorkouts
+        )
     }
 }

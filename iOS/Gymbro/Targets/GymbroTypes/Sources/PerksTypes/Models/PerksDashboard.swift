@@ -21,3 +21,16 @@ public struct PerksDashboard: Equatable {
         self.myRank = myRank
     }
 }
+
+public extension PerksDashboardResponse {
+    
+    func toModel() -> PerksDashboard {
+        PerksDashboard(
+            streak: streak.toModel(),
+            recentUnlocks: recentUnlocks.map { $0.toModel() },
+            achievements: achievements.map { $0.toModel() },
+            leaderboardPreview: leaderboardPreview.map { $0.toModel() },
+            myRank: myRank?.toModel()
+        )
+    }
+}

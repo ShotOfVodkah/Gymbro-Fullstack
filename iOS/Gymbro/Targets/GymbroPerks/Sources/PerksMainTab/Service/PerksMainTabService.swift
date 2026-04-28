@@ -1,87 +1,43 @@
 import Foundation
+import GymbroNetwork
 import GymbroTypes
 
 protocol PerksMainTabService {
     func fetchDashboard() async throws -> PerksDashboard
     func updateWeeklyGoal(_ goal: Int) async throws -> PerksDashboard
     func useStreakFreeze() async throws -> PerksDashboard
+    func sendPerksEvent(_ event: PerksEvent) async throws
 }
 
 final class PerksMainTabServiceImpl: PerksMainTabService {
     
-    private var dashboard = PerksMockData.dashboard
+    private let client: any PerksClient
     
-    init() { // client: FeedsClient
-        //        self.client = client
+    init(client: any PerksClient) {
+        self.client = client
     }
     
     func fetchDashboard() async throws -> PerksDashboard {
-        try await Task.sleep(nanoseconds: 500_000_000)
-        return PerksMockData.dashboard
+        try await client.fetchDashboard().toModel()
     }
     
     func updateWeeklyGoal(_ goal: Int) async throws -> PerksDashboard {
-        try await Task.sleep(nanoseconds: 300_000_000)
-        
-        let oldStreak = dashboard.streak
-        
-        let updatedStreak = StreakState(
-            currentStreakWeeks: oldStreak.currentStreakWeeks,
-            bestStreakWeeks: oldStreak.bestStreakWeeks,
-            weeklyGoal: oldStreak.weeklyGoal,
-            nextWeeklyGoal: goal,
-            completedThisWeek: oldStreak.completedThisWeek,
-            remainingToGoal: oldStreak.remainingToGoal,
-            weekStartDate: oldStreak.weekStartDate,
-            weekEndDate: oldStreak.weekEndDate,
-            isGoalCompleted: oldStreak.isGoalCompleted,
-            streakFreezeCount: oldStreak.streakFreezeCount,
-            canUseStreakFreeze: oldStreak.canUseStreakFreeze,
-            wasFreezeUsedThisWeek: oldStreak.wasFreezeUsedThisWeek
-        )
-        
-        dashboard = PerksDashboard(
-            streak: updatedStreak,
-            recentUnlocks: dashboard.recentUnlocks,
-            achievements: dashboard.achievements,
-            leaderboardPreview: dashboard.leaderboardPreview,
-            myRank: dashboard.myRank
-        )
-        
-        return dashboard
+        let request = UpdateWeeklyGoalRequest(weeklyGoal: goal)
+        return try await client.updateWeeklyGoal(request).toModel()
     }
     
     func useStreakFreeze() async throws -> PerksDashboard {
-        try await Task.sleep(nanoseconds: 300_000_000)
-        
-        let oldStreak = dashboard.streak
-        let updatedFreezeCount = max(oldStreak.streakFreezeCount - 1, 0)
-        
-        let updatedStreak = StreakState(
-            currentStreakWeeks: oldStreak.currentStreakWeeks,
-            bestStreakWeeks: oldStreak.bestStreakWeeks,
-            weeklyGoal: oldStreak.weeklyGoal,
-            nextWeeklyGoal: oldStreak.nextWeeklyGoal,
-            completedThisWeek: oldStreak.completedThisWeek,
-            remainingToGoal: oldStreak.remainingToGoal,
-            weekStartDate: oldStreak.weekStartDate,
-            weekEndDate: oldStreak.weekEndDate,
-            isGoalCompleted: oldStreak.isGoalCompleted,
-            streakFreezeCount: updatedFreezeCount,
-            canUseStreakFreeze: false,
-            wasFreezeUsedThisWeek: true
-        )
-        
-        dashboard = PerksDashboard(
-            streak: updatedStreak,
-            recentUnlocks: dashboard.recentUnlocks,
-            achievements: dashboard.achievements,
-            leaderboardPreview: dashboard.leaderboardPreview,
-            myRank: dashboard.myRank
-        )
-        
-        return dashboard
+        let request = UseStreakFreezeRequest()
+        return try await client.useStreakFreeze(request).toModel()
     }
     
-    //    private let client: FeedsClient
+    func sendPerksEvent(_ event: PerksEvent) async throws {
+        let request = PerksEventRequest(
+            type: event.type.rawValue,
+            metadata: event.metadata,
+            createdAt: event.createdAt
+        )
+        
+        try await client.sendPerksEvent(request)
+    }
 }

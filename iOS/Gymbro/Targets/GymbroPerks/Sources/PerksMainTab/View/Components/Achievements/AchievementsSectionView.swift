@@ -4,6 +4,7 @@ import GymbroTypes
 struct AchievementsSectionView: View {
     
     let achievements: [Achievement]
+    let onAchievementOpened: (Achievement) -> Void
     
     @State private var selectedCategory: AchievementCategory = .all
     @State private var selectedAchievement: Achievement?
@@ -123,6 +124,7 @@ struct AchievementsSectionView: View {
                     achievement: achievement,
                     isSelected: selectedAchievement?.id == achievement.id,
                     onTap: {
+                        onAchievementOpened(achievement)
                         withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
                             selectedAchievement = achievement
                         }

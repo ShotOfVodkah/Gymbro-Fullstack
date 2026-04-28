@@ -78,6 +78,12 @@ public enum AnalyticsEvent {
     case workoutShareSubmitFailed(message: String)
     case workoutShareSuccessViewed(createdPost: Bool, deliveredChatsCount: Int, createdChatsCount: Int)
     case workoutShareDoneTapped
+    
+    case perksWeeklyGoalChanged(goal: Int)
+    case perksStreakFreezeUsed
+    case perksLeaderboardFilterChanged(filter: String)
+    case perksLeaderboardSortChanged(sort: String)
+    case perksAchievementOpened(code: String, name: String, rarity: String, isUnlocked: Bool)
 
     case errorOccurred(screen: String, message: String)
     case errorRetryTapped(screen: String)
@@ -99,6 +105,7 @@ public enum AnalyticsScreen: String {
     case profileEdit = "profile_edit"
     case profileSettings = "profile_settings"
     case profileStatistics = "profile_statistics"
+    case perks = "perks"
     case auth
     case home
 }
