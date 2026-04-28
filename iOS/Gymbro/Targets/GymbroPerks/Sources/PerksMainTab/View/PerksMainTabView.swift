@@ -18,7 +18,14 @@ struct PerksMainTabView: View {
                     PerksViewStub()
                     
                 case .loaded:
-                    contentView
+                    if let dashboard = viewModel.dashboard {
+                        PerksDashboardView(dashboard: dashboard,
+                                           onOpenStreakSettings: { viewModel.openStreakSettings() },
+                                           onUseStreakFreeze: { viewModel.useStreakFreeze()},
+                                           onRefresh: { await viewModel.refresh() })
+                    } else {
+                        PerksViewStub()
+                    }
                     
                 case .error:
                     VStack(alignment: .center) {
@@ -37,12 +44,27 @@ struct PerksMainTabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
-    }
-    
-    private var contentView: some View {
-        Text("Perks Main Tab View")
-            .font(.title3)
-            .foregroundStyle(.white)
+        .task {
+            await viewModel.loadIfNeeded()
+        }
+        .sheet(isPresented: $viewModel.isStreakSettingsPresented) {
+            if let streak = viewModel.dashboard?.streak {
+                StreakSettingsSheetView(
+                    currentGoal: streak.weeklyGoal,
+                    scheduledGoal: streak.nextWeeklyGoal,
+                    isSaving: viewModel.isUpdatingWeeklyGoal,
+                    onSave: { goal in
+                        viewModel.updateWeeklyGoal(goal)
+                    },
+                    onCancel: {
+                        viewModel.closeStreakSettings()
+                    }
+                )
+                .presentationDetents([.height(360)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(.clear)
+            }
+        }
     }
     
     private var backgroundView: some View {
