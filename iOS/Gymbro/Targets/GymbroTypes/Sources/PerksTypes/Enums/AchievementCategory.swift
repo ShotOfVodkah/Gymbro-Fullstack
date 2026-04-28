@@ -1,6 +1,6 @@
 import Foundation
 
-public enum AchievementCategory: String, CaseIterable, Identifiable {
+public enum AchievementCategory: String, Codable, Sendable, CaseIterable, Identifiable {
     case all
     case workoutMilestones
     case consistency
@@ -30,7 +30,7 @@ public enum AchievementCategory: String, CaseIterable, Identifiable {
     }
 }
 
-public enum AchievementRarity: String, CaseIterable {
+public enum AchievementRarity: String, Codable, Sendable, CaseIterable {
     case common
     case rare
     case epic
@@ -50,7 +50,7 @@ public enum AchievementRarity: String, CaseIterable {
     }
 }
 
-public enum AchievementStatus: String {
+public enum AchievementStatus: String, Codable, Sendable {
     case locked
     case unlocked
 }

@@ -22,6 +22,8 @@ final class PerksMainTabViewModel: ObservableObject {
     private let service: any PerksMainTabService
     private let analytics: any AnalyticsService
     
+    private var didTrackScreenOpen = false
+    
     init(
         router: any Router,
         service: any PerksMainTabService,
@@ -33,6 +35,11 @@ final class PerksMainTabViewModel: ObservableObject {
     }
     
     func loadIfNeeded() async {
+        if !didTrackScreenOpen {
+            didTrackScreenOpen = true
+            analytics.track(.screenViewed(screen: .perks))
+        }
+        
         guard dashboard == nil else { return }
         await loadDashboard()
     }
@@ -55,6 +62,7 @@ final class PerksMainTabViewModel: ObservableObject {
         guard !isUpdatingWeeklyGoal else { return }
         
         isUpdatingWeeklyGoal = true
+        analytics.track(.perksWeeklyGoalChanged(goal: goal))
         
         Task {
             do {
@@ -73,6 +81,7 @@ final class PerksMainTabViewModel: ObservableObject {
         guard dashboard?.streak.canUseStreakFreeze == true else { return }
         
         isUsingStreakFreeze = true
+        analytics.track(.perksStreakFreezeUsed)
         
         Task {
             do {
@@ -83,6 +92,23 @@ final class PerksMainTabViewModel: ObservableObject {
             
             isUsingStreakFreeze = false
         }
+    }
+    
+    func trackLeaderboardFilterChanged(_ filter: LeaderboardFilter) {
+        analytics.track(.perksLeaderboardFilterChanged(filter: filter.rawValue))
+    }
+
+    func trackLeaderboardSortChanged(_ sort: LeaderboardSort) {
+        analytics.track(.perksLeaderboardSortChanged(sort: sort.rawValue))
+    }
+    
+    func trackAchievementOpened(_ achievement: Achievement) {
+        analytics.track(.perksAchievementOpened(
+            code: achievement.code,
+            name: achievement.name,
+            rarity: achievement.rarity.rawValue,
+            isUnlocked: achievement.isUnlocked
+        ))
     }
     
     func refresh() async {
