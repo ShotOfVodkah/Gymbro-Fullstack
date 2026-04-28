@@ -21,7 +21,8 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         сlient: WorkoutsClient,
         type: String?,
         workoutId: String?,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        perksEvents: any PerksEventTrackingService
     ) -> some View {
         guard let viewModelCache, typeCache == type, idCache == workoutId else {
             let service = WorkoutBuilderForTypeServiceImpl(
@@ -30,7 +31,8 @@ public final class WorkoutBuilderForTypeFactoryImpl {
                 workoutsRepository: workoutsRepository,
                 exercisesRepository: exercisesRepository,
                 actionsRepository: actionsRepository,
-                localMapper: localMapper
+                localMapper: localMapper,
+                perksEvents: perksEvents
             )
             let viewModel = WorkoutBuilderForTypeViewModel(
                 service: service,

@@ -31,6 +31,16 @@ func main() {
 		log.Fatal("PROFILE_SERVICE_URL is not set")
 	}
 
+	perksBaseURL := os.Getenv("PERKS_SERVICE_URL")
+	if perksBaseURL == "" {
+		log.Fatal("PERKS_SERVICE_URL is not set")
+	}
+
+	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
+	if internalSecret == "" {
+		log.Fatal("INTERNAL_SERVICE_SECRET is not set")
+	}
+
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		log.Fatal("DATABASE_URL is not set")
@@ -44,15 +54,17 @@ func main() {
 	workoutsClient := clients.NewWorkoutsClient(workoutsBaseURL)
 	workoutsCalendarClient := clients.NewWorkoutsCalendarClient(workoutsBaseURL)
 	profileClient := clients.NewProfileClient(profileBaseURL)
+	perksClient := clients.NewPerksClient(perksBaseURL, internalSecret)
 
 	feedStore := store.NewFeedStore(db)
 	calendarStore := store.NewCalendarStore(db)
 	peopleStore := store.NewPeopleStore(db)
 	chatStore := store.NewChatStore(db)
 
-	feedH := feeds.NewFeedHandler(feedStore, chatStore, workoutsClient, profileClient)
+	feedH := feeds.NewFeedHandler(feedStore, chatStore, workoutsClient, profileClient, perksClient)
 	calendarH := handlers.NewCalendarHandler(calendarStore, profileClient, workoutsCalendarClient)
 	peopleH := handlers.NewPeopleHandler(peopleStore, profileClient)
+	internalPeopleH := handlers.NewInternalPeopleHandler(peopleStore)
 	chatH := chats.NewChatHandler(chatStore, profileClient, workoutsClient)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
@@ -79,6 +91,7 @@ func main() {
 	mux.Handle("/messages/", authMiddleware(chatH))
 
 	mux.Handle("/shares/workout", authMiddleware(feedH))
+	mux.Handle("/internal/people/", internalPeopleH)
 
 	log.Println("feeds service listening on :8083")
 	log.Fatal(http.ListenAndServe(":8083", mux))

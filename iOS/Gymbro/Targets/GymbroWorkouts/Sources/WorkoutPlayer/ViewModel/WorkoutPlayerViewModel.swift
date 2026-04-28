@@ -96,6 +96,10 @@ final class WorkoutPlayerViewModel: ObservableObject {
             modelModifier.events.send(.workoutEdited(id: id))
             switch result {
             case .completed(let session):
+                await service.trackWorkoutCompleted(
+                        startedAt: startTime,
+                        exercises: exercises
+                )
                 switch action {
                 case .saveOnly:
                     router.popToRoot()

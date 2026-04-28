@@ -23,9 +23,8 @@ struct PerksMainTabView: View {
                                            onOpenStreakSettings: { viewModel.openStreakSettings() },
                                            onUseStreakFreeze: { viewModel.useStreakFreeze()},
                                            onRefresh: { await viewModel.refresh() },
-                                           onLeaderboardFilterChanged: { filter in viewModel.trackLeaderboardFilterChanged(filter) },
-                                           onLeaderboardSortChanged: { sort in viewModel.trackLeaderboardSortChanged(sort) },
-                                           onAchievementOpened: { achievement in viewModel.trackAchievementOpened(achievement) })
+                                           onAchievementOpened: { achievement in viewModel.trackAchievementOpened(achievement) },
+                                           onLeaderboardSelectionChanged: { filter, sort in viewModel.updateLeaderboard(filter: filter, sort: sort) })
                     } else {
                         PerksViewStub()
                     }

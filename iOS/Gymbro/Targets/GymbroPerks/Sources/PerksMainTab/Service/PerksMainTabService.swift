@@ -7,6 +7,7 @@ protocol PerksMainTabService {
     func updateWeeklyGoal(_ goal: Int) async throws -> PerksDashboard
     func useStreakFreeze() async throws -> PerksDashboard
     func sendPerksEvent(_ event: PerksEvent) async throws
+    func fetchLeaderboard(filter: LeaderboardFilter, sort: LeaderboardSort) async throws -> [LeaderboardEntry]
 }
 
 final class PerksMainTabServiceImpl: PerksMainTabService {
@@ -39,5 +40,10 @@ final class PerksMainTabServiceImpl: PerksMainTabService {
         )
         
         try await client.sendPerksEvent(request)
+    }
+    
+    func fetchLeaderboard(filter: LeaderboardFilter, sort: LeaderboardSort) async throws -> [LeaderboardEntry] {
+        let response = try await client.fetchLeaderboard(filter: filter, sort: sort)
+        return response.map { $0.toModel() }
     }
 }

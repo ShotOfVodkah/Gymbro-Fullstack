@@ -1,16 +1,19 @@
 import Foundation
+import GymbroNetwork
 import GymbroTypes
 
 protocol ProfileMainTabService {
     func fetchScreen(mode: ProfileViewMode) async throws -> ProfileMainScreenModel
     func createDirectChat(with personID: String) async throws -> ChatSessionInput
     func toggleFollow(for userID: Int, isFollowing: Bool) async throws
+    func trackProfileOpened(mode: ProfileViewMode) async
 }
 
 final class ProfileMainServiceImpl: ProfileMainTabService {
     
-    init(gateway: any ProfileGateway) {
+    init(gateway: any ProfileGateway, perksEvents: any PerksEventTrackingService) {
         self.gateway = gateway
+        self.perksEvents = perksEvents
     }
     
     func fetchScreen(mode: ProfileViewMode) async throws -> ProfileMainScreenModel {
@@ -83,5 +86,11 @@ final class ProfileMainServiceImpl: ProfileMainTabService {
         try await gateway.toggleFollow(userID: userID, isFollowing: isFollowing)
     }
     
+    func trackProfileOpened(mode: ProfileViewMode) async {
+        guard case .otherUserProfile(let userID) = mode else { return }
+        await perksEvents.trackProfileOpened(userId: "\(userID)")
+    }
+    
     private let gateway: any ProfileGateway
+    private let perksEvents: any PerksEventTrackingService
 }

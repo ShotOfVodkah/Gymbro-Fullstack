@@ -13,9 +13,10 @@ public final class WorkoutShareFactoryImpl {
         input: WorkoutShareInput,
         router: any Router,
         client: FeedsClient,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        perksEvents: any PerksEventTrackingService
     ) -> some View {
-        let service = WorkoutShareServiceImpl(feedsClient: client)
+        let service = WorkoutShareServiceImpl(feedsClient: client, perksEvents: perksEvents)
         let viewModel = WorkoutShareViewModel(
             input: input,
             router: router,

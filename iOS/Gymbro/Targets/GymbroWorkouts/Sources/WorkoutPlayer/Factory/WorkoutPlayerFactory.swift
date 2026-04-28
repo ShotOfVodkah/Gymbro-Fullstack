@@ -20,7 +20,8 @@ public final class WorkoutPlayerFactoryImpl {
         feedsClient: FeedsClient,
         analytics: any AnalyticsService,
         streakWidget: StreakWidgetControlling,
-        activityCalendarWidget: ActivityCalendarWidgetControlling
+        activityCalendarWidget: ActivityCalendarWidgetControlling,
+        perksEvents: any PerksEventTrackingService
     ) -> some View {
         guard let viewModelCache, id == idCache else {
             let service = WorkoutPlayerServiceImpl(
@@ -29,7 +30,8 @@ public final class WorkoutPlayerFactoryImpl {
                 workoutsRepository: workoutsRepository,
                 actionsRepository: actionsRepository,
                 streakWidget: streakWidget,
-                activityCalendarWidget: activityCalendarWidget
+                activityCalendarWidget: activityCalendarWidget,
+                perksEvents: perksEvents
             )
             let viewModel = WorkoutPlayerViewModel(
                 id: id,
