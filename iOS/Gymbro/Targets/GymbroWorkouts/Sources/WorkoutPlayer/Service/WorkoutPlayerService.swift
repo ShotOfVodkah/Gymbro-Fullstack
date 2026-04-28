@@ -12,6 +12,10 @@ protocol WorkoutPlayerService {
         exercises: [ExerciseItem],
         weightUpdates: [String: Double]
     ) async -> WorkoutCompletionResult
+    func trackWorkoutCompleted(
+        startedAt: Date,
+        exercises: [ExerciseItem]
+    ) async
 }
 
 final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
@@ -22,7 +26,8 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
         workoutsRepository: WorkoutsCacheRepository,
         actionsRepository: OfflineActionsRepository,
         streakWidget: StreakWidgetControlling,
-        activityCalendarWidget: ActivityCalendarWidgetControlling
+        activityCalendarWidget: ActivityCalendarWidgetControlling,
+        perksEvents: any PerksEventTrackingService
     ) {
         self.client = client
         self.feedsClient = feedsClient
@@ -30,6 +35,7 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
         self.actionsRepository = actionsRepository
         self.streakWidget = streakWidget
         self.activityCalendarWidget = activityCalendarWidget
+        self.perksEvents = perksEvents
     }
 
     func fetchWorkout(id: String) async throws -> (WorkoutPlayerViewState, ScreenState) {
@@ -135,6 +141,22 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
 
         return completionResult
     }
+    
+    func trackWorkoutCompleted(
+        startedAt: Date,
+        exercises: [ExerciseItem]
+    ) async {
+        await perksEvents.trackWorkoutCompleted(
+            startedAt: startedAt,
+            hasNotes: false,
+            muscleGroupsCount: uniqueMuscleGroupsCount(from: exercises)
+        )
+    }
+
+    private func uniqueMuscleGroupsCount(from exercises: [ExerciseItem]) -> Int {
+        let groups = exercises.map { $0.exercise.muscleGroup.rawValue }
+        return Set(groups).count
+    }
 
     private let client: WorkoutsClient
     private let feedsClient: FeedsClient
@@ -142,6 +164,7 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
     private let actionsRepository: OfflineActionsRepository
     private let streakWidget: StreakWidgetControlling
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
+    private let perksEvents: any PerksEventTrackingService
 
     private func applyActivityCalendarSnapshotIfPossible() async {
         do {

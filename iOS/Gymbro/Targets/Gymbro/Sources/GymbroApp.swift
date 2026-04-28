@@ -57,9 +57,15 @@ struct GymbroApp: App {
                                             appServicesFactory.makeDestinationView(for: route)
                                         }
                                 case .challenge:
-                                    Text(String(localized: "app.tab.challenges", bundle: .module))
+                                    appServicesFactory.makeChallengesMainTab()
+                                        .navigationDestination(for: NavigationRoute.self) { route in
+                                            appServicesFactory.makeDestinationView(for: route)
+                                        }
                                 case .perks:
-                                    Text(String(localized: "app.tab.perks", bundle: .module))
+                                    appServicesFactory.makePerksMainTab()
+                                        .navigationDestination(for: NavigationRoute.self) { route in
+                                            appServicesFactory.makeDestinationView(for: route)
+                                        }
                                 }
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)

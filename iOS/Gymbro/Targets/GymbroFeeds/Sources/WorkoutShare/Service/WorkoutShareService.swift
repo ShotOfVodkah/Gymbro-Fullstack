@@ -14,9 +14,11 @@ struct WorkoutShareRecipientData {
 
 final class WorkoutShareServiceImpl: WorkoutShareService {
     init(
-        feedsClient: FeedsClient
+        feedsClient: FeedsClient,
+        perksEvents: any PerksEventTrackingService
     ) {
         self.feedsClient = feedsClient
+        self.perksEvents = perksEvents
     }
 
     func fetchRecipientDestinations() async throws -> WorkoutShareRecipientData {
@@ -50,7 +52,7 @@ final class WorkoutShareServiceImpl: WorkoutShareService {
     }
     
     func submitShare(sessionID: String, targets: ResolvedShareTargets, caption: String, location: String?) async throws -> ShareWorkoutResponse {
-        try await feedsClient.shareWorkout(
+        let response = try await feedsClient.shareWorkout(
             sessionID: sessionID,
             publishToFeed: targets.publishToFeed,
             existingChatIDs: targets.existingChatIDs,
@@ -58,7 +60,10 @@ final class WorkoutShareServiceImpl: WorkoutShareService {
             description: caption,
             location: location
         )
+        await perksEvents.trackWorkoutShared()
+        return response
     }
 
     private let feedsClient: FeedsClient
+    private let perksEvents: any PerksEventTrackingService
 }

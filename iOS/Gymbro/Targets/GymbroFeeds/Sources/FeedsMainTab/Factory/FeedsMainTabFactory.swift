@@ -15,10 +15,11 @@ public final class FeedsMainTabFactoryImpl {
     public func makeView(
         router: any Router,
         client: FeedsClient,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        perksEvents: any PerksEventTrackingService
     ) -> some View {
         guard let viewModelCache else {
-            let service = FeedsMainTabServiceImpl(client: client)
+            let service = FeedsMainTabServiceImpl(client: client, perksEvents: perksEvents)
             let viewModel = FeedsMainTabViewModel(
                 router: router,
                 service: service,

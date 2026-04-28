@@ -9,6 +9,8 @@ import GymbroFeeds
 import GymbroProfile
 import GymbroTypes
 import GymbroAnalytics
+import GymbroPerks
+import GymbroChallenges
 
 final class AppServicesFactory {
     let router: AppRouter
@@ -185,7 +187,8 @@ final class AppServicesFactory {
             feedsClient: AppMicroservices.feeds,
             analytics: analytics,
             streakWidget: streakWidget,
-            activityCalendarWidget: activityCalendarWidget
+            activityCalendarWidget: activityCalendarWidget,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -215,7 +218,8 @@ final class AppServicesFactory {
             сlient: AppMicroservices.workouts,
             type: type,
             workoutId: workoutId,
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -239,7 +243,8 @@ final class AppServicesFactory {
             input: input,
             router: router,
             client: AppMicroservices.feeds,
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -248,7 +253,8 @@ final class AppServicesFactory {
         screenFactories.feedsMainTabFactory.makeView(
             router: router,
             client: AppMicroservices.feeds,
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -301,12 +307,12 @@ final class AppServicesFactory {
     
     @MainActor
     func makeProfileMainScreen(mode: ProfileViewMode) -> some View {
-        
         screenFactories.profileMainTabFactory.makeView(
             router: router,
             mode: mode,
             gateway: ProfileGatewayImpl(profileClient: AppMicroservices.profile, feedsClient: AppMicroservices.feeds),
-            analytics: analytics
+            analytics: analytics,
+            perksEvents: AppMicroservices.perksEvents
         )
     }
     
@@ -334,6 +340,28 @@ final class AppServicesFactory {
             mode: mode,
             router: router,
             client: AppMicroservices.profile,
+            analytics: analytics
+        )
+    }
+    
+    // Perks
+    
+    @MainActor
+    func makePerksMainTab() -> some View {
+        screenFactories.perksMainTabFactory.makeView(
+            router: router,
+            client: AppMicroservices.perks,
+            analytics: analytics
+        )
+    }
+    
+    // Challenges
+    
+    @MainActor
+    func makeChallengesMainTab() -> some View {
+        screenFactories.challengesMainTabFactory.makeView(
+            router: router,
+//            client: AppMicroservices.feeds,
             analytics: analytics
         )
     }
@@ -365,4 +393,12 @@ private struct ScreenFactories {
     lazy var editProfileFactory = EditProfileFactoryImpl()
     lazy var settingsFactory = ProfileSettingsFactoryImpl()
     lazy var statisticsFactory = ProfileStatisticsFactoryImpl()
+    
+    // Perks factories
+    
+    lazy var perksMainTabFactory = PerksMainTabFactoryImpl()
+    
+    // Challenges factories
+    
+    lazy var challengesMainTabFactory = ChallengesMainTabFactoryImpl()
 }

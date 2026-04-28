@@ -307,20 +307,6 @@ func (fs *FeedStore) ListPostsByAuthorID(authorID string, currentUserID int) ([]
 	return rows, nil
 }
 
-func (ps *PeopleStore) ListFollowingIDsForUserAny(userID int) ([]int, error) {
-	query := `
-		SELECT followee_id
-		FROM user_follows
-		WHERE follower_id = $1
-		ORDER BY followee_id
-	`
-	var ids []int
-	if err := ps.db.Select(&ids, query, userID); err != nil {
-		return nil, fmt.Errorf("ListFollowingIDsForUserAny: %w", err)
-	}
-	return ids, nil
-}
-
 func (fs *FeedStore) InsertPost(authorID int, sessionID string, description string, location *string, communityID *string, kind string,) (*types.FeedPostRow, error) {
 	query := `
 		INSERT INTO posts (
@@ -376,4 +362,20 @@ func (fs *FeedStore) InsertPost(authorID int, sessionID string, description stri
 	}
 
 	return &row, nil
+}
+
+func (fs *FeedStore) GetPostAuthorID(postID string) (int, error) {
+	var authorID int
+
+	query := `
+		SELECT author_id
+		FROM posts
+		WHERE id = $1::uuid
+	`
+
+	if err := fs.db.Get(&authorID, query, postID); err != nil {
+		return 0, fmt.Errorf("GetPostAuthorID: %w", err)
+	}
+
+	return authorID, nil
 }

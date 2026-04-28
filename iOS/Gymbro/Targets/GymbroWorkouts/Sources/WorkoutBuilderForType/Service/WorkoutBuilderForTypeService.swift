@@ -9,6 +9,7 @@ protocol WorkoutBuilderForTypeService {
     func fetchAvailableExercises(type: String) async -> [any Exercise]
     func saveWorkout(_ workout: Workout) async
     func editWorkout(_ workout: Workout) async
+    func trackCustomWorkoutCreated() async
 }
 
 final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
@@ -19,7 +20,8 @@ final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
         actionsRepository: OfflineActionsRepository,
-        localMapper: WorkoutsLocalMapper
+        localMapper: WorkoutsLocalMapper,
+        perksEvents: any PerksEventTrackingService
     ) {
         self.networkClient = networkClient
         self.divLocalRepository = divLocalRepository
@@ -27,6 +29,7 @@ final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
         self.exercisesRepository = exercisesRepository
         self.actionsRepository = actionsRepository
         self.localMapper = localMapper
+        self.perksEvents = perksEvents
     }
 
     func fetchScreen(type: String, workout: Workout?, selectedExerciseIds: [String]) async throws -> (Data, ScreenState) {
@@ -87,6 +90,10 @@ final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
             actionsRepository.enqueueSmart(.editedWorkout(workout: WorkoutDTO(from: workout)))
         }
     }
+    
+    func trackCustomWorkoutCreated() async {
+        await perksEvents.trackCustomWorkoutCreated()
+    }
 
     // MARK: - Private
 
@@ -96,4 +103,5 @@ final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
     private let exercisesRepository: ExercisesRepository
     private let actionsRepository: OfflineActionsRepository
     private let localMapper: WorkoutsLocalMapper
+    private let perksEvents: any PerksEventTrackingService
 }

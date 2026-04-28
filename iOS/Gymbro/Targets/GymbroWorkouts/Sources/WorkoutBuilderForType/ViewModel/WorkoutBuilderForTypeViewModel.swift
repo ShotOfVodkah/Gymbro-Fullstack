@@ -108,6 +108,7 @@ final class WorkoutBuilderForTypeViewModel: ObservableObject {
             switch screenMode {
             case .create:
                 await service.saveWorkout(workout)
+                await service.trackCustomWorkoutCreated()
                 analytics.track(.workoutCreated(
                     workoutId: workoutId,
                     exerciseCount: exercises.count,
