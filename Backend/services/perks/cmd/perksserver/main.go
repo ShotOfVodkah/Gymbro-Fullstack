@@ -39,17 +39,23 @@ func main() {
 		feedsURL = "http://feeds_service:8083"
 	}
 
+	profileURL := os.Getenv("PROFILE_SERVICE_URL")
+	if profileURL == "" {
+		profileURL = "http://profile_service:8084"
+	}
+
 	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
 	if internalSecret == "" {
 		log.Fatal("INTERNAL_SERVICE_SECRET is required")
 	}
 
 	feedsClient := clients.NewFeedsClient(feedsURL, internalSecret)
+	profileClient := clients.NewProfileClient(profileURL)
 
 	baseStore := store.NewPerksStore(db)
 	streakStore := streak.NewStore(db, baseStore)
 	achievementStore := achievements.NewStore(db, baseStore)
-	leaderboardStore := leaderboard.NewStore(db, baseStore, feedsClient)
+	leaderboardStore := leaderboard.NewStore(db, baseStore, feedsClient, profileClient)
 
 	perksService := service.NewPerksService(
 		baseStore,

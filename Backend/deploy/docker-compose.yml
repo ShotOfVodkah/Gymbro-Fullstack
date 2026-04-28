@@ -166,6 +166,7 @@ services:
       JWT_SECRET: "supersecret_noone_will_get_out"
       INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
       FEEDS_SERVICE_URL: "http://feeds_service:8083"
+      PROFILE_SERVICE_URL: "http://profile_service:8084"
       PGHOST: postgres_perks
       PGPORT: 5432
     depends_on:
