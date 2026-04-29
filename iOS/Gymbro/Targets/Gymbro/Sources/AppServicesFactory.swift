@@ -138,6 +138,14 @@ final class AppServicesFactory {
             makeSettingsScreen()
         case .profileStatistics(let mode):
             makeStatisticsScreen(mode: mode)
+       
+            // challenges
+        case .challengeDetails(let id):
+            makeChallengeDetails(challengeID: id)
+        case .joinChallenge(let id):
+            makeJoinChallenge(challengeID: id)
+        case .challengeLeaderboard(let id):
+            makeChallengeLeaderboard(challengeID: id)
         }
     }
     
@@ -361,7 +369,37 @@ final class AppServicesFactory {
     func makeChallengesMainTab() -> some View {
         screenFactories.challengesMainTabFactory.makeView(
             router: router,
-//            client: AppMicroservices.feeds,
+            client: AppMicroservices.challenges,
+            analytics: analytics
+        )
+    }
+    
+    @MainActor
+    func makeChallengeDetails(challengeID: String) -> some View {
+        screenFactories.challengeDetailsFactory.makeView(
+            challengeID: challengeID,
+            router: router,
+            client: AppMicroservices.challenges,
+            analytics: analytics
+        )
+    }
+
+    @MainActor
+    func makeJoinChallenge(challengeID: String) -> some View {
+        screenFactories.joinChallengeFactory.makeView(
+            challengeID: challengeID,
+            router: router,
+            client: AppMicroservices.challenges,
+            analytics: analytics
+        )
+    }
+
+    @MainActor
+    func makeChallengeLeaderboard(challengeID: String) -> some View {
+        screenFactories.challengeLeaderboardFactory.makeView(
+            challengeID: challengeID,
+            router: router,
+            client: AppMicroservices.challenges,
             analytics: analytics
         )
     }
@@ -401,4 +439,7 @@ private struct ScreenFactories {
     // Challenges factories
     
     lazy var challengesMainTabFactory = ChallengesMainTabFactoryImpl()
+    lazy var challengeDetailsFactory = ChallengeDetailsFactoryImpl()
+    lazy var joinChallengeFactory = JoinChallengeFactoryImpl()
+    lazy var challengeLeaderboardFactory = ChallengeLeaderboardFactoryImpl()
 }

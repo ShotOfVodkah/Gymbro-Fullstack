@@ -26,7 +26,9 @@ public enum NavigationRoute: Hashable {
     case profileSettings
     case profileStatistics(mode: ProfileViewMode)
     
-    // другие маршруты
+    case challengeDetails(id: String)
+    case joinChallenge(id: String)
+    case challengeLeaderboard(id: String)
 }
 
 public protocol Router: ObservableObject {

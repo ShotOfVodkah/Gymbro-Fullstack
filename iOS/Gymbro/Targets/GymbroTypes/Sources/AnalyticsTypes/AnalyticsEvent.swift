@@ -84,6 +84,19 @@ public enum AnalyticsEvent {
     case perksLeaderboardFilterChanged(filter: String)
     case perksLeaderboardSortChanged(sort: String)
     case perksAchievementOpened(code: String, name: String, rarity: String, isUnlocked: Bool)
+    
+    case challengeListOpened
+    case challengeDetailsOpened(challengeId: String)
+    case challengeFilterSelected(filter: String)
+    case challengeJoinOpened(challengeId: String)
+    case challengeTeamSelected(challengeId: String, chatId: String, canJoin: Bool)
+    case challengeJoined(challengeId: String, chatId: String)
+    case challengeLeft(challengeId: String, teamId: String)
+    case challengeLeaderboardOpened(challengeId: String)
+    case challengeCompleted(challengeId: String, teamId: String?)
+    case challengeFailed(challengeId: String, teamId: String?)
+    case challengeActivityOpened(challengeId: String)
+    case challengeOpenChatTapped(challengeId: String, chatId: String)
 
     case errorOccurred(screen: String, message: String)
     case errorRetryTapped(screen: String)
@@ -106,6 +119,10 @@ public enum AnalyticsScreen: String {
     case profileSettings = "profile_settings"
     case profileStatistics = "profile_statistics"
     case perks = "perks"
+    case challenges = "challenges"
+    case challengeDetails = "challenge_details"
+    case challengeJoin = "challenge_join"
+    case challengeLeaderboard = "challenge_leaderboard"
     case auth
     case home
 }

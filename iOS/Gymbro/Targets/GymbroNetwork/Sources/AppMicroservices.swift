@@ -10,6 +10,7 @@ public final class AppMicroservices {
     public let profileClient: ProfileClient
     public let perksClient: PerksClient
     public let perksEvents: PerksEventTrackingService
+    public let challengesClient: ChallengesClient
     
     public let networkClient: NetworkClient
     
@@ -57,6 +58,7 @@ public final class AppMicroservices {
         profileClient = ProfileClient(client: networkClient)
         perksClient = PerksClientImpl(client: networkClient)
         perksEvents = PerksEventTrackingServiceImpl(client: perksClient)
+        challengesClient = ChallengesClientImpl(client: networkClient)
     }
     
     @MainActor
@@ -74,4 +76,5 @@ extension AppMicroservices {
     public static var profile: ProfileClient { shared.profileClient }
     public static var perks: PerksClient { shared.perksClient }
     public static var perksEvents: PerksEventTrackingService { shared.perksEvents }
+    public static var challenges: ChallengesClient { shared.challengesClient }
 }
