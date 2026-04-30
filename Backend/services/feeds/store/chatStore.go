@@ -583,3 +583,62 @@ func (cs *ChatStore) FindOrCreateDirectCommunity(userA, userB int) (*Community, 
 
 	return community, true, nil
 }
+
+func (cs *ChatStore) ListGroupCommunitiesForUser(userID int) ([]Community, error) {
+	query := `
+		SELECT
+			c.id,
+			c.title,
+			c.description,
+			c.kind,
+			c.created_by,
+			c.created_at,
+			c.updated_at
+		FROM communities c
+		JOIN community_members cm
+			ON cm.community_id = c.id
+		   AND cm.user_id = $1
+		WHERE c.kind = 'joined_group'
+		ORDER BY c.updated_at DESC
+	`
+
+	var rows []communityRow
+	if err := cs.db.Select(&rows, query, userID); err != nil {
+		return nil, err
+	}
+
+	result := make([]Community, 0, len(rows))
+	for _, row := range rows {
+		result = append(result, rowToCommunity(row))
+	}
+
+	return result, nil
+}
+
+func (cs *ChatStore) InsertSystemMessage(
+	communityID string,
+	kind string,
+	text string,
+) (*CommunityMessage, error) {
+	id := newUUIDLikeID()
+
+	query := `
+		INSERT INTO community_messages (
+			id,
+			community_id,
+			sender_id,
+			kind,
+			text,
+			session_id,
+			created_at
+		)
+		VALUES ($1, $2, 0, $3, $4, NULL, NOW())
+	`
+
+	_, err := cs.db.Exec(query, id, communityID, kind, text)
+	if err != nil {
+		return nil, fmt.Errorf("InsertSystemMessage: %w", err)
+	}
+
+	return cs.GetMessageByID(id)
+}

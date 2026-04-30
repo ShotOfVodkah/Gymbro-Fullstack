@@ -11,6 +11,7 @@ struct ChatMessageListView: View {
     let onLongPress: (ChatMessage) -> Void
     let onQuickReactionTap: (String) -> Void
     let onDismissQuickReaction: () -> Void
+    let onChallengeTap: (ChatMessage) -> Void
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -88,6 +89,17 @@ struct ChatMessageListView: View {
             ChatWorkoutMessageCardView(
                 message: message,
                 onTap: { onWorkoutTap(message) },
+                onReactionTap: { emoji in
+                    onReactionTap(emoji, message.id)
+                },
+                onLongPress: {
+                    onLongPress(message)
+                }
+            )
+        case .challengeSystem:
+            ChatChallengeSystemMessageCardView(
+                message: message,
+                onTap: { onChallengeTap(message) },
                 onReactionTap: { emoji in
                     onReactionTap(emoji, message.id)
                 },

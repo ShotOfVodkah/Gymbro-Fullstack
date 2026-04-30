@@ -48,8 +48,13 @@ func main() {
 
 	profileURL := os.Getenv("PROFILE_SERVICE_URL")
 	internalSecret := os.Getenv("INTERNAL_SERVICE_SECRET")
+	challengesURL := os.Getenv("CHALLENGES_SERVICE_URL")
+	if challengesURL == "" {
+		challengesURL = "http://challenges_service:8088"
+	}
 	profileStatsClient := clients.NewProfileStatsClient(profileURL, internalSecret)
-	sessionH := handlers.NewSessionHandler(db, profileStatsClient)
+	challengesClient := clients.NewChallengesClient(challengesURL, internalSecret)
+	sessionH := handlers.NewSessionHandler(db, profileStatsClient, challengesClient)
 
 	mux := http.NewServeMux()
 	mux.Handle("/workouts/", authMiddleware(workoutH))

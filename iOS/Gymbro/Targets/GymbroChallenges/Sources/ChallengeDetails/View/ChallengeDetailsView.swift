@@ -61,6 +61,10 @@ struct ChallengeDetailsView: View {
                 )
                 
                 ChallengeRewardsView(rewards: details.rewards)
+                
+                if details.participationStatus == .inProgress {
+                    leaveChallengeButton
+                }
             }
             .padding(.horizontal, 15)
             .padding(.top, 16)
@@ -95,6 +99,34 @@ struct ChallengeDetailsView: View {
             Color.clear
                 .frame(width: 42, height: 42)
         }
+    }
+    
+    private var leaveChallengeButton: some View {
+        Button {
+            viewModel.leaveChallengeTapped()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                    .font(.system(size: 15, weight: .semibold))
+                
+                Text("Leave Challenge")
+                    .font(.system(size: 15, weight: .bold))
+                
+                Spacer()
+            }
+            .foregroundStyle(.red.opacity(0.95))
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(.red.opacity(0.10))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(.red.opacity(0.18), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 4)
     }
     
     private var errorView: some View {

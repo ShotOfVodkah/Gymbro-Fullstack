@@ -142,22 +142,48 @@ struct ChallengeCardView: View {
     }
     
     private var metaView: some View {
-        HStack(spacing: 10) {
-            if challenge.isJoined {
-                metaPill(
-                    title: "Team",
-                    value: challenge.teamName ?? "Team",
-                    iconName: "person.3.fill"
+        VStack(alignment: .leading, spacing: 10) {
+            if let targetText = challenge.targetText {
+                HStack(spacing: 7) {
+                    Image(systemName: "scope")
+                        .font(.system(size: 12, weight: .semibold))
+                    
+                    Text(targetText)
+                        .font(.system(size: 12, weight: .bold))
+                        .lineLimit(1)
+                    
+                    Spacer(minLength: 0)
+                }
+                .foregroundStyle(challenge.status.accentColor)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(challenge.status.accentColor.opacity(0.13))
                 )
-            } else {
-                joinPill
+                .overlay(
+                    Capsule()
+                        .stroke(challenge.status.accentColor.opacity(0.18), lineWidth: 1)
+                )
             }
             
-            metaPill(
-                title: "Members",
-                value: challenge.membersCount.map { "\($0)" } ?? "—",
-                iconName: "person.2.fill"
-            )
+            HStack(spacing: 10) {
+                if challenge.isJoined {
+                    metaPill(
+                        title: "Team",
+                        value: challenge.teamName ?? "Team",
+                        iconName: "person.3.fill"
+                    )
+                } else {
+                    joinPill
+                }
+                
+                metaPill(
+                    title: "Members",
+                    value: challenge.membersCount.map { "\($0)" } ?? "—",
+                    iconName: "person.2.fill"
+                )
+            }
         }
     }
     

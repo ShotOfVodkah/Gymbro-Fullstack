@@ -16,6 +16,8 @@ public struct ChallengeCardModel: Identifiable, Hashable {
     public let teamName: String?
     public let membersCount: Int?
     public let isJoined: Bool
+    public let targetFilter: String?
+    public let targetText: String?
     
     public init(
         id: String,
@@ -32,7 +34,9 @@ public struct ChallengeCardModel: Identifiable, Hashable {
         dateText: String,
         teamName: String?,
         membersCount: Int?,
-        isJoined: Bool
+        isJoined: Bool,
+        targetFilter: String? = nil,
+        targetText: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -49,6 +53,8 @@ public struct ChallengeCardModel: Identifiable, Hashable {
         self.teamName = teamName
         self.membersCount = membersCount
         self.isJoined = isJoined
+        self.targetFilter = targetFilter
+        self.targetText = targetText
     }
 }
 
@@ -56,6 +62,7 @@ extension ChallengeCardModel {
     
     public init(response: ChallengeResponse) {
         let participationStatus = ChallengeParticipationStatus(rawValue: response.participationStatus)
+        let type = ChallengeType(rawValue: response.type)
         
         self.init(
             id: response.id,
@@ -65,7 +72,7 @@ extension ChallengeCardModel {
             accentColorName: response.accentColor ?? participationStatus.colorName,
             status: participationStatus,
             difficulty: ChallengeDifficulty(rawValue: response.difficulty),
-            type: ChallengeType(rawValue: response.type),
+            type: type,
             unit: ChallengeUnit(rawValue: response.unit),
             progressText: ChallengeFormatter.progressText(
                 current: response.currentValue,
@@ -76,7 +83,12 @@ extension ChallengeCardModel {
             dateText: ChallengeFormatter.timeLeftText(endDate: response.endDate),
             teamName: response.team?.teamName,
             membersCount: nil,
-            isJoined: response.team != nil
+            isJoined: response.team != nil,
+            targetFilter: response.targetFilter,
+            targetText: ChallengeFormatter.targetText(
+                type: type,
+                targetFilter: response.targetFilter
+            )
         )
     }
 }

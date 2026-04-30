@@ -71,7 +71,8 @@ struct ChatView: View {
                 onReactionTap: viewModel.toggleReaction(_:for:),
                 onLongPress: viewModel.didLongPressMessage(_:),
                 onQuickReactionTap: viewModel.addQuickReaction(_:),
-                onDismissQuickReaction: viewModel.hideQuickReactionPicker
+                onDismissQuickReaction: viewModel.hideQuickReactionPicker,
+                onChallengeTap: viewModel.didTapChallengeMessage(_:),
             )
             
             ChatInputBarView(

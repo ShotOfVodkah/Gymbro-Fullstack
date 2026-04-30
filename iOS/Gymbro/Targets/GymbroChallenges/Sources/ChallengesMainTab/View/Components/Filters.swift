@@ -19,6 +19,8 @@ enum ChallengeCategory: String, CaseIterable, Identifiable {
     case streak = "Streak"
     case strength = "Strength"
     case cardio = "Cardio"
+    case exercises = "Exercises"
+    case muscleGroups = "Muscle Groups"
     
     var id: String { rawValue }
     
@@ -29,6 +31,8 @@ enum ChallengeCategory: String, CaseIterable, Identifiable {
         case .streak: return "flame.fill"
         case .strength: return "dumbbell.fill"
         case .cardio: return "heart.fill"
+        case .exercises: return "scope"
+        case .muscleGroups: return "figure.highintensity.intervaltraining"
         }
     }
 }

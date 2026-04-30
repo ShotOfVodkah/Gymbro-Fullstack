@@ -43,4 +43,25 @@ enum ChallengeFormatter {
             return value == 1 ? "day" : "days"
         }
     }
+    
+    static func targetText(type: ChallengeType, targetFilter: String?) -> String? {
+        guard let targetFilter, !targetFilter.isEmpty else {
+            return nil
+        }
+        
+        let formatted = targetFilter
+            .replacingOccurrences(of: "_", with: " ")
+            .capitalized
+        
+        switch type {
+        case .workoutCategory:
+            return "Category: \(formatted)"
+        case .exerciseSpecific:
+            return "Exercise: \(formatted)"
+        case .muscleGroup:
+            return "Muscle group: \(formatted)"
+        default:
+            return nil
+        }
+    }
 }

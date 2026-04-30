@@ -65,6 +65,30 @@ extension ChatMessage {
                 category: workout?.category ?? ""
             )
             
+        case "challenge_joined":
+            kind = .challengeSystem(
+                challengeID: response.challenge_id ?? "",
+                title: "Challenge Joined",
+                message: response.text ?? "",
+                status: .inProgress
+            )
+
+        case "challenge_completed":
+            kind = .challengeSystem(
+                challengeID: response.challenge_id ?? "",
+                title: "Challenge Completed",
+                message: response.text ?? "",
+                status: .completed
+            )
+
+        case "challenge_failed":
+            kind = .challengeSystem(
+                challengeID: response.challenge_id ?? "",
+                title: "Challenge Failed",
+                message: response.text ?? "",
+                status: .failed
+            )
+            
         default:
             kind = .text(response.text ?? "")
         }

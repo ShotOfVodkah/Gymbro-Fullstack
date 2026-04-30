@@ -22,6 +22,8 @@ public struct ChallengeDetailsModel: Identifiable, Hashable {
     public let participants: [ChallengeParticipantModel]
     public let rules: [ChallengeRulesModel]
     public let rewards: [ChallengeRewardModel]
+    public let targetFilter: String?
+    public let targetText: String?
     
     public init(
         id: String,
@@ -44,7 +46,9 @@ public struct ChallengeDetailsModel: Identifiable, Hashable {
         team: ChallengeTeamModel?,
         participants: [ChallengeParticipantModel],
         rules: [ChallengeRulesModel],
-        rewards: [ChallengeRewardModel]
+        rewards: [ChallengeRewardModel],
+        targetFilter: String? = nil,
+        targetText: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -67,6 +71,8 @@ public struct ChallengeDetailsModel: Identifiable, Hashable {
         self.participants = participants
         self.rules = rules
         self.rewards = rewards
+        self.targetFilter = targetFilter
+        self.targetText = targetText
     }
 }
 
@@ -74,6 +80,7 @@ extension ChallengeDetailsModel {
     
     public init(response: ChallengeDetailsResponse) {
         let participationStatus = ChallengeParticipationStatus(rawValue: response.participationStatus)
+        let type = ChallengeType(rawValue: response.type)
         
         self.init(
             id: response.id,
@@ -84,7 +91,7 @@ extension ChallengeDetailsModel {
             status: ChallengeStatus(rawValue: response.status),
             participationStatus: participationStatus,
             difficulty: ChallengeDifficulty(rawValue: response.difficulty),
-            type: ChallengeType(rawValue: response.type),
+            type: type,
             unit: ChallengeUnit(rawValue: response.unit),
             startDate: response.startDate,
             endDate: response.endDate,
@@ -100,7 +107,12 @@ extension ChallengeDetailsModel {
             team: response.team.map { ChallengeTeamModel(response: $0) },
             participants: response.participants.map { ChallengeParticipantModel(response: $0) },
             rules: response.rules.map { ChallengeRulesModel(text: $0) },
-            rewards: response.rewards?.map { ChallengeRewardModel(response: $0) } ?? []
+            rewards: response.rewards?.map { ChallengeRewardModel(response: $0) } ?? [],
+            targetFilter: response.targetFilter,
+            targetText: ChallengeFormatter.targetText(
+                type: type,
+                targetFilter: response.targetFilter
+            )
         )
     }
 }

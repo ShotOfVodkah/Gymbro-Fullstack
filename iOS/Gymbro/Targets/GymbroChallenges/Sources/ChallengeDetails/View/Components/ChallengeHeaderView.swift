@@ -32,9 +32,35 @@ struct ChallengeHeaderView: View {
                 }
             }
             
-            HStack(spacing: 8) {
-                ChallengeStatusBadgeView(status: details.participationStatus)
-                ChallengeDifficultyBadgeView(difficulty: details.difficulty)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    ChallengeStatusBadgeView(status: details.participationStatus)
+                    ChallengeDifficultyBadgeView(difficulty: details.difficulty)
+                }
+                
+                if let targetText = details.targetText {
+                    HStack(spacing: 7) {
+                        Image(systemName: "scope")
+                            .font(.system(size: 12, weight: .semibold))
+                        
+                        Text(targetText)
+                            .font(.system(size: 12, weight: .bold))
+                            .lineLimit(1)
+                        
+                        Spacer(minLength: 0)
+                    }
+                    .foregroundStyle(details.accentColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(details.accentColor.opacity(0.13))
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(details.accentColor.opacity(0.18), lineWidth: 1)
+                    )
+                }
             }
             
             HStack(spacing: 8) {

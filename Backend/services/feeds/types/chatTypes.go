@@ -72,3 +72,8 @@ type AddChatMembersRequest struct {
 	UserIDs []string `json:"user_ids"`
 }
 
+type InternalSystemMessageRequest struct {
+	Kind        string  `json:"kind"`
+	Text        string  `json:"text"`
+	ChallengeID string  `json:"challenge_id,omitempty"`
+}

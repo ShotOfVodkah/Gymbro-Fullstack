@@ -43,3 +43,10 @@ type IngestedEvent struct {
 	NormalizedPlatform string
 	EventFingerprint   string
 }
+
+type InternalAnalyticsEventRequest struct {
+	EventName  string            `json:"event_name"`
+	Properties map[string]string `json:"properties"`
+	Timestamp  string            `json:"timestamp"`
+	Platform   string            `json:"platform"`
+}

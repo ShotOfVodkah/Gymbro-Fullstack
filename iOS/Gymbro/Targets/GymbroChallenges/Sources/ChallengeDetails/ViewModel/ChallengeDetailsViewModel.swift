@@ -83,6 +83,22 @@ final class ChallengeDetailsViewModel: ObservableObject {
         }
     }
     
+    func leaveChallengeTapped() {
+        guard let teamID = details?.team?.id else { return }
+        
+        Task {
+            do {
+                try await service.leaveChallenge(
+                    challengeID: challengeID,
+                    teamID: teamID
+                )
+                await loadDetails()
+            } catch {
+                screenState = .error
+            }
+        }
+    }
+    
     func joinAnotherTeamTapped() {
         router.navigate(to: .joinChallenge(id: challengeID))
     }

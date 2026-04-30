@@ -25,14 +25,16 @@ type sessionHandler struct {
 	workoutStore  store.WorkoutStorer
 	statsBuilder  *stats.Builder
 	profileStats  *clients.ProfileStatsClient
+	challengesClient *clients.ChallengesClient
 }
 
-func NewSessionHandler(db *sqlx.DB, profileStats *clients.ProfileStatsClient) *sessionHandler {
+func NewSessionHandler(db *sqlx.DB, profileStats *clients.ProfileStatsClient, challengesClient *clients.ChallengesClient,) *sessionHandler {
 	return &sessionHandler{
 		sessionStore: store.NewSessionStore(db),
 		workoutStore: store.NewWorkoutStore(db),
 		statsBuilder: stats.NewBuilder(db),
 		profileStats: profileStats,
+		challengesClient: challengesClient,
 	}
 }
 
@@ -223,6 +225,7 @@ func (h *sessionHandler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.pushProfileStats(r.Context(), userID)
+	h.pushChallengeProgress(r.Context(), userID, input)
 
 	session, err := h.sessionStore.GetSessionByID(input.ID, requestLocale(r))
 	if err != nil {
@@ -253,6 +256,65 @@ func (h *sessionHandler) pushProfileStats(ctx context.Context, userID string) {
 	}
 	if err := h.profileStats.UpsertStatistics(ctx, uid, payload); err != nil {
 		log.Printf("profile stats upsert: %v", err)
+	}
+}
+
+func (h *sessionHandler) pushChallengeProgress(
+	ctx context.Context,
+	userID string,
+	input types.SessionInput,
+) {
+	if h.challengesClient == nil {
+		return
+	}
+
+	uid, err := strconv.ParseInt(userID, 10, 64)
+	if err != nil {
+		log.Printf("challenges event: skip non-numeric user_id %q", userID)
+		return
+	}
+
+	session, err := h.sessionStore.GetSessionByID(input.ID, types.LocaleEN)
+	if err != nil {
+		log.Printf("challenges event: failed to load session %s: %v", input.ID, err)
+		return
+	}
+
+	durationMinutes := 0
+	exerciseIDs := make([]string, 0, len(session.Exercises))
+	exerciseTypes := make([]string, 0, len(session.Exercises))
+	muscleGroups := make([]string, 0, len(session.Exercises))
+
+	for _, exercise := range session.Exercises {
+		exerciseIDs = append(exerciseIDs, exercise.ID)
+		exerciseTypes = append(exerciseTypes, exercise.Type)
+		muscleGroups = append(muscleGroups, exercise.MuscleGroup)
+
+		if exercise.DurationMinutes != nil {
+			durationMinutes += *exercise.DurationMinutes
+		}
+	}
+
+	workoutID := ""
+	if session.WorkoutID != nil {
+		workoutID = *session.WorkoutID
+	}
+
+	event := clients.NewWorkoutCompletedEvent(
+		uid,
+		session.ID,
+		workoutID,
+		session.WorkoutType,
+		durationMinutes,
+		0,
+		exerciseIDs,
+		exerciseTypes,
+		muscleGroups,
+		session.CompletedAt,
+	)
+
+	if err := h.challengesClient.SendWorkoutCompleted(ctx, event); err != nil {
+		log.Printf("challenges event failed: %v", err)
 	}
 }
 

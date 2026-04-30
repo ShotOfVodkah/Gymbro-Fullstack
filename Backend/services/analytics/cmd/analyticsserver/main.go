@@ -40,6 +40,7 @@ func main() {
 	analyticsH := handlers.NewAnalyticsHandler(analyticsStore)
 	queryH := handlers.NewQueryHandler(analyticsStore)
 	adminH := handlers.NewAdminHandler(analyticsStore)
+	internalAnalyticsH := handlers.NewInternalAnalyticsHandler(analyticsStore)
 
 	demoH := handlers.NewDemoHandler(analyticsStore)
 	researchH := handlers.NewResearchHandler(analyticsStore)
@@ -83,6 +84,8 @@ func main() {
 
 	mux.Handle("/analytics/admin/privacy/cleanup", authMiddleware(adminH))
 	mux.Handle("/analytics/admin/batches/", authMiddleware(adminH))
+
+	mux.Handle("/internal/analytics/events", internalAnalyticsH)
 
 	// authMiddleware
 	mux.Handle("/analytics/admin/dashboard", dashboardPageH) 

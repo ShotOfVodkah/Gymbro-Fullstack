@@ -21,6 +21,7 @@ public struct ChallengeResponse: Decodable {
     public let progressPercent: Double
     public let unit: String
     public let team: ChallengeTeamPreviewResponse?
+    public let targetFilter: String?
     
     private enum CodingKeys: String, CodingKey {
         case id, title, description, type, status, difficulty, unit, team
@@ -32,6 +33,7 @@ public struct ChallengeResponse: Decodable {
         case targetValue = "target_value"
         case currentValue = "current_value"
         case progressPercent = "progress_percent"
+        case targetFilter = "target_filter"
     }
 }
 
@@ -55,6 +57,7 @@ public struct ChallengeDetailsResponse: Decodable {
     public let team: ChallengeTeamResponse?
     public let participants: [ChallengeParticipantResponse]
     public let rewards: [ChallengeRewardResponse]?
+    public let targetFilter: String?
     
     private enum CodingKeys: String, CodingKey {
         case id, title, description, rules, type, status, difficulty, unit, team, participants, rewards
@@ -66,6 +69,7 @@ public struct ChallengeDetailsResponse: Decodable {
         case targetValue = "target_value"
         case currentValue = "current_value"
         case progressPercent = "progress_percent"
+        case targetFilter = "target_filter"
     }
 }
 

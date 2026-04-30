@@ -38,7 +38,26 @@ final class ChallengesMainTabViewModel: ObservableObject {
                 matchesFilter = challenge.status == .failed
             }
             
-            return matchesFilter
+            let matchesCategory: Bool
+            
+            switch selectedCategory {
+            case .workouts:
+                matchesCategory = challenge.type == .teamWorkoutsCount
+            case .minutes:
+                matchesCategory = challenge.type == .teamTrainingMinutes
+            case .streak:
+                matchesCategory = challenge.type == .teamStreakDays
+            case .strength:
+                matchesCategory = challenge.type == .workoutCategory && challenge.targetFilter == "strength"
+            case .cardio:
+                matchesCategory = challenge.type == .workoutCategory && challenge.targetFilter == "cardio"
+            case .exercises:
+                matchesCategory = challenge.type == .exerciseSpecific
+            case .muscleGroups:
+                matchesCategory = challenge.type == .muscleGroup
+            }
+            
+            return matchesFilter && matchesCategory
         }
     }
     
