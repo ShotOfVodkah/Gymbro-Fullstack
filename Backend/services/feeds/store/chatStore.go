@@ -63,6 +63,7 @@ type CommunityMessage struct {
 	Kind        string
 	Text        *string
 	SessionID   *string
+	ChallengeID *string
 	CreatedAt   time.Time
 }
 
@@ -91,6 +92,7 @@ type communityMessageRow struct {
 	Kind        string    `db:"kind"`
 	Text        *string   `db:"text"`
 	SessionID   *string   `db:"session_id"`
+	ChallengeID *string   `db:"challenge_id"`
 	CreatedAt   time.Time `db:"created_at"`
 }
 
@@ -131,6 +133,7 @@ func rowToCommunityMessage(row communityMessageRow) CommunityMessage {
 		Kind:        row.Kind,
 		Text:        row.Text,
 		SessionID:   row.SessionID,
+		ChallengeID: row.ChallengeID,
 		CreatedAt:   row.CreatedAt,
 	}
 }
@@ -371,9 +374,10 @@ func (cs *ChatStore) InsertMessage(
 			kind,
 			text,
 			session_id,
+			challenge_id,
 			created_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, NOW())
+		VALUES ($1, $2, $3, $4, $5, $6, NULL, NOW())
 	`
 
 	_, err := cs.db.Exec(query, id, communityID, senderID, kind, text, sessionID)
@@ -381,25 +385,7 @@ func (cs *ChatStore) InsertMessage(
 		return nil, fmt.Errorf("InsertMessage: %w", err)
 	}
 
-	var row communityMessageRow
-	err = cs.db.Get(&row, `
-		SELECT
-			id,
-			community_id,
-			sender_id,
-			kind,
-			text,
-			session_id,
-			created_at
-		FROM community_messages
-		WHERE id = $1
-	`, id)
-	if err != nil {
-		return nil, fmt.Errorf("InsertMessage fetch: %w", err)
-	}
-
-	message := rowToCommunityMessage(row)
-	return &message, nil
+	return cs.GetMessageByID(id)
 }
 
 func (cs *ChatStore) ListMessagesByCommunityID(communityID string) ([]CommunityMessage, error) {
@@ -411,6 +397,7 @@ func (cs *ChatStore) ListMessagesByCommunityID(communityID string) ([]CommunityM
 			kind,
 			text,
 			session_id,
+			challenge_id,
 			created_at
 		FROM community_messages
 		WHERE community_id = $1
@@ -439,6 +426,7 @@ func (cs *ChatStore) GetMessageByID(messageID string) (*CommunityMessage, error)
 			kind,
 			text,
 			session_id,
+			challenge_id,
 			created_at
 		FROM community_messages
 		WHERE id = $1
@@ -619,6 +607,7 @@ func (cs *ChatStore) InsertSystemMessage(
 	communityID string,
 	kind string,
 	text string,
+	challengeID *string,
 ) (*CommunityMessage, error) {
 	id := newUUIDLikeID()
 
@@ -630,12 +619,13 @@ func (cs *ChatStore) InsertSystemMessage(
 			kind,
 			text,
 			session_id,
+			challenge_id,
 			created_at
 		)
-		VALUES ($1, $2, 0, $3, $4, NULL, NOW())
+		VALUES ($1, $2, 0, $3, $4, NULL, $5, NOW())
 	`
 
-	_, err := cs.db.Exec(query, id, communityID, kind, text)
+	_, err := cs.db.Exec(query, id, communityID, kind, text, challengeID)
 	if err != nil {
 		return nil, fmt.Errorf("InsertSystemMessage: %w", err)
 	}

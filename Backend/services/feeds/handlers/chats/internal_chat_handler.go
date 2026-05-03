@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -14,6 +15,20 @@ import (
 type InternalChatHandler struct {
 	chatStore store.ChatStore
 	secret    string
+}
+
+type InternalGroupChatResponse struct {
+	ID               string `json:"id"`
+	Name             string `json:"name"`
+	AvatarSystemName string `json:"avatar_system_name"`
+	MembersCount     int    `json:"members_count"`
+	IsGroup          bool   `json:"is_group"`
+}
+
+type InternalGroupChatMemberResponse struct {
+	UserID           int64  `json:"user_id"`
+	Name             string `json:"name"`
+	AvatarSystemName string `json:"avatar_system_name"`
 }
 
 func NewInternalChatHandler(chatStore store.ChatStore) *InternalChatHandler {
@@ -67,7 +82,30 @@ func (h *InternalChatHandler) GetUserGroupChats(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	writeJSON(w, chats)
+	response := make([]InternalGroupChatResponse, 0, len(chats))
+
+	for _, chat := range chats {
+		members, err := h.chatStore.ListCommunityMembers(chat.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		name := "Group chat"
+		if chat.Title != nil && *chat.Title != "" {
+			name = *chat.Title
+		}
+
+		response = append(response, InternalGroupChatResponse{
+			ID:               chat.ID,
+			Name:             name,
+			AvatarSystemName: "person.3.fill",
+			MembersCount:     len(members),
+			IsGroup:          chat.Kind == "joined_group",
+		})
+	}
+
+	writeJSON(w, response)
 }
 
 func (h *InternalChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
@@ -86,13 +124,17 @@ func (h *InternalChatHandler) GetChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, map[string]any{
-		"id":                 chat.ID,
-		"title":              chat.Title,
-		"kind":               chat.Kind,
-		"avatar_system_name":  "person.3.fill",
-		"members_count":      len(members),
-		"is_group":           chat.Kind == "joined_group",
+	name := "Group chat"
+	if chat.Title != nil && *chat.Title != "" {
+		name = *chat.Title
+	}
+
+	writeJSON(w, InternalGroupChatResponse{
+		ID:               chat.ID,
+		Name:             name,
+		AvatarSystemName: "person.3.fill",
+		MembersCount:     len(members),
+		IsGroup:          chat.Kind == "joined_group",
 	})
 }
 
@@ -106,7 +148,17 @@ func (h *InternalChatHandler) GetChatMembers(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	writeJSON(w, members)
+	response := make([]InternalGroupChatMemberResponse, 0, len(members))
+
+	for _, member := range members {
+		response = append(response, InternalGroupChatMemberResponse{
+			UserID:           int64(member.UserID),
+			Name:             fmt.Sprintf("User %d", member.UserID),
+			AvatarSystemName: "person.crop.circle.fill",
+		})
+	}
+
+	writeJSON(w, response)
 }
 
 func (h *InternalChatHandler) SendSystemMessage(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +176,12 @@ func (h *InternalChatHandler) SendSystemMessage(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	message, err := h.chatStore.InsertSystemMessage(chatID, req.Kind, req.Text)
+	message, err := h.chatStore.InsertSystemMessage(
+		chatID,
+		req.Kind,
+		req.Text,
+		nullableStringPointer(req.ChallengeID),
+	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -136,4 +193,13 @@ func (h *InternalChatHandler) SendSystemMessage(w http.ResponseWriter, r *http.R
 func writeJSON(w http.ResponseWriter, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(value)
+}
+
+func nullableStringPointer(value string) *string {
+
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	return &value
+
 }

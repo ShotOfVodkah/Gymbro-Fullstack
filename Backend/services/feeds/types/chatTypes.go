@@ -40,6 +40,7 @@ type ChatMessageResponse struct {
 	Kind                   string                        `json:"kind"`
 	Text                   *string                       `json:"text,omitempty"`
 	Workout                *ChatWorkoutAttachmentResponse `json:"workout,omitempty"`
+	ChallengeID 		   *string 						  `json:"challenge_id,omitempty"`
 	Reactions              []ChatReactionResponse        `json:"reactions"`
 }
 
