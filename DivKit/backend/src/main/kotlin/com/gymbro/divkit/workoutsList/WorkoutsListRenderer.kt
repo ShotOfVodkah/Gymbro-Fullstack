@@ -57,6 +57,9 @@ object WorkoutsListRenderer {
         streakGoal: Int,
         daysLeft: Int,
         currentStreak: Int,
+        weekEnd: String,
+        wasFreezeUsedThisWeek: Boolean,
+        isGoalCompleted: Boolean,
         language: Language
     ): Div {
         val translations = WorkoutsListTranslations(language)
@@ -65,7 +68,16 @@ object WorkoutsListRenderer {
             height = matchParentSize(),
             orientation = vertical,
             items = listOf(
-                workoutHeader(streakData, streakGoal, daysLeft, currentStreak, translations),
+                workoutHeader(
+                    streakData,
+                    streakGoal,
+                    daysLeft,
+                    currentStreak,
+                    weekEnd,
+                    wasFreezeUsedThisWeek,
+                    isGoalCompleted,
+                    translations
+                ),
                 workoutSecondRow(),
                 gallery(
                     width = matchParentSize(),
@@ -83,9 +95,21 @@ object WorkoutsListRenderer {
         streakGoal: Int,
         daysLeft: Int,
         current: Int,
+        weekEnd: String,
+        wasFreezeUsedThisWeek: Boolean,
+        isGoalCompleted: Boolean,
         translations: WorkoutsListTranslations
     ): Div {
         val imageUrl = "http://localhost:8090/assets/fire.png"
+        val streakOpenUrl = openStreakUrl(
+            streakData,
+            streakGoal,
+            daysLeft,
+            current,
+            weekEnd,
+            wasFreezeUsedThisWeek,
+            isGoalCompleted,
+        )
         return container(
             orientation = horizontal,
             alignmentVertical = center,
@@ -174,13 +198,33 @@ object WorkoutsListRenderer {
                     actions = listOf(
                         action(
                             logId = "open_streak",
-                            url = Url.create("app://open_streak?current=$streakData&goal=$streakGoal&daysLeft=$daysLeft&total=$current")
+                            url = Url.create(streakOpenUrl)
                         )
                     )
                 )
             )
         )
 
+    }
+
+    private fun openStreakUrl(
+        streakData: Int,
+        streakGoal: Int,
+        daysLeft: Int,
+        currentStreakWeeks: Int,
+        weekEnd: String,
+        wasFreezeUsedThisWeek: Boolean,
+        isGoalCompleted: Boolean,
+    ): String {
+        val freeze = if (wasFreezeUsedThisWeek) "true" else "false"
+        val goalDone = if (isGoalCompleted) "true" else "false"
+        val base =
+            "app://open_streak?current=$streakData&goal=$streakGoal&daysLeft=$daysLeft&total=$currentStreakWeeks&freezeUsed=$freeze&goalCompleted=$goalDone"
+        return if (weekEnd.isNotBlank()) {
+            "$base&weekEnd=${URLEncoder.encode(weekEnd, UTF_8)}"
+        } else {
+            base
+        }
     }
 
     private fun DivScope.workoutSecondRow(): Div {

@@ -142,6 +142,23 @@
         }
       }
     },
+    "widget.streak.freeze_protected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Streak protected"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стрик защищён"
+          }
+        }
+      }
+    },
     "widget.streak.title" : {
       "extractionState" : "stale",
       "localizations" : {

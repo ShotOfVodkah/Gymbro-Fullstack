@@ -6,7 +6,14 @@ import GymbroTypes
 enum WorkoutsNavigationLink {
     case openWorkout(id: String)
     case openBuilder
-    case openStreak(current: Int, goal: Int, daysLeft: Int, value: Int)
+    case openStreak(
+        current: Int,
+        goal: Int,
+        daysLeft: Int,
+        value: Int,
+        wasFreezeUsedThisWeek: Bool,
+        isGoalCompleted: Bool
+    )
 }
 
 enum WorkoutInfoNavigationLink {

@@ -18,4 +18,8 @@ enum WorkoutL10n {
     static var streakMotivationDanger: String {
         String(localized: "workout.streak.motivation.danger", bundle: .module)
     }
+
+    static var streakMotivationFreeze: String {
+        String(localized: "workout.streak.motivation.freeze", bundle: .module)
+    }
 }

@@ -107,12 +107,25 @@ public final class WorkoutsClient {
         return dto.toWorkout()
     }
     
-    public func fetchWorkoutsList() async throws -> Data {
+    public func fetchStreak() async throws -> StreakResponse {
+        try await client.request(
+            method: .GET,
+            path: "/perks/streak",
+            body: EmptyBody?.none,
+            requiresAuth: true,
+            responseType: StreakResponse.self
+        )
+    }
+
+    public func fetchWorkoutsList(streak: StreakResponse? = nil) async throws -> Data {
         let userId = try requireUserId()
-        let queryItems: [URLQueryItem] = [
+        var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "userId", value: userId),
             divKitLanguageQueryItem(),
         ]
+        if let streak {
+            queryItems.append(contentsOf: streak.workoutsListStreakQueryItems())
+        }
         return try await client.requestData(
             method: .GET,
             base: URL(string: "http://localhost:8090"),

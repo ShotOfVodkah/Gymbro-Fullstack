@@ -2,27 +2,54 @@ import SwiftUI
 import GymbroCommonUI
 
 struct WorkoutsStreakSheet: View {
-    
+
     private let total: Int
     private let current: Int
     private let daysLeft: Int
     private let value: Int
+    private let wasFreezeUsedThisWeek: Bool
+    private let isGoalCompleted: Bool
     private let streakText: String
-    
+
+    private var isDangerState: Bool {
+        !isGoalCompleted && !wasFreezeUsedThisWeek && daysLeft <= 2 && current < total
+    }
+
+    private var accentColor: Color {
+        if wasFreezeUsedThisWeek {
+            return Color.cyan
+        }
+        if isGoalCompleted {
+            return Color.mint
+        }
+        return isDangerState ? Color.appRed : Color.appPurple
+    }
+
     init(
         total: Int,
         current: Int,
         daysLeft: Int,
-        value: Int
+        value: Int,
+        wasFreezeUsedThisWeek: Bool,
+        isGoalCompleted: Bool
     ) {
         self.total = total
         self.daysLeft = daysLeft
         self.current = current
         self.value = value
-        self.streakText = (daysLeft <= 2)
-        ? WorkoutL10n.streakMotivationDanger
-        : WorkoutL10n.streakMotivationSafe
+        self.wasFreezeUsedThisWeek = wasFreezeUsedThisWeek
+        self.isGoalCompleted = isGoalCompleted
+        if wasFreezeUsedThisWeek {
+            self.streakText = WorkoutL10n.streakMotivationFreeze
+        } else if isGoalCompleted {
+            self.streakText = WorkoutL10n.streakMotivationSafe
+        } else {
+            self.streakText = !isGoalCompleted && !wasFreezeUsedThisWeek && daysLeft <= 2 && current < total
+                ? WorkoutL10n.streakMotivationDanger
+                : WorkoutL10n.streakMotivationSafe
+        }
     }
+
     var body: some View {
         VStack(spacing: 10) {
             Text(String(localized: "workout.streak.title", bundle: .module))
@@ -33,7 +60,7 @@ struct WorkoutsStreakSheet: View {
             ZStack {
                 Image("streak", bundle: .module)
                     .renderingMode(.template)
-                    .foregroundStyle((daysLeft <= 2) ? Color.appRed : Color.appPurple)
+                    .foregroundStyle(accentColor)
                     .scaleEffect(0.23)
                 Text("\(value)")
                     .foregroundStyle(.white)
@@ -42,14 +69,14 @@ struct WorkoutsStreakSheet: View {
                     .offset(y: 15)
             }
             .frame(width: 130, height: 130)
-            
+
             SegmentedPillProgress(
                 total: total,
                 current: current,
                 daysLeft: daysLeft,
-                color: (daysLeft <= 2) ? Color.appRed : Color.appPurple
+                color: accentColor
             )
-            
+
             Text(streakText)
                 .foregroundStyle(.white)
                 .font(.subheadline)
@@ -68,7 +95,7 @@ public struct SegmentedPillProgress: View {
     private let height: CGFloat
     private let spacing: CGFloat
     private let color: Color
-    
+
     private let borderGradient = LinearGradient(
         colors: [
             Color.white.opacity(0.85),
@@ -124,7 +151,7 @@ public struct SegmentedPillProgress: View {
                         .frame(height: height)
                 }
             }
-            
+
             Text(WorkoutL10n.streakDaysLeft(daysLeft))
                 .foregroundStyle(.white)
                 .font(.subheadline)
@@ -136,4 +163,3 @@ public struct SegmentedPillProgress: View {
         .padding(.horizontal, 15)
     }
 }
-

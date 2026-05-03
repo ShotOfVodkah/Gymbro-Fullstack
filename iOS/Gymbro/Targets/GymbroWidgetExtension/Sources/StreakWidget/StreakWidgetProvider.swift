@@ -14,10 +14,12 @@ struct StreakWidgetProvider: TimelineProvider {
         StreakWidgetEntry(
             date: Date(),
             payload: StreakWidgetPayload(
-                weeklyTarget: 0,
+                weeklyTarget: 1,
                 weeklyProgress: 0,
                 streakValue: 0,
-                daysUntilBurn: 0
+                daysUntilBurn: 0,
+                wasFreezeUsedThisWeek: false,
+                isGoalCompleted: false
             ))
     }
 

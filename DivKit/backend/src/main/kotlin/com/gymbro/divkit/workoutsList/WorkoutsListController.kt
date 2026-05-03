@@ -23,6 +23,13 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
     fun getWorkouts(
         @RequestParam userId: String,
         @RequestParam(name = "lang", required = false, defaultValue = "en") lang: String,
+        @RequestParam(name = "completedThisWeek", required = false, defaultValue = "4") completedThisWeek: Int,
+        @RequestParam(name = "weeklyGoal", required = false, defaultValue = "6") weeklyGoal: Int,
+        @RequestParam(name = "daysLeft", required = false, defaultValue = "2") daysLeft: Int,
+        @RequestParam(name = "currentStreakWeeks", required = false, defaultValue = "10") currentStreakWeeks: Int,
+        @RequestParam(name = "weekEnd", required = false, defaultValue = "") weekEnd: String,
+        @RequestParam(name = "wasFreezeUsedThisWeek", required = false, defaultValue = "false") wasFreezeUsedThisWeek: Boolean,
+        @RequestParam(name = "isGoalCompleted", required = false, defaultValue = "false") isGoalCompleted: Boolean,
         request: HttpServletRequest,
     ): ResponseEntity<Divan> {
         val jwtUserId = request.getAttribute(GymbroJwtAuth.USER_ID_ATTRIBUTE) as String
@@ -52,10 +59,13 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
                     div = with(WorkoutsListRenderer) {
                         render(
                             workouts,
-                            4,
-                            6,
-                            2,
-                            10,
+                            completedThisWeek,
+                            weeklyGoal,
+                            daysLeft,
+                            currentStreakWeeks,
+                            weekEnd,
+                            wasFreezeUsedThisWeek,
+                            isGoalCompleted,
                             language
                         ) },
                     variables = listOf(
