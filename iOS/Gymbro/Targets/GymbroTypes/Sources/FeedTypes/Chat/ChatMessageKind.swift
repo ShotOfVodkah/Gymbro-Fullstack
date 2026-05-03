@@ -9,4 +9,10 @@ public enum ChatMessageKind: Hashable {
         duration: String,
         category: String
     )
+    case challengeSystem(
+        challengeID: String,
+        title: String,
+        message: String,
+        status: ChallengeParticipationStatus
+    )
 }

@@ -53,6 +53,7 @@ services:
         eQIDAQAB
         -----END PUBLIC KEY-----
       PROFILE_SERVICE_URL: "http://profile_service:8084"
+      CHALLENGES_SERVICE_URL: "http://challenges_service:8088"
       INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
       PGHOST: postgres_workouts
       PGPORT: 5432
@@ -151,6 +152,7 @@ services:
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres_analytics:5432/gymbro_analytics?sslmode=disable"
       JWT_SECRET: "supersecret_noone_will_get_out"
+      INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
       PGHOST: postgres_analytics
       PGPORT: 5432
     depends_on:
@@ -186,6 +188,38 @@ services:
     expose:
       - "8087"
 
+  postgres_challenges:
+    image: postgres:14
+    container_name: postgres_challenges
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gymbro_challenges
+    volumes:
+      - pg_challenges_data:/var/lib/postgresql/data
+
+  challenges_service:
+    build:
+      context: ..
+      dockerfile: deploy/challenges.Dockerfile
+    container_name: challenges_service
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres_challenges:5432/gymbro_challenges?sslmode=disable"
+      JWT_SECRET: "supersecret_noone_will_get_out"
+      INTERNAL_SERVICE_SECRET: "internal_service_shared_secret_change_me"
+      FEEDS_SERVICE_URL: "http://feeds_service:8083"
+      ANALYTICS_SERVICE_URL: "http://analytics_service:8086"
+      # PERKS_SERVICE_URL: "http://perks_service:8087"
+      PGHOST: postgres_challenges
+      PGPORT: 5432
+    depends_on:
+      - postgres_challenges
+      - feeds_service
+      - analytics_service
+      # - perks_service
+    expose:
+      - "8088"
+
   gateway:
     build:
       context: ..
@@ -199,6 +233,7 @@ services:
       AI_URL: "http://ai_service:8085"
       ANALYTICS_URL: "http://analytics_service:8086"
       PERKS_URL: "http://perks_service:8087"
+      CHALLENGES_URL: "http://challenges_service:8088"
     depends_on:
       - auth_service
       - workouts_service
@@ -207,6 +242,7 @@ services:
       - ai_service
       - analytics_service
       - perks_service
+      - challenges_service
     ports:
       - "8080:8080"
 
@@ -217,3 +253,4 @@ volumes:
   pg_profile_data:
   pg_analytics_data:
   pg_perks_data:
+  pg_challenges_data:

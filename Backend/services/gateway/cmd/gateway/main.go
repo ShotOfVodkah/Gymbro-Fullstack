@@ -57,12 +57,10 @@ func main() {
 		{Prefix: "/shares", EnvKey: "FEEDS_URL", Default: "http://feeds_service:8083"},
 
 		{Prefix: "/profiles", EnvKey: "PROFILE_URL", Default: "http://profile_service:8084"},
-
 		{Prefix: "/ai", EnvKey: "AI_URL", Default: "http://ai_service:8085"},
-
 		{Prefix: "/analytics", EnvKey: "ANALYTICS_URL", Default: "http://analytics_service:8086"},
-
 		{Prefix: "/perks", EnvKey: "PERKS_URL", Default: "http://perks_service:8087"},
+		{Prefix: "/challenges", EnvKey: "CHALLENGES_URL", Default: "http://challenges_service:8088"},
 	}
 
 	mux := http.NewServeMux()

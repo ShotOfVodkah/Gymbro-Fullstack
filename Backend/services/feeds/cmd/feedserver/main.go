@@ -65,6 +65,7 @@ func main() {
 	calendarH := handlers.NewCalendarHandler(calendarStore, profileClient, workoutsCalendarClient)
 	peopleH := handlers.NewPeopleHandler(peopleStore, profileClient)
 	internalPeopleH := handlers.NewInternalPeopleHandler(peopleStore)
+	internalChatH := chats.NewInternalChatHandler(chatStore)
 	chatH := chats.NewChatHandler(chatStore, profileClient, workoutsClient)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
@@ -92,6 +93,7 @@ func main() {
 
 	mux.Handle("/shares/workout", authMiddleware(feedH))
 	mux.Handle("/internal/people/", internalPeopleH)
+	mux.Handle("/internal/chats/", internalChatH)
 
 	log.Println("feeds service listening on :8083")
 	log.Fatal(http.ListenAndServe(":8083", mux))

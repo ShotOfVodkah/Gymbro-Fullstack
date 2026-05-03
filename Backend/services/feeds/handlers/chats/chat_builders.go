@@ -135,20 +135,29 @@ func (h *ChatHandler) buildChatMessagesResponse(
 
 	result := make([]types.ChatMessageResponse, 0, len(messages))
 	for _, message := range messages {
-		profile, ok := profilesMap[message.SenderID]
-		if !ok {
-			continue
+		senderName := "GymBro"
+		senderAvatarSystemName := "flag.checkered"
+
+		if message.SenderID != 0 {
+			profile, ok := profilesMap[message.SenderID]
+			if !ok {
+				continue
+			}
+
+			senderName = profile.Name
+			senderAvatarSystemName = profile.AvatarSystemName
 		}
 
 		resp := types.ChatMessageResponse{
 			ID:                     message.ID,
 			SenderID:               strconv.Itoa(message.SenderID),
-			SenderName:             profile.Name,
-			SenderAvatarSystemName: profile.AvatarSystemName,
+			SenderName:             senderName,
+			SenderAvatarSystemName: senderAvatarSystemName,
 			SentAt:                 message.CreatedAt,
 			IsMine:                 message.SenderID == currentUserID,
 			Kind:                   message.Kind,
 			Text:                   message.Text,
+			ChallengeID:            message.ChallengeID,
 			Reactions:              reactionsMap[message.ID],
 		}
 

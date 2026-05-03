@@ -24,6 +24,7 @@ public struct ChatMessageResponse: Decodable {
     let kind: String
     let text: String?
     let workout: ChatWorkoutAttachmentResponse?
+    let challenge_id: String?
     let reactions: [ChatReactionResponse]
 }
 

@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 public final class ChallengesMainTabFactoryImpl {
@@ -13,11 +14,11 @@ public final class ChallengesMainTabFactoryImpl {
     @MainActor
     public func makeView(
         router: any Router,
-//        client: any ProfileGateway,
+        client: any ChallengesClient,
         analytics: any AnalyticsService
     ) -> some View {
         guard let viewModelCache else {
-            let service = ChallengesMainTabServiceImpl() // client: client
+            let service = ChallengesMainTabServiceImpl(client: client)
             let viewModel = ChallengesMainTabViewModel(
                 router: router,
                 service: service,

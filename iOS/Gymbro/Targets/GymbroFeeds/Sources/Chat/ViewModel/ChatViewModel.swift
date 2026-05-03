@@ -306,4 +306,13 @@ final class ChatViewModel: ObservableObject {
             router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
         }
     }
+    
+    func didTapChallengeMessage(_ message: ChatMessage) {
+        guard case .challengeSystem(let challengeID, _, _, _) = message.kind,
+              !challengeID.isEmpty else {
+            return
+        }
+        
+        router.navigate(to: .challengeDetails(id: challengeID))
+    }
 }

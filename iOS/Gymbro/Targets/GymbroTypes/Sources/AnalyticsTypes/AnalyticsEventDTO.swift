@@ -114,6 +114,18 @@ public extension AnalyticsEvent {
         case .perksLeaderboardFilterChanged: return "perks_leaderboard_filter_changed"
         case .perksLeaderboardSortChanged: return "perks_leaderboard_sort_changed"
         case .perksAchievementOpened: return "perks_achievement_opened"
+        case .challengeListOpened: return "challenge_list_opened"
+        case .challengeDetailsOpened: return "challenge_details_opened"
+        case .challengeFilterSelected: return "challenge_filter_selected"
+        case .challengeJoinOpened: return "challenge_join_opened"
+        case .challengeTeamSelected: return "challenge_team_selected"
+        case .challengeJoined: return "challenge_joined"
+        case .challengeLeft: return "challenge_left"
+        case .challengeLeaderboardOpened: return "challenge_leaderboard_opened"
+        case .challengeCompleted: return "challenge_completed"
+        case .challengeFailed: return "challenge_failed"
+        case .challengeActivityOpened: return "challenge_activity_opened"
+        case .challengeOpenChatTapped: return "challenge_open_chat_tapped"
         }
     }
 
@@ -303,6 +315,78 @@ public extension AnalyticsEvent {
                 "name": name,
                 "rarity": rarity,
                 "is_unlocked": "\(isUnlocked)"
+            ]
+        case .challengeListOpened:
+            return ["screen": AnalyticsScreen.challenges.rawValue]
+
+        case .challengeDetailsOpened(let challengeId):
+            return [
+                "screen": AnalyticsScreen.challengeDetails.rawValue,
+                "challenge_id": challengeId
+            ]
+
+        case .challengeFilterSelected(let filter):
+            return [
+                "screen": AnalyticsScreen.challenges.rawValue,
+                "filter": filter
+            ]
+
+        case .challengeJoinOpened(let challengeId):
+            return [
+                "screen": AnalyticsScreen.challengeJoin.rawValue,
+                "challenge_id": challengeId
+            ]
+
+        case .challengeTeamSelected(let challengeId, let chatId, let canJoin):
+            return [
+                "screen": AnalyticsScreen.challengeJoin.rawValue,
+                "challenge_id": challengeId,
+                "chat_id": chatId,
+                "can_join": "\(canJoin)"
+            ]
+
+        case .challengeJoined(let challengeId, let chatId):
+            return [
+                "screen": AnalyticsScreen.challengeJoin.rawValue,
+                "challenge_id": challengeId,
+                "chat_id": chatId
+            ]
+
+        case .challengeLeft(let challengeId, let teamId):
+            return [
+                "challenge_id": challengeId,
+                "team_id": teamId
+            ]
+
+        case .challengeLeaderboardOpened(let challengeId):
+            return [
+                "screen": AnalyticsScreen.challengeLeaderboard.rawValue,
+                "challenge_id": challengeId
+            ]
+
+        case .challengeCompleted(let challengeId, let teamId):
+            return [
+                "challenge_id": challengeId,
+                "team_id": teamId ?? ""
+            ]
+
+        case .challengeFailed(let challengeId, let teamId):
+            return [
+                "challenge_id": challengeId,
+                "team_id": teamId ?? ""
+            ]
+
+        case .challengeActivityOpened(let challengeId):
+            return [
+                "screen": AnalyticsScreen.challengeDetails.rawValue,
+                "challenge_id": challengeId
+            ]
+
+        case .challengeOpenChatTapped(let challengeId, let chatId):
+            return [
+                "screen": AnalyticsScreen.challengeDetails.rawValue,
+                "challenge_id": challengeId,
+                "chat_id": chatId
             ]
         }
     }
