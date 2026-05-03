@@ -76,7 +76,7 @@ struct StreakWidgetView: View {
             VStack(spacing: 4) {
                 Text(WidgetStreakL10n.daysLeft(payload.daysUntilBurn))
                     .font(.caption)
-                    .foregroundStyle(payload.isDangerState ? Color.appRed : .white)
+                    .foregroundStyle(.white)
                     .lineLimit(2)
                     .minimumScaleFactor(0.85)
                     .multilineTextAlignment(.center)

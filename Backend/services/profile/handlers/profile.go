@@ -148,6 +148,10 @@ func (h *ProfileHandler) getMe(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if err := h.store.EnsureProfile(claims.UserID); err != nil {
+		internalServerError(w, r)
+		return
+	}
 	profile, err := h.store.GetByUserID(claims.UserID)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
@@ -179,6 +183,10 @@ func (h *ProfileHandler) patchMe(w http.ResponseWriter, r *http.Request) {
 		badRequest(w, r)
 		return
 	}
+	if err := h.store.EnsureProfile(claims.UserID); err != nil {
+		internalServerError(w, r)
+		return
+	}
 	if err := h.store.PatchProfile(claims.UserID, body); errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
 		return
@@ -195,6 +203,10 @@ func (h *ProfileHandler) patchMe(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) getMeSettings(w http.ResponseWriter, r *http.Request) {
 	claims, ok := h.requireClaims(w, r)
 	if !ok {
+		return
+	}
+	if err := h.store.EnsureProfile(claims.UserID); err != nil {
+		internalServerError(w, r)
 		return
 	}
 	s, err := h.store.GetSettings(claims.UserID)
@@ -231,6 +243,10 @@ func (h *ProfileHandler) patchMeSettings(w http.ResponseWriter, r *http.Request)
 	var body types.PatchSettingsRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		badRequest(w, r)
+		return
+	}
+	if err := h.store.EnsureProfile(claims.UserID); err != nil {
+		internalServerError(w, r)
 		return
 	}
 	if err := h.store.PatchSettings(claims.UserID, body); err != nil {
@@ -275,6 +291,9 @@ func (h *ProfileHandler) allowViewPrivateStats(viewerID, targetID int) (allowed 
 		return true, nil
 	}
 	st, err := h.store.GetSettings(targetID)
+	if errors.Is(err, store.ErrNotFound) {
+		return true, nil
+	}
 	if err != nil {
 		return false, err
 	}
@@ -333,6 +352,12 @@ func (h *ProfileHandler) getUserMain(w http.ResponseWriter, r *http.Request, use
 }
 
 func (h *ProfileHandler) writeMainForUser(w http.ResponseWriter, r *http.Request, targetUserID int, isSelf bool) {
+	if isSelf {
+		if err := h.store.EnsureProfile(targetUserID); err != nil {
+			internalServerError(w, r)
+			return
+		}
+	}
 	profile, err := h.store.GetByUserID(targetUserID)
 	if errors.Is(err, store.ErrNotFound) {
 		notFound(w, r)
