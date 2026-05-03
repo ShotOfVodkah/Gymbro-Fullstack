@@ -221,15 +221,24 @@ final class AuthViewModel: ObservableObject {
     }
     
     private static func extractVerificationToken(from url: URL) -> String? {
-        guard url.scheme == "gymbro",
-              url.host == "verify-email"
-        else {
-            return nil
-        }
-
-        return URLComponents(url: url, resolvingAgainstBaseURL: false)?
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        let token = components?
             .queryItems?
             .first(where: { $0.name == "token" })?
             .value
+
+        guard let token, !token.isEmpty else {
+            return nil
+        }
+
+        if url.scheme == "gymbro", url.host == "verify-email" {
+            return token
+        }
+
+        if url.scheme == "https", url.path == "/auth/verify-email-link" {
+            return token
+        }
+
+        return nil
     }
 }

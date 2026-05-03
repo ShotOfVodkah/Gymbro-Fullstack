@@ -26,6 +26,8 @@ final class ProfileSettingsViewModel: ObservableObject {
     @Published var isLegalSheetPresented: Bool = false
     @Published var isShowingAppVersionAlert: Bool = false
     
+    @Published var isConnectedDevicesPresented: Bool = false
+    
     private let router: any Router
     private let service: any SettingsServiceProtocol
     private let analytics: any AnalyticsService
@@ -91,7 +93,7 @@ final class ProfileSettingsViewModel: ObservableObject {
             print("Open change password")
             
         case "devices":
-            print("Open connected devices")
+            isConnectedDevicesPresented = true
             
         case "language":
             print("Open language settings")
@@ -191,6 +193,7 @@ final class ProfileSettingsViewModel: ObservableObject {
     }
     
     private func logout() {
+        isConnectedDevicesPresented = false
         Task {
             await SessionManager.shared.logout()
             analytics.track(.userLoggedOut)

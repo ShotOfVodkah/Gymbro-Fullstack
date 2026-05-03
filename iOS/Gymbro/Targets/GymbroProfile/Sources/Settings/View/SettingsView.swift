@@ -43,6 +43,11 @@ struct ProfileSettingsView: View {
             )
             .preferredColorScheme(.dark)
         }
+        .sheet(isPresented: $viewModel.isConnectedDevicesPresented) {
+            ConnectedDevicesView() {
+                viewModel.isConnectedDevicesPresented = false
+            }
+        }
         .alert("App Version", isPresented: $viewModel.isShowingAppVersionAlert) {
             Button("OK", role: .cancel) { }
         } message: {

@@ -3,10 +3,21 @@ import Foundation
 public struct LoginRequest: Encodable {
     public let User: String
     public let Password: String
+    public let deviceName: String
+    public let platform: String
 
-    public init(User: String, Password: String) {
+    public init(User: String, Password: String, deviceName: String, platform: String) {
         self.User = User
         self.Password = Password
+        self.deviceName = deviceName
+        self.platform = platform
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case User
+        case Password
+        case deviceName = "device_name"
+        case platform
     }
 }
 
@@ -94,4 +105,32 @@ public struct BasicOKResponse: Decodable {
         self.ok = ok
         self.message = message
     }
+}
+
+public struct AuthSessionResponse: Decodable, Identifiable, Hashable {
+    public var id: String { sessionID }
+
+    public let sessionID: String
+    public let deviceName: String
+    public let platform: String
+    public let ipAddress: String?
+    public let createdAt: Date
+    public let lastUsedAt: Date?
+    public let expiresAt: Date
+    public let isCurrent: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case sessionID = "session_id"
+        case deviceName = "device_name"
+        case platform
+        case ipAddress = "ip_address"
+        case createdAt = "created_at"
+        case lastUsedAt = "last_used_at"
+        case expiresAt = "expires_at"
+        case isCurrent = "is_current"
+    }
+}
+
+public struct AuthSessionsListResponse: Decodable {
+    public let sessions: [AuthSessionResponse]
 }

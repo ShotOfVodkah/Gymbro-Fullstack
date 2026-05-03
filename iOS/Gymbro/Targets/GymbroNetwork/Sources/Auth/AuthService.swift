@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 public final class AuthService {
     private let client: NetworkClient
@@ -11,7 +12,8 @@ public final class AuthService {
         email: String,
         password: String
     ) async throws -> TokenResponse {
-        let body = LoginRequest(User: email, Password: password)
+        let deviceName = await MainActor.run { UIDevice.current.name }
+        let body = LoginRequest(User: email, Password: password, deviceName: deviceName, platform: "iOS")
 
         return try await client.request(
             method: .POST,
@@ -86,6 +88,36 @@ public final class AuthService {
             path: "/auth/logout",
             body: Optional<EmptyBody>.none,
             requiresAuth: true
+        )
+    }
+    
+    public func listSessions() async throws -> AuthSessionsListResponse {
+        try await client.request(
+            method: .GET,
+            path: "/auth/sessions",
+            body: Optional<String>.none,
+            requiresAuth: true,
+            responseType: AuthSessionsListResponse.self
+        )
+    }
+
+    public func revokeSession(sessionID: String) async throws -> BasicOKResponse {
+        try await client.request(
+            method: .DELETE,
+            path: "/auth/sessions/\(sessionID)",
+            body: Optional<String>.none,
+            requiresAuth: true,
+            responseType: BasicOKResponse.self
+        )
+    }
+
+    public func logoutAllDevices() async throws -> BasicOKResponse {
+        try await client.request(
+            method: .POST,
+            path: "/auth/logout-all",
+            body: Optional<String>.none,
+            requiresAuth: true,
+            responseType: BasicOKResponse.self
         )
     }
 }

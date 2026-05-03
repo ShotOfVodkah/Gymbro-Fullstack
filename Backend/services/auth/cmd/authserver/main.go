@@ -51,8 +51,11 @@ func main() {
 	mux.Handle("/users", authMiddleware(userH))
 	mux.Handle("/users/", authMiddleware(userH))
 
-	mux.Handle("/auth/", authH)
+	mux.Handle("/auth/sessions", authMiddleware(http.HandlerFunc(authH.ListSessions)))
+	mux.Handle("/auth/sessions/", authMiddleware(http.HandlerFunc(authH.RevokeSession)))
+	mux.Handle("/auth/logout-all", authMiddleware(http.HandlerFunc(authH.LogoutAllDevices)))
 	mux.Handle("/auth/logout", authMiddleware(http.HandlerFunc(authH.Logout)))
+	mux.Handle("/auth/", authH)
 
 	http.ListenAndServe(":8081", mux)
 }
