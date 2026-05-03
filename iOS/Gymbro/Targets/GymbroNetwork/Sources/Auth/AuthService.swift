@@ -1,7 +1,6 @@
 import Foundation
 
 public final class AuthService {
-
     private let client: NetworkClient
 
     public init(client: NetworkClient) {
@@ -22,13 +21,17 @@ public final class AuthService {
             responseType: TokenResponse.self
         )
     }
-    
+
     public func register(
         email: String,
         password: String,
         role: String
     ) async throws -> UserResponse {
-        let body = RegisterRequest(email: email, password: password, role: role)
+        let body = RegisterRequest(
+            email: email,
+            password: password,
+            role: role
+        )
 
         return try await client.request(
             method: .POST,
@@ -50,6 +53,30 @@ public final class AuthService {
             body: body,
             requiresAuth: false,
             responseType: TokenResponse.self
+        )
+    }
+
+    public func verifyEmail(token: String) async throws -> TokenResponse {
+        let body = VerifyEmailRequest(token: token)
+
+        return try await client.request(
+            method: .POST,
+            path: "/auth/verify-email",
+            body: body,
+            requiresAuth: false,
+            responseType: TokenResponse.self
+        )
+    }
+
+    public func resendVerificationEmail(email: String) async throws -> BasicOKResponse {
+        let body = ResendVerificationRequest(email: email)
+
+        return try await client.request(
+            method: .POST,
+            path: "/auth/resend-verification-email",
+            body: body,
+            requiresAuth: false,
+            responseType: BasicOKResponse.self
         )
     }
 

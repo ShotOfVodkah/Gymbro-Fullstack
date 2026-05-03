@@ -40,3 +40,7 @@ func (us *UserService) GetUserByID(id int) (*types.User, error) {
 func (us *UserService) GetUserByEmail(email string) (*types.User, error) {
 	return us.store.GetUserByEmail(email)
 }
+
+func (us *UserService) MarkEmailVerified(userID int) error {
+    return us.store.MarkEmailVerified(userID)
+}

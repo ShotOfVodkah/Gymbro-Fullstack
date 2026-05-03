@@ -30,6 +30,22 @@ public struct RefreshRequest: Encodable {
     }
 }
 
+public struct VerifyEmailRequest: Encodable {
+    public let token: String
+
+    public init(token: String) {
+        self.token = token
+    }
+}
+
+public struct ResendVerificationRequest: Encodable {
+    public let email: String
+
+    public init(email: String) {
+        self.email = email
+    }
+}
+
 public struct TokenResponse: Decodable {
     public let access_token: String
     public let refresh_token: String
@@ -44,10 +60,38 @@ public struct UserResponse: Decodable {
     public let id: Int
     public let email: String
     public let role: String
+    public let emailVerified: Bool
+    public let devVerifyURL: String?
 
-    public init(id: Int, email: String, role: String) {
+    enum CodingKeys: String, CodingKey {
+        case id
+        case email
+        case role
+        case emailVerified = "email_verified"
+        case devVerifyURL = "dev_verify_url"
+    }
+
+    public init(
+        id: Int,
+        email: String,
+        role: String,
+        emailVerified: Bool,
+        devVerifyURL: String? = nil
+    ) {
         self.id = id
         self.email = email
         self.role = role
+        self.emailVerified = emailVerified
+        self.devVerifyURL = devVerifyURL
+    }
+}
+
+public struct BasicOKResponse: Decodable {
+    public let ok: Bool
+    public let message: String
+
+    public init(ok: Bool, message: String) {
+        self.ok = ok
+        self.message = message
     }
 }

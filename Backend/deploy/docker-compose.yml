@@ -19,6 +19,10 @@ services:
       JWT_SECRET: "supersecret_noone_will_get_out"
       PGHOST: postgres_auth
       PGPORT: 5432
+      RESEND_API_KEY: "re_MZUmk2tu_76FrW6HqYyLDPs437chEECpj"
+      AUTH_EMAIL_FROM: "GymBro <onboarding@resend.dev>"
+      APP_VERIFY_EMAIL_URL: "https://eating-spotting-pony.ngrok-free.dev/auth/verify-email-link"
+      APP_ENV: "dev"
     depends_on:
       - postgres_auth
     expose:
