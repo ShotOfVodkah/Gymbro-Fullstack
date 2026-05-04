@@ -45,12 +45,10 @@ def test_safe_exercise_no_injuries():
 
 
 def test_contraindicated_exercise_rejected():
-    # running has knee_injury in contraindications
     assert is_safe_for_injuries("running", ["knee_injury"]) is False
 
 
 def test_non_contraindicated_injury_passes():
-    # running does NOT have shoulder_injury in contraindications
     assert is_safe_for_injuries("running", ["shoulder_injury"]) is True
 
 
@@ -59,17 +57,14 @@ def test_unknown_exercise_is_not_safe():
 
 
 def test_multiple_injuries_one_contraindicated():
-    # squat has knee_injury as contraindication
     assert is_safe_for_injuries("squat", ["shoulder_injury", "knee_injury"]) is False
 
 
 def test_multiple_injuries_none_contraindicated():
-    # cycling contraindications: knee_injury, hip_injury — not shoulder or wrist
     assert is_safe_for_injuries("cycling", ["shoulder_injury", "wrist_injury"]) is True
 
 
 def test_yoga_exercise_contraindication():
-    # cobra has lower_back_pain, pregnancy as contraindications
     assert is_safe_for_injuries("cobra", ["lower_back_pain"]) is False
     assert is_safe_for_injuries("cobra", ["knee_injury"]) is True
 
@@ -78,9 +73,15 @@ def test_yoga_exercise_contraindication():
     ("deadlift", "lower_back_pain", False),
     ("deadlift", "knee_injury", False),
     ("deadlift", "shoulder_injury", True),
+    ("deadlift", "high_blood_pressure", False),
     ("bench-press", "shoulder_injury", False),
     ("bench-press", "wrist_injury", False),
     ("bench-press", "knee_injury", True),
+    ("overhead-press", "high_blood_pressure", False),
+    ("crunch", "pregnancy", False),
+    ("crunch", "wrist_injury", True),
+    ("jump-rope", "pregnancy", False),
+    ("jump-rope", "shoulder_injury", True),
     ("downward-dog", "shoulder_injury", False),
     ("downward-dog", "wrist_injury", False),
     ("downward-dog", "knee_injury", True),
