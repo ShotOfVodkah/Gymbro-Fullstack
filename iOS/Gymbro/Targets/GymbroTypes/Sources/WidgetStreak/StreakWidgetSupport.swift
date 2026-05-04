@@ -103,6 +103,10 @@ public final class StreakWidgetStore {
         return try? JSONDecoder().decode(StreakWidgetPayload.self, from: data)
     }
 
+    public func clear() {
+        defaults.removeObject(forKey: payloadKey)
+    }
+
     private let defaults: UserDefaults
     private let payloadKey: String
 }

@@ -47,11 +47,13 @@ public final class SessionManager: ObservableObject {
         
         AppMicroservices.tokens.clear()
         isAuthenticated = false
+        AuthEvents.onSessionCleared?()
     }
     
     public func forceLogoutLocally() {
         AppMicroservices.tokens.clear()
         isAuthenticated = false
+        AuthEvents.onSessionCleared?()
         print("Forced log out(((")
     }
 }

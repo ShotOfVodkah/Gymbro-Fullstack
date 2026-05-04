@@ -53,6 +53,10 @@ public final class ActivityCalendarWidgetStore {
         return try? JSONDecoder().decode(ActivityCalendarWidgetPayload.self, from: data)
     }
 
+    public func clear() {
+        defaults.removeObject(forKey: payloadKey)
+    }
+
     private let defaults: UserDefaults
     private let payloadKey: String
 }

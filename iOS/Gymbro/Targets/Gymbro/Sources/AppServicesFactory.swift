@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 import GymbroWorkouts
 import GymbroNetwork
@@ -86,6 +87,18 @@ final class AppServicesFactory {
         let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
         self.analytics = AnalyticsServiceImpl(client: analyticsClient)
         watchConnectivityService.activate()
+
+        AuthEvents.onSessionCleared = {
+            AppServicesFactory.resetWidgetsOnSessionCleared()
+        }
+    }
+
+    @MainActor
+    private static func resetWidgetsOnSessionCleared() {
+        StreakWidgetStore().clear()
+        ActivityCalendarWidgetStore().clear()
+        WidgetCenter.shared.reloadTimelines(ofKind: StreakWidgetConfig.kind)
+        WidgetCenter.shared.reloadTimelines(ofKind: ActivityCalendarWidgetConfig.kind)
     }
 
     func startOfflineSyncIfNeeded() {
