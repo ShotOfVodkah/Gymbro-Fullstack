@@ -92,6 +92,15 @@ struct FeedsMainTabView: View {
                             onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) },
                             onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) }
                         )
+                        .onAppear {
+                            viewModel.loadNextPageIfNeeded(currentPost: post)
+                        }
+                    }
+                    
+                    if viewModel.isLoadingNextPage {
+                        ProgressView()
+                            .tint(.white)
+                            .padding(.vertical, 16)
                     }
                 }
                 .padding(.horizontal, 7)

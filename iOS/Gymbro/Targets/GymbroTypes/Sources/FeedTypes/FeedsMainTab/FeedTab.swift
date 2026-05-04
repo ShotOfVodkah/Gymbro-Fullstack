@@ -21,3 +21,11 @@ public enum FeedTab: String, CaseIterable, Identifiable {
         }
     }
 }
+
+public enum FeedScope: String, Codable, Sendable {
+    case all
+    case friends
+    case direct
+    case groups
+    case mine
+}

@@ -2,9 +2,60 @@ package feeds
 
 import (
 	"strconv"
+	"net/http"
 
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
 )
+
+const (
+	defaultFeedPageLimit = 20
+	maxFeedPageLimit     = 50
+)
+
+func parseFeedPageLimit(r *http.Request) int {
+	raw := r.URL.Query().Get("limit")
+	if raw == "" {
+		return defaultFeedPageLimit
+	}
+
+	limit, err := strconv.Atoi(raw)
+	if err != nil || limit <= 0 {
+		return defaultFeedPageLimit
+	}
+
+	if limit > maxFeedPageLimit {
+		return maxFeedPageLimit
+	}
+
+	return limit
+}
+
+func parseFeedCursor(r *http.Request) *string {
+	raw := r.URL.Query().Get("cursor")
+	if raw == "" {
+		return nil
+	}
+
+	return &raw
+}
+
+func parseFeedScope(r *http.Request) types.FeedScope {
+	raw := r.URL.Query().Get("scope")
+	if raw == "" {
+		return types.FeedScopeAll
+	}
+
+	switch types.FeedScope(raw) {
+	case types.FeedScopeAll,
+		types.FeedScopeFriends,
+		types.FeedScopeDirect,
+		types.FeedScopeGroups,
+		types.FeedScopeMine:
+		return types.FeedScope(raw)
+	default:
+		return types.FeedScopeAll
+	}
+}
 
 func uniqueSessionIDs(rows []types.FeedPostRow) []string {
 	seen := make(map[string]struct{})

@@ -3,18 +3,33 @@ import GymbroTypes
 
 public extension FeedsClient {
     
-    func fetchFeed() async throws -> [FeedPostItemResponse] {
+    func fetchFeed(scope: FeedScope = .all, limit: Int = 20, cursor: Date? = nil) async throws -> FeedPageResponse {
         let _ = try requireUserId()
         
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "scope", value: scope.rawValue),
+            URLQueryItem(name: "limit", value: "\(limit)")
+        ]
+        
+        if let cursor {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            queryItems.append(
+                URLQueryItem(name: "cursor", value: formatter.string(from: cursor))
+            )
+        }
+
         return try await client.request(
             method: .GET,
             path: "feed",
+            queryItems: queryItems,
             body: Optional<EmptyBody>.none,
             requiresAuth: true,
-            responseType: [FeedPostItemResponse].self
+            responseType: FeedPageResponse.self
         )
     }
-    
+
     func fetchCommunities() async throws -> [FeedCommunityItemResponse] {
         try await client.request(
             method: .GET,

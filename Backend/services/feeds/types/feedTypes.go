@@ -169,3 +169,19 @@ type CreateFeedPostRequest struct {
 	Location    *string `json:"location,omitempty"`
 	CommunityID *string `json:"community_id,omitempty"`
 }
+
+type FeedPageResponse struct {
+	Items      []FeedPostItemResponse `json:"items"`
+	NextCursor *time.Time             `json:"next_cursor,omitempty"`
+	HasMore    bool                   `json:"has_more"`
+}
+
+type FeedScope string
+
+const (
+	FeedScopeAll     FeedScope = "all"
+	FeedScopeFriends FeedScope = "friends"
+	FeedScopeDirect  FeedScope = "direct"
+	FeedScopeGroups  FeedScope = "groups"
+	FeedScopeMine    FeedScope = "mine"
+)

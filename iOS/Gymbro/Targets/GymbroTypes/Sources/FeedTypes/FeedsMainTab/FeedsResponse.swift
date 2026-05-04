@@ -1,17 +1,17 @@
 import Foundation
 
-public struct FeedAuthorPreviewResponse: Decodable {
+public struct FeedAuthorPreviewResponse: Decodable, Sendable {
     let id: String
     let name: String
     let avatar_url: String
 }
 
-public struct FeedCommunityPreviewResponse: Decodable {
+public struct FeedCommunityPreviewResponse: Decodable, Sendable {
     let id: String
     let title: String
 }
 
-public struct FeedWorkoutExercisePreviewResponse: Decodable {
+public struct FeedWorkoutExercisePreviewResponse: Decodable, Sendable {
     let id: String
     let name: String
     let type: String
@@ -25,7 +25,7 @@ public struct FeedWorkoutExercisePreviewResponse: Decodable {
     let breathCount: Int?
 }
 
-public struct FeedWorkoutPreviewResponse: Decodable {
+public struct FeedWorkoutPreviewResponse: Decodable, Sendable {
     let id: String
     let title: String
     let category: String
@@ -34,7 +34,7 @@ public struct FeedWorkoutPreviewResponse: Decodable {
     let exercises_preview: [FeedWorkoutExercisePreviewResponse]
 }
 
-public struct FeedPostItemResponse: Decodable {
+public struct FeedPostItemResponse: Decodable, Sendable {
     let id: String
     let author: FeedAuthorPreviewResponse
     let community: FeedCommunityPreviewResponse?
@@ -49,6 +49,22 @@ public struct FeedPostItemResponse: Decodable {
     let is_from_following: Bool
     let is_from_direct_chat: Bool
     let is_from_group_community: Bool
+}
+
+public struct FeedPageResponse: Decodable, Sendable {
+    public let items: [FeedPostItemResponse]
+    public let next_cursor: Date?
+    public let has_more: Bool
+    
+    public init(
+        items: [FeedPostItemResponse],
+        next_cursor: Date?,
+        has_more: Bool
+    ) {
+        self.items = items
+        self.next_cursor = next_cursor
+        self.has_more = has_more
+    }
 }
 
 public struct FeedCommunityItemResponse: Decodable {

@@ -15,7 +15,11 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var screenState: ScreenState = .loading
     @Published var selectedTab: FeedTab = .forYou {
         didSet {
+            guard oldValue != selectedTab else { return }
             analytics.track(.feedsTabSelected(tab: selectedTab.rawValue))
+            Task {
+                await reloadPosts()
+            }
         }
     }
     @Published var communities: [FeedCommunity] = []
@@ -33,6 +37,12 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var comments: [FeedComment] = []
     @Published var commentsDraftText: String = ""
     @Published var isCommentsLoading: Bool = false
+    @Published var isLoadingNextPage: Bool = false
+
+    private let pageLimit = 20
+    private var nextFeedCursor: Date?
+    private var hasMoreFeedPosts: Bool = true
+    private var isRefreshing: Bool = false
     
     private let router: any Router
     private let service: any FeedsMainTabService
@@ -77,15 +87,23 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
 
     func refresh(showLoading: Bool = false) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+        
         if showLoading {
             screenState = .loading
         }
 
         do {
-            let screenData = try await service.fetchScreen()
+            let screenData = try await service.fetchScreen(scope: selectedFeedScope)
             posts = screenData.posts
             communities = screenData.communities
+            nextFeedCursor = screenData.nextCursor
+            hasMoreFeedPosts = screenData.hasMorePosts
             screenState = .loaded
+        } catch is CancellationError {
+            return
         } catch {
             print("Failed to refresh feeds screen:", error)
             screenState = .error
@@ -94,7 +112,10 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     func reloadPosts() async {
         do {
-            posts = try await service.fetchPosts()
+            let page = try await service.fetchPostsPage(scope: selectedFeedScope, limit: pageLimit, cursor: nil)
+            posts = page.posts
+            nextFeedCursor = page.nextCursor
+            hasMoreFeedPosts = page.hasMore
         } catch {
             print("Failed to reload posts:", error)
         }
@@ -116,6 +137,42 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
     
+    func loadNextPageIfNeeded(currentPost post: FeedPost) {
+        guard post.id == visiblePosts.last?.id else { return }
+        
+        Task {
+            await loadNextPage()
+        }
+    }
+
+    func loadNextPage() async {
+        guard !isLoadingNextPage else { return }
+        guard hasMoreFeedPosts else { return }
+        guard let nextFeedCursor else { return }
+        isLoadingNextPage = true
+
+        do {
+            let page = try await service.fetchPostsPage(
+                scope: selectedFeedScope,
+                limit: pageLimit,
+                cursor: nextFeedCursor
+            )
+            
+            let existingIDs = Set(posts.map(\.id))
+            let newPosts = page.posts.filter { !existingIDs.contains($0.id) }
+            
+            posts.append(contentsOf: newPosts)
+            self.nextFeedCursor = page.nextCursor
+            self.hasMoreFeedPosts = page.hasMore
+        } catch is CancellationError {
+            return
+        } catch {
+            print("Failed to load next feed page:", error)
+        }
+        
+        isLoadingNextPage = false
+    }
+    
     func clearUserScopedState() {
         posts = []
         communities = []
@@ -130,6 +187,10 @@ final class FeedsMainTabViewModel: ObservableObject {
         groupChatSearchText = ""
         isShowingChatCreation = false
         chatCreationStep = .chooseType
+        
+        nextFeedCursor = nil
+        hasMoreFeedPosts = true
+        isLoadingNextPage = false
 
         screenState = .loading
     }
@@ -167,20 +228,19 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     var visiblePosts: [FeedPost] {
-        let sorted = posts.sorted { $0.createdAt > $1.createdAt }
-
+        posts.sorted { $0.createdAt > $1.createdAt }
+    }
+    
+    private var selectedFeedScope: FeedScope {
         switch selectedTab {
         case .forYou:
-            return sorted
-
+            return .all
         case .friends:
-            return sorted.filter { $0.isFromFollowing }
-
+            return .friends
         case .personal:
-            return sorted.filter { $0.isFromDirectChat }
-
+            return .direct
         case .group:
-            return sorted.filter { $0.isFromGroupCommunity }
+            return .groups
         }
     }
     
@@ -378,20 +438,6 @@ final class FeedsMainTabViewModel: ObservableObject {
             }
         }
     }
-    
-//    private func loadFeed() async {
-//        screenState = .loading
-//        
-//        do {
-//            let screenData = try await service.fetchScreen()
-//            posts = screenData.posts
-//            communities = screenData.communities
-//            screenState = .loaded
-//        } catch {
-//            print("Failed to load feed:", error)
-//            screenState = .error
-//        }
-//    }
     
     private func loadChatCreationPeople() async {
         do {
