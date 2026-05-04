@@ -26,18 +26,29 @@ final class ChatViewModel: ObservableObject {
     private let service: any ChatService
     private let analytics: any AnalyticsService
     
+    private let invalidationCenter: FeedsStateInvalidationCenter
+    
+    private var pollingTask: Task<Void, Never>?
+    
     init(
         input: ChatSessionInput,
         router: any Router,
         service: any ChatService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: FeedsStateInvalidationCenter? = nil
     ) {
         self.input = input
         self.router = router
         self.service = service
         self.analytics = analytics
+        self.invalidationCenter = invalidationCenter ?? FeedsStateInvalidationCenter.shared
+        
         reload()
         analytics.track(.screenViewed(screen: .feedsChat))
+    }
+    
+    deinit {
+        pollingTask?.cancel()
     }
     
     var title: String {
@@ -179,6 +190,7 @@ final class ChatViewModel: ObservableObject {
                 let message = try await service.sendText(chatID: chatID, text: text)
                 messages.append(message)
                 analytics.track(.chatMessageSent(isGroup: isGroup))
+                invalidationCenter.invalidate(.chatChanged(chatID: chatID))
                 draftText = ""
             } catch {
                 print("Failed to send message:", error)
@@ -196,6 +208,8 @@ final class ChatViewModel: ObservableObject {
                     userIDs: people.map(\.id)
                 )
                 groupInfo = updated
+                invalidationCenter.invalidate(.chatChanged(chatID: chatID))
+                invalidationCenter.invalidate(.communitiesChanged)
                 analytics.track(.chatGroupPeopleAdded(count: people.count))
             } catch {
                 print("Failed to add people to group:", error)
@@ -212,8 +226,18 @@ final class ChatViewModel: ObservableObject {
                     chatID: chatID,
                     userID: personID
                 )
-                groupInfo = updated
+                
+                invalidationCenter.invalidate(.chatChanged(chatID: chatID))
+                invalidationCenter.invalidate(.communitiesChanged)
                 analytics.track(.chatGroupParticipantRemoved)
+                
+                if personID == AppMicroservices.tokens.userId {
+                    isShowingGroupInfo = false
+                    router.pop()
+                    return
+                }
+                
+                groupInfo = updated
             } catch {
                 print("Failed to remove person from group:", error)
             }
@@ -231,7 +255,10 @@ final class ChatViewModel: ObservableObject {
                     description: description
                 )
                 groupInfo = updated
+                isShowingGroupInfo = false
                 analytics.track(.chatGroupInfoSaved)
+                invalidationCenter.invalidate(.communitiesChanged)
+                invalidationCenter.invalidate(.chatChanged(chatID: chatID))
             } catch {
                 print("Failed to update group info:", error)
             }
@@ -245,6 +272,7 @@ final class ChatViewModel: ObservableObject {
             do {
                 try await service.deleteGroup(chatID: chatID)
                 analytics.track(.chatGroupDeleted)
+                invalidationCenter.invalidate(.communitiesChanged)
                 router.pop()
             } catch {
                 print("Failed to delete group:", error)

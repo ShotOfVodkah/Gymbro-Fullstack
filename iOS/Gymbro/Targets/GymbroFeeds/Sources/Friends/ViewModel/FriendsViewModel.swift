@@ -27,21 +27,32 @@ final class FeedsPeopleViewModel: ObservableObject {
     private let service: any FeedsPeopleService
     private let analytics: any AnalyticsService
     
-    let currentUserID: String
+    private let invalidationCenter: FeedsStateInvalidationCenter
+    private var invalidationTask: Task<Void, Never>?
+    
+    var currentUserID: String { AppMicroservices.tokens.userId ?? "" }
     
     init(
         input: PeopleScreenInput,
         router: any Router,
         service: any FeedsPeopleService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: FeedsStateInvalidationCenter? = nil
     ) {
         self.input = input
         self.router = router
         self.analytics = analytics
         self.service = service
-        self.currentUserID = AppMicroservices.tokens.userId ?? ""
+        self.invalidationCenter = invalidationCenter ?? FeedsStateInvalidationCenter.shared
+
+        bindInvalidationEvents()
         reload()
+        
         analytics.track(.screenViewed(screen: .feedsPeople))
+    }
+    
+    deinit {
+        invalidationTask?.cancel()
     }
     
     func reload() {
@@ -51,26 +62,19 @@ final class FeedsPeopleViewModel: ObservableObject {
         }
     }
     
-    private func loadPeople() async {
+    func refresh() async {
+        await loadPeople()
+    }
+
+    func clearUserScopedState() {
+        friends = []
+        followingPeople = []
+        discoverPeople = []
+        selectedPerson = nil
+        searchText = ""
+        selectedTab = .friends
+        shouldShowDiscover = true
         screenState = .loading
-        
-        do {
-            let result = try await service.fetchScreen(input: input)
-            
-            friends = result.friends
-            followingPeople = result.following
-            discoverPeople = result.discover
-            shouldShowDiscover = result.shouldShowDiscover
-            
-            if !shouldShowDiscover && selectedTab == .discover {
-                selectedTab = .friends
-            }
-            
-            screenState = .loaded
-        } catch {
-            print("Failed to load people:", error)
-            screenState = .error
-        }
     }
     
     func didSelectTab(_ tab: PeopleTab) {
@@ -130,6 +134,18 @@ final class FeedsPeopleViewModel: ObservableObject {
         shouldShowDiscover ? [.friends, .following, .discover] : [.friends, .following]
     }
     
+    var filteredFriends: [PersonItem] {
+        filter(people: friends)
+    }
+    
+    var filteredFollowingPeople: [PersonItem] {
+        filter(people: followingPeople)
+    }
+    
+    var filteredDiscoverPeople: [PersonItem] {
+        filter(people: discoverPeople)
+    }
+    
     func didTapPerson(_ person: PersonItem) {
         Task {
             do {
@@ -156,6 +172,8 @@ final class FeedsPeopleViewModel: ObservableObject {
                 if selectedPerson?.id == personID {
                     selectedPerson = allPeople.first(where: { $0.id == personID })
                 }
+                
+                invalidationCenter.invalidate(.peopleChanged)
             } catch {
                 print("Failed to toggle follow:", error)
             }
@@ -184,6 +202,7 @@ final class FeedsPeopleViewModel: ObservableObject {
         Task {
             do {
                 let input = try await service.createDirectChat(with: person.id)
+                invalidationCenter.invalidate(.communitiesChanged)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to create direct chat:", error)
@@ -191,16 +210,8 @@ final class FeedsPeopleViewModel: ObservableObject {
         }
     }
     
-    var filteredFriends: [PersonItem] {
-        filter(people: friends)
-    }
-    
-    var filteredFollowingPeople: [PersonItem] {
-        filter(people: followingPeople)
-    }
-    
-    var filteredDiscoverPeople: [PersonItem] {
-        filter(people: discoverPeople)
+    func didTapBack() {
+        router.pop()
     }
     
     private func filter(people: [PersonItem]) -> [PersonItem] {
@@ -217,7 +228,51 @@ final class FeedsPeopleViewModel: ObservableObject {
         }
     }
     
-    func didTapBack() {
-        router.pop()
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+
+    private func handleInvalidation(_ reason: FeedsInvalidationReason) async {
+        switch reason {
+        case .peopleChanged:
+            await refresh()
+
+        case .accountChanged, .all:
+            clearUserScopedState()
+            await refresh()
+
+        default:
+            break
+        }
+    }
+    
+    private func loadPeople() async {
+        screenState = .loading
+        
+        do {
+            let result = try await service.fetchScreen(input: input)
+            
+            friends = result.friends
+            followingPeople = result.following
+            discoverPeople = result.discover
+            shouldShowDiscover = result.shouldShowDiscover
+            
+            if !shouldShowDiscover && selectedTab == .discover {
+                selectedTab = .friends
+            }
+            
+            screenState = .loaded
+        } catch {
+            print("Failed to load people:", error)
+            screenState = .error
+        }
     }
 }

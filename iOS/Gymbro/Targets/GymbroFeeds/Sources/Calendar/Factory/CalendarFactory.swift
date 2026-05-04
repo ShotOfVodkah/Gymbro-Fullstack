@@ -6,6 +6,7 @@ import GymbroTypes
 
 public final class FeedsCalendarFactoryImpl {
     
+    private var cachedUserID: String?
     private var viewModelCache: [CalendarScreenInput: FeedsCalendarViewModel] = [:]
     
     public init() {}
@@ -17,6 +18,14 @@ public final class FeedsCalendarFactoryImpl {
         client: FeedsClient,
         analytics: any AnalyticsService
     ) -> some View {
+        let currentUserID = AppMicroservices.tokens.userId ?? ""
+
+        if cachedUserID != currentUserID {
+            viewModelCache.removeAll()
+            cachedUserID = currentUserID
+            FeedsStateInvalidationCenter.shared.invalidate(.accountChanged)
+        }
+        
         if let cached = viewModelCache[input] {
             return FeedsCalendarView(viewModel: cached)
         }

@@ -84,6 +84,9 @@ struct FeedsPeopleView: View {
                 }
                 .padding(.top, 12)
             }
+            .refreshable {
+                await viewModel.refresh()
+            }
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)

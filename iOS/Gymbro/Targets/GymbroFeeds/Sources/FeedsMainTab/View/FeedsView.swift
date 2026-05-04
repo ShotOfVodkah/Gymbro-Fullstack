@@ -99,6 +99,9 @@ struct FeedsMainTabView: View {
             }
             .padding(.top, 8)
         }
+        .refreshable {
+            await viewModel.refresh(showLoading: true)
+        }
     }
     
     private var backgroundView: some View {

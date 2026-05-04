@@ -94,6 +94,9 @@ struct FeedsCalendarView: View {
             .padding(.top, 12)
             .padding(.bottom, 24)
         }
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
     
     private var cardBackground: some View {

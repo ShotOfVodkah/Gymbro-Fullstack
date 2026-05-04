@@ -38,26 +38,100 @@ final class FeedsMainTabViewModel: ObservableObject {
     private let service: any FeedsMainTabService
     private let analytics: any AnalyticsService
     
-    let currentUserID: String
+    private let invalidationCenter: FeedsStateInvalidationCenter
+    private var invalidationTask: Task<Void, Never>?
+    var currentUserID: String { AppMicroservices.tokens.userId ?? "" }
     
     init(
         router: any Router,
         service: any FeedsMainTabService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: FeedsStateInvalidationCenter? = nil
     ) {
         self.router = router
         self.service = service
         self.analytics = analytics
-        self.currentUserID = AppMicroservices.tokens.userId ?? ""
-        reload()
+        self.invalidationCenter = invalidationCenter ?? FeedsStateInvalidationCenter.shared
+
+        bindInvalidationEvents()
+        loadInitial()
+        
         analytics.track(.screenViewed(screen: .feedsMain))
     }
     
+    deinit {
+        invalidationTask?.cancel()
+    }
+    
+    func loadInitial() {
+        Task {
+            await refresh(showLoading: true)
+        }
+    }
+
     func reload() {
         Task {
             analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsMain.rawValue))
-            await loadFeed()
+            await refresh(showLoading: true)
         }
+    }
+
+    func refresh(showLoading: Bool = false) async {
+        if showLoading {
+            screenState = .loading
+        }
+
+        do {
+            let screenData = try await service.fetchScreen()
+            posts = screenData.posts
+            communities = screenData.communities
+            screenState = .loaded
+        } catch {
+            print("Failed to refresh feeds screen:", error)
+            screenState = .error
+        }
+    }
+    
+    func reloadPosts() async {
+        do {
+            posts = try await service.fetchPosts()
+        } catch {
+            print("Failed to reload posts:", error)
+        }
+    }
+
+    func reloadCommunities() async {
+        do {
+            communities = try await service.fetchCommunities()
+        } catch {
+            print("Failed to reload communities:", error)
+        }
+    }
+
+    func reloadPeople() async {
+        do {
+            chatCreationPeople = try await service.fetchChatCreationPeople()
+        } catch {
+            print("Failed to reload people:", error)
+        }
+    }
+    
+    func clearUserScopedState() {
+        posts = []
+        communities = []
+        comments = []
+        commentsDraftText = ""
+        selectedPostForComments = nil
+        isShowingCommentsSheet = false
+
+        chatCreationPeople = []
+        chatCreationDraft = ChatCreationDraft()
+        directChatSearchText = ""
+        groupChatSearchText = ""
+        isShowingChatCreation = false
+        chatCreationStep = .chooseType
+
+        screenState = .loading
     }
     
     func didTapOpenFriends() {
@@ -208,6 +282,8 @@ final class FeedsMainTabViewModel: ObservableObject {
                 )
                 analytics.track(.feedsGroupChatCreated(memberCount: chatCreationDraft.selectedGroupMembers.count))
                 isShowingChatCreation = false
+                resetChatCreationState()
+                invalidationCenter.invalidate(.communitiesChanged)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to create group chat:", error)
@@ -260,6 +336,8 @@ final class FeedsMainTabViewModel: ObservableObject {
                 if let index = posts.firstIndex(where: { $0.id == post.id }) {
                     posts[index].commentsCount += 1
                 }
+                
+                invalidationCenter.invalidate(.commentsChanged(postID: postID))
             } catch {
                 print("Failed to send comment:", error)
             }
@@ -301,19 +379,19 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
     
-    private func loadFeed() async {
-        screenState = .loading
-        
-        do {
-            let screenData = try await service.fetchScreen()
-            posts = screenData.posts
-            communities = screenData.communities
-            screenState = .loaded
-        } catch {
-            print("Failed to load feed:", error)
-            screenState = .error
-        }
-    }
+//    private func loadFeed() async {
+//        screenState = .loading
+//        
+//        do {
+//            let screenData = try await service.fetchScreen()
+//            posts = screenData.posts
+//            communities = screenData.communities
+//            screenState = .loaded
+//        } catch {
+//            print("Failed to load feed:", error)
+//            screenState = .error
+//        }
+//    }
     
     private func loadChatCreationPeople() async {
         do {
@@ -352,6 +430,8 @@ final class FeedsMainTabViewModel: ObservableObject {
             do {
                 let input = try await service.createDirectChat(with: person.id)
                 isShowingChatCreation = false
+                resetChatCreationState()
+                invalidationCenter.invalidate(.communitiesChanged)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to create direct chat:", error)
@@ -378,5 +458,47 @@ final class FeedsMainTabViewModel: ObservableObject {
     private func resetChatCreationSearch() {
         directChatSearchText = ""
         groupChatSearchText = ""
+    }
+    
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+    
+    private func handleInvalidation(_ reason: FeedsInvalidationReason) async {
+        switch reason {
+        case .feedChanged:
+            await reloadPosts()
+
+        case .communitiesChanged:
+            await reloadCommunities()
+
+        case .peopleChanged:
+            await reloadPeople()
+
+        case .chatChanged:
+            await reloadCommunities()
+
+        case .commentsChanged(let postID):
+            if let selected = selectedPostForComments,
+               selected.serverID == postID {
+                await loadComments(for: selected)
+            }
+            await reloadPosts()
+
+        case .calendarChanged:
+            break
+
+        case .accountChanged, .all:
+            clearUserScopedState()
+            await refresh()
+        }
     }
 }

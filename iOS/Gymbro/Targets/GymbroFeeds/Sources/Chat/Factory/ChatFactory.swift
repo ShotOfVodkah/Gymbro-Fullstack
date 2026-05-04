@@ -6,6 +6,7 @@ import GymbroTypes
 
 public final class FeedsChatFactoryImpl {
     
+    private var cachedUserID: String?
     private var viewModelCache: [ChatSessionInput: ChatViewModel] = [:]
     
     public init() {}
@@ -17,6 +18,14 @@ public final class FeedsChatFactoryImpl {
         client: FeedsClient,
         analytics: any AnalyticsService
     ) -> some View {
+        let currentUserID = AppMicroservices.tokens.userId ?? ""
+        
+        if cachedUserID != currentUserID {
+            viewModelCache.removeAll()
+            cachedUserID = currentUserID
+            FeedsStateInvalidationCenter.shared.invalidate(.accountChanged)
+        }
+        
         if let cached = viewModelCache[input] {
             return ChatView(viewModel: cached)
         }

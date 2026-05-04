@@ -4,8 +4,10 @@ import GymbroTypes
 
 protocol FeedsMainTabService {
     func fetchScreen() async throws -> FeedsMainTabScreenData
-    func fetchChatCreationPeople() async throws -> [PersonItem]
+    func fetchPosts() async throws -> [FeedPost]
+    func fetchCommunities() async throws -> [FeedCommunity]
     
+    func fetchChatCreationPeople() async throws -> [PersonItem]
     func createDirectChat(with personID: String) async throws -> ChatSessionInput
     func createGroupChat(title: String, participantIDs: [String]) async throws -> ChatSessionInput
     func openExistingChat(communityID: String) async throws -> ChatSessionInput
@@ -29,16 +31,23 @@ final class FeedsMainTabServiceImpl: FeedsMainTabService {
     }
     
     func fetchScreen() async throws -> FeedsMainTabScreenData {
-        async let feedResponse = client.fetchFeed()
-        async let communitiesResponse = client.fetchCommunities()
+        async let posts = fetchPosts()
+        async let communities = fetchCommunities()
         
-        let posts = try await feedResponse.map(FeedPost.init(response:))
-        let communities = try await communitiesResponse.map(FeedCommunity.init(response:))
-        
-        return FeedsMainTabScreenData(
+        return try await FeedsMainTabScreenData(
             communities: communities,
             posts: posts
         )
+    }
+    
+    func fetchPosts() async throws -> [FeedPost] {
+        let response = try await client.fetchFeed()
+        return response.map(FeedPost.init(response:))
+    }
+
+    func fetchCommunities() async throws -> [FeedCommunity] {
+        let response = try await client.fetchCommunities()
+        return response.map(FeedCommunity.init(response:))
     }
     
     func fetchChatCreationPeople() async throws -> [PersonItem] {
