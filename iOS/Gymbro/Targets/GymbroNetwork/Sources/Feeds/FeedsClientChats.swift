@@ -130,4 +130,33 @@ public extension FeedsClient {
             requiresAuth: true
         )
     }
+    
+    func markChatRead(chatID: String, lastReadMessageID: String?) async throws -> ChatReadResponse {
+        try await client.request(
+            method: .POST,
+            path: "chats/\(chatID)/read",
+            body: MarkChatReadRequest(last_read_message_id: lastReadMessageID),
+            requiresAuth: true,
+            responseType: ChatReadResponse.self
+        )
+    }
+
+    func startTyping(chatID: String) async throws {
+        try await client.requestVoid(
+            method: .POST,
+            path: "chats/\(chatID)/typing",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true
+        )
+    }
+
+    func stopTyping(chatID: String) async throws {
+        try await client.requestVoid(
+            method: .DELETE,
+            path: "chats/\(chatID)/typing",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true
+        )
+    }
 }
+

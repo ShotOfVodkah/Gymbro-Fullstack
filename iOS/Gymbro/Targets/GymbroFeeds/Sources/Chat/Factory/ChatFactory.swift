@@ -16,6 +16,7 @@ public final class FeedsChatFactoryImpl {
         input: ChatSessionInput,
         router: any Router,
         client: FeedsClient,
+        realtimeClient: FeedsChatRealtimeClient,
         analytics: any AnalyticsService
     ) -> some View {
         let currentUserID = AppMicroservices.tokens.userId ?? ""
@@ -30,7 +31,7 @@ public final class FeedsChatFactoryImpl {
             return ChatView(viewModel: cached)
         }
         
-        let service = ChatServiceImpl(client: client)
+        let service = ChatServiceImpl(client: client, realtimeClient: realtimeClient)
         let viewModel = ChatViewModel(
             input: input,
             router: router,

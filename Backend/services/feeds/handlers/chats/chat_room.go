@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
+	"fmt"
 
 	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
@@ -187,6 +189,14 @@ func (h *ChatHandler) AddChatMembers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.eventHub.Publish(chatID, types.ChatRealtimeEvent{
+		Type:      "member_added",
+		ChatID:    chatID,
+		ActorID:   fmt.Sprintf("%d", claims.UserID),
+		Payload:   resp,
+		CreatedAt: time.Now().UTC(),
+	})
+
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
 }
@@ -240,6 +250,14 @@ func (h *ChatHandler) RemoveChatMember(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to build updated chat response", http.StatusInternalServerError)
 		return
 	}
+
+	h.eventHub.Publish(chatID, types.ChatRealtimeEvent{
+		Type:      "member_removed",
+		ChatID:    chatID,
+		ActorID:   fmt.Sprintf("%d", claims.UserID),
+		Payload:   resp,
+		CreatedAt: time.Now().UTC(),
+	})
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)

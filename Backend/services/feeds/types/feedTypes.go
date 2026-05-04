@@ -122,6 +122,9 @@ type FeedCommunityItemResponse struct {
 	Icon          string `json:"icon"`
 	IsSystemImage bool   `json:"is_system_image"`
 	MembersCount  int    `json:"members_count"`
+	UnreadCount        int        `json:"unread_count"`
+	LastMessagePreview *string    `json:"last_message_preview,omitempty"`
+	LastMessageAt      *time.Time `json:"last_message_at,omitempty"`
 }
 
 type FeedCommentResponse struct {

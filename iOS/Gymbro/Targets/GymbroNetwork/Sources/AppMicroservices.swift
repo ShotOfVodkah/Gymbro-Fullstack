@@ -7,6 +7,7 @@ public final class AppMicroservices {
     public let authService: AuthService
     public let workoutsClient: WorkoutsClient
     public let feedsClient: FeedsClient
+    public let feedsRealtimeClient: FeedsChatRealtimeClient
     public let profileClient: ProfileClient
     public let perksClient: PerksClient
     public let perksEvents: PerksEventTrackingService
@@ -59,6 +60,10 @@ public final class AppMicroservices {
         perksClient = PerksClientImpl(client: networkClient)
         perksEvents = PerksEventTrackingServiceImpl(client: perksClient)
         challengesClient = ChallengesClientImpl(client: networkClient)
+        feedsRealtimeClient = FeedsChatRealtimeClient(
+            baseURL: URL(string: "http://localhost:8080")!,
+            tokenProvider: { storage.accessToken }
+        )
     }
     
     @MainActor
@@ -77,4 +82,5 @@ extension AppMicroservices {
     public static var perks: PerksClient { shared.perksClient }
     public static var perksEvents: PerksEventTrackingService { shared.perksEvents }
     public static var challenges: ChallengesClient { shared.challengesClient }
+    public static var feedsRealtime: FeedsChatRealtimeClient { shared.feedsRealtimeClient }
 }

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"fmt"
+	"time"
 
 	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
@@ -105,6 +107,14 @@ func (h *ChatHandler) SendChatMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.eventHub.Publish(chatID, types.ChatRealtimeEvent{
+		Type:      "new_message",
+		ChatID:    chatID,
+		ActorID:   fmt.Sprintf("%d", claims.UserID),
+		Payload:   resp[0],
+		CreatedAt: time.Now().UTC(),
+	})
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(resp[0])
@@ -168,6 +178,17 @@ func (h *ChatHandler) ToggleMessageReaction(w http.ResponseWriter, r *http.Reque
 	if reactions == nil {
 		reactions = []types.ChatReactionResponse{}
 	}
+
+	h.eventHub.Publish(message.CommunityID, types.ChatRealtimeEvent{
+		Type:    "reaction_updated",
+		ChatID:  message.CommunityID,
+		ActorID: fmt.Sprintf("%d", claims.UserID),
+		Payload: map[string]any{
+			"message_id": messageID,
+			"reactions":  reactions,
+		},
+		CreatedAt: time.Now().UTC(),
+	})
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(reactions)

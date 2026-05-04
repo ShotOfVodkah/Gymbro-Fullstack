@@ -75,6 +75,9 @@ public struct FeedCommunityItemResponse: Decodable {
     public let icon: String
     public let is_system_image: Bool
     public let members_count: Int
+    public let unread_count: Int
+    public let last_message_preview: String?
+    public let last_message_at: Date?
 
     public init(
         id: String,
@@ -83,7 +86,10 @@ public struct FeedCommunityItemResponse: Decodable {
         kind: String,
         icon: String,
         is_system_image: Bool,
-        members_count: Int
+        members_count: Int,
+        unread_count: Int,
+        last_message_preview: String?,
+        last_message_at: Date?
     ) {
         self.id = id
         self.title = title
@@ -92,6 +98,9 @@ public struct FeedCommunityItemResponse: Decodable {
         self.icon = icon
         self.is_system_image = is_system_image
         self.members_count = members_count
+        self.unread_count = unread_count
+        self.last_message_preview = last_message_preview
+        self.last_message_at = last_message_at
     }
 }
 

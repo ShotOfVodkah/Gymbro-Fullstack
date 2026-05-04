@@ -12,17 +12,20 @@ type ChatHandler struct {
 	chatStore      store.ChatStore
 	profileClient  *clients.ProfileClient
 	workoutsClient *clients.WorkoutsClient
+	eventHub       *ChatEventHub
 }
 
 func NewChatHandler(
 	chatStore store.ChatStore,
 	profileClient *clients.ProfileClient,
 	workoutsClient *clients.WorkoutsClient,
+	eventHub *ChatEventHub,
 ) *ChatHandler {
 	return &ChatHandler{
 		chatStore:      chatStore,
 		profileClient:  profileClient,
 		workoutsClient: workoutsClient,
+		eventHub:       eventHub,
 	}
 }
 
@@ -34,6 +37,22 @@ func (h *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	case r.Method == http.MethodPost && r.URL.Path == "/chats/group":
 		h.CreateGroupChat(w, r)
+		return
+
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/chats/") && strings.HasSuffix(r.URL.Path, "/stream"):
+		h.StreamChatEvents(w, r)
+		return
+		
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/chats/") && strings.HasSuffix(r.URL.Path, "/read"):
+		h.MarkChatRead(w, r)
+		return
+
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/chats/") && strings.HasSuffix(r.URL.Path, "/typing"):
+		h.StartTyping(w, r)
+		return
+
+	case r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/chats/") && strings.HasSuffix(r.URL.Path, "/typing"):
+		h.StopTyping(w, r)
 		return
 
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/chats/") && strings.HasSuffix(r.URL.Path, "/messages"):

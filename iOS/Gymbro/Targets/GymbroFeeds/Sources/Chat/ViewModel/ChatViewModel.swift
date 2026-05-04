@@ -20,6 +20,20 @@ final class ChatViewModel: ObservableObject {
     @Published var selectedMessageForQuickReaction: ChatMessage?
     @Published var isShowingQuickReactionPicker: Bool = false
     @Published var availablePeopleToAdd: [ChatParticipant] = []
+    @Published var room: ChatRoomResponse?
+    
+    @Published var typingUserIDs: Set<String> = []
+    @Published var messageStatuses: [String: ChatMessageLocalStatus] = [:]
+    private var realtimeTask: Task<Void, Never>?
+    private var typingStopTask: Task<Void, Never>?
+    
+    private var isTypingSent = false
+
+    enum ChatMessageLocalStatus {
+        case sending
+        case sent
+        case failed
+    }
     
     let input: ChatSessionInput
     private let router: any Router
@@ -27,8 +41,6 @@ final class ChatViewModel: ObservableObject {
     private let analytics: any AnalyticsService
     
     private let invalidationCenter: FeedsStateInvalidationCenter
-    
-    private var pollingTask: Task<Void, Never>?
     
     init(
         input: ChatSessionInput,
@@ -48,7 +60,8 @@ final class ChatViewModel: ObservableObject {
     }
     
     deinit {
-        pollingTask?.cancel()
+        realtimeTask?.cancel()
+        typingStopTask?.cancel()
     }
     
     var title: String {
@@ -89,9 +102,13 @@ final class ChatViewModel: ObservableObject {
         
         do {
             let result = try await service.fetchScreen(chatID: chatID)
+            room = result.room
             messages = result.messages
             groupInfo = result.groupInfo
             screenState = .loaded
+            
+            startRealtime()
+            markLastMessageAsRead()
         } catch {
             print("Failed to load chat:", error)
             screenState = .error
@@ -99,18 +116,22 @@ final class ChatViewModel: ObservableObject {
     }
     
     func didTapBack() {
+        invalidationCenter.invalidate(.communitiesChanged)
         router.pop()
     }
     
     func didTapHeaderTitle() {
         switch input.presentationStyle {
         case .direct(let person):
-            guard let userID = Int(person.id) else {
-                print("Invalid userID: \(person.id)")
+            let targetPerson = resolvedDirectParticipant(fallback: person)
+            
+            guard let userID = Int(targetPerson.id) else {
+                print("Invalid userID: \(targetPerson.id)")
                 return
             }
+            
             router.navigate(to: .profileMain(mode: .otherUserProfile(userID: userID)))
-            print("\(userID)")
+            
         case .group:
             loadAvailablePeopleToAdd()
             isShowingGroupInfo = true
@@ -184,16 +205,24 @@ final class ChatViewModel: ObservableObject {
     func sendMessage() {
         let text = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, let chatID = input.chatID else { return }
+        draftText = ""
+        
+        isTypingSent = false
+        Task {
+            try? await service.stopTyping(chatID: chatID)
+        }
         
         Task {
             do {
                 let message = try await service.sendText(chatID: chatID, text: text)
-                messages.append(message)
+                upsertMessage(message)
+                messageStatuses[message.id] = .sent
                 analytics.track(.chatMessageSent(isGroup: isGroup))
                 invalidationCenter.invalidate(.chatChanged(chatID: chatID))
-                draftText = ""
+                markLastMessageAsRead()
             } catch {
                 print("Failed to send message:", error)
+                draftText = text
             }
         }
     }
@@ -342,5 +371,155 @@ final class ChatViewModel: ObservableObject {
         }
         
         router.navigate(to: .challengeDetails(id: challengeID))
+    }
+    
+    private var currentUserID: String {
+        AppMicroservices.tokens.userId ?? ""
+    }
+    
+    private func startRealtime() {
+        guard let chatID = input.chatID else { return }
+        realtimeTask?.cancel()
+        realtimeTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                for try await event in service.streamEvents(chatID: chatID) {
+                    await self.handleRealtimeEvent(event)
+                }
+            } catch is CancellationError {
+                print("⚠️ REALTIME CANCELLED")
+            } catch {
+                print("❌ Chat realtime failed:", error)
+            }
+        }
+    }
+    
+    private func handleRealtimeEvent(_ event: ChatRealtimeEventResponse) async {
+        switch event.type {
+        case "connected":
+            break
+
+        case "new_message":
+            if case .message(let response) = event.payload {
+                let message = ChatMessage(
+                    response: response,
+                    currentUserID: currentUserID
+                )
+                upsertMessage(message)
+                markLastMessageAsRead()
+            } else {
+                print("❌ new_message payload is NOT message:", event.payload as Any)
+            }
+
+        case "reaction_updated":
+            if case .reactionUpdated(let update) = event.payload {
+                updateMessageReactions(
+                    messageID: update.message_id,
+                    reactions: update.reactions.map(ChatReaction.init(response:))
+                )
+            }
+
+        case "member_added", "member_removed":
+            if case .room(let room) = event.payload {
+                groupInfo = ChatGroupInfo(response: room)
+                invalidationCenter.invalidate(.communitiesChanged)
+            }
+
+        case "read_updated":
+            if case .read(let read) = event.payload {
+                handleReadUpdated(read)
+            }
+
+        case "typing_started":
+            if case .typing(let typing) = event.payload,
+               typing.user_id != currentUserID {
+                typingUserIDs.insert(typing.user_id)
+            }
+
+        case "typing_stopped":
+            if case .typing(let typing) = event.payload {
+                typingUserIDs.remove(typing.user_id)
+            }
+
+        default:
+            break
+        }
+    }
+    
+    private func upsertMessage(_ message: ChatMessage) {
+        if let index = messages.firstIndex(where: { $0.id == message.id }) {
+            messages[index] = message
+        } else {
+            messages.append(message)
+        }
+
+        messageStatuses[message.id] = .sent
+        invalidationCenter.invalidate(.chatChanged(chatID: input.chatID))
+    }
+    
+    private func markLastMessageAsRead() {
+        guard let chatID = input.chatID else { return }
+        let lastID = messages.last?.id
+
+        Task {
+            do {
+                try await service.markRead(chatID: chatID, lastReadMessageID: lastID)
+            } catch {
+                print("Failed to mark chat read:", error)
+            }
+        }
+    }
+    
+    private func updateMessageReactions(
+        messageID: String,
+        reactions: [ChatReaction]
+    ) {
+        guard let index = messages.firstIndex(where: { $0.id == messageID }) else {
+            return
+        }
+        
+        messages[index].reactions = reactions
+        invalidationCenter.invalidate(.chatChanged(chatID: input.chatID))
+    }
+
+    private func handleReadUpdated(_ read: ChatReadResponse) {
+        invalidationCenter.invalidate(.communitiesChanged)
+    }
+    
+    func didChangeDraftText(_ text: String) {
+        draftText = text
+        guard let chatID = input.chatID else { return }
+
+        typingStopTask?.cancel()
+
+        if !isTypingSent {
+            isTypingSent = true
+            Task {
+                try? await service.startTyping(chatID: chatID)
+            }
+        }
+
+        typingStopTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            guard let self else { return }
+
+            self.isTypingSent = false
+            try? await self.service.stopTyping(chatID: chatID)
+        }
+    }
+    
+    private func resolvedDirectParticipant(
+        fallback person: ChatParticipant
+    ) -> ChatParticipant {
+        guard person.id == currentUserID else {
+            return person
+        }
+
+        if let other = room?.participants.first(where: { $0.id != currentUserID }) {
+            return ChatParticipant(response: other)
+        }
+
+        return person
     }
 }

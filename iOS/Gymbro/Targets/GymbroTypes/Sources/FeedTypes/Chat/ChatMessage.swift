@@ -104,4 +104,25 @@ extension ChatMessage {
             reactions: response.reactions.map(ChatReaction.init(response:))
         )
     }
+    
+    public init(
+        response: ChatMessageResponse,
+        currentUserID: String
+    ) {
+        self.init(
+            response: ChatMessageResponse(
+                id: response.id,
+                sender_id: response.sender_id,
+                sender_name: response.sender_name,
+                sender_avatar_system_name: response.sender_avatar_system_name,
+                sent_at: response.sent_at,
+                is_mine: response.sender_id == currentUserID,
+                kind: response.kind,
+                text: response.text,
+                workout: response.workout,
+                challenge_id: response.challenge_id,
+                reactions: response.reactions
+            )
+        )
+    }
 }

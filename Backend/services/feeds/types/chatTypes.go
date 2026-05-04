@@ -14,6 +14,32 @@ type ChatRoomResponse struct {
 	Title        *string                   `json:"title,omitempty"`
 	Description  *string                   `json:"description,omitempty"`
 	Participants []ChatParticipantResponse `json:"participants"`
+	UnreadCount       int                       `json:"unread_count"`
+	LastMessagePreview *string                   `json:"last_message_preview,omitempty"`
+	LastMessageAt      *time.Time                `json:"last_message_at,omitempty"`
+}
+
+type MarkChatReadRequest struct {
+	LastReadMessageID *string `json:"last_read_message_id,omitempty"`
+}
+
+type ChatReadResponse struct {
+	CommunityID        string     `json:"community_id"`
+	UserID             string     `json:"user_id"`
+	LastReadMessageID  *string    `json:"last_read_message_id,omitempty"`
+	LastReadAt         time.Time  `json:"last_read_at"`
+}
+
+type ChatTypingRequest struct {
+	IsTyping bool `json:"is_typing"`
+}
+
+type ChatRealtimeEvent struct {
+	Type      string      `json:"type"`
+	ChatID    string      `json:"chat_id"`
+	ActorID   string      `json:"actor_id,omitempty"`
+	Payload   interface{} `json:"payload,omitempty"`
+	CreatedAt time.Time   `json:"created_at"`
 }
 
 type ChatReactionResponse struct {
@@ -78,3 +104,4 @@ type InternalSystemMessageRequest struct {
 	Text        string  `json:"text"`
 	ChallengeID string  `json:"challenge_id,omitempty"`
 }
+

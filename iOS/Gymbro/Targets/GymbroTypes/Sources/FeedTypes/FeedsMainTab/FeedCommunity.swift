@@ -8,6 +8,9 @@ public struct FeedCommunity: Identifiable, Hashable {
     public let isSystemImage: Bool
     public let kind: FeedCommunityKind
     public let participants: [PersonItem]
+    public let unreadCount: Int
+    public let lastMessagePreview: String?
+    public let lastMessageAt: Date?
 
     public init(
         id: String,
@@ -16,7 +19,10 @@ public struct FeedCommunity: Identifiable, Hashable {
         icon: String,
         isSystemImage: Bool = false,
         kind: FeedCommunityKind,
-        participants: [PersonItem] = []
+        participants: [PersonItem] = [],
+        unreadCount: Int = 0,
+        lastMessagePreview: String? = nil,
+        lastMessageAt: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -25,6 +31,9 @@ public struct FeedCommunity: Identifiable, Hashable {
         self.isSystemImage = isSystemImage
         self.kind = kind
         self.participants = participants
+        self.unreadCount = unreadCount
+        self.lastMessagePreview = lastMessagePreview
+        self.lastMessageAt = lastMessageAt
     }
 }
 
@@ -42,5 +51,8 @@ extension FeedCommunity {
         self.isSystemImage = response.is_system_image
         self.kind = response.kind == "direct" ? .directPerson : .joinedGroup
         self.participants = []
+        self.unreadCount = response.unread_count
+        self.lastMessagePreview = response.last_message_preview
+        self.lastMessageAt = response.last_message_at
     }
 }

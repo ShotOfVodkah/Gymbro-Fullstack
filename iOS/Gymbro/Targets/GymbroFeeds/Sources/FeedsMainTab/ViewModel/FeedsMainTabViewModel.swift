@@ -50,6 +50,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     private let invalidationCenter: FeedsStateInvalidationCenter
     private var invalidationTask: Task<Void, Never>?
+    private var communitiesPollingTask: Task<Void, Never>?
     var currentUserID: String { AppMicroservices.tokens.userId ?? "" }
     
     init(
@@ -65,11 +66,13 @@ final class FeedsMainTabViewModel: ObservableObject {
 
         bindInvalidationEvents()
         loadInitial()
+        startCommunitiesPolling()
         
         analytics.track(.screenViewed(screen: .feedsMain))
     }
     
     deinit {
+        communitiesPollingTask?.cancel()
         invalidationTask?.cancel()
     }
     
@@ -545,6 +548,19 @@ final class FeedsMainTabViewModel: ObservableObject {
         case .accountChanged, .all:
             clearUserScopedState()
             await refresh()
+        }
+    }
+    
+    private func startCommunitiesPolling() {
+        communitiesPollingTask?.cancel()
+
+        communitiesPollingTask = Task { [weak self] in
+            guard let self else { return }
+
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                await self.reloadCommunities()
+            }
         }
     }
 }
