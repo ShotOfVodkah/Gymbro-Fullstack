@@ -81,6 +81,7 @@ object WorkoutInfoRenderer {
                         gallery(
                             width = matchParentSize(),
                             height = matchParentSize(),
+                            paddings = edgeInsets(bottom = 100),
                             orientation = vertical,
                             columnCount = 1,
                             items = workout.exercises.mapIndexed { index, exercise ->

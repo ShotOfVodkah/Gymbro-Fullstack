@@ -82,6 +82,7 @@ object WorkoutsListRenderer {
                 gallery(
                     width = matchParentSize(),
                     height = matchParentSize(),
+                    paddings = edgeInsets(bottom = 100),
                     orientation = vertical,
                     columnCount = 1,
                     items = workouts.map { workoutCard(it, translations) }
