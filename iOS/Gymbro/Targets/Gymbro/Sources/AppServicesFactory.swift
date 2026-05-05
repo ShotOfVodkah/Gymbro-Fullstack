@@ -29,6 +29,7 @@ final class AppServicesFactory {
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
 
     private let offlineSyncService: OfflineSyncService
+    private let connectivityStatusProvider: ConnectivityStatusProviding
     private var screenFactories = ScreenFactories()
     private var didStartOfflineSync = false
     
@@ -69,6 +70,8 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             workoutsLocalRepository: workoutsRepository
         )
+        let connectivityProvider = NWPathConnectivityStatusProvider()
+        self.connectivityStatusProvider = connectivityProvider
 
         self.offlineSyncService = OfflineSyncService(
             actionsRepository: actionsRepository,
@@ -76,7 +79,8 @@ final class AppServicesFactory {
             feedsClient: AppMicroservices.feeds,
             modelModifier: workoutsModelModifier,
             streakWidget: streakService,
-            activityCalendarWidget: activityCalendarService
+            activityCalendarWidget: activityCalendarService,
+            connectivityProvider: connectivityProvider
         )
         self.watchConnectivityService = WatchConnectivityService(
             workoutsRepository: workoutsRepository,
