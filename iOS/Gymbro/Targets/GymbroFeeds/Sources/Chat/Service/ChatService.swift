@@ -17,12 +17,18 @@ protocol ChatService {
     func removePerson(chatID: String, userID: String) async throws -> ChatGroupInfo
     func deleteGroup(chatID: String) async throws
     func fetchAvailablePeopleToAdd() async throws -> [ChatParticipant]
+    
+    func markRead(chatID: String, lastReadMessageID: String?) async throws
+    func startTyping(chatID: String) async throws
+    func stopTyping(chatID: String) async throws
+    func streamEvents(chatID: String) -> AsyncThrowingStream<ChatRealtimeEventResponse, Error>
 }
 
 final class ChatServiceImpl: ChatService {
     
-    init(client: FeedsClient) {
+    init(client: FeedsClient, realtimeClient: FeedsChatRealtimeClient) {
         self.client = client
+        self.realtimeClient = realtimeClient
     }
     
     func fetchScreen(chatID: String) async throws -> ChatScreenData {
@@ -68,6 +74,22 @@ final class ChatServiceImpl: ChatService {
         try await client.deleteGroupChat(chatID: chatID)
     }
     
+    func markRead(chatID: String, lastReadMessageID: String?) async throws {
+        _ = try await client.markChatRead(chatID: chatID, lastReadMessageID: lastReadMessageID)
+    }
+
+    func startTyping(chatID: String) async throws {
+        try await client.startTyping(chatID: chatID)
+    }
+
+    func stopTyping(chatID: String) async throws {
+        try await client.stopTyping(chatID: chatID)
+    }
+
+    func streamEvents(chatID: String) -> AsyncThrowingStream<ChatRealtimeEventResponse, Error> {
+        realtimeClient.stream(chatID: chatID)
+    }
+    
     func fetchAvailablePeopleToAdd() async throws -> [ChatParticipant] {
         async let friendsResponse = client.fetchFriends()
         async let followingResponse = client.fetchFollowing()
@@ -96,4 +118,5 @@ final class ChatServiceImpl: ChatService {
     }
     
     private let client: FeedsClient
+    private let realtimeClient: FeedsChatRealtimeClient
 }

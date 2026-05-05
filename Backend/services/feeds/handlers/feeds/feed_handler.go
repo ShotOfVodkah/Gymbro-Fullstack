@@ -9,6 +9,7 @@ import (
 
 type FeedHandler struct {
 	store          store.FeedStore
+	chatStore      store.ChatStore
 	workoutsClient *clients.WorkoutsClient
 	profileClient  *clients.ProfileClient
 	shareService   *ShareService
@@ -17,13 +18,14 @@ type FeedHandler struct {
 
 func NewFeedHandler(
 	store store.FeedStore, 
-	chatStore store.ChatStore, 
+	chatStore store.ChatStore,
 	workoutsClient *clients.WorkoutsClient, 
 	profileClient *clients.ProfileClient, 
 	perksClient *clients.PerksClient,
 	) *FeedHandler {
 	return &FeedHandler{
 		store:          store,
+		chatStore:      chatStore,
 		workoutsClient: workoutsClient,
 		profileClient:  profileClient,
 		shareService:   NewShareService(store, chatStore),

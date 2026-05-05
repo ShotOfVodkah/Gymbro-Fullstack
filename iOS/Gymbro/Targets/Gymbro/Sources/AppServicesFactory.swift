@@ -292,6 +292,7 @@ final class AppServicesFactory {
             input: input,
             router: router,
             client: AppMicroservices.feeds,
+            realtimeClient: AppMicroservices.feedsRealtime,
             analytics: analytics
         )
     }

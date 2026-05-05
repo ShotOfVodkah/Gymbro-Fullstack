@@ -61,12 +61,14 @@ func main() {
 	peopleStore := store.NewPeopleStore(db)
 	chatStore := store.NewChatStore(db)
 
+	chatEventHub := chats.NewChatEventHub()
+
 	feedH := feeds.NewFeedHandler(feedStore, chatStore, workoutsClient, profileClient, perksClient)
 	calendarH := handlers.NewCalendarHandler(calendarStore, profileClient, workoutsCalendarClient)
 	peopleH := handlers.NewPeopleHandler(peopleStore, profileClient)
 	internalPeopleH := handlers.NewInternalPeopleHandler(peopleStore)
 	internalChatH := chats.NewInternalChatHandler(chatStore)
-	chatH := chats.NewChatHandler(chatStore, profileClient, workoutsClient)
+	chatH := chats.NewChatHandler(chatStore, profileClient, workoutsClient, chatEventHub)
 	authMiddleware := handlers.AuthMiddleware(secretKey)
 
 	mux := http.NewServeMux()

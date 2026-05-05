@@ -15,7 +15,8 @@ struct PostCardView: View {
         onLikeTap: @escaping () -> Void = {},
         onCommentTap: @escaping () -> Void = {},
         onExerciseTap: @escaping (ExerciseItem) -> Void,
-        onShowAllExercisesTap: @escaping () -> Void = {}
+        onShowAllExercisesTap: @escaping () -> Void = {},
+        onDoubleTapLike: @escaping () -> Void = {}
     ) {
         self.post = post
         self.mode = mode
@@ -24,6 +25,7 @@ struct PostCardView: View {
         self.onCommentTap = onCommentTap
         self.onExerciseTap = onExerciseTap
         self.onShowAllExercisesTap = onShowAllExercisesTap
+        self.onDoubleTapLike = onDoubleTapLike
     }
     
     var body: some View {
@@ -38,38 +40,47 @@ struct PostCardView: View {
             }
             
             VStack(alignment: .leading, spacing: 14) {
-                Text(post.title)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
-                
-                PostMetaTagsView(
-                    category: post.category,
-                    duration: post.duration,
-                    timeAgo: post.timeAgo
-                )
-                
-                if let location = post.location {
-                    HStack(spacing: 8) {
-                        Image(systemName: "location.fill")
-                            .foregroundStyle(.gray)
-                        
-                        Text(location)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(.gray)
+                Group {
+                    Text(post.title)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(.white)
+                    
+                    PostMetaTagsView(
+                        category: post.category,
+                        duration: post.duration,
+                        timeAgo: post.timeAgo
+                    )
+                    
+                    if let location = post.location {
+                        HStack(spacing: 8) {
+                            Image(systemName: "location.fill")
+                                .foregroundStyle(.gray)
+                            
+                            Text(location)
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundStyle(.gray)
+                        }
                     }
+                    
+                    if !post.description.isEmpty {
+                        Text(post.description)
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.95))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    
+                    Text(String(localized: "feeds.post.exercises", bundle: .module))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .textCase(.uppercase)
                 }
-                
-                if !post.description.isEmpty {
-                    Text(post.description)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.95))
-                        .fixedSize(horizontal: false, vertical: true)
+                .onTapGesture(count: 2) {
+
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        onDoubleTapLike()
+                    
+                    
                 }
-                
-                Text(String(localized: "feeds.post.exercises", bundle: .module))
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .textCase(.uppercase)
                 
                 VStack(spacing: 12) {
                     ForEach(Array(post.exercises.prefix(2).enumerated()), id: \.element.id) { index, exercise in
@@ -139,4 +150,5 @@ struct PostCardView: View {
     private let onCommentTap: () -> Void
     private let onExerciseTap: (ExerciseItem) -> Void
     private let onShowAllExercisesTap: () -> Void
+    private let onDoubleTapLike: () -> Void
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 	"net/http"
 	"strconv"
 
@@ -24,16 +25,38 @@ func (h *FeedHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := h.store.ListFeedPostsForUser(claims.UserID)
+	limit := parseFeedPageLimit(r)
+	cursor := parseFeedCursor(r)
+	scope := parseFeedScope(r)
+
+	rows, err := h.store.ListFeedPostsForUserPaginated(claims.UserID, limit+1, cursor, scope,)
+	
 	if err != nil {
 		http.Error(w, "failed to load posts", http.StatusInternalServerError)
 		return
 	}
 
-	resp, err := h.buildFeedPostListResponse(r, rows)
+	hasMore := len(rows) > limit
+	if hasMore {
+		rows = rows[:limit]
+	}
+
+	respItems, err := h.buildFeedPostListResponse(r, rows)
 	if err != nil {
 		writeFeedPostListFetchError(w, err)
 		return
+	}
+
+	var nextCursor *time.Time
+	if hasMore && len(rows) > 0 {
+		lastCreatedAt := rows[len(rows)-1].CreatedAt
+		nextCursor = &lastCreatedAt
+	}
+
+	resp := types.FeedPageResponse{
+		Items:      respItems,
+		NextCursor: nextCursor,
+		HasMore:    hasMore,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

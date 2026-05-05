@@ -90,14 +90,27 @@ struct FeedsMainTabView: View {
                             onLikeTap: { viewModel.toggleLike(for: post.id) },
                             onCommentTap: { viewModel.didTapComments(for: post) },
                             onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) },
-                            onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) }
+                            onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) },
+                            onDoubleTapLike: { viewModel.doubleTapLike(for: post.id) },
                         )
+                        .onAppear {
+                            viewModel.loadNextPageIfNeeded(currentPost: post)
+                        }
+                    }
+                    
+                    if viewModel.isLoadingNextPage {
+                        ProgressView()
+                            .tint(.white)
+                            .padding(.vertical, 16)
                     }
                 }
                 .padding(.horizontal, 7)
                 .padding(.bottom, 120)
             }
             .padding(.top, 8)
+        }
+        .refreshable {
+            await viewModel.refresh(showLoading: true)
         }
     }
     

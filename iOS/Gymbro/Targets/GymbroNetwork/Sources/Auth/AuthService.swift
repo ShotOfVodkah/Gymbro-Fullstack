@@ -1,7 +1,7 @@
 import Foundation
+import UIKit
 
 public final class AuthService {
-
     private let client: NetworkClient
 
     public init(client: NetworkClient) {
@@ -12,7 +12,8 @@ public final class AuthService {
         email: String,
         password: String
     ) async throws -> TokenResponse {
-        let body = LoginRequest(User: email, Password: password)
+        let deviceName = await MainActor.run { UIDevice.current.name }
+        let body = LoginRequest(User: email, Password: password, deviceName: deviceName, platform: "iOS")
 
         return try await client.request(
             method: .POST,
@@ -22,13 +23,17 @@ public final class AuthService {
             responseType: TokenResponse.self
         )
     }
-    
+
     public func register(
         email: String,
         password: String,
         role: String
     ) async throws -> UserResponse {
-        let body = RegisterRequest(email: email, password: password, role: role)
+        let body = RegisterRequest(
+            email: email,
+            password: password,
+            role: role
+        )
 
         return try await client.request(
             method: .POST,
@@ -53,12 +58,66 @@ public final class AuthService {
         )
     }
 
+    public func verifyEmail(token: String) async throws -> TokenResponse {
+        let body = VerifyEmailRequest(token: token)
+
+        return try await client.request(
+            method: .POST,
+            path: "/auth/verify-email",
+            body: body,
+            requiresAuth: false,
+            responseType: TokenResponse.self
+        )
+    }
+
+    public func resendVerificationEmail(email: String) async throws -> BasicOKResponse {
+        let body = ResendVerificationRequest(email: email)
+
+        return try await client.request(
+            method: .POST,
+            path: "/auth/resend-verification-email",
+            body: body,
+            requiresAuth: false,
+            responseType: BasicOKResponse.self
+        )
+    }
+
     public func logout() async throws {
         try await client.requestVoid(
             method: .POST,
             path: "/auth/logout",
             body: Optional<EmptyBody>.none,
             requiresAuth: true
+        )
+    }
+    
+    public func listSessions() async throws -> AuthSessionsListResponse {
+        try await client.request(
+            method: .GET,
+            path: "/auth/sessions",
+            body: Optional<String>.none,
+            requiresAuth: true,
+            responseType: AuthSessionsListResponse.self
+        )
+    }
+
+    public func revokeSession(sessionID: String) async throws -> BasicOKResponse {
+        try await client.request(
+            method: .DELETE,
+            path: "/auth/sessions/\(sessionID)",
+            body: Optional<String>.none,
+            requiresAuth: true,
+            responseType: BasicOKResponse.self
+        )
+    }
+
+    public func logoutAllDevices() async throws -> BasicOKResponse {
+        try await client.request(
+            method: .POST,
+            path: "/auth/logout-all",
+            body: Optional<String>.none,
+            requiresAuth: true,
+            responseType: BasicOKResponse.self
         )
     }
 }

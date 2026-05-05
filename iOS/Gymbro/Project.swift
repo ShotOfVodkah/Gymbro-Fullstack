@@ -21,7 +21,15 @@ let mainAppTarget: ProjectDescription.Target = .target(
             "UILaunchScreen": [:],
             "CFBundleDevelopmentRegion": "en",
             "CFBundleLocalizations": ["en", "ru"],
-            "CFBundleAllowMixedLocalizations": true
+            "CFBundleAllowMixedLocalizations": true,
+            "CFBundleURLTypes": [
+                [
+                    "CFBundleURLName": "dev.tuist.Gymbro",
+                    "CFBundleURLSchemes": [
+                        "gymbro"
+                    ]
+                ]
+            ]
         ]
     ),
     sources: ["\(basePath)/Gymbro/Sources/**"],

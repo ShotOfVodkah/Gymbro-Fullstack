@@ -75,8 +75,20 @@ struct ChatView: View {
                 onChallengeTap: viewModel.didTapChallengeMessage(_:),
             )
             
+            if !viewModel.typingUserIDs.isEmpty {
+                Text("Typing...")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.55))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 6)
+            }
+            
             ChatInputBarView(
-                text: $viewModel.draftText,
+                text: Binding(
+                    get: { viewModel.draftText },
+                    set: { viewModel.didChangeDraftText($0) }
+                ),
                 onSendTap: viewModel.sendMessage
             )
         }

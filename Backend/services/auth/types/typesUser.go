@@ -14,6 +14,7 @@ type User struct {
 	Email        string    `db:"email"`
 	PasswordHash *string   `db:"password_hash"`
 	Role         string    `db:"role"`
+	EmailVerified bool `db:"email_verified" json:"email_verified"`
 	InsertedAt   time.Time `db:"inserted_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 }

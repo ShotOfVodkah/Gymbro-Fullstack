@@ -52,6 +52,9 @@ struct FeedsProfilePostsView: View {
             .padding(.top, 8)
             .padding(.bottom, 120)
         }
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
     
     private var backgroundView: some View {

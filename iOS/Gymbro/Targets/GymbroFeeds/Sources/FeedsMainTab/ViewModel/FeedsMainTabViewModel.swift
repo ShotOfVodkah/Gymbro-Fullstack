@@ -15,7 +15,11 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var screenState: ScreenState = .loading
     @Published var selectedTab: FeedTab = .forYou {
         didSet {
+            guard oldValue != selectedTab else { return }
             analytics.track(.feedsTabSelected(tab: selectedTab.rawValue))
+            Task {
+                await reloadPosts()
+            }
         }
     }
     @Published var communities: [FeedCommunity] = []
@@ -33,31 +37,165 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var comments: [FeedComment] = []
     @Published var commentsDraftText: String = ""
     @Published var isCommentsLoading: Bool = false
+    @Published var isLoadingNextPage: Bool = false
+
+    private let pageLimit = 20
+    private var nextFeedCursor: Date?
+    private var hasMoreFeedPosts: Bool = true
+    private var isRefreshing: Bool = false
     
     private let router: any Router
     private let service: any FeedsMainTabService
     private let analytics: any AnalyticsService
     
-    let currentUserID: String
+    private let invalidationCenter: FeedsStateInvalidationCenter
+    private var invalidationTask: Task<Void, Never>?
+    private var communitiesPollingTask: Task<Void, Never>?
+    var currentUserID: String { AppMicroservices.tokens.userId ?? "" }
     
     init(
         router: any Router,
         service: any FeedsMainTabService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: FeedsStateInvalidationCenter? = nil
     ) {
         self.router = router
         self.service = service
         self.analytics = analytics
-        self.currentUserID = AppMicroservices.tokens.userId ?? ""
-        reload()
+        self.invalidationCenter = invalidationCenter ?? FeedsStateInvalidationCenter.shared
+
+        bindInvalidationEvents()
+        loadInitial()
+        startCommunitiesPolling()
+        
         analytics.track(.screenViewed(screen: .feedsMain))
     }
     
+    deinit {
+        communitiesPollingTask?.cancel()
+        invalidationTask?.cancel()
+    }
+    
+    func loadInitial() {
+        Task {
+            await refresh(showLoading: true)
+        }
+    }
+
     func reload() {
         Task {
             analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsMain.rawValue))
-            await loadFeed()
+            await refresh(showLoading: true)
         }
+    }
+
+    func refresh(showLoading: Bool = false) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+        
+        if showLoading {
+            screenState = .loading
+        }
+
+        do {
+            let screenData = try await service.fetchScreen(scope: selectedFeedScope)
+            posts = screenData.posts
+            communities = screenData.communities
+            nextFeedCursor = screenData.nextCursor
+            hasMoreFeedPosts = screenData.hasMorePosts
+            screenState = .loaded
+        } catch is CancellationError {
+            return
+        } catch {
+            print("Failed to refresh feeds screen:", error)
+            screenState = .error
+        }
+    }
+    
+    func reloadPosts() async {
+        do {
+            let page = try await service.fetchPostsPage(scope: selectedFeedScope, limit: pageLimit, cursor: nil)
+            posts = page.posts
+            nextFeedCursor = page.nextCursor
+            hasMoreFeedPosts = page.hasMore
+        } catch {
+            print("Failed to reload posts:", error)
+        }
+    }
+
+    func reloadCommunities() async {
+        do {
+            communities = try await service.fetchCommunities()
+        } catch {
+            print("Failed to reload communities:", error)
+        }
+    }
+
+    func reloadPeople() async {
+        do {
+            chatCreationPeople = try await service.fetchChatCreationPeople()
+        } catch {
+            print("Failed to reload people:", error)
+        }
+    }
+    
+    func loadNextPageIfNeeded(currentPost post: FeedPost) {
+        guard post.id == visiblePosts.last?.id else { return }
+        
+        Task {
+            await loadNextPage()
+        }
+    }
+
+    func loadNextPage() async {
+        guard !isLoadingNextPage else { return }
+        guard hasMoreFeedPosts else { return }
+        guard let nextFeedCursor else { return }
+        isLoadingNextPage = true
+
+        do {
+            let page = try await service.fetchPostsPage(
+                scope: selectedFeedScope,
+                limit: pageLimit,
+                cursor: nextFeedCursor
+            )
+            
+            let existingIDs = Set(posts.map(\.id))
+            let newPosts = page.posts.filter { !existingIDs.contains($0.id) }
+            
+            posts.append(contentsOf: newPosts)
+            self.nextFeedCursor = page.nextCursor
+            self.hasMoreFeedPosts = page.hasMore
+        } catch is CancellationError {
+            return
+        } catch {
+            print("Failed to load next feed page:", error)
+        }
+        
+        isLoadingNextPage = false
+    }
+    
+    func clearUserScopedState() {
+        posts = []
+        communities = []
+        comments = []
+        commentsDraftText = ""
+        selectedPostForComments = nil
+        isShowingCommentsSheet = false
+
+        chatCreationPeople = []
+        chatCreationDraft = ChatCreationDraft()
+        directChatSearchText = ""
+        groupChatSearchText = ""
+        isShowingChatCreation = false
+        chatCreationStep = .chooseType
+        
+        nextFeedCursor = nil
+        hasMoreFeedPosts = true
+        isLoadingNextPage = false
+
+        screenState = .loading
     }
     
     func didTapOpenFriends() {
@@ -93,20 +231,19 @@ final class FeedsMainTabViewModel: ObservableObject {
     }
     
     var visiblePosts: [FeedPost] {
-        let sorted = posts.sorted { $0.createdAt > $1.createdAt }
-
+        posts.sorted { $0.createdAt > $1.createdAt }
+    }
+    
+    private var selectedFeedScope: FeedScope {
         switch selectedTab {
         case .forYou:
-            return sorted
-
+            return .all
         case .friends:
-            return sorted.filter { $0.isFromFollowing }
-
+            return .friends
         case .personal:
-            return sorted.filter { $0.isFromDirectChat }
-
+            return .direct
         case .group:
-            return sorted.filter { $0.isFromGroupCommunity }
+            return .groups
         }
     }
     
@@ -208,6 +345,8 @@ final class FeedsMainTabViewModel: ObservableObject {
                 )
                 analytics.track(.feedsGroupChatCreated(memberCount: chatCreationDraft.selectedGroupMembers.count))
                 isShowingChatCreation = false
+                resetChatCreationState()
+                invalidationCenter.invalidate(.communitiesChanged)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to create group chat:", error)
@@ -260,6 +399,8 @@ final class FeedsMainTabViewModel: ObservableObject {
                 if let index = posts.firstIndex(where: { $0.id == post.id }) {
                     posts[index].commentsCount += 1
                 }
+                
+                invalidationCenter.invalidate(.commentsChanged(postID: postID))
             } catch {
                 print("Failed to send comment:", error)
             }
@@ -301,18 +442,11 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
     
-    private func loadFeed() async {
-        screenState = .loading
-        
-        do {
-            let screenData = try await service.fetchScreen()
-            posts = screenData.posts
-            communities = screenData.communities
-            screenState = .loaded
-        } catch {
-            print("Failed to load feed:", error)
-            screenState = .error
-        }
+    func doubleTapLike(for postID: String) {
+        guard let index = posts.firstIndex(where: { $0.id == postID }) else { return }
+        guard posts[index].isLiked == false else { return }
+
+        toggleLike(for: postID)
     }
     
     private func loadChatCreationPeople() async {
@@ -352,6 +486,8 @@ final class FeedsMainTabViewModel: ObservableObject {
             do {
                 let input = try await service.createDirectChat(with: person.id)
                 isShowingChatCreation = false
+                resetChatCreationState()
+                invalidationCenter.invalidate(.communitiesChanged)
                 router.navigate(to: .feedsChat(input: input))
             } catch {
                 print("Failed to create direct chat:", error)
@@ -378,5 +514,60 @@ final class FeedsMainTabViewModel: ObservableObject {
     private func resetChatCreationSearch() {
         directChatSearchText = ""
         groupChatSearchText = ""
+    }
+    
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+    
+    private func handleInvalidation(_ reason: FeedsInvalidationReason) async {
+        switch reason {
+        case .feedChanged:
+            await reloadPosts()
+
+        case .communitiesChanged:
+            await reloadCommunities()
+
+        case .peopleChanged:
+            await reloadPeople()
+
+        case .chatChanged:
+            await reloadCommunities()
+
+        case .commentsChanged(let postID):
+            if let selected = selectedPostForComments,
+               selected.serverID == postID {
+                await loadComments(for: selected)
+            }
+            await reloadPosts()
+
+        case .calendarChanged:
+            break
+
+        case .accountChanged, .all:
+            clearUserScopedState()
+            await refresh()
+        }
+    }
+    
+    private func startCommunitiesPolling() {
+        communitiesPollingTask?.cancel()
+
+        communitiesPollingTask = Task { [weak self] in
+            guard let self else { return }
+
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                await self.reloadCommunities()
+            }
+        }
     }
 }

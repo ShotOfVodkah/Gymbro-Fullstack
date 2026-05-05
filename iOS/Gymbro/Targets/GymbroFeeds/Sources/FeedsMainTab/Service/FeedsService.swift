@@ -3,9 +3,12 @@ import GymbroNetwork
 import GymbroTypes
 
 protocol FeedsMainTabService {
-    func fetchScreen() async throws -> FeedsMainTabScreenData
-    func fetchChatCreationPeople() async throws -> [PersonItem]
+    func fetchScreen(scope: FeedScope) async throws -> FeedsMainTabScreenData
+    func fetchPosts(scope: FeedScope) async throws -> [FeedPost]
+    func fetchCommunities() async throws -> [FeedCommunity]
+    func fetchPostsPage(scope: FeedScope, limit: Int, cursor: Date?) async throws -> FeedPostsPage
     
+    func fetchChatCreationPeople() async throws -> [PersonItem]
     func createDirectChat(with personID: String) async throws -> ChatSessionInput
     func createGroupChat(title: String, participantIDs: [String]) async throws -> ChatSessionInput
     func openExistingChat(communityID: String) async throws -> ChatSessionInput
@@ -19,6 +22,14 @@ protocol FeedsMainTabService {
 struct FeedsMainTabScreenData {
     let communities: [FeedCommunity]
     let posts: [FeedPost]
+    let nextCursor: Date?
+    let hasMorePosts: Bool
+}
+
+struct FeedPostsPage {
+    let posts: [FeedPost]
+    let nextCursor: Date?
+    let hasMore: Bool
 }
 
 final class FeedsMainTabServiceImpl: FeedsMainTabService {
@@ -28,17 +39,37 @@ final class FeedsMainTabServiceImpl: FeedsMainTabService {
         self.perksEvents = perksEvents
     }
     
-    func fetchScreen() async throws -> FeedsMainTabScreenData {
-        async let feedResponse = client.fetchFeed()
-        async let communitiesResponse = client.fetchCommunities()
+    func fetchScreen(scope: FeedScope = .all) async throws -> FeedsMainTabScreenData {
+        async let postsPage = fetchPostsPage(scope: scope, limit: 20, cursor: nil)
+        async let communities = fetchCommunities()
+
+        let resolvedPostsPage = try await postsPage
         
-        let posts = try await feedResponse.map(FeedPost.init(response:))
-        let communities = try await communitiesResponse.map(FeedCommunity.init(response:))
-        
-        return FeedsMainTabScreenData(
+        return try await FeedsMainTabScreenData(
             communities: communities,
-            posts: posts
+            posts: resolvedPostsPage.posts,
+            nextCursor: resolvedPostsPage.nextCursor,
+            hasMorePosts: resolvedPostsPage.hasMore
         )
+    }
+    
+    func fetchPosts(scope: FeedScope = .all) async throws -> [FeedPost] {
+        try await fetchPostsPage(scope: scope, limit: 20, cursor: nil).posts
+    }
+    
+    func fetchPostsPage(scope: FeedScope = .all, limit: Int = 20, cursor: Date? = nil) async throws -> FeedPostsPage {
+        let page = try await client.fetchFeed(scope: scope, limit: limit, cursor: cursor)
+        
+        return FeedPostsPage(
+            posts: page.items.map(FeedPost.init(response:)),
+            nextCursor: page.next_cursor,
+            hasMore: page.has_more
+        )
+    }
+
+    func fetchCommunities() async throws -> [FeedCommunity] {
+        let response = try await client.fetchCommunities()
+        return response.map(FeedCommunity.init(response:))
     }
     
     func fetchChatCreationPeople() async throws -> [PersonItem] {

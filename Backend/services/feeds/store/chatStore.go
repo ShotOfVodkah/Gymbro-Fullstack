@@ -103,6 +103,20 @@ type messageReactionRow struct {
 	IsSelectedByMe   bool   `db:"is_selected_by_me"`
 }
 
+type ChatReadState struct {
+	CommunityID       string
+	UserID            int
+	LastReadMessageID *string
+	LastReadAt        time.Time
+}
+
+type ChatPreviewMeta struct {
+	CommunityID         string     `db:"community_id"`
+	LastMessagePreview  *string    `db:"last_message_preview"`
+	LastMessageAt       *time.Time `db:"last_message_at"`
+	UnreadCount         int        `db:"unread_count"`
+}
+
 func rowToCommunity(row communityRow) Community {
 	return Community{
 		ID:          row.ID,
@@ -631,4 +645,120 @@ func (cs *ChatStore) InsertSystemMessage(
 	}
 
 	return cs.GetMessageByID(id)
+}
+
+func (cs *ChatStore) MarkCommunityRead(
+	communityID string,
+	userID int,
+	lastReadMessageID *string,
+) (*ChatReadState, error) {
+	query := `
+		INSERT INTO chat_room_reads (
+			community_id,
+			user_id,
+			last_read_message_id,
+			last_read_at
+		)
+		VALUES ($1, $2, $3, NOW())
+		ON CONFLICT (community_id, user_id)
+		DO UPDATE SET
+			last_read_message_id = EXCLUDED.last_read_message_id,
+			last_read_at = NOW()
+		RETURNING community_id, user_id, last_read_message_id, last_read_at
+	`
+
+	var row struct {
+		CommunityID       string    `db:"community_id"`
+		UserID            int       `db:"user_id"`
+		LastReadMessageID *string   `db:"last_read_message_id"`
+		LastReadAt        time.Time `db:"last_read_at"`
+	}
+
+	if err := cs.db.Get(&row, query, communityID, userID, lastReadMessageID); err != nil {
+		return nil, fmt.Errorf("MarkCommunityRead: %w", err)
+	}
+
+	return &ChatReadState{
+		CommunityID:       row.CommunityID,
+		UserID:            row.UserID,
+		LastReadMessageID: row.LastReadMessageID,
+		LastReadAt:        row.LastReadAt,
+	}, nil
+}
+
+func (cs *ChatStore) ListCommunityPreviewMeta(
+	communityIDs []string,
+	userID int,
+) (map[string]ChatPreviewMeta, error) {
+	result := make(map[string]ChatPreviewMeta)
+
+	if len(communityIDs) == 0 {
+		return result, nil
+	}
+
+	query, args, err := sqlx.In(`
+		WITH latest AS (
+			SELECT DISTINCT ON (m.community_id)
+				m.community_id,
+				m.id,
+				m.kind,
+				m.text,
+				m.created_at
+			FROM community_messages m
+			WHERE m.community_id IN (?)
+			ORDER BY m.community_id, m.created_at DESC
+		),
+		read_state AS (
+			SELECT
+				community_id,
+				last_read_at
+			FROM chat_room_reads
+			WHERE user_id = ?
+			  AND community_id IN (?)
+		)
+		SELECT
+			c.id AS community_id,
+
+			CASE
+				WHEN latest.id IS NULL THEN NULL
+				WHEN latest.kind = 'workout' THEN 'Workout shared'
+				WHEN latest.kind = 'challenge_system' THEN COALESCE(latest.text, 'Challenge update')
+				ELSE latest.text
+			END AS last_message_preview,
+
+			latest.created_at AS last_message_at,
+
+			COALESCE((
+				SELECT COUNT(*)
+				FROM community_messages unread
+				LEFT JOIN read_state rs ON rs.community_id = unread.community_id
+				WHERE unread.community_id = c.id
+				  AND unread.sender_id <> ?
+				  AND (
+				  	rs.last_read_at IS NULL
+				  	OR unread.created_at > rs.last_read_at
+				  )
+			), 0) AS unread_count
+
+		FROM communities c
+		LEFT JOIN latest ON latest.community_id = c.id
+		WHERE c.id IN (?)
+	`, communityIDs, userID, communityIDs, userID, communityIDs)
+
+	if err != nil {
+		return nil, fmt.Errorf("ListCommunityPreviewMeta build: %w", err)
+	}
+
+	query = cs.db.Rebind(query)
+
+	var rows []ChatPreviewMeta
+	if err := cs.db.Select(&rows, query, args...); err != nil {
+		return nil, fmt.Errorf("ListCommunityPreviewMeta select: %w", err)
+	}
+
+	for _, row := range rows {
+		result[row.CommunityID] = row
+	}
+
+	return result, nil
 }

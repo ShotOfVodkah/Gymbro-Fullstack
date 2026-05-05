@@ -15,8 +15,20 @@ public struct AuthView: View {
             BlurredBackground()
             VStack(spacing: 18) {
                 header
-                authCard.padding(.top, 10)
-                legalText.padding(.top, 10)
+                if vm.shouldShowCheckEmailScreen {
+                    CheckEmailView(
+                        email: vm.registeredEmail ?? vm.email,
+                        devVerifyURL: vm.devVerifyURL,
+                        isVerificationInProgress: vm.isEmailVerificationInProgress,
+                        onResend: vm.resendVerificationEmail,
+                        onBackToLogin: vm.backToLoginAfterRegistration,
+                        onVerifyDevLink: vm.verifyEmailFromDevURL
+                    )
+                    .padding(.top, 10)
+                } else {
+                    authCard.padding(.top, 10)
+                    legalText.padding(.top, 10)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 30)
@@ -29,6 +41,9 @@ public struct AuthView: View {
                 mode: .acceptance(isAlreadyAccepted: vm.consent.isAccepted(vm.legalSheetType),
                                   onAccept: vm.acceptCurrentLegal))
             .preferredColorScheme(.dark)
+        }
+        .onOpenURL { url in
+            vm.verifyEmail(from: url)
         }
     }
     

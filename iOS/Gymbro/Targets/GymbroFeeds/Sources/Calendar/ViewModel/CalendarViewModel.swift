@@ -25,18 +25,30 @@ final class FeedsCalendarViewModel: ObservableObject {
     private let analytics: any AnalyticsService
     private let calendar = Calendar.current
     
+    private let invalidationCenter: FeedsStateInvalidationCenter
+    private var invalidationTask: Task<Void, Never>?
+    
     init(
         input: CalendarScreenInput,
         router: any Router,
         service: any FeedsCalendarService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: FeedsStateInvalidationCenter? = nil
     ) {
         self.input = input
         self.router = router
         self.analytics = analytics
         self.service = service
+        self.invalidationCenter = invalidationCenter ?? FeedsStateInvalidationCenter.shared
+        
+        bindInvalidationEvents()
         reload()
+        
         analytics.track(.screenViewed(screen: .feedsCalendar))
+    }
+    
+    deinit {
+        invalidationTask?.cancel()
     }
     
     func reload() {
@@ -44,6 +56,18 @@ final class FeedsCalendarViewModel: ObservableObject {
             analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
             await loadCalendar()
         }
+    }
+    
+    func refresh() async {
+        await loadCalendar()
+    }
+
+    func clearUserScopedState() {
+        selectedPerson = nil
+        availablePeople = []
+        days = []
+        selectedDayForActions = nil
+        screenState = .loading
     }
     
     func didTapBack() {
@@ -224,5 +248,31 @@ final class FeedsCalendarViewModel: ObservableObject {
         }
         
         days = result
+    }
+    
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+
+    private func handleInvalidation(_ reason: FeedsInvalidationReason) async {
+        switch reason {
+        case .calendarChanged, .chatChanged, .communitiesChanged:
+            await reloadMonthOnly()
+
+        case .accountChanged, .all:
+            clearUserScopedState()
+            await refresh()
+
+        default:
+            break
+        }
     }
 }
