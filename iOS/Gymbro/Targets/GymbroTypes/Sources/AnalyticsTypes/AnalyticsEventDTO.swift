@@ -103,6 +103,7 @@ public extension AnalyticsEvent {
         case .profileRelationshipMessageTapped: return "profile_relationship_message_tapped"
         case .profileRelationshipPostsTapped: return "profile_relationship_posts_tapped"
         case .profileEditSaved: return "profile_edit_saved"
+        case .profileOnboardingCompleted: return "profile_onboarding_completed"
         case .settingsRowOpened: return "settings_row_opened"
         case .settingsToggleChanged: return "settings_toggle_changed"
         case .profileStatisticsScreenViewed: return "screen_viewed"
@@ -270,6 +271,8 @@ public extension AnalyticsEvent {
             ]
         case .profileEditSaved:
             return [:]
+        case .profileOnboardingCompleted:
+            return ["screen": AnalyticsScreen.profileOnboarding.rawValue]
         case .settingsRowOpened(let itemId):
             return ["item_id": itemId]
         case .settingsToggleChanged(let itemId, let isOn):

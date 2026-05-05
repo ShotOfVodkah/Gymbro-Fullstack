@@ -55,6 +55,7 @@ public enum AnalyticsEvent {
     case profileRelationshipMessageTapped(targetUserId: String)
     case profileRelationshipPostsTapped(targetUserId: String, isOwnProfile: Bool)
     case profileEditSaved
+    case profileOnboardingCompleted
     case settingsRowOpened(itemId: String)
     case settingsToggleChanged(itemId: String, isOn: Bool)
     case profileStatisticsScreenViewed(isOwnProfile: Bool)
@@ -116,6 +117,7 @@ public enum AnalyticsScreen: String {
     case feedsCalendar
     case profile
     case profileEdit = "profile_edit"
+    case profileOnboarding = "profile_onboarding"
     case profileSettings = "profile_settings"
     case profileStatistics = "profile_statistics"
     case perks = "perks"

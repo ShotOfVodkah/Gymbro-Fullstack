@@ -346,6 +346,15 @@ final class AppServicesFactory {
             analytics: analytics
         )
     }
+
+    @MainActor
+    func makeProfileOnboarding(onCompleted: @escaping () -> Void) -> some View {
+        screenFactories.profileOnboardingFactory.makeView(
+            client: AppMicroservices.profile,
+            analytics: analytics,
+            onCompleted: onCompleted
+        )
+    }
     
     @MainActor
     func makeSettingsScreen() -> some View {
@@ -443,6 +452,7 @@ private struct ScreenFactories {
     
     lazy var profileMainTabFactory = ProfileMainTabFactoryImpl()
     lazy var editProfileFactory = EditProfileFactoryImpl()
+    lazy var profileOnboardingFactory = ProfileOnboardingFactoryImpl()
     lazy var settingsFactory = ProfileSettingsFactoryImpl()
     lazy var statisticsFactory = ProfileStatisticsFactoryImpl()
     
