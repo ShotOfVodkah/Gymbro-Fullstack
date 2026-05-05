@@ -1,6 +1,18 @@
 import Foundation
 import UIKit
 
+public protocol AuthServiceProtocol: AnyObject {
+    func login(email: String, password: String) async throws -> TokenResponse
+    func register(email: String, password: String, role: String) async throws -> UserResponse
+    func refresh(refreshToken: String) async throws -> TokenResponse
+    func verifyEmail(token: String) async throws -> TokenResponse
+    func resendVerificationEmail(email: String) async throws -> BasicOKResponse
+    func logout() async throws
+    func listSessions() async throws -> AuthSessionsListResponse
+    func revokeSession(sessionID: String) async throws -> BasicOKResponse
+    func logoutAllDevices() async throws -> BasicOKResponse
+}
+
 public final class AuthService {
     private let client: NetworkClient
 
@@ -121,3 +133,5 @@ public final class AuthService {
         )
     }
 }
+
+extension AuthService: AuthServiceProtocol {}

@@ -14,7 +14,7 @@ struct WorkoutShareRecipientData {
 
 final class WorkoutShareServiceImpl: WorkoutShareService {
     init(
-        feedsClient: FeedsClient,
+        feedsClient: any FeedsClientProtocol,
         perksEvents: any PerksEventTrackingService
     ) {
         self.feedsClient = feedsClient
@@ -64,6 +64,6 @@ final class WorkoutShareServiceImpl: WorkoutShareService {
         return response
     }
 
-    private let feedsClient: FeedsClient
+    private let feedsClient: any FeedsClientProtocol
     private let perksEvents: any PerksEventTrackingService
 }

@@ -339,6 +339,21 @@ let analyticsTarget: ProjectDescription.Target = .target(
     settings: baseSettings()
 )
 
+let gymbroUITestsTarget: ProjectDescription.Target = .target(
+    name: "GymbroUITests",
+    destinations: .iOS,
+    product: .uiTests,
+    bundleId: "\(bundleId).uiTests",
+    deploymentTargets: .iOS(iOSTargetVersion),
+    infoPlist: .extendingDefault(with: [:]),
+    sources: ["\(basePath)/GymbroUITests/Sources/**"],
+    resources: ["\(basePath)/GymbroUITests/Resources/**"],
+    dependencies: [
+        .target(name: "Gymbro")
+    ],
+    settings: baseSettings()
+)
+
 // watchOS
 
 let watchOSTarget: ProjectDescription.Target = .target(
@@ -429,6 +444,23 @@ let gymbroProfileTestsScheme: Scheme = .scheme(
     )
 )
 
+let gymbroUITestsScheme: Scheme = .scheme(
+    name: "GymbroUITests",
+    shared: true,
+    buildAction: .buildAction(
+        targets: [
+            TargetReference(stringLiteral: "Gymbro"),
+            TargetReference(stringLiteral: "GymbroUITests")
+        ],
+        preActions: [],
+        postActions: []
+    ),
+    testAction: .targets(
+        [TestableTarget(stringLiteral: "GymbroUITests")],
+        configuration: .debug
+    )
+)
+
 // Project
 
 let project = Project(
@@ -451,10 +483,11 @@ let project = Project(
         challengesTarget,
         gymbroProfileTests,
         analyticsTarget,
+        gymbroUITestsTarget,
         watchOSTarget,
         widgetExtensionTarget
     ],
-    schemes: [gymbroWorkoutsTestsScheme, gymbroFeedsTestsScheme, gymbroProfileTestsScheme]
+    schemes: [gymbroWorkoutsTestsScheme, gymbroFeedsTestsScheme, gymbroProfileTestsScheme, gymbroUITestsScheme]
 )
 
 // Helpers

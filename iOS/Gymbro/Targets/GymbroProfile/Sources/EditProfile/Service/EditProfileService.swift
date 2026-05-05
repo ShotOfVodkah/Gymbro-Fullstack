@@ -9,7 +9,7 @@ protocol EditProfileService {
 
 final class EditProfileServiceImpl: EditProfileService {
     
-    init(client: ProfileClient) {
+    init(client: any ProfileClientProtocol) {
         self.client = client
     }
     
@@ -50,5 +50,5 @@ final class EditProfileServiceImpl: EditProfileService {
         )
     }
     
-    private let client: ProfileClient
+    private let client: any ProfileClientProtocol
 }

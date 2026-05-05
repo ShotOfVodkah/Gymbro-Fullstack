@@ -14,7 +14,7 @@ public final class ProfileSettingsFactoryImpl {
     @MainActor
     public func makeView(
         router: any Router,
-        client: ProfileClient,
+        client: any ProfileClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
         if let viewModelCache {

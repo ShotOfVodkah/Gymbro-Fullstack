@@ -21,7 +21,7 @@ struct FeedsCalendarMonthData {
 
 final class FeedsCalendarServiceImpl: FeedsCalendarService {
     
-    init(client: FeedsClient) {
+    init(client: any FeedsClientProtocol) {
         self.client = client
     }
     
@@ -64,7 +64,7 @@ final class FeedsCalendarServiceImpl: FeedsCalendarService {
         )
     }
     
-    private let client: FeedsClient
+    private let client: any FeedsClientProtocol
     
     private let calendar = Calendar.current
     

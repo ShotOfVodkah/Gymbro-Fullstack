@@ -26,6 +26,16 @@ public struct CalendarMonthResponse: Decodable {
         case partner_workouts
     }
     
+    public init(
+        month: String,
+        my_workouts: [CalendarWorkoutDayResponse],
+        partner_workouts: [CalendarWorkoutDayResponse]
+    ) {
+        self.month = month
+        self.my_workouts = my_workouts
+        self.partner_workouts = partner_workouts
+    }
+    
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         

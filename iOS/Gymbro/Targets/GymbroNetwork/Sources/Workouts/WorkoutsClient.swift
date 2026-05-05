@@ -333,3 +333,5 @@ public final class WorkoutsClient {
     }
 }
 
+extension WorkoutsClient: WorkoutsClientProtocol {}
+

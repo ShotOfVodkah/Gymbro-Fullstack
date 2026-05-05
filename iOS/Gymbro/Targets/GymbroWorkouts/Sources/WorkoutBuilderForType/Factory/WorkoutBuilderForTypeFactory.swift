@@ -18,7 +18,7 @@ public final class WorkoutBuilderForTypeFactoryImpl {
         actionsRepository: OfflineActionsRepository,
         localMapper: WorkoutsLocalMapper,
         modelModifier: WorkoutsModelModifier,
-        сlient: WorkoutsClient,
+        сlient: any WorkoutsClientProtocol,
         type: String?,
         workoutId: String?,
         analytics: any AnalyticsService,

@@ -17,7 +17,7 @@ public final class WorkoutInfoFactoryImpl {
         divLocalRepository: DivCacheRepository,
         actionsRepository: OfflineActionsRepository,
         modelModifier: WorkoutsModelModifier,
-        сlient: WorkoutsClient,
+        сlient: any WorkoutsClientProtocol,
         localMapper: WorkoutsLocalMapper,
         analytics: any AnalyticsService
     ) -> some View {

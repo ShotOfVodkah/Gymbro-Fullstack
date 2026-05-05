@@ -18,7 +18,7 @@ struct FeedsPeopleScreenData {
 
 final class FeedsPeopleServiceImpl: FeedsPeopleService {
     
-    init(client: FeedsClient) {
+    init(client: any FeedsClientProtocol) {
         self.client = client
     }
     
@@ -27,7 +27,7 @@ final class FeedsPeopleServiceImpl: FeedsPeopleService {
         case .mine:
             async let friendsResponse = client.fetchFriends()
             async let followingResponse = client.fetchFollowing()
-            async let discoverResponse = client.fetchDiscoverPeople()
+            async let discoverResponse = client.fetchDiscoverPeople(query: nil)
             
             let friends = try await friendsResponse.map(PersonItem.init(response:))
             let following = try await followingResponse.map(PersonItem.init(response:))
@@ -81,5 +81,5 @@ final class FeedsPeopleServiceImpl: FeedsPeopleService {
         return ChatSessionInput(response: room)
     }
     
-    private let client: FeedsClient
+    private let client: any FeedsClientProtocol
 }

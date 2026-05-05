@@ -8,7 +8,7 @@ protocol FeedsProfilePostsService {
 
 final class FeedsProfilePostsServiceImpl: FeedsProfilePostsService {
     
-    init(client: FeedsClient) {
+    init(client: any FeedsClientProtocol) {
         self.client = client
     }
     
@@ -17,5 +17,5 @@ final class FeedsProfilePostsServiceImpl: FeedsProfilePostsService {
         return response.map(FeedPost.init(response:))
     }
     
-    private let client: FeedsClient
+    private let client: any FeedsClientProtocol
 }

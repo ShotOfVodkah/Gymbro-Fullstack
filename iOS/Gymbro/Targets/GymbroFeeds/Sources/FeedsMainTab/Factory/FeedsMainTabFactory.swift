@@ -15,7 +15,7 @@ public final class FeedsMainTabFactoryImpl {
     @MainActor
     public func makeView(
         router: any Router,
-        client: FeedsClient,
+        client: any FeedsClientProtocol,
         analytics: any AnalyticsService,
         perksEvents: any PerksEventTrackingService
     ) -> some View {

@@ -21,8 +21,8 @@ protocol WorkoutPlayerService {
 final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
 
     init(
-        client: WorkoutsClient,
-        feedsClient: FeedsClient,
+        client: any WorkoutsClientProtocol,
+        feedsClient: any FeedsClientProtocol,
         workoutsRepository: WorkoutsCacheRepository,
         actionsRepository: OfflineActionsRepository,
         streakWidget: StreakWidgetControlling,
@@ -158,8 +158,8 @@ final class WorkoutPlayerServiceImpl: WorkoutPlayerService {
         return Set(groups).count
     }
 
-    private let client: WorkoutsClient
-    private let feedsClient: FeedsClient
+    private let client: any WorkoutsClientProtocol
+    private let feedsClient: any FeedsClientProtocol
     private let workoutsRepository: WorkoutsCacheRepository
     private let actionsRepository: OfflineActionsRepository
     private let streakWidget: StreakWidgetControlling

@@ -7,8 +7,8 @@ public final class OfflineSyncService {
 
     public init(
         actionsRepository: OfflineActionsRepository,
-        networkClient: WorkoutsClient,
-        feedsClient: FeedsClient,
+        networkClient: any WorkoutsClientProtocol,
+        feedsClient: any FeedsClientProtocol,
         modelModifier: WorkoutsModelModifier,
         streakWidget: StreakWidgetControlling,
         activityCalendarWidget: ActivityCalendarWidgetControlling,
@@ -45,8 +45,8 @@ public final class OfflineSyncService {
     }
 
     private let actionsRepository: OfflineActionsRepository
-    private let networkClient: WorkoutsClient
-    private let feedsClient: FeedsClient
+    private let networkClient: any WorkoutsClientProtocol
+    private let feedsClient: any FeedsClientProtocol
     private let modelModifier: WorkoutsModelModifier
     private let streakWidget: StreakWidgetControlling
     private let activityCalendarWidget: ActivityCalendarWidgetControlling

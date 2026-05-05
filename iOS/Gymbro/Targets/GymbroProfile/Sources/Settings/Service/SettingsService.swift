@@ -9,7 +9,7 @@ protocol SettingsServiceProtocol {
 
 final class SettingsService: SettingsServiceProtocol {
     
-    init(client: ProfileClient) {
+    init(client: any ProfileClientProtocol) {
         self.client = client
     }
     
@@ -45,5 +45,5 @@ final class SettingsService: SettingsServiceProtocol {
         )
     }
     
-    private let client: ProfileClient
+    private let client: any ProfileClientProtocol
 }

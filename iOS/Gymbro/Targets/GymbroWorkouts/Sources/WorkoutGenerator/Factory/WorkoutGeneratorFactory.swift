@@ -15,7 +15,7 @@ public final class WorkoutGeneratorFactoryImpl {
         modelModifier: WorkoutsModelModifier,
         actionsRepository: OfflineActionsRepository,
         workoutsRepository: WorkoutsCacheRepository,
-        client: WorkoutsClient,
+        client: any WorkoutsClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
         guard let viewModelCache else {

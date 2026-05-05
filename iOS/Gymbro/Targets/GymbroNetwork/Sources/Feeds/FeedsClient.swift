@@ -16,3 +16,5 @@ public final class FeedsClient {
         return userId
     }
 }
+
+extension FeedsClient: FeedsClientProtocol {}

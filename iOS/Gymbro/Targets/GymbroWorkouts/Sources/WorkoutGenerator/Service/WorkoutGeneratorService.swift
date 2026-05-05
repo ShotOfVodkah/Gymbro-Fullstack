@@ -11,7 +11,7 @@ protocol WorkoutGeneratorService {
 final class WorkoutGeneratorServiceImpl: WorkoutGeneratorService {
 
     init(
-        client: WorkoutsClient,
+        client: any WorkoutsClientProtocol,
         workoutsRepository: WorkoutsCacheRepository,
         actionsRepository: OfflineActionsRepository
     ) {
@@ -34,7 +34,7 @@ final class WorkoutGeneratorServiceImpl: WorkoutGeneratorService {
         }
     }
 
-    private let client: WorkoutsClient
+    private let client: any WorkoutsClientProtocol
     private let actionsRepository: OfflineActionsRepository
     private let workoutsRepository: WorkoutsCacheRepository
 }
