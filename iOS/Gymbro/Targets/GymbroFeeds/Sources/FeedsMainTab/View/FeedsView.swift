@@ -90,7 +90,8 @@ struct FeedsMainTabView: View {
                             onLikeTap: { viewModel.toggleLike(for: post.id) },
                             onCommentTap: { viewModel.didTapComments(for: post) },
                             onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) },
-                            onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) }
+                            onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) },
+                            onDoubleTapLike: { viewModel.doubleTapLike(for: post.id) },
                         )
                         .onAppear {
                             viewModel.loadNextPageIfNeeded(currentPost: post)

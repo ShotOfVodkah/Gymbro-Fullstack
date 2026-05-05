@@ -442,6 +442,13 @@ final class FeedsMainTabViewModel: ObservableObject {
         }
     }
     
+    func doubleTapLike(for postID: String) {
+        guard let index = posts.firstIndex(where: { $0.id == postID }) else { return }
+        guard posts[index].isLiked == false else { return }
+
+        toggleLike(for: postID)
+    }
+    
     private func loadChatCreationPeople() async {
         do {
             chatCreationPeople = try await service.fetchChatCreationPeople()
