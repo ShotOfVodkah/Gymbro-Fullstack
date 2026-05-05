@@ -1,0 +1,28 @@
+name: Feeds CI
+
+on:
+  push:
+    paths:
+      - 'Backend/services/feeds/**'
+      - '.github/workflows/feeds-ci.yml'
+  pull_request:
+
+jobs:
+  test:
+    name: Go tests — feeds service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/services/feeds
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: Backend/services/feeds/go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./... -count=1 -short

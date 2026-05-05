@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"slices"
@@ -8,20 +9,31 @@ import (
 
 	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/clients"
-	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
 )
 
 type CalendarHandler struct {
-	calendarStore   store.CalendarStore
-	profileClient   *clients.ProfileClient
-	workoutsClient  *clients.WorkoutsCalendarClient
+	calendarStore   CalendarStore
+	profileClient   ProfileClient
+	workoutsClient  WorkoutsCalendarClient
+}
+
+type CalendarStore interface {
+	ListCommunityMemberIDs(communityID string) ([]int, error)
+}
+
+type ProfileClient interface {
+	FetchProfilesBatch(ctx context.Context, ids []int) (map[int]clients.ProfilePreview, error)
+}
+
+type WorkoutsCalendarClient interface {
+	FetchUserCalendarMonth(ctx context.Context, userID string, month string) ([]types.CalendarWorkoutDayResponse, error)
 }
 
 func NewCalendarHandler(
-	calendarStore store.CalendarStore,
-	profileClient *clients.ProfileClient,
-	workoutsClient *clients.WorkoutsCalendarClient,
+	calendarStore CalendarStore,
+	profileClient ProfileClient,
+	workoutsClient WorkoutsCalendarClient,
 ) *CalendarHandler {
 	return &CalendarHandler{
 		calendarStore:  calendarStore,

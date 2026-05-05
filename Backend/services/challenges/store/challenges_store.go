@@ -93,7 +93,7 @@ func (s *PostgresChallengeStore) IsChatAlreadyJoined(challengeID string, chatID 
 }
 
 func (s *PostgresChallengeStore) CreateTeam(team models.ChallengeTeam) error {
-	_, err := s.db.Exec(`
+	_, err := s.db.NamedExec(`
 		INSERT INTO challenge_teams (
 			id, challenge_id, chat_id, team_name, team_avatar,
 			status, current_value, target_value, joined_at
