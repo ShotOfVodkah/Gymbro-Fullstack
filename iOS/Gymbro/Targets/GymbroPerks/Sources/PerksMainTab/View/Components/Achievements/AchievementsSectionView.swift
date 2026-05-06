@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroCommonUI
 import GymbroTypes
 
 struct AchievementsSectionView: View {
@@ -55,6 +56,9 @@ struct AchievementsSectionView: View {
             }
         }
         .animation(.spring(response: 0.38, dampingFraction: 0.78), value: selectedAchievement)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "perks.achievements.section")
+        }
     }
     
     private var headerView: some View {
@@ -97,6 +101,7 @@ struct AchievementsSectionView: View {
                 )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("perks.achievements.category.\(category.rawValue)")
     }
     
     private var achievementsPagerView: some View {

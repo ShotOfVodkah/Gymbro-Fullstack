@@ -20,6 +20,7 @@ struct RecentUnlocksView: View {
         .background(sectionBackground)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(sectionBorder)
+        .accessibilityIdentifier("perks.recentUnlocks.section")
     }
     
     // MARK: - Header

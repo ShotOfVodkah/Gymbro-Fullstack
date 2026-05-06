@@ -2,6 +2,10 @@ import Foundation
 
 public struct ChallengesListResponse: Decodable {
     public let challenges: [ChallengeResponse]
+
+    public init(challenges: [ChallengeResponse]) {
+        self.challenges = challenges
+    }
 }
 
 public struct ChallengeResponse: Decodable {
@@ -82,6 +86,40 @@ public struct ChallengeTeamPreviewResponse: Decodable {
         case teamID = "team_id"
         case chatID = "chat_id"
         case teamName = "team_name"
+    }
+
+    public init(teamID: String, chatID: String, teamName: String) {
+        self.teamID = teamID
+        self.chatID = chatID
+        self.teamName = teamName
+    }
+}
+
+extension ChallengeResponse {
+
+    public func replacing(
+        participationStatus: String,
+        team: ChallengeTeamPreviewResponse?
+    ) -> ChallengeResponse {
+        ChallengeResponse(
+            id: id,
+            title: title,
+            description: description,
+            type: type,
+            status: status,
+            participationStatus: participationStatus,
+            difficulty: difficulty,
+            coverIcon: coverIcon,
+            accentColor: accentColor,
+            startDate: startDate,
+            endDate: endDate,
+            targetValue: targetValue,
+            currentValue: currentValue,
+            progressPercent: progressPercent,
+            unit: unit,
+            team: team,
+            targetFilter: targetFilter
+        )
     }
 }
 

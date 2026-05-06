@@ -78,6 +78,7 @@ struct ChallengeCardView: View {
             .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("challenges.card.\(challenge.id)")
     }
     
     private var headerView: some View {
@@ -219,6 +220,7 @@ struct ChallengeCardView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("challenges.card.\(challenge.id).join")
     }
     
     private var footerView: some View {

@@ -112,6 +112,9 @@ struct ChallengesMainTabView: View {
         .refreshable {
             viewModel.refresh()
         }
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "challenges.list.loaded")
+        }
     }
     
     private var headerView: some View {

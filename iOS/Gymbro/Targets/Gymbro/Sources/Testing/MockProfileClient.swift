@@ -107,11 +107,16 @@ final class MockProfileClient: ProfileClientProtocol {
             "total_duration_hours": 96,
             "consistency": 82,
             "workouts_this_week": 4,
-            "workouts_this_month": 14
+            "workouts_this_month": 14,
+            "average_workout_duration_minutes": 45,
+            "completion_rate": 78,
+            "favorite_muscle_group": "Chest",
+            "most_active_day": "Monday"
           },
-          "favorite_categories": [],
           "weekly_activity": [],
-          "monthly_progress": []
+          "monthly_trend": [],
+          "workouts_by_month": [],
+          "categories": []
         }
         """
     }

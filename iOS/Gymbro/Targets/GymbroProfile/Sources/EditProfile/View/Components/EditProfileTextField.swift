@@ -6,12 +6,14 @@ struct EditProfileTextField: View {
         title: String,
         text: Binding<String>,
         autocapitalization: TextInputAutocapitalization = .never,
-        disableAutocorrection: Bool = true
+        disableAutocorrection: Bool = true,
+        accessibilityIdentifier: String
     ) {
         self.title = title
         self._text = text
         self.autocapitalization = autocapitalization
         self.disableAutocorrection = disableAutocorrection
+        self.accessibilityIdentifier = accessibilityIdentifier
     }
     
     var body: some View {
@@ -23,6 +25,7 @@ struct EditProfileTextField: View {
             TextField("", text: $text)
                 .textInputAutocapitalization(autocapitalization)
                 .autocorrectionDisabled(disableAutocorrection)
+                .accessibilityIdentifier(accessibilityIdentifier)
                 .padding(.horizontal, 14)
                 .frame(height: 48)
                 .background(
@@ -37,4 +40,5 @@ struct EditProfileTextField: View {
     @Binding private var text: String
     private let autocapitalization: TextInputAutocapitalization
     private let disableAutocorrection: Bool
+    private let accessibilityIdentifier: String
 }

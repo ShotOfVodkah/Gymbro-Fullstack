@@ -44,6 +44,7 @@ struct AchievementCardView: View {
             .aspectRatio(1, contentMode: .fit)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("perks.achievement.card.\(achievement.code)")
     }
     
     private var cardBackground: some View {

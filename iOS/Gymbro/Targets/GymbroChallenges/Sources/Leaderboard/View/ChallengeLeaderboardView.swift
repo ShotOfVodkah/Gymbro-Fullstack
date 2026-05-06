@@ -71,6 +71,9 @@ struct ChallengeLeaderboardView: View {
         .refreshable {
             viewModel.reload()
         }
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "challenges.leaderboard.loaded")
+        }
     }
     
     private var topBar: some View {
@@ -85,6 +88,7 @@ struct ChallengeLeaderboardView: View {
                     .background(.white.opacity(0.08))
                     .clipShape(Circle())
             }
+            .accessibilityIdentifier("challenges.leaderboard.back")
             
             Spacer()
             

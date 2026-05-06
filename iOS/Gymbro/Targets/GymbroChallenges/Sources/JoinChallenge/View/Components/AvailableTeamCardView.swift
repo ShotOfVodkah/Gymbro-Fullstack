@@ -67,6 +67,7 @@ struct AvailableTeamCardView: View {
         }
         .buttonStyle(.plain)
         .disabled(!team.canJoin)
+        .accessibilityIdentifier("challenges.join.team.\(team.chatID)")
     }
     
     private var cardBackground: some View {

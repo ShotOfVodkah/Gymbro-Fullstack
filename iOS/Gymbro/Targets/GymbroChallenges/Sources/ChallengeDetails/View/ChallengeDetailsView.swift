@@ -73,6 +73,9 @@ struct ChallengeDetailsView: View {
         .refreshable {
             viewModel.reload()
         }
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "challenges.details.loaded")
+        }
     }
     
     private var topBar: some View {
@@ -87,6 +90,7 @@ struct ChallengeDetailsView: View {
                     .background(.white.opacity(0.08))
                     .clipShape(Circle())
             }
+            .accessibilityIdentifier("challenges.details.back")
             
             Spacer()
             
@@ -127,6 +131,7 @@ struct ChallengeDetailsView: View {
         }
         .buttonStyle(.plain)
         .padding(.top, 4)
+        .accessibilityIdentifier("challenges.details.leave")
     }
     
     private var errorView: some View {

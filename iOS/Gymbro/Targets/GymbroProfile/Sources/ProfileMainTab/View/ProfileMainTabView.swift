@@ -36,6 +36,10 @@ struct ProfileMainTabView: View {
                 }
             }
 
+            if viewModel.screenState == .loaded, viewModel.isOwnProfile {
+                UITestMarker(id: "profile.my.loaded")
+            }
+
             if case .otherUserProfile = viewModel.mode {
                 UITestMarker(id: "profile.other.user.screen")
             }

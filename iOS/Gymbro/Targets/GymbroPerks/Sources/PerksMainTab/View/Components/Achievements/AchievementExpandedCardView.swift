@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroCommonUI
 import GymbroTypes
 
 struct AchievementExpandedCardView: View {
@@ -29,6 +30,7 @@ struct AchievementExpandedCardView: View {
                         .background(Circle().fill(Color.white.opacity(0.12)))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("perks.achievement.expanded.close")
             }
             
             VStack(alignment: .leading, spacing: 7) {
@@ -58,6 +60,9 @@ struct AchievementExpandedCardView: View {
         .overlay(cardBorder)
         .shadow(color: rarityColor.opacity(0.35), radius: 22, x: 0, y: 14)
         .padding(.horizontal, 10)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "perks.achievement.expanded")
+        }
     }
     
     private var progressView: some View {

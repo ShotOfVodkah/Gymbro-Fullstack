@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroCommonUI
 import GymbroTypes
 
 struct WeeklyStreakCardView: View {
@@ -94,6 +95,9 @@ struct WeeklyStreakCardView: View {
         .background(cardBackground)
         .overlay(iceOverlay)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "perks.streak.card")
+        }
         .scaleEffect(freezePulse ? 1.018 : 1)
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: freezePulse)
     }
@@ -284,6 +288,7 @@ struct WeeklyStreakCardView: View {
                     )
             }
             .disabled(!streak.canUseStreakFreeze || streak.wasFreezeUsedThisWeek)
+            .accessibilityIdentifier("perks.streak.freeze.use")
         }
         .padding(12)
         .background(
@@ -321,6 +326,7 @@ struct WeeklyStreakCardView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("perks.streak.changeGoal")
     }
     
     private var footerView: some View {
@@ -335,6 +341,16 @@ struct WeeklyStreakCardView: View {
             
             Spacer()
         }
+        .overlay(alignment: .leading) {
+            UITestMarker(id: streakStateAccessibilityId)
+        }
+    }
+
+    private var streakStateAccessibilityId: String {
+        if streak.wasFreezeUsedThisWeek { return "perks.streak.state.freeze" }
+        if streak.isGoalCompleted { return "perks.streak.state.completed" }
+        if isDangerState { return "perks.streak.state.danger" }
+        return "perks.streak.state.normal"
     }
     
     private var footerIconName: String {
