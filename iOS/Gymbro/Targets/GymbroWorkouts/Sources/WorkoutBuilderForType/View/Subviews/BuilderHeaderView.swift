@@ -18,7 +18,8 @@ struct BuilderHeaderView: View {
 
             AppTextField(
                 placeholder: String(localized: "workout.builder.placeholder_name", bundle: .module),
-                text: $name
+                text: $name,
+                textFieldAccessibilityIdentifier: "workouts.builder.name"
             )
             .padding(.vertical, Layout.fieldVertical)
             .padding(.horizontal, Layout.fieldHorizontal)

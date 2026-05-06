@@ -14,15 +14,21 @@ struct WorkoutsListView: View {
             switch viewModel.screenState {
             case .loading:
                 WorkoutsListViewStub()
-            case .loaded:
-                DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
-                    .id(viewModel.sourceDebugId)
-            case .offline:
-                VStack{
-                    OfflineHeader()
+                case .loaded:
                     DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
                         .id(viewModel.sourceDebugId)
-                }
+                        .overlay(alignment: .topLeading) {
+                            UITestMarker(id: "workouts.list.loaded")
+                        }
+                case .offline:
+                    VStack{
+                        OfflineHeader()
+                        DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
+                            .id(viewModel.sourceDebugId)
+                            .overlay(alignment: .topLeading) {
+                                UITestMarker(id: "workouts.list.loaded")
+                            }
+                    }
             case .error:
                 VStack(alignment: .center) {
                     Text(GymbroCommonStrings.genericError)

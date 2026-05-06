@@ -19,6 +19,7 @@ struct WorkoutResultCard: View {
             header
             exercisesList
             AppButton(String(localized: "workout.generator.action_save", bundle: .module), action: saveAction, wrapContent: false)
+                .accessibilityIdentifier("workouts.generator.result.save")
                 .padding(.horizontal, 40)
             Text(String(localized: "workout.generator.disclaimer", bundle: .module))
                 .font(.caption.weight(.semibold))

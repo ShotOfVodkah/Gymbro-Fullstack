@@ -32,6 +32,7 @@ struct WorkoutPlayerView: View {
                             .imageScale(.large)
                     }
                     .padding(.leading, 16)
+                    .accessibilityIdentifier("workouts.player.back")
                 }
             case .loaded:
                 content
@@ -53,6 +54,7 @@ struct WorkoutPlayerView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(.leading, 16)
+                    .accessibilityIdentifier("workouts.player.back")
                     
                     VStack(alignment: .center) {
                         Text(GymbroCommonStrings.genericError)
@@ -140,6 +142,9 @@ struct WorkoutPlayerView: View {
                     .padding(.top, 20)
             }
         }
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "workouts.player.loaded")
+        }
     }
     
     private var headerBlock: some View {
@@ -154,6 +159,7 @@ struct WorkoutPlayerView: View {
                         .foregroundColor(.white)
                         .imageScale(.large)
                 }
+                .accessibilityIdentifier("workouts.player.back")
                 
                 Text(viewModel.workoutName)
                     .font(.title)
@@ -230,6 +236,7 @@ struct WorkoutPlayerView: View {
                 }
                 Spacer()
                 AppButton(String(localized: "workout.player.action_finish", bundle: .module), action: { viewModel.showFinishPopup = true })
+                    .accessibilityIdentifier("workouts.player.finish")
             }
             
         }

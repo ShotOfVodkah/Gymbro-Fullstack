@@ -32,6 +32,7 @@ struct WorkoutGeneratorView: View {
                         .foregroundColor(.white)
                         .imageScale(.large)
                 }
+                .accessibilityIdentifier("workouts.generator.back")
                 .padding(.leading, 16)
                 
                 Text(String(localized: "workout.generator.title", bundle: .module))
@@ -45,6 +46,11 @@ struct WorkoutGeneratorView: View {
         .interactiveDismissDisabled(false)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
+        .overlay(alignment: .topLeading) {
+            if viewModel.screenState == .loaded {
+                UITestMarker(id: "workouts.generator.loaded")
+            }
+        }
     }
 
     private var content: some View {
@@ -52,7 +58,8 @@ struct WorkoutGeneratorView: View {
             AppTextField(
                 title: String(localized: "workout.generator.field_prompt_title", bundle: .module),
                 placeholder: "",
-                text: $viewModel.prompt
+                text: $viewModel.prompt,
+                textFieldAccessibilityIdentifier: "workouts.generator.prompt"
             )
             
             if viewModel.screenState == .loaded && viewModel.generated == nil {
@@ -62,6 +69,7 @@ struct WorkoutGeneratorView: View {
                     AppButton(String(localized: "workout.generator.action_generate", bundle: .module), size: .l, action: {
                         Task { await viewModel.generateWorkout() }
                     }, wrapContent: false)
+                    .accessibilityIdentifier("workouts.generator.generate")
                 }
             } else {
                 resultSection

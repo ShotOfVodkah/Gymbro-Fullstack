@@ -11,5 +11,6 @@ public struct OfflineHeader: View {
             .padding(.bottom, 10)
             .background(LinearGradient(colors: [.red, .pink], startPoint: .leading, endPoint: .trailing))
             .foregroundStyle(Color.white)
+            .accessibilityIdentifier("workouts.offline.banner")
     }
 }

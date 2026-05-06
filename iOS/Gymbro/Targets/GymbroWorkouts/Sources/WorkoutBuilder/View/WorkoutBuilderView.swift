@@ -17,10 +17,16 @@ struct WorkoutBuilderView: View {
                     WorkoutBuilderViewStub()
                 case .loaded:
                     DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
+                        .overlay(alignment: .topLeading) {
+                            UITestMarker(id: "workouts.builder.loaded")
+                        }
                 case .offline:
                     VStack{
                         OfflineHeader()
                         DivHostingView(divkitComponents: viewModel.divkitComponents, source: viewModel.source!)
+                            .overlay(alignment: .topLeading) {
+                                UITestMarker(id: "workouts.builder.loaded")
+                            }
                     }
                     .ignoresSafeArea(.container, edges: .bottom)
                 case .error:
@@ -44,6 +50,7 @@ struct WorkoutBuilderView: View {
                     .foregroundColor(.white)
                     .imageScale(.large)
             }
+            .accessibilityIdentifier("workouts.builder.back")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.top, viewModel.screenState == .offline ? 58 : 20)
             .padding(.leading, 16)

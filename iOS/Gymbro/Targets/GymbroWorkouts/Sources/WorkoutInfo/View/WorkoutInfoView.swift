@@ -50,6 +50,7 @@ struct WorkoutInfoView: View {
                     .foregroundColor(.white)
                     .imageScale(.large)
             }
+            .accessibilityIdentifier("workouts.info.back")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.top, viewModel.screenState == .offline ? 50 : 16)
             .padding(.leading, 16)

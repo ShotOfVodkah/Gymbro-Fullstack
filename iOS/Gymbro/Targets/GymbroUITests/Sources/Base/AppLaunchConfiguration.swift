@@ -12,6 +12,8 @@ enum AppLaunchArgument {
     static let uitestPerksStreakDanger = "-uitest-perks-streak-danger"
 
     static let uitestChallengesUnavailableTeams = "-uitest-challenges-unavailable-teams"
+
+    static let uitestWorkoutsPlayerOffline = "-uitest-workouts-player-offline"
 }
 
 enum PerksStreakUITestVariant {
@@ -28,6 +30,7 @@ struct AppLaunchConfiguration {
     var openWorkoutShareRoute: Bool = false
     var perksStreakVariant: PerksStreakUITestVariant = .standard
     var challengesUnavailableTeams: Bool = false
+    var workoutsPlayerOffline: Bool = false
 
     var launchArguments: [String] {
         var arguments = [AppLaunchArgument.uiTesting]
@@ -61,6 +64,10 @@ struct AppLaunchConfiguration {
 
         if challengesUnavailableTeams {
             arguments.append(AppLaunchArgument.uitestChallengesUnavailableTeams)
+        }
+
+        if workoutsPlayerOffline {
+            arguments.append(AppLaunchArgument.uitestWorkoutsPlayerOffline)
         }
 
         return arguments

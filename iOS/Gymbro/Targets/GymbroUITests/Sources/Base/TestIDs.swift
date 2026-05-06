@@ -60,6 +60,37 @@ enum TestIDs {
         static let perks = "perks.main.screen"
     }
 
+    enum Workouts {
+        static let listLoaded = "workouts.list.loaded"
+        static let infoScreen = "workout.info.screen"
+        static let infoBack = "workouts.info.back"
+
+        static let playerLoaded = "workouts.player.loaded"
+        static let playerBack = "workouts.player.back"
+        static let playerFinish = "workouts.player.finish"
+
+        static let finishSaveOnly = "workouts.finish.save_only"
+        static let finishShare = "workouts.finish.share"
+
+        static let shareLoaded = "workouts.share.loaded"
+
+        static let builderLoaded = "workouts.builder.loaded"
+        static let builderBack = "workouts.builder.back"
+
+        static let builderForTypeLoaded = "workouts.builderForType.loaded"
+        static let builderForTypeBack = "workouts.builderForType.back"
+        static let builderForTypeSave = "workouts.builderForType.save"
+        static let builderName = "workouts.builder.name"
+
+        static let generatorLoaded = "workouts.generator.loaded"
+        static let generatorBack = "workouts.generator.back"
+        static let generatorPrompt = "workouts.generator.prompt"
+        static let generatorGenerate = "workouts.generator.generate"
+        static let generatorResultSave = "workouts.generator.result.save"
+
+        static let offlineBanner = "workouts.offline.banner"
+    }
+
     enum Challenges {
         static let listLoaded = "challenges.list.loaded"
         static let detailsLoaded = "challenges.details.loaded"
