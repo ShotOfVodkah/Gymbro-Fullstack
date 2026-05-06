@@ -63,7 +63,7 @@ func main() {
 
 	chatEventHub := chats.NewChatEventHub()
 
-	feedH := feeds.NewFeedHandler(feedStore, chatStore, workoutsClient, profileClient, perksClient)
+	feedH := feeds.NewFeedHandler(&feedStore, &chatStore, workoutsClient, profileClient, perksClient)
 	calendarH := handlers.NewCalendarHandler(&calendarStore, profileClient, workoutsCalendarClient)
 	peopleH := handlers.NewPeopleHandler(peopleStore, profileClient)
 	internalPeopleH := handlers.NewInternalPeopleHandler(peopleStore)

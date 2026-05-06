@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 struct IconEmailField: View {
     let title: String
     let systemImage: String
@@ -22,6 +21,7 @@ struct IconEmailField: View {
                     .autocorrectionDisabled()
                     .keyboardType(.emailAddress)
                     .foregroundStyle(.white)
+                    .accessibilityIdentifier("auth.email.textfield")
                     .placeholder(when: text.isEmpty) {
                         Text(String(localized: "auth.placeholder.email", bundle: .module))
                             .foregroundColor(.white.opacity(0.6))

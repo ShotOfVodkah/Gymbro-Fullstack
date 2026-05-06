@@ -21,4 +21,38 @@ class BaseUITestCase: XCTestCase {
         app.launchArguments = configuration.launchArguments
         app.launch()
     }
+
+    func element(_ id: String) -> XCUIElement {
+        app.descendants(matching: .any)[id]
+    }
+
+    func assertExists(
+        _ id: String,
+        timeout: TimeInterval = 8,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let element = element(id)
+
+        XCTAssertTrue(
+            element.waitForExistence(timeout: timeout),
+            "Expected element to exist: \(id)",
+            file: file,
+            line: line
+        )
+    }
+    
+    func assertElementExists(
+        _ element: XCUIElement,
+        timeout: TimeInterval = 8,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertTrue(
+            element.waitForExistence(timeout: timeout),
+            "Expected element to exist: \(element)",
+            file: file,
+            line: line
+        )
+    }
 }

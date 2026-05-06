@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 struct IconSecureField: View {
     let title: String
     let systemImage: String
@@ -23,6 +22,7 @@ struct IconSecureField: View {
                         SecureField("", text: $text)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .accessibilityIdentifier("auth.password.securefield")
                             .placeholder(when: text.isEmpty) {
                                 Text(String(localized: "auth.placeholder.password", bundle: .module))
                                     .foregroundColor(.white.opacity(0.6))
@@ -32,6 +32,7 @@ struct IconSecureField: View {
                         TextField("", text: $text)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .accessibilityIdentifier("auth.password.securefield")
                             .placeholder(when: text.isEmpty) {
                                 Text(String(localized: "auth.placeholder.password", bundle: .module))
                                     .foregroundColor(.white.opacity(0.6))
@@ -47,6 +48,7 @@ struct IconSecureField: View {
                     Image(systemName: isHidden ? "eye.slash" : "eye")
                         .foregroundStyle(.white.opacity(0.6))
                 }
+                .accessibilityIdentifier("auth.password.visibility.button")
             }
             .padding(.horizontal, 14)
             .frame(height: 54)

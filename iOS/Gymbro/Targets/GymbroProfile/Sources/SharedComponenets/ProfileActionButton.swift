@@ -42,6 +42,28 @@ struct ProfileActionButton: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityID)
+    }
+    
+    private var accessibilityID: String {
+        switch model.kind {
+        case .settings:
+            return "profile.settings.button"
+        default:
+            return "profile.action.\(Self.analyticsActionID(model.kind)).button"
+        }
+    }
+
+    private static func analyticsActionID(_ kind: ProfileActionKind) -> String {
+        switch kind {
+        case .editProfile: return "edit_profile"
+        case .settings: return "settings"
+        case .posts: return "posts"
+        case .friends: return "friends"
+        case .workoutCalendar: return "workout_calendar"
+        case .statistics: return "statistics"
+        case .logout: return "logout"
+        }
     }
     
     private let model: ProfileActionModel

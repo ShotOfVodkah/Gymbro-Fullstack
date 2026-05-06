@@ -35,83 +35,67 @@ struct GymbroApp: App {
         let container: ModelContainer = {
             do {
                 return try ModelContainer(
-                    for: DivJsonCache.self, WorkoutsCache.self, ExercisesCache.self, OfflineActionEntity.self,
-                    configurations: ModelConfiguration(isStoredInMemoryOnly: isUITesting))
+                    for: DivJsonCache.self,
+                    WorkoutsCache.self,
+                    ExercisesCache.self,
+                    OfflineActionEntity.self,
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: isUITesting)
+                )
             } catch {
                 fatalError("Failed to create ModelContainer: \(error)")
             }
         }()
+
         _modelContainer = State(initialValue: container)
         _router = StateObject(wrappedValue: r)
+
         let clients: AppClients = AppEnvironment.shouldUseMockNetwork ? .mock : .real
         SessionManager.setAuthServiceOverride(AppEnvironment.shouldUseMockNetwork ? clients.auth : nil)
-        self.appServicesFactory = AppServicesFactory(router: r, container: container, clients: clients, isUITesting: isUITesting)
+
+        self.appServicesFactory = AppServicesFactory(
+            router: r,
+            container: container,
+            clients: clients,
+            isUITesting: isUITesting
+        )
     }
     
     var body: some Scene {
         WindowGroup {
-            Group {
-                if session.isAuthenticated {
-                    if let userId = session.currentUserId, !userId.isEmpty,
-                       !profileOnboardingGate.isCompleted(for: userId) {
-                        NavigationStack {
-                            appServicesFactory.makeProfileOnboarding {
-                                profileOnboardingGate.markCompleted(for: userId)
+            ZStack {
+                Group {
+                    if session.isAuthenticated {
+                        if let userId = session.currentUserId,
+                           !userId.isEmpty,
+                           !profileOnboardingGate.isCompleted(for: userId) {
+
+                            NavigationStack {
+                                ZStack {
+                                    appServicesFactory.makeProfileOnboarding {
+                                        profileOnboardingGate.markCompleted(for: userId)
+                                    }
+
+                                    UITestMarker(id: "profile.onboarding.screen")
+                                }
                             }
+
+                        } else {
+                            mainAppView
                         }
                     } else {
-                        NavigationStack(path: $router.path) {
-                            ZStack(alignment: .bottom) {
-                                Group {
-                                    switch tab {
-                                    case .workouts:
-                                        appServicesFactory.makeWorkoutsScreen()
-                                            .accessibilityIdentifier("screen.workouts")
-                                            .navigationDestination(for: NavigationRoute.self) { route in
-                                                appServicesFactory.makeDestinationView(for: route)
-                                            }
-                                    case .feeds:
-                                        appServicesFactory.makeFeedsMainTab()
-                                            .accessibilityIdentifier("screen.feeds")
-                                            .navigationDestination(for: NavigationRoute.self) { route in
-                                                appServicesFactory.makeDestinationView(for: route)
-                                            }
-                                    case .profile:
-                                        appServicesFactory.makeProfileMainTab()
-                                            .accessibilityIdentifier("screen.profile")
-                                            .navigationDestination(for: NavigationRoute.self) { route in
-                                                appServicesFactory.makeDestinationView(for: route)
-                                            }
-                                    case .challenge:
-                                        appServicesFactory.makeChallengesMainTab()
-                                            .accessibilityIdentifier("screen.challenges")
-                                            .navigationDestination(for: NavigationRoute.self) { route in
-                                                appServicesFactory.makeDestinationView(for: route)
-                                            }
-                                    case .perks:
-                                        appServicesFactory.makePerksMainTab()
-                                            .accessibilityIdentifier("screen.perks")
-                                            .navigationDestination(for: NavigationRoute.self) { route in
-                                                appServicesFactory.makeDestinationView(for: route)
-                                            }
-                                    }
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .accessibilityIdentifier("app.main.content")
-                                
-                                AppTabBar(selected: $tab)
-                                    .padding(.horizontal, 10)
-                                    .padding(.bottom, 10)
-                            }
-                            .ignoresSafeArea(.container, edges: .bottom)
+                        ZStack {
+                            AuthView(
+                                analytics: appServicesFactory.analytics,
+                                auth: appServicesFactory.auth
+                            )
+
+                            UITestMarker(id: "auth.screen")
                         }
                     }
-                } else {
-                    AuthView(analytics: appServicesFactory.analytics, auth: appServicesFactory.auth)
-                        .accessibilityIdentifier("auth.screen")
                 }
+
+                UITestMarker(id: "app.root")
             }
-            .accessibilityIdentifier("app.root")
             .onAppear {
                 if session.isAuthenticated {
                     appServicesFactory.startOfflineSyncIfNeeded()
@@ -127,5 +111,81 @@ struct GymbroApp: App {
             }
         }
         .modelContainer(modelContainer)
+    }
+
+    private var mainAppView: some View {
+        NavigationStack(path: $router.path) {
+            ZStack(alignment: .bottom) {
+                if AppEnvironment.isUITesting {
+                    UITestMarker(
+                        id: AppEnvironment.shouldUseMockNetwork
+                        ? "debug.network.mock"
+                        : "debug.network.real"
+                    )
+                }
+
+                Group {
+                    switch tab {
+                    case .workouts:
+                        ZStack {
+                            appServicesFactory.makeWorkoutsScreen()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
+
+                            UITestMarker(id: "workouts.list.screen")
+                        }
+
+                    case .feeds:
+                        ZStack {
+                            appServicesFactory.makeFeedsMainTab()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
+
+                            UITestMarker(id: "feeds.main.screen")
+                        }
+
+                    case .profile:
+                        ZStack {
+                            appServicesFactory.makeProfileMainTab()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
+
+                            UITestMarker(id: "profile.main.screen")
+                        }
+
+                    case .challenge:
+                        ZStack {
+                            appServicesFactory.makeChallengesMainTab()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
+
+                            UITestMarker(id: "challenges.main.screen")
+                        }
+
+                    case .perks:
+                        ZStack {
+                            appServicesFactory.makePerksMainTab()
+                                .navigationDestination(for: NavigationRoute.self) { route in
+                                    appServicesFactory.makeDestinationView(for: route)
+                                }
+
+                            UITestMarker(id: "perks.main.screen")
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                UITestMarker(id: "app.main.content")
+
+                AppTabBar(selected: $tab)
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 10)
+            }
+            .ignoresSafeArea(.container, edges: .bottom)
+        }
     }
 }

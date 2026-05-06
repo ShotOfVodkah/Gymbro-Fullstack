@@ -6,18 +6,17 @@ import (
 	"strings"
 	"errors"
 
-	"github.com/alexandra-gritsaenko/gymbro-feeds/store"
 	"github.com/alexandra-gritsaenko/gymbro-feeds/types"
 )
 
 type ShareService struct {
-	feedStore store.FeedStore
-	chatStore store.ChatStore
+	feedStore FeedStore
+	chatStore ChatStore
 }
 
 func NewShareService(
-	feedStore store.FeedStore,
-	chatStore store.ChatStore,
+	feedStore FeedStore,
+	chatStore ChatStore,
 ) *ShareService {
 	return &ShareService{
 		feedStore: feedStore,

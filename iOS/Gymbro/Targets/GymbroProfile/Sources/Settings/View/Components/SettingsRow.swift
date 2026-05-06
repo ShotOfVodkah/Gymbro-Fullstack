@@ -30,6 +30,7 @@ struct SettingsRow: View {
             .background(backgroundView)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityID)
     }
     
     @ViewBuilder
@@ -47,9 +48,19 @@ struct SettingsRow: View {
             ))
             .labelsHidden()
             .tint(Color.appPurple)
+            .accessibilityIdentifier("profile.settings.\(item.id).toggle")
             
         case .destructive:
             EmptyView()
+        }
+    }
+    
+    private var accessibilityID: String {
+        switch item.id {
+        case "logout":
+            return "profile.settings.logout.button"
+        default:
+            return "profile.settings.\(item.id).row"
         }
     }
     
