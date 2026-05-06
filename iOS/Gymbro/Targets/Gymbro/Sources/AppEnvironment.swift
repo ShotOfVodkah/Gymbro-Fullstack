@@ -20,6 +20,10 @@ enum AppEnvironment {
         arguments.contains("-authorized-user")
     }
 
+    static var shouldPresentWorkoutShareFromUITest: Bool {
+        arguments.contains("-uitest-route-workout-share")
+    }
+
     static var shouldDisableStartupServices: Bool {
         isUITesting
     }

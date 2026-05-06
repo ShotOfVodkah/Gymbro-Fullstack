@@ -59,6 +59,7 @@ struct CommunityBubbleView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("feeds.community.\(community.id)")
     }
 
     @ViewBuilder

@@ -7,12 +7,14 @@ import GymbroNetwork
 import GymbroCommonUI
 import GymbroAuth
 import GymbroAnalytics
+import GymbroTypes
 
 @main
 struct GymbroApp: App {
 
     @State private var modelContainer: ModelContainer
     @State var tab: AppTab = .workouts
+    @State private var didApplyUITestRoutes = false
     @StateObject private var router: AppRouter
     @StateObject private var session = SessionManager.shared
     @StateObject private var profileOnboardingGate = ProfileOnboardingGate()
@@ -99,6 +101,7 @@ struct GymbroApp: App {
             .onAppear {
                 if session.isAuthenticated {
                     appServicesFactory.startOfflineSyncIfNeeded()
+                    applyUITestRoutesIfNeeded()
                 }
             }
             .onChange(of: session.isAuthenticated) { _, authenticated in
@@ -186,6 +189,25 @@ struct GymbroApp: App {
                     .padding(.bottom, 10)
             }
             .ignoresSafeArea(.container, edges: .bottom)
+        }
+    }
+
+    private func applyUITestRoutesIfNeeded() {
+        guard AppEnvironment.isUITesting else { return }
+        guard AppEnvironment.shouldPresentWorkoutShareFromUITest else { return }
+        guard !didApplyUITestRoutes else { return }
+        didApplyUITestRoutes = true
+
+        let shareInput = WorkoutShareInput(
+            sessionID: "uitest_share_session",
+            workoutID: "uitest_workout_w",
+            workoutName: "UI Strength",
+            workoutType: "strength",
+            completedAt: Date(timeIntervalSince1970: 1_717_000_000)
+        )
+
+        DispatchQueue.main.async {
+            router.navigate(to: .workoutShare(input: shareInput))
         }
     }
 }

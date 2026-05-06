@@ -2,7 +2,9 @@ import SwiftUI
 import GymbroCommonUI
 
 struct FeedsCalendarView: View {
-    
+
+    @State private var contentSafeAreaTop: CGFloat = 0
+
     init(viewModel: FeedsCalendarViewModel) {
         self.viewModel = viewModel
     }
@@ -14,7 +16,7 @@ struct FeedsCalendarView: View {
             Group {
                 switch viewModel.screenState {
                 case .loading:
-                    FeedsCalendarViewStub()
+                    FeedsCalendarViewStub(topSafeInset: contentSafeAreaTop)
                     
                 case .loaded:
                     contentView
@@ -37,12 +39,22 @@ struct FeedsCalendarView: View {
         .toolbar(.hidden, for: .navigationBar)
         .toolbarBackground(.hidden, for: .navigationBar)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: FeedsContentSafeAreaTopKey.self,
+                    value: proxy.safeAreaInsets.top
+                )
+            }
+        )
+        .onPreferenceChange(FeedsContentSafeAreaTopKey.self) { contentSafeAreaTop = $0 }
     }
     
     private var contentView: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 18) {
                 CalendarHeaderView(onBackTap: viewModel.didTapBack)
+                    .padding(.top, contentSafeAreaTop + 4)
                 
                 if viewModel.availablePeople.count > 1 {
                     CalendarPersonPickerView(
@@ -91,8 +103,11 @@ struct FeedsCalendarView: View {
                 
                 Spacer(minLength: 24)
             }
-            .padding(.top, 12)
             .padding(.bottom, 24)
+        }
+        .ignoresSafeArea(edges: .top)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "feeds.calendar.screen")
         }
         .refreshable {
             await viewModel.refresh()

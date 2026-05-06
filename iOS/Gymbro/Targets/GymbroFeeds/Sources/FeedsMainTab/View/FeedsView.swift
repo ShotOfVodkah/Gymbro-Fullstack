@@ -3,7 +3,10 @@ import SwiftUI
 import GymbroCommonUI
 
 struct FeedsMainTabView: View {
-    
+
+    @ObservedObject private var viewModel: FeedsMainTabViewModel
+    @State private var feedsScrollSafeAreaTop: CGFloat = 0
+
     init(viewModel: FeedsMainTabViewModel) {
         self.viewModel = viewModel
     }
@@ -15,7 +18,7 @@ struct FeedsMainTabView: View {
             Group {
                 switch viewModel.screenState {
                 case .loading:
-                    FeedsViewStub()
+                    FeedsViewStub(topSafeInset: feedsScrollSafeAreaTop)
                     
                 case .loaded:
                     contentView
@@ -37,6 +40,17 @@ struct FeedsMainTabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: FeedsContentSafeAreaTopKey.self,
+                    value: proxy.safeAreaInsets.top
+                )
+            }
+        )
+        .onPreferenceChange(FeedsContentSafeAreaTopKey.self) { feedsScrollSafeAreaTop = $0 }
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .sheet(isPresented: $viewModel.isShowingChatCreation, onDismiss: {
             viewModel.resetChatCreationState()
         }) {
@@ -60,7 +74,7 @@ struct FeedsMainTabView: View {
             .presentationBackground(.clear)
         }
     }
-    
+
     private var contentView: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 20) {
@@ -68,7 +82,8 @@ struct FeedsMainTabView: View {
                     onPeopleTap: viewModel.didTapOpenFriends,
                     onCalendarTap: viewModel.didTapCalendarButton
                 )
-                
+                .padding(.top, feedsScrollSafeAreaTop + 4)
+
                 CommunitiesSegmentPicker(selectedTab: $viewModel.selectedTab)
                 
                 if viewModel.shouldShowCommunities {
@@ -107,7 +122,10 @@ struct FeedsMainTabView: View {
                 .padding(.horizontal, 7)
                 .padding(.bottom, 120)
             }
-            .padding(.top, 8)
+        }
+        .ignoresSafeArea(edges: .top)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "feeds.content.loaded")
         }
         .refreshable {
             await viewModel.refresh(showLoading: true)
@@ -126,6 +144,4 @@ struct FeedsMainTabView: View {
         )
         .ignoresSafeArea()
     }
-    
-    @ObservedObject private var viewModel: FeedsMainTabViewModel
 }

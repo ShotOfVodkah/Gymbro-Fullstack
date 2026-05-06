@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import GymbroCommonUI
+import GymbroTypes
 
 struct ProfileMainTabView: View {
     
@@ -33,6 +34,10 @@ struct ProfileMainTabView: View {
                     .padding(.horizontal, 40)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 }
+            }
+
+            if case .otherUserProfile = viewModel.mode {
+                UITestMarker(id: "profile.other.user.screen")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

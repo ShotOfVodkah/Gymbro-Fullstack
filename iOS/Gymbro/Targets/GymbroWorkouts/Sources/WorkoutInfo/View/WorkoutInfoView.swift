@@ -79,6 +79,11 @@ struct WorkoutInfoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
         .ignoresSafeArea(.container, edges: .bottom)
+        .overlay(alignment: .bottomTrailing) {
+            if viewModel.screenState != .loading {
+                UITestMarker(id: "workout.info.screen")
+            }
+        }
     }
 
     @ObservedObject private var viewModel: WorkoutInfoViewModel

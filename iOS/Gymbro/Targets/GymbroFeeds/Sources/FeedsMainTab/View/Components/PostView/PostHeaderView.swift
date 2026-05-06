@@ -5,7 +5,22 @@ struct PostHeaderView: View {
     let avatar: String
     let authorName: String
     let postedAt: String
+    let authorAccessibilityIdentifier: String?
     let onAuthorTap: () -> Void
+    
+    init(
+        avatar: String,
+        authorName: String,
+        postedAt: String,
+        authorAccessibilityIdentifier: String? = nil,
+        onAuthorTap: @escaping () -> Void
+    ) {
+        self.avatar = avatar
+        self.authorName = authorName
+        self.postedAt = postedAt
+        self.authorAccessibilityIdentifier = authorAccessibilityIdentifier
+        self.onAuthorTap = onAuthorTap
+    }
     
     var body: some View {
         HStack(spacing: 12) {
@@ -31,6 +46,7 @@ struct PostHeaderView: View {
                         .foregroundStyle(.white)
                 }
                 .buttonStyle(.plain)
+                .modifier(PostHeaderAccessibilityIdentifier(identifier: authorAccessibilityIdentifier))
 
                 Text(postedAt)
                     .font(.system(size: 14, weight: .medium))
@@ -38,6 +54,18 @@ struct PostHeaderView: View {
             }
 
             Spacer()
+        }
+    }
+}
+
+private struct PostHeaderAccessibilityIdentifier: ViewModifier {
+    let identifier: String?
+
+    func body(content: Content) -> some View {
+        if let identifier {
+            content.accessibilityIdentifier(identifier)
+        } else {
+            content
         }
     }
 }

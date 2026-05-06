@@ -49,4 +49,31 @@ enum TestIDs {
         static let mockNetwork = "debug.network.mock"
         static let realNetwork = "debug.network.real"
     }
+
+    enum Feeds {
+        static let contentLoaded = "feeds.content.loaded"
+        static let topBarFriends = "feeds.topbar.friends"
+        static let topBarCalendar = "feeds.topbar.calendar"
+        static let friendsScreen = "feeds.friends.screen"
+        static let calendarScreen = "feeds.calendar.screen"
+        static let chatScreen = "feeds.chat.screen"
+        static let chatInput = "feeds.chat.input"
+        static let chatSend = "feeds.chat.send"
+        static let commentsSheet = "feeds.comments.sheet"
+        static let commentsInput = "feeds.comments.input"
+        static let commentsSend = "feeds.comments.send"
+        static let workoutShareOptionFeed = "feeds.workoutShare.option.feed"
+        static let workoutSharePrimary = "feeds.workoutShare.primary"
+        static let workoutShareSuccess = "feeds.workoutShare.success"
+        static let workoutInfoScreen = "workout.info.screen"
+        static let profileOtherUser = "profile.other.user.screen"
+
+        static func feedTab(_ rawValue: String) -> String { "feeds.tab.\(rawValue)" }
+        static func postLike(_ postID: String) -> String { "feeds.post.\(postID).like" }
+        static func postComments(_ postID: String) -> String { "feeds.post.\(postID).comments" }
+        static func postAuthor(_ postID: String) -> String { "feeds.post.\(postID).author" }
+        static func postDoubleTapArea(_ postID: String) -> String { "feeds.post.\(postID).doubleTapLikeArea" }
+        static func postExercise(_ postID: String, index: Int) -> String { "feeds.post.\(postID).exercise.\(index)" }
+        static func community(_ id: String) -> String { "feeds.community.\(id)" }
+    }
 }

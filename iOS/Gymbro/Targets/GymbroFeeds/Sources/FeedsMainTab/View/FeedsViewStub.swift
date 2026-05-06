@@ -2,14 +2,16 @@ import SwiftUI
 import GymbroCommonUI
 
 struct FeedsViewStub: View {
-    
+
+    var topSafeInset: CGFloat = 0
+
     var body: some View {
         ZStack {
             backgroundView
             
             VStack(spacing: 0) {
                 topBar
-                    .padding(.top, 16)
+                    .padding(.top, topSafeInset + 4)
                     .padding(.bottom, 18)
                 
                 segmentRow

@@ -44,6 +44,9 @@ struct WorkoutShareSuccessView: View {
                 .padding(.bottom, 16)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "feeds.workoutShare.success")
+        }
     }
 
     private var successSubtitle: String {

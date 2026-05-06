@@ -5,12 +5,14 @@ enum AppLaunchArgument {
     static let resetState = "-reset-state"
     static let mockNetwork = "-mock-network"
     static let authorizedUser = "-authorized-user"
+    static let uitestRouteWorkoutShare = "-uitest-route-workout-share"
 }
 
 struct AppLaunchConfiguration {
     var resetState: Bool = true
     var mockNetwork: Bool = true
     var authorizedUser: Bool = true
+    var openWorkoutShareRoute: Bool = false
 
     var launchArguments: [String] {
         var arguments = [AppLaunchArgument.uiTesting]
@@ -25,6 +27,10 @@ struct AppLaunchConfiguration {
 
         if authorizedUser {
             arguments.append(AppLaunchArgument.authorizedUser)
+        }
+
+        if openWorkoutShareRoute {
+            arguments.append(AppLaunchArgument.uitestRouteWorkoutShare)
         }
 
         return arguments

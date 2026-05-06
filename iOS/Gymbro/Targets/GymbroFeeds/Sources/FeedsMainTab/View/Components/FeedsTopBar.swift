@@ -9,6 +9,7 @@ struct FeedsTopBar: View {
     var body: some View {
         HStack {
             AppButton(systemImage: "person.2.badge.plus", size: .l, action: onPeopleTap)
+                .accessibilityIdentifier("feeds.topbar.friends")
 
             Spacer()
             
@@ -19,8 +20,8 @@ struct FeedsTopBar: View {
             Spacer()
 
             AppButton(systemImage: "calendar", size: .l, action: onCalendarTap)
+                .accessibilityIdentifier("feeds.topbar.calendar")
         }
         .padding(.horizontal, 20)
-        .padding(.top, 8)
     }
 }

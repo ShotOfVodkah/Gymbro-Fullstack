@@ -5,7 +5,20 @@ struct ExercisePreviewCardView: View {
     
     let exercise: ExerciseItem
     let index: Int
+    let accessibilityIdentifier: String?
     let onTap: () -> Void
+    
+    init(
+        exercise: ExerciseItem,
+        index: Int,
+        accessibilityIdentifier: String? = nil,
+        onTap: @escaping () -> Void
+    ) {
+        self.exercise = exercise
+        self.index = index
+        self.accessibilityIdentifier = accessibilityIdentifier
+        self.onTap = onTap
+    }
     
     var body: some View {
         Button(action: onTap) {
@@ -44,6 +57,7 @@ struct ExercisePreviewCardView: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
         }
         .buttonStyle(.plain)
+        .modifier(ExercisePreviewAccessibilityIdentifier(identifier: accessibilityIdentifier))
     }
     
     private var exerciseImage: some View {
@@ -55,6 +69,18 @@ struct ExercisePreviewCardView: View {
             Image(systemName: exercise.imageName)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.white)
+        }
+    }
+}
+
+private struct ExercisePreviewAccessibilityIdentifier: ViewModifier {
+    let identifier: String?
+
+    func body(content: Content) -> some View {
+        if let identifier {
+            content.accessibilityIdentifier(identifier)
+        } else {
+            content
         }
     }
 }
