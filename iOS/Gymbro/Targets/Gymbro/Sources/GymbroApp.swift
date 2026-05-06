@@ -25,6 +25,11 @@ struct GymbroApp: App {
         
         if AppEnvironment.shouldResetState {
             AppMicroservices.tokens.clear()
+            if AppEnvironment.isUITesting {
+                let defaults = UserDefaults.standard
+                defaults.removeObject(forKey: "termsAccepted_v1")
+                defaults.removeObject(forKey: "privacyAccepted_v1")
+            }
         }
 
         if AppEnvironment.shouldAuthorizeUser {
