@@ -193,34 +193,6 @@ final class EditProfileViewModel: ObservableObject {
     }
     
     private func validate() -> [EditProfileValidationError] {
-        var errors: [EditProfileValidationError] = []
-        
-        if form.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            errors.append(.emptyName)
-        }
-        
-        let trimmedUsername = form.username.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedUsername.count < 3 {
-            errors.append(.usernameTooShort)
-        }
-        
-        let usernameRegex = "^[A-Za-z0-9._]+$"
-        if trimmedUsername.range(of: usernameRegex, options: .regularExpression) == nil {
-            errors.append(.usernameInvalid)
-        }
-        
-        if form.status.count > 60 {
-            errors.append(.statusTooLong)
-        }
-        
-        if form.subtitle.count > 80 {
-            errors.append(.subtitleTooLong)
-        }
-        
-        if form.bio.count > 220 {
-            errors.append(.bioTooLong)
-        }
-        
-        return errors
+        form.validateProfileForm()
     }
 }

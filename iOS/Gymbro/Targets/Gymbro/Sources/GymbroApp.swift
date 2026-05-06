@@ -15,6 +15,7 @@ struct GymbroApp: App {
     @State var tab: AppTab = .workouts
     @StateObject private var router = AppRouter()
     @StateObject private var session = SessionManager.shared
+    @StateObject private var profileOnboardingGate = ProfileOnboardingGate()
     private let appServicesFactory: AppServicesFactory
     
     init() {
@@ -37,44 +38,53 @@ struct GymbroApp: App {
         WindowGroup {
             Group {
                 if session.isAuthenticated {
-                    NavigationStack(path: $router.path) {
-                        ZStack(alignment: .bottom) {
-                            Group {
-                                switch tab {
-                                case .workouts:
-                                    appServicesFactory.makeWorkoutsScreen()
-                                        .navigationDestination(for: NavigationRoute.self) { route in
-                                            appServicesFactory.makeDestinationView(for: route)
-                                        }
-                                case .feeds:
-                                    appServicesFactory.makeFeedsMainTab()
-                                        .navigationDestination(for: NavigationRoute.self) { route in
-                                            appServicesFactory.makeDestinationView(for: route)
-                                        }
-                                case .profile:
-                                    appServicesFactory.makeProfileMainTab()
-                                        .navigationDestination(for: NavigationRoute.self) { route in
-                                            appServicesFactory.makeDestinationView(for: route)
-                                        }
-                                case .challenge:
-                                    appServicesFactory.makeChallengesMainTab()
-                                        .navigationDestination(for: NavigationRoute.self) { route in
-                                            appServicesFactory.makeDestinationView(for: route)
-                                        }
-                                case .perks:
-                                    appServicesFactory.makePerksMainTab()
-                                        .navigationDestination(for: NavigationRoute.self) { route in
-                                            appServicesFactory.makeDestinationView(for: route)
-                                        }
-                                }
+                    if let userId = session.currentUserId, !userId.isEmpty,
+                       !profileOnboardingGate.isCompleted(for: userId) {
+                        NavigationStack {
+                            appServicesFactory.makeProfileOnboarding {
+                                profileOnboardingGate.markCompleted(for: userId)
                             }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            
-                            AppTabBar(selected: $tab)
-                                .padding(.horizontal, 10)
-                                .padding(.bottom, 10)
                         }
-                        .ignoresSafeArea(.container, edges: .bottom)
+                    } else {
+                        NavigationStack(path: $router.path) {
+                            ZStack(alignment: .bottom) {
+                                Group {
+                                    switch tab {
+                                    case .workouts:
+                                        appServicesFactory.makeWorkoutsScreen()
+                                            .navigationDestination(for: NavigationRoute.self) { route in
+                                                appServicesFactory.makeDestinationView(for: route)
+                                            }
+                                    case .feeds:
+                                        appServicesFactory.makeFeedsMainTab()
+                                            .navigationDestination(for: NavigationRoute.self) { route in
+                                                appServicesFactory.makeDestinationView(for: route)
+                                            }
+                                    case .profile:
+                                        appServicesFactory.makeProfileMainTab()
+                                            .navigationDestination(for: NavigationRoute.self) { route in
+                                                appServicesFactory.makeDestinationView(for: route)
+                                            }
+                                    case .challenge:
+                                        appServicesFactory.makeChallengesMainTab()
+                                            .navigationDestination(for: NavigationRoute.self) { route in
+                                                appServicesFactory.makeDestinationView(for: route)
+                                            }
+                                    case .perks:
+                                        appServicesFactory.makePerksMainTab()
+                                            .navigationDestination(for: NavigationRoute.self) { route in
+                                                appServicesFactory.makeDestinationView(for: route)
+                                            }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                                AppTabBar(selected: $tab)
+                                    .padding(.horizontal, 10)
+                                    .padding(.bottom, 10)
+                            }
+                            .ignoresSafeArea(.container, edges: .bottom)
+                        }
                     }
                 } else {
                     AuthView(analytics: appServicesFactory.analytics)

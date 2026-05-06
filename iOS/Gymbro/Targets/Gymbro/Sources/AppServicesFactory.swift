@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 import GymbroWorkouts
 import GymbroNetwork
@@ -28,6 +29,7 @@ final class AppServicesFactory {
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
 
     private let offlineSyncService: OfflineSyncService
+    private let connectivityStatusProvider: ConnectivityStatusProviding
     private var screenFactories = ScreenFactories()
     private var didStartOfflineSync = false
     
@@ -68,6 +70,8 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             workoutsLocalRepository: workoutsRepository
         )
+        let connectivityProvider = NWPathConnectivityStatusProvider()
+        self.connectivityStatusProvider = connectivityProvider
 
         self.offlineSyncService = OfflineSyncService(
             actionsRepository: actionsRepository,
@@ -75,7 +79,8 @@ final class AppServicesFactory {
             feedsClient: AppMicroservices.feeds,
             modelModifier: workoutsModelModifier,
             streakWidget: streakService,
-            activityCalendarWidget: activityCalendarService
+            activityCalendarWidget: activityCalendarService,
+            connectivityProvider: connectivityProvider
         )
         self.watchConnectivityService = WatchConnectivityService(
             workoutsRepository: workoutsRepository,
@@ -86,6 +91,18 @@ final class AppServicesFactory {
         let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
         self.analytics = AnalyticsServiceImpl(client: analyticsClient)
         watchConnectivityService.activate()
+
+        AuthEvents.onSessionCleared = {
+            AppServicesFactory.resetWidgetsOnSessionCleared()
+        }
+    }
+
+    @MainActor
+    private static func resetWidgetsOnSessionCleared() {
+        StreakWidgetStore().clear()
+        ActivityCalendarWidgetStore().clear()
+        WidgetCenter.shared.reloadTimelines(ofKind: StreakWidgetConfig.kind)
+        WidgetCenter.shared.reloadTimelines(ofKind: ActivityCalendarWidgetConfig.kind)
     }
 
     func startOfflineSyncIfNeeded() {
@@ -333,6 +350,15 @@ final class AppServicesFactory {
             analytics: analytics
         )
     }
+
+    @MainActor
+    func makeProfileOnboarding(onCompleted: @escaping () -> Void) -> some View {
+        screenFactories.profileOnboardingFactory.makeView(
+            client: AppMicroservices.profile,
+            analytics: analytics,
+            onCompleted: onCompleted
+        )
+    }
     
     @MainActor
     func makeSettingsScreen() -> some View {
@@ -430,6 +456,7 @@ private struct ScreenFactories {
     
     lazy var profileMainTabFactory = ProfileMainTabFactoryImpl()
     lazy var editProfileFactory = EditProfileFactoryImpl()
+    lazy var profileOnboardingFactory = ProfileOnboardingFactoryImpl()
     lazy var settingsFactory = ProfileSettingsFactoryImpl()
     lazy var statisticsFactory = ProfileStatisticsFactoryImpl()
     

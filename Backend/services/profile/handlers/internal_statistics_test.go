@@ -14,6 +14,7 @@ import (
 )
 
 type mockProfileStore struct {
+	ensureProfile           func(userID int) error
 	getByUserID             func(userID int) (*types.Profile, error)
 	listByUserIDs           func(ids []int) ([]types.Profile, error)
 	listAll                 func() ([]types.Profile, error)
@@ -22,6 +23,13 @@ type mockProfileStore struct {
 	patchSettings           func(userID int, p types.PatchSettingsRequest) error
 	getStatisticsRaw        func(userID int) ([]byte, bool, error)
 	upsertStatisticsPayload func(userID int, payloadJSON []byte) error
+}
+
+func (m *mockProfileStore) EnsureProfile(userID int) error {
+	if m.ensureProfile != nil {
+		return m.ensureProfile(userID)
+	}
+	return nil
 }
 
 func (m *mockProfileStore) GetByUserID(userID int) (*types.Profile, error) {

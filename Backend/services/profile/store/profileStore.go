@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/alexandra-gritsaenko/gymbro-profile/types"
 	"github.com/jmoiron/sqlx"
@@ -13,6 +14,7 @@ import (
 var ErrNotFound = errors.New("not found")
 
 type ProfileStorer interface {
+	EnsureProfile(userID int) error
 	GetByUserID(userID int) (*types.Profile, error)
 	ListByUserIDs(ids []int) ([]types.Profile, error)
 	ListAll() ([]types.Profile, error)
@@ -34,6 +36,26 @@ func NewProfileStore(db *sqlx.DB) *ProfileStore {
 }
 
 const profileSelectCols = `user_id, name, username, status, subtitle, bio, avatar_system_name, badge, workouts_this_month`
+
+func (ps *ProfileStore) EnsureProfile(userID int) error {
+	if userID <= 0 {
+		return fmt.Errorf("EnsureProfile: invalid user id")
+	}
+	username := "user_" + strconv.Itoa(userID)
+	_, err := ps.db.Exec(`
+		INSERT INTO profiles (user_id, name, username, status, subtitle, bio, avatar_system_name, badge, workouts_this_month)
+		VALUES ($1, '', $2, '', '', '', 'person.circle.fill', NULL, 0)
+		ON CONFLICT (user_id) DO NOTHING
+	`, userID, username)
+	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+			return ErrUsernameTaken
+		}
+		return fmt.Errorf("EnsureProfile: %w", err)
+	}
+	return nil
+}
 
 func (ps *ProfileStore) GetByUserID(userID int) (*types.Profile, error) {
 	var profile types.Profile
@@ -160,6 +182,13 @@ func (ps *ProfileStore) GetSettings(userID int) (*types.ProfileSettings, error) 
 		WHERE user_id = $1
 	`, userID)
 	if errors.Is(err, sql.ErrNoRows) {
+		_, perr := ps.GetByUserID(userID)
+		if errors.Is(perr, ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		if perr != nil {
+			return nil, fmt.Errorf("GetSettings profile check: %w", perr)
+		}
 		if err := ps.ensureSettingsRow(userID); err != nil {
 			return nil, err
 		}
@@ -235,6 +264,9 @@ func (ps *ProfileStore) GetStatisticsRaw(userID int) ([]byte, bool, error) {
 }
 
 func (ps *ProfileStore) UpsertStatisticsPayload(userID int, payloadJSON []byte) error {
+	if err := ps.EnsureProfile(userID); err != nil {
+		return err
+	}
 	_, err := ps.db.Exec(`
 		INSERT INTO profile_statistics (user_id, payload, updated_at)
 		VALUES ($1, $2::jsonb, NOW())

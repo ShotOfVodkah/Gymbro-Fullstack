@@ -21,8 +21,6 @@ public final class WorkoutsLocalMapper {
     
     public func addWorkoutCard(to screenData: Data, id: String, fromPremade: Bool) -> Data? {
         do {
-            let workout = workoutsLocalRepository.loadWorkout(key: fromPremade ? "premade" : "user", workoutId: id)
-            
             guard let workout = workoutsLocalRepository.loadWorkout(
                 key: fromPremade ? "premade" : "user",
                 workoutId: id
@@ -52,10 +50,11 @@ public final class WorkoutsLocalMapper {
             guard var div = firstState["div"] as? [String: Any],
                   var items = div["items"] as? [Any],
                   items.count > 2,
-                  var gallery = items[2] as? [String: Any],
-                  var galleryItems = gallery["items"] as? [[String: Any]] else {
+                  var gallery = items[2] as? [String: Any] else {
                 return nil
             }
+            
+            var galleryItems = galleryCardItems(from: gallery)
             
             let context: [String: String] = [
                 "workout_name": workout.name,
@@ -108,9 +107,10 @@ public final class WorkoutsLocalMapper {
                 var div = firstState["div"] as? [String: Any],
                 var items = div["items"] as? [Any],
                 items.count > 2,
-                var gallery = items[2] as? [String: Any],
-                var galleryItems = gallery["items"] as? [[String: Any]]
+                var gallery = items[2] as? [String: Any]
             else { return nil }
+
+            var galleryItems = galleryCardItems(from: gallery)
 
             galleryItems.removeAll { item in
                 guard let openUrl = item["open_url"] as? String else { return false }
@@ -440,6 +440,16 @@ public final class WorkoutsLocalMapper {
     private func extractId(fromOpenUrl urlString: String) -> String? {
         guard let components = URLComponents(string: urlString) else { return nil }
         return components.queryItems?.first(where: { $0.name == "id" })?.value
+    }
+
+    private func galleryCardItems(from gallery: [String: Any]) -> [[String: Any]] {
+        guard let raw = gallery["items"], !(raw is NSNull) else {
+            return []
+        }
+        guard let array = raw as? [Any] else {
+            return []
+        }
+        return array.compactMap { $0 as? [String: Any] }
     }
 
 }

@@ -35,11 +35,14 @@ final class StreakWidgetControllingService: StreakWidgetControlling {
     func incrementAfterSessionSuccessfullyCreated() async {
         guard let current = store.load() else { return }
         let progressed = min(current.weeklyProgress + 1, current.weeklyTarget)
+        let goalDone = progressed >= current.weeklyTarget || current.isGoalCompleted
         let next = StreakWidgetPayload(
             weeklyTarget: current.weeklyTarget,
             weeklyProgress: progressed,
             streakValue: current.streakValue,
-            daysUntilBurn: current.daysUntilBurn
+            daysUntilBurn: current.daysUntilBurn,
+            wasFreezeUsedThisWeek: current.wasFreezeUsedThisWeek,
+            isGoalCompleted: goalDone
         )
         store.save(next)
         reloader.reloadStreakWidgetTimelines()

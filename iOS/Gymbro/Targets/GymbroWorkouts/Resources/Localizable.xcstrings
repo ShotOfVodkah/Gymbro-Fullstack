@@ -1,6 +1,12 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "·" : {
+
+    },
+    "%@" : {
+
+    },
     "workout.available_exercises" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -898,6 +904,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Серия под угрозой! Пора тренироваться и её сохранить!"
+          }
+        }
+      }
+    },
+    "workout.streak.motivation.freeze" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your streak is protected this week. Stay consistent next week!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стрик защищён на этой неделе. Продолжайте в том же духе на следующей!"
           }
         }
       }

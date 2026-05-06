@@ -33,9 +33,10 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     }
 
     func fetchScreen() async throws -> (Data, ScreenState) {
+        let streak = try? await networkClient.fetchStreak()
         do {
-            try await seedInitialData()
-            let data = try await networkClient.fetchWorkoutsList()
+            try await seedInitialData(streak: streak)
+            let data = try await networkClient.fetchWorkoutsList(streak: streak)
             let templates = try await networkClient.fetchWorkoutInfoTemplates()
             divLocalRepository.save(key: "workoutsList", data: data)
             divLocalRepository.save(key: "workoutInfoTemplate", data: templates)
@@ -50,9 +51,10 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     }
     
     func fetchAfterAction() async throws -> (Data, ScreenState) {
+        let streak = try? await networkClient.fetchStreak()
         do {
-            try await seedInitialData()
-            let data = try await networkClient.fetchWorkoutsList()
+            try await seedInitialData(streak: streak)
+            let data = try await networkClient.fetchWorkoutsList(streak: streak)
             let templates = try await networkClient.fetchWorkoutInfoTemplates()
             divLocalRepository.save(key: "workoutsList", data: data)
             divLocalRepository.save(key: "workoutInfoTemplate", data: templates)
@@ -91,7 +93,7 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
     private let streakWidget: StreakWidgetControlling
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
 
-    private func seedInitialData() async throws {
+    private func seedInitialData(streak: StreakResponse?) async throws {
         let workouts = try await networkClient.fetchUserWorkouts()
         workoutsRepository.saveWorkouts(key: "user", workouts: workouts)
         for workoutType in [WorkoutType.strength, .cardio, .yoga] {
@@ -104,9 +106,11 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
 
         let premadeWorkouts = try await networkClient.fetchPremadeWorkouts()
         workoutsRepository.saveWorkouts(key: "premade", workouts: premadeWorkouts)
-        
-        let streakData = StreakWidgetPayload(weeklyTarget: 5, weeklyProgress: 4, streakValue: 10, daysUntilBurn: 5)
-        await streakWidget.applySnapshotFromWorkoutsListLoaded(with: streakData)
+
+        if let streak {
+            let streakPayload = StreakWidgetPayload.from(streak: streak)
+            await streakWidget.applySnapshotFromWorkoutsListLoaded(with: streakPayload)
+        }
 
         let monthResponse = try await feedsClient.fetchCalendarMonth(
             context: .mine,

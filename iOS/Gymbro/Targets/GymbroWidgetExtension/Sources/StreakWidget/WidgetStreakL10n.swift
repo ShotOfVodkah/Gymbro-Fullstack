@@ -7,6 +7,10 @@ enum WidgetStreakL10n {
         String(localized: "widget.streak.title", bundle: bundle)
     }
 
+    static var streakFreezeProtected: String {
+        String(localized: "widget.streak.freeze_protected", bundle: bundle)
+    }
+
     static func daysLeft(_ count: Int) -> String {
         let format = NSLocalizedString(
             "widget.streak.days_remaining",

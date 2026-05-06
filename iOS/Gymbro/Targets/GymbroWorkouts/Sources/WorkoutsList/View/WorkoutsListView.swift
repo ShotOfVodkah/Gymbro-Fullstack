@@ -43,9 +43,11 @@ struct WorkoutsListView: View {
                 total: model.goal,
                 current: model.current,
                 daysLeft: model.daysLeft,
-                value: model.value
+                value: model.value,
+                wasFreezeUsedThisWeek: model.wasFreezeUsedThisWeek,
+                isGoalCompleted: model.isGoalCompleted
             )
-                .presentationDetents([.fraction(0.4)])
+                .presentationDetents([.fraction(0.6)])
         }
         .transition(.blurReplace)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

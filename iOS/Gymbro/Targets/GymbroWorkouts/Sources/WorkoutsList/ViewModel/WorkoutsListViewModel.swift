@@ -10,19 +10,28 @@ import GymbroTypes
 final class WorkoutsListViewModel: ObservableObject {
 
     struct StreakSheetModel: Identifiable {
-        var id: Int
-
+        let id = UUID()
         let current: Int
         let goal: Int
         let daysLeft: Int
         let value: Int
+        let wasFreezeUsedThisWeek: Bool
+        let isGoalCompleted: Bool
 
-        init(current: Int, goal: Int, daysLeft: Int, value: Int) {
-            self.id = value
+        init(
+            current: Int,
+            goal: Int,
+            daysLeft: Int,
+            value: Int,
+            wasFreezeUsedThisWeek: Bool,
+            isGoalCompleted: Bool
+        ) {
             self.current = current
             self.goal = goal
             self.daysLeft = daysLeft
             self.value = value
+            self.wasFreezeUsedThisWeek = wasFreezeUsedThisWeek
+            self.isGoalCompleted = isGoalCompleted
         }
     }
 
@@ -142,12 +151,14 @@ final class WorkoutsListViewModel: ObservableObject {
             router.navigate(to: .workoutInfo(id: id, type: .workout))
         case .openBuilder:
             router.navigate(to: .workoutBuilder)
-        case .openStreak(let current, let goal, let daysLeft, let value):
+        case .openStreak(let current, let goal, let daysLeft, let value, let freeze, let goalDone):
             streakModel = StreakSheetModel(
                 current: current,
                 goal: goal,
                 daysLeft: daysLeft,
-                value: value
+                value: value,
+                wasFreezeUsedThisWeek: freeze,
+                isGoalCompleted: goalDone
             )
         }
     }
