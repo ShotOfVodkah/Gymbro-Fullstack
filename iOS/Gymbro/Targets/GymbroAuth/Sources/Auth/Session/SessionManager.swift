@@ -44,10 +44,12 @@ public final class SessionManager: ObservableObject {
     }
         
     #if DEBUG
+    public static let uiTestingUserId = "1"
+
     public func setUITestingAuthenticatedSession() {
         AppMicroservices.tokens.accessToken = "ui-testing-access-token"
         AppMicroservices.tokens.refreshToken = "ui-testing-refresh-token"
-        AppMicroservices.tokens.userId = "1"
+        AppMicroservices.tokens.userId = Self.uiTestingUserId
         isAuthenticated = true
     }
     #endif

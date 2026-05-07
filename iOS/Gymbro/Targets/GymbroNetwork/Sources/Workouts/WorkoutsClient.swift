@@ -117,6 +117,10 @@ public final class WorkoutsClient {
         )
     }
 
+    public func fetchWorkoutsList() async throws -> Data {
+        try await fetchWorkoutsList(streak: nil)
+    }
+
     public func fetchWorkoutsList(streak: StreakResponse? = nil) async throws -> Data {
         let userId = try requireUserId()
         var queryItems: [URLQueryItem] = [

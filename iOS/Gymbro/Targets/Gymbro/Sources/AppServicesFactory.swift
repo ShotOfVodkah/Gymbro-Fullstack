@@ -373,7 +373,7 @@ final class AppServicesFactory {
     @MainActor
     func makeProfileOnboarding(onCompleted: @escaping () -> Void) -> some View {
         screenFactories.profileOnboardingFactory.makeView(
-            client: AppMicroservices.profile,
+            client: clients.profile,
             analytics: analytics,
             onCompleted: onCompleted
         )

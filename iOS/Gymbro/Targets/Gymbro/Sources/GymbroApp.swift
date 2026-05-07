@@ -29,11 +29,24 @@ struct GymbroApp: App {
                 let defaults = UserDefaults.standard
                 defaults.removeObject(forKey: "termsAccepted_v1")
                 defaults.removeObject(forKey: "privacyAccepted_v1")
+                defaults.removeObject(
+                    forKey: ProfileOnboardingGate.userDefaultsKey(
+                        for: SessionManager.uiTestingUserId
+                    )
+                )
             }
         }
 
         if AppEnvironment.shouldAuthorizeUser {
             SessionManager.shared.setUITestingAuthenticatedSession()
+            if AppEnvironment.isUITesting {
+                UserDefaults.standard.set(
+                    true,
+                    forKey: ProfileOnboardingGate.userDefaultsKey(
+                        for: SessionManager.uiTestingUserId
+                    )
+                )
+            }
         }
 
         UIView.setAnimationsEnabled(!isUITesting)

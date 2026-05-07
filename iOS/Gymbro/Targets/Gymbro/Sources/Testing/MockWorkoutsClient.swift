@@ -80,8 +80,40 @@ final class MockWorkoutsClient: WorkoutsClientProtocol {
         return primaryUITestWorkout()
     }
 
+    func fetchStreak() async throws -> StreakResponse {
+        let calendar = Calendar.current
+        let now = Date()
+        let start = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
+        let end = calendar.date(byAdding: .day, value: 6, to: start) ?? now
+
+        let formatter = ISO8601DateFormatter()
+        let startString = formatter.string(from: start)
+        let endString = formatter.string(from: end)
+
+        return MockDecoder.decode("""
+        {
+          "currentStreakWeeks": 2,
+          "bestStreakWeeks": 4,
+          "weeklyGoal": 3,
+          "nextWeeklyGoal": 4,
+          "completedThisWeek": 1,
+          "remainingToGoal": 2,
+          "weekStartDate": "\(startString)",
+          "weekEndDate": "\(endString)",
+          "isGoalCompleted": false,
+          "streakFreezeCount": 1,
+          "canUseStreakFreeze": true,
+          "wasFreezeUsedThisWeek": false
+        }
+        """)
+    }
+
     func fetchWorkoutsList() async throws -> Data {
         WorkoutsUITestDivPayload.workoutsList()
+    }
+
+    func fetchWorkoutsList(streak: StreakResponse?) async throws -> Data {
+        try await fetchWorkoutsList()
     }
 
     func generateWorkout(prompt: String, injuries: [Injury]) async throws -> Workout {

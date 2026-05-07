@@ -69,8 +69,6 @@ final class PerksUITests: BaseUITestCase {
         let rookieCards = app.buttons.matching(identifier: rookieID)
         XCTAssertGreaterThan(rookieCards.count, 0, "Expected achievement card to exist: \(rookieID)")
 
-        // The card may exist in the hierarchy while being offscreen (ScrollView / TabView pages).
-        // Prefer tapping a hittable match; if none are hittable yet, scroll a bit and retry.
         var rookieCard: XCUIElement?
         for _ in 0..<6 {
             let hittable = rookieCards.allElementsBoundByIndex.first(where: { $0.exists && $0.isHittable })

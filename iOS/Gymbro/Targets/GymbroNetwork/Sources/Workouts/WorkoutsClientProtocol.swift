@@ -10,7 +10,9 @@ public protocol WorkoutsClientProtocol {
     func editWorkout(_ workout: Workout) async throws -> Workout
     func fetchWorkout(by id: String) async throws -> Workout
 
+    func fetchStreak() async throws -> StreakResponse
     func fetchWorkoutsList() async throws -> Data
+    func fetchWorkoutsList(streak: StreakResponse?) async throws -> Data
     func generateWorkout(prompt: String, injuries: [Injury]) async throws -> Workout
 
     func fetchWorkoutInfoTemplates() async throws -> Data
@@ -36,6 +38,18 @@ public protocol WorkoutsClientProtocol {
 }
 
 public extension WorkoutsClientProtocol {
+    func fetchStreak() async throws -> StreakResponse {
+        throw NSError(
+            domain: "WorkoutsClientProtocol",
+            code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "fetchStreak() is not implemented"]
+        )
+    }
+
+    func fetchWorkoutsList(streak: StreakResponse?) async throws -> Data {
+        try await fetchWorkoutsList()
+    }
+
     func createSession(
         workoutId: String,
         exercises: [WorkoutExerciseRequest]
