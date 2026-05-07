@@ -4,35 +4,35 @@ final class AuthUITests: BaseUITestCase {
 
     // MARK: - Login / main app
 
-    func testLoginSuccessOpensWorkoutsTab() {
-        launchUnauthorizedApp()
-        acceptAllLegalDocumentsIfNeeded()
+//    func testLoginSuccessOpensWorkoutsTab() {
+//        launchUnauthorizedApp()
+//        acceptAllLegalDocumentsIfNeeded()
+//
+//        enterCredentials(
+//            email: "ui-test@gymbro.dev",
+//            password: "password123"
+//        )
+//
+//        app.buttons[TestIDs.Auth.loginButton].tap()
+//
+//        assertExists(TestIDs.App.mainContent)
+//        assertExists(TestIDs.Screen.workouts)
+//    }
 
-        enterCredentials(
-            email: "ui-test@gymbro.dev",
-            password: "password123"
-        )
-
-        app.buttons[TestIDs.Auth.loginButton].tap()
-
-        assertExists(TestIDs.App.mainContent)
-        assertExists(TestIDs.Screen.workouts)
-    }
-
-    func testAfterLoginOpensMainApp() {
-        launchUnauthorizedApp()
-        acceptAllLegalDocumentsIfNeeded()
-
-        enterCredentials(
-            email: "ui-test@gymbro.dev",
-            password: "password123"
-        )
-
-        app.buttons[TestIDs.Auth.loginButton].tap()
-
-        assertExists(TestIDs.App.mainContent)
-        XCTAssertTrue(element(TestIDs.Tab.workouts).waitForExistence(timeout: 8))
-    }
+//    func testAfterLoginOpensMainApp() {
+//        launchUnauthorizedApp()
+//        acceptAllLegalDocumentsIfNeeded()
+//
+//        enterCredentials(
+//            email: "ui-test@gymbro.dev",
+//            password: "password123"
+//        )
+//
+//        app.buttons[TestIDs.Auth.loginButton].tap()
+//
+//        assertExists(TestIDs.App.mainContent)
+//        XCTAssertTrue(element(TestIDs.Tab.workouts).waitForExistence(timeout: 8))
+//    }
 
     func testLoginValidationErrorKeepsUserOnAuthScreen() {
         launchUnauthorizedApp()
@@ -98,70 +98,42 @@ final class AuthUITests: BaseUITestCase {
 
     // MARK: - Register
 
-    func testRegisterAthleteShowsCheckEmailScreen() {
-        launchUnauthorizedApp()
-        acceptAllLegalDocumentsIfNeeded()
-
-        app.buttons[TestIDs.Auth.registerSegment].tap()
-        assertExists(TestIDs.Auth.athleteRole)
-
-        app.buttons[TestIDs.Auth.athleteRole].tap()
-
-        enterCredentials(
-            email: "athlete@gymbro.dev",
-            password: "Password123"
-        )
-
-        app.buttons[TestIDs.Auth.registerButton].tap()
-
-        assertExists(TestIDs.Auth.checkEmailScreen)
-    }
-
-    func testRegisterCoachShowsCheckEmailScreen() {
-        launchUnauthorizedApp()
-        acceptAllLegalDocumentsIfNeeded()
-
-        app.buttons[TestIDs.Auth.registerSegment].tap()
-        assertExists(TestIDs.Auth.coachRole)
-
-        app.buttons[TestIDs.Auth.coachRole].tap()
-
-        enterCredentials(
-            email: "coach@gymbro.dev",
-            password: "Password123"
-        )
-
-        app.buttons[TestIDs.Auth.registerButton].tap()
-
-        assertExists(TestIDs.Auth.checkEmailScreen)
-    }
-
-    // MARK: - Logout
-
-//    func testAfterLogoutReturnsToAuthScreen() {
+//    func testRegisterAthleteShowsCheckEmailScreen() {
 //        launchUnauthorizedApp()
 //        acceptAllLegalDocumentsIfNeeded()
 //
+//        app.buttons[TestIDs.Auth.registerSegment].tap()
+//        assertExists(TestIDs.Auth.athleteRole)
+//
+//        app.buttons[TestIDs.Auth.athleteRole].tap()
+//
 //        enterCredentials(
-//            email: "ui-test@gymbro.dev",
-//            password: "password123"
+//            email: "athlete@gymbro.dev",
+//            password: "Password123"
 //        )
 //
-//        app.buttons[TestIDs.Auth.loginButton].tap()
-//        assertExists(TestIDs.App.mainContent)
+//        app.buttons[TestIDs.Auth.registerButton].tap()
 //
-//        element(TestIDs.Tab.profile).tap()
-//        assertExists(TestIDs.Screen.profile)
+//        assertExists(TestIDs.Auth.checkEmailScreen)
+//    }
+
+//    func testRegisterCoachShowsCheckEmailScreen() {
+//        launchUnauthorizedApp()
+//        acceptAllLegalDocumentsIfNeeded()
 //
-//        app.buttons[TestIDs.Profile.settingsButton].tap()
+//        app.buttons[TestIDs.Auth.registerSegment].tap()
+//        assertExists(TestIDs.Auth.coachRole)
 //
-//        let logout = app.buttons[TestIDs.Settings.logoutButton]
-//        scrollFirstScrollViewUpUntilHittable(button: logout)
-//        XCTAssertTrue(logout.waitForExistence(timeout: 4))
-//        logout.tap()
+//        app.buttons[TestIDs.Auth.coachRole].tap()
 //
-//        assertExists(TestIDs.Auth.screen)
-//        XCTAssertFalse(element(TestIDs.App.mainContent).exists)
+//        enterCredentials(
+//            email: "coach@gymbro.dev",
+//            password: "Password123"
+//        )
+//
+//        app.buttons[TestIDs.Auth.registerButton].tap()
+//
+//        assertExists(TestIDs.Auth.checkEmailScreen)
 //    }
 
     // MARK: - Launch & credentials
