@@ -67,7 +67,22 @@ final class PerksUITests: BaseUITestCase {
 
         let rookieCard = app.buttons[TestIDs.Perks.achievementCard("rookie")]
         XCTAssertTrue(rookieCard.waitForExistence(timeout: 8))
-        rookieCard.tap()
+        
+        var didOpen = false
+        for _ in 0..<3 {
+            if rookieCard.isHittable {
+                rookieCard.tap()
+            } else {
+                rookieCard.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            }
+            
+            if element(TestIDs.Perks.achievementExpanded).waitForExistence(timeout: 4) {
+                didOpen = true
+                break
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.25))
+        }
+        XCTAssertTrue(didOpen, "Expected achievement expanded view to open after tapping rookie card")
 
         assertExists(TestIDs.Perks.achievementExpanded)
         XCTAssertTrue(app.staticTexts["First recorded workout"].waitForExistence(timeout: 8))
