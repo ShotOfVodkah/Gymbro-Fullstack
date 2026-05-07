@@ -50,6 +50,7 @@ struct WorkoutInfoView: View {
                     .foregroundColor(.white)
                     .imageScale(.large)
             }
+            .accessibilityIdentifier("workouts.info.back")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.top, viewModel.screenState == .offline ? 50 : 16)
             .padding(.leading, 16)
@@ -79,6 +80,11 @@ struct WorkoutInfoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
         .ignoresSafeArea(.container, edges: .bottom)
+        .overlay(alignment: .bottomTrailing) {
+            if viewModel.screenState != .loading {
+                UITestMarker(id: "workout.info.screen")
+            }
+        }
     }
 
     @ObservedObject private var viewModel: WorkoutInfoViewModel

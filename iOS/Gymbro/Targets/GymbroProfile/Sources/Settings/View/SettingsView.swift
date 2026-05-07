@@ -53,6 +53,11 @@ struct ProfileSettingsView: View {
         } message: {
             Text(viewModel.appVersionText)
         }
+        .overlay(alignment: .topLeading) {
+            if viewModel.screenState == .loaded {
+                UITestMarker(id: "profile.settings.screen")
+            }
+        }
     }
     
     private var contentView: some View {

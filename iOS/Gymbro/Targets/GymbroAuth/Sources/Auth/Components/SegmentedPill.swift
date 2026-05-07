@@ -7,26 +7,37 @@ struct SegmentedPill: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AuthTab.allCases, id: \.self) { item in
-                Text(item.localizedTitle)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(tab == item ? .white : .white.opacity(0.55))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(
-                        Group {
-                            if tab == item {
-                                LinearGradient(
-                                    colors: [Color.appPurple.opacity(0.95), Color.purple.opacity(0.75)],
-                                    startPoint: .leading, endPoint: .trailing
-                                )
-                                .cornerRadius(15)
-                            } else {
-                                Color.clear
+                Button {
+                    withAnimation(.easeInOut(duration: 0.18)) {
+                        tab = item
+                    }
+                } label: {
+                    Text(item.localizedTitle)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(tab == item ? .white : .white.opacity(0.55))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(
+                            Group {
+                                if tab == item {
+                                    LinearGradient(
+                                        colors: [
+                                            Color.appPurple.opacity(0.95),
+                                            Color.purple.opacity(0.75)
+                                        ],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                    .cornerRadius(15)
+                                } else {
+                                    Color.clear
+                                }
                             }
-                        }
-                    )
-                    .contentShape(Rectangle())
-                    .onTapGesture { withAnimation(.easeInOut(duration: 0.18)) { tab = item } }
+                        )
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier(item == .login ? "auth.segment.login" : "auth.segment.register")
             }
         }
         .padding(6)

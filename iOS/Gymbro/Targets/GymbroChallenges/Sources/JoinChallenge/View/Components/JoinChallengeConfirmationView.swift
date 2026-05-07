@@ -56,6 +56,7 @@ struct JoinChallengeConfirmationView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("challenges.join.confirm.cancel")
                     
                     Button {
                         onConfirm()
@@ -75,6 +76,7 @@ struct JoinChallengeConfirmationView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("challenges.join.confirm")
                 }
             }
             .padding(20)

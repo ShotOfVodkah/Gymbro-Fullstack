@@ -2,14 +2,16 @@ import SwiftUI
 import GymbroCommonUI
 
 struct FeedsPeopleViewStub: View {
-    
+
+    var topSafeInset: CGFloat = 0
+
     var body: some View {
         ZStack {
             backgroundView
             
             VStack(spacing: 0) {
                 header
-                    .padding(.top, 12)
+                    .padding(.top, topSafeInset + 4)
                     .padding(.bottom, 18)
                 
                 searchBar

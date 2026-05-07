@@ -25,6 +25,9 @@ struct PerksMainTabView: View {
                                            onRefresh: { await viewModel.refresh() },
                                            onAchievementOpened: { achievement in viewModel.trackAchievementOpened(achievement) },
                                            onLeaderboardSelectionChanged: { filter, sort in viewModel.updateLeaderboard(filter: filter, sort: sort) })
+                            .overlay(alignment: .topLeading) {
+                                UITestMarker(id: "perks.dashboard.loaded")
+                            }
                     } else {
                         PerksViewStub()
                     }

@@ -15,7 +15,7 @@ protocol WorkoutBuilderForTypeService {
 final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
 
     init(
-        networkClient: WorkoutsClient,
+        networkClient: any WorkoutsClientProtocol,
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
@@ -97,7 +97,7 @@ final class WorkoutBuilderForTypeServiceImpl: WorkoutBuilderForTypeService {
 
     // MARK: - Private
 
-    private let networkClient: WorkoutsClient
+    private let networkClient: any WorkoutsClientProtocol
     private let divLocalRepository: DivCacheRepository
     private let workoutsRepository: WorkoutsCacheRepository
     private let exercisesRepository: ExercisesRepository

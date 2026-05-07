@@ -66,6 +66,18 @@ public struct ChatReadResponse: Decodable, Sendable {
     public let user_id: String
     public let last_read_message_id: String?
     public let last_read_at: Date
+    
+    public init(
+        community_id: String,
+        user_id: String,
+        last_read_message_id: String?,
+        last_read_at: Date
+    ) {
+        self.community_id = community_id
+        self.user_id = user_id
+        self.last_read_message_id = last_read_message_id
+        self.last_read_at = last_read_at
+    }
 }
 
 public struct ChatTypingResponse: Decodable, Sendable {

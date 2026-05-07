@@ -15,7 +15,7 @@ public final class FeedsProfilePostsFactoryImpl {
     public func makeView(
         input: PostsScreenInput,
         router: any Router,
-        client: FeedsClient,
+        client: any FeedsClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
         let currentUserID = AppMicroservices.tokens.userId ?? ""

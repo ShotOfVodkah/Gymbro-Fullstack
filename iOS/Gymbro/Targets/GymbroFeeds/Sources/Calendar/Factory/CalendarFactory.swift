@@ -15,7 +15,7 @@ public final class FeedsCalendarFactoryImpl {
     public func makeView(
         input: CalendarScreenInput,
         router: any Router,
-        client: FeedsClient,
+        client: any FeedsClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
         let currentUserID = AppMicroservices.tokens.userId ?? ""

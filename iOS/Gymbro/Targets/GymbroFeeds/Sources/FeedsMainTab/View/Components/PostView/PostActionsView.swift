@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PostActionsView: View {
     
+    let postID: String
     let likesCount: Int
     let commentsCount: Int
     let isLiked: Bool
@@ -19,6 +20,8 @@ struct PostActionsView: View {
                 .foregroundStyle(isLiked ? Color.pink : Color.white.opacity(0.85))
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("feeds.post.\(postID).like")
+            .accessibilityValue(isLiked ? "liked" : "unliked")
 
             Button(action: onCommentTap) {
                 HStack(spacing: 8) {
@@ -26,9 +29,10 @@ struct PostActionsView: View {
                     Text("\(commentsCount)")
                 }
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(Color.white.opacity(0.85))
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("feeds.post.\(postID).comments")
 
             Spacer()
         }

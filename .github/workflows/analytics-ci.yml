@@ -1,0 +1,28 @@
+name: Analytics CI
+
+on:
+  push:
+    paths:
+      - 'Backend/services/analytics/**'
+      - '.github/workflows/analytics-ci.yml'
+  pull_request:
+
+jobs:
+  test:
+    name: Go tests — analytics service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/services/analytics
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: Backend/services/analytics/go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./... -count=1 -short

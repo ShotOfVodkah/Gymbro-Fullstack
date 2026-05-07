@@ -8,11 +8,13 @@ final class WatchConnectivityService: NSObject {
 
     init(
         workoutsRepository: WorkoutsCacheRepository,
-        feedsClient: FeedsClient,
+        workoutsClient: any WorkoutsClientProtocol,
+        feedsClient: any FeedsClientProtocol,
         streakWidget: StreakWidgetControlling,
         activityCalendarWidget: ActivityCalendarWidgetControlling
     ) {
         self.workoutsRepository = workoutsRepository
+        self.workoutsClient = workoutsClient
         self.feedsClient = feedsClient
         self.streakWidget = streakWidget
         self.activityCalendarWidget = activityCalendarWidget
@@ -37,7 +39,8 @@ final class WatchConnectivityService: NSObject {
     }
     
     private let workoutsRepository: WorkoutsCacheRepository
-    private let feedsClient: FeedsClient
+    private let workoutsClient: any WorkoutsClientProtocol
+    private let feedsClient: any FeedsClientProtocol
     private let streakWidget: StreakWidgetControlling
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
 }
@@ -55,7 +58,7 @@ extension WatchConnectivityService: WCSessionDelegate {
         Task {
             let workouts: [Workout]
             do {
-                workouts = try await AppMicroservices.workouts.fetchUserWorkouts()
+                workouts = try await workoutsClient.fetchUserWorkouts()
             } catch {
                 workouts = workoutsRepository.loadWorkouts(key: "user")
             }
@@ -84,7 +87,7 @@ extension WatchConnectivityService: WCSessionDelegate {
         Task { [weak self] in
             guard let self else { return }
             do {
-                try await AppMicroservices.workouts.createSession(
+                try await workoutsClient.createSession(
                     workoutId: payload.workoutId,
                     completedAt: payload.completedAt,
                     exercises: exercises

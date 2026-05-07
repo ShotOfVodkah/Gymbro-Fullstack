@@ -44,6 +44,7 @@ struct EditProfileView: View {
                     viewModel.didTapCancel()
                 }
                 .foregroundStyle(.white)
+                .accessibilityIdentifier("profile.edit.cancel")
             }
             
             ToolbarItem(placement: .topBarTrailing) {
@@ -52,6 +53,7 @@ struct EditProfileView: View {
                 }
                 .foregroundStyle(viewModel.canSave ? .white : .gray)
                 .disabled(!viewModel.canSave)
+                .accessibilityIdentifier("profile.edit.save")
             }
         }
         .alert("Discard changes?", isPresented: $viewModel.shouldShowDiscardAlert) {
@@ -85,6 +87,11 @@ struct EditProfileView: View {
                 viewModel.dismissSaveBanner()
             }
         }
+        .overlay(alignment: .topLeading) {
+            if viewModel.screenState == .loaded {
+                UITestMarker(id: "profile.edit.screen")
+            }
+        }
     }
     
     private var contentView: some View {
@@ -103,7 +110,8 @@ struct EditProfileView: View {
                                 set: viewModel.updateName
                             ),
                             autocapitalization: .words,
-                            disableAutocorrection: true
+                            disableAutocorrection: true,
+                            accessibilityIdentifier: "profile.edit.field.fullName"
                         )
                         
                         EditProfileTextField(
@@ -111,7 +119,8 @@ struct EditProfileView: View {
                             text: Binding(
                                 get: { viewModel.form.username },
                                 set: viewModel.updateUsername
-                            )
+                            ),
+                            accessibilityIdentifier: "profile.edit.field.username"
                         )
                         
                         EditProfileTextField(
@@ -121,7 +130,8 @@ struct EditProfileView: View {
                                 set: viewModel.updateStatus
                             ),
                             autocapitalization: .sentences,
-                            disableAutocorrection: true
+                            disableAutocorrection: true,
+                            accessibilityIdentifier: "profile.edit.field.status"
                         )
                         
                         EditProfileTextField(
@@ -131,7 +141,8 @@ struct EditProfileView: View {
                                 set: viewModel.updateSubtitle
                             ),
                             autocapitalization: .sentences,
-                            disableAutocorrection: true
+                            disableAutocorrection: true,
+                            accessibilityIdentifier: "profile.edit.field.subtitle"
                         )
                     }
                 }
@@ -142,7 +153,8 @@ struct EditProfileView: View {
                             get: { viewModel.form.bio },
                             set: viewModel.updateBio
                         ),
-                        limit: 220
+                        limit: 220,
+                        accessibilityIdentifier: "profile.edit.field.bio"
                     )
                 }
                 

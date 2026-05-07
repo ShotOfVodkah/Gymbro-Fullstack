@@ -20,6 +20,9 @@ public final class AppMicroservices {
     private init() {
         let storage = KeychainTokenStorage()
         tokenStorage = storage
+
+        let args = ProcessInfo.processInfo.arguments
+        let shouldDisableRefresh: Bool = args.contains("-ui-testing") || args.contains("-mock-network")
         
         let refreshClient = NetworkClient(baseURL: "http://localhost:8080")
         let refreshAuthService = AuthService(client: refreshClient)
@@ -27,7 +30,7 @@ public final class AppMicroservices {
         networkClient = NetworkClient(
             baseURL: "http://localhost:8080",
             tokenProvider: { storage.accessToken },
-            refreshHandler: { [refreshCoordinator] in
+            refreshHandler: shouldDisableRefresh ? nil : { [refreshCoordinator] in
                 try await refreshCoordinator.refreshIfNeeded {
                     guard let refreshToken = storage.refreshToken, !refreshToken.isEmpty else {
                         print("No refresh token available")
@@ -47,6 +50,7 @@ public final class AppMicroservices {
                         return true
                     } catch {
                         print("Token refresh failed:", error)
+                        await AppMicroservices.shared.handleSessionExpired()
                         await AppMicroservices.shared.handleSessionExpired()
                         return false
                     }

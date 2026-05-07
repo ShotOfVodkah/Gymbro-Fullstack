@@ -55,6 +55,8 @@ struct ChatView: View {
     
     private var contentView: some View {
         VStack(spacing: 0) {
+            UITestMarker(id: "feeds.chat.screen")
+
             ChatHeaderView(
                 title: viewModel.title,
                 isGroup: viewModel.isGroup,

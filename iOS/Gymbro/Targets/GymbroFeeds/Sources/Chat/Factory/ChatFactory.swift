@@ -15,7 +15,7 @@ public final class FeedsChatFactoryImpl {
     public func makeView(
         input: ChatSessionInput,
         router: any Router,
-        client: FeedsClient,
+        client: any FeedsClientProtocol,
         realtimeClient: FeedsChatRealtimeClient,
         analytics: any AnalyticsService
     ) -> some View {

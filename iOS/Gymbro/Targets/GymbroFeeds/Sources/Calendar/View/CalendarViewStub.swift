@@ -2,7 +2,9 @@ import SwiftUI
 import GymbroCommonUI
 
 struct FeedsCalendarViewStub: View {
-    
+
+    var topSafeInset: CGFloat = 0
+
     var body: some View {
         ZStack {
             backgroundView
@@ -10,13 +12,14 @@ struct FeedsCalendarViewStub: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 18) {
                     header
+                        .padding(.top, topSafeInset + 4)
                     personPicker
                     calendarCard
                     Spacer(minLength: 24)
                 }
-                .padding(.top, 12)
                 .padding(.bottom, 24)
             }
+            .ignoresSafeArea(edges: .top)
         }
         .shimmer(active: true)
     }

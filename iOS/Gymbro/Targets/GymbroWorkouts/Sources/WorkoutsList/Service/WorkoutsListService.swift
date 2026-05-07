@@ -13,8 +13,8 @@ protocol WorkoutsListService {
 final class WorkoutsListServiceImpl: WorkoutsListService {
 
     init(
-        networkClient: WorkoutsClient,
-        feedsClient: FeedsClient,
+        networkClient: any WorkoutsClientProtocol,
+        feedsClient: any FeedsClientProtocol,
         divLocalRepository: DivCacheRepository,
         workoutsRepository: WorkoutsCacheRepository,
         exercisesRepository: ExercisesRepository,
@@ -84,8 +84,8 @@ final class WorkoutsListServiceImpl: WorkoutsListService {
 
     // MARK: - Private
 
-    private let networkClient: WorkoutsClient
-    private let feedsClient: FeedsClient
+    private let networkClient: any WorkoutsClientProtocol
+    private let feedsClient: any FeedsClientProtocol
     private let divLocalRepository: DivCacheRepository
     private let workoutsRepository: WorkoutsCacheRepository
     private let exercisesRepository: ExercisesRepository

@@ -1,13 +1,14 @@
 import SwiftUI
 import GymbroCommonUI
+import GymbroNetwork
 import GymbroTypes
 
 
 public struct AuthView: View {
     @StateObject private var vm: AuthViewModel
 
-    public init(analytics: any AnalyticsService) {
-        _vm = StateObject(wrappedValue: AuthViewModel(analytics: analytics))
+    public init(analytics: any AnalyticsService, auth: any AuthServiceProtocol) {
+        _vm = StateObject(wrappedValue: AuthViewModel(analytics: analytics, auth: auth))
     }
     
     public var body: some View {
@@ -16,14 +17,18 @@ public struct AuthView: View {
             VStack(spacing: 18) {
                 header
                 if vm.shouldShowCheckEmailScreen {
-                    CheckEmailView(
-                        email: vm.registeredEmail ?? vm.email,
-                        devVerifyURL: vm.devVerifyURL,
-                        isVerificationInProgress: vm.isEmailVerificationInProgress,
-                        onResend: vm.resendVerificationEmail,
-                        onBackToLogin: vm.backToLoginAfterRegistration,
-                        onVerifyDevLink: vm.verifyEmailFromDevURL
-                    )
+                    ZStack {
+                        CheckEmailView(
+                            email: vm.registeredEmail ?? vm.email,
+                            devVerifyURL: vm.devVerifyURL,
+                            isVerificationInProgress: vm.isEmailVerificationInProgress,
+                            onResend: vm.resendVerificationEmail,
+                            onBackToLogin: vm.backToLoginAfterRegistration,
+                            onVerifyDevLink: vm.verifyEmailFromDevURL
+                        )
+
+                        UITestMarker(id: "auth.check_email.screen")
+                    }
                     .padding(.top, 10)
                 } else {
                     authCard.padding(.top, 10)
@@ -119,6 +124,7 @@ public struct AuthView: View {
                 .clipShape(Capsule())
                 .shadow(radius: 18)
             }
+            .accessibilityIdentifier(vm.tab == .login ? "auth.login.button" : "auth.register.button")
             .padding(.top, 6)
         }
         .padding(.horizontal, 15)
@@ -173,19 +179,29 @@ public struct AuthView: View {
                 .foregroundStyle(.white)
             
             HStack(spacing: 14) {
-                RoleCard(
-                    title: String(localized: "auth.role.athlete", bundle: .module),
-                    systemImage: "figure.run",
-                    selected: vm.role == .athlete
-                )
-                .onTapGesture { vm.role = .athlete }
+                Button {
+                    vm.role = .athlete
+                } label: {
+                    RoleCard(
+                        title: String(localized: "auth.role.athlete", bundle: .module),
+                        systemImage: "figure.run",
+                        selected: vm.role == .athlete
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("auth.role.athlete")
                 
-                RoleCard(
-                    title: String(localized: "auth.role.coach", bundle: .module),
-                    systemImage: "person.3.fill",
-                    selected: vm.role == .coach
-                )
-                .onTapGesture { vm.role = .coach }
+                Button {
+                    vm.role = .coach
+                } label: {
+                    RoleCard(
+                        title: String(localized: "auth.role.coach", bundle: .module),
+                        systemImage: "person.3.fill",
+                        selected: vm.role == .coach
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("auth.role.coach")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

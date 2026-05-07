@@ -12,7 +12,7 @@ public final class WorkoutShareFactoryImpl {
     public func makeView(
         input: WorkoutShareInput,
         router: any Router,
-        client: FeedsClient,
+        client: any FeedsClientProtocol,
         analytics: any AnalyticsService,
         perksEvents: any PerksEventTrackingService
     ) -> some View {

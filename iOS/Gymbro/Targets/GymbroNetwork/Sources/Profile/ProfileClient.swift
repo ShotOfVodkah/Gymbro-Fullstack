@@ -1,6 +1,20 @@
 import Foundation
 import GymbroTypes
 
+public protocol ProfileClientProtocol {
+    func fetchMyProfileForEdit() async throws -> EditProfileResponse
+    func updateMyProfile(_ request: UpdateProfileRequest) async throws -> EditProfileResponse
+
+    func fetchMyStatistics() async throws -> ProfileStatisticsResponse
+    func fetchStatistics(userID: Int) async throws -> ProfileStatisticsResponse
+
+    func fetchMySettings() async throws -> ProfileSettingsResponse
+    func updateMySettings(_ request: UpdateProfileSettingsRequest) async throws -> ProfileSettingsResponse
+
+    func fetchMyMainProfile() async throws -> ProfileMainResponse
+    func fetchMainProfile(userID: Int) async throws -> ProfileMainResponse
+}
+
 public final class ProfileClient {
     
     public init(client: NetworkClient) {
@@ -89,3 +103,5 @@ public final class ProfileClient {
         )
     }
 }
+
+extension ProfileClient: ProfileClientProtocol {}

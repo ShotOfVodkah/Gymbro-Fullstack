@@ -5,15 +5,18 @@ public struct AppTextField: View {
     let title: String?
     let placeholder: String
     var text: Binding<String>
+    let textFieldAccessibilityIdentifier: String?
     
     public init(
         title: String? = nil,
         placeholder: String,
-        text: Binding<String>
+        text: Binding<String>,
+        textFieldAccessibilityIdentifier: String? = nil
     ) {
         self.title = title
         self.placeholder = placeholder
         self.text = text
+        self.textFieldAccessibilityIdentifier = textFieldAccessibilityIdentifier
     }
     
     public var body: some View {
@@ -37,6 +40,20 @@ public struct AppTextField: View {
                                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
                         )
                 )
+                .modifier(AccessibilityIdentifierIfPresent(identifier: textFieldAccessibilityIdentifier))
+        }
+    }
+}
+
+private struct AccessibilityIdentifierIfPresent: ViewModifier {
+    let identifier: String?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let identifier {
+            content.accessibilityIdentifier(identifier)
+        } else {
+            content
         }
     }
 }

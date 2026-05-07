@@ -82,6 +82,9 @@ struct JoinChallengeView: View {
         .refreshable {
             viewModel.reload()
         }
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "challenges.join.loaded")
+        }
     }
     
     private var topBar: some View {
@@ -96,6 +99,7 @@ struct JoinChallengeView: View {
                     .background(.white.opacity(0.08))
                     .clipShape(Circle())
             }
+            .accessibilityIdentifier("challenges.join.back")
             
             Spacer()
             
@@ -263,8 +267,12 @@ struct JoinChallengeView: View {
             }
             .buttonStyle(.plain)
             .padding(.top, 8)
+            .accessibilityIdentifier("challenges.join.success.done")
         }
         .padding(.horizontal, 32)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "challenges.join.success")
+        }
     }
     
     private var errorView: some View {

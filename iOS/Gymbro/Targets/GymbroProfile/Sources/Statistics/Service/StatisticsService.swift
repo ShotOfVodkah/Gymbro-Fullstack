@@ -8,7 +8,7 @@ protocol ProfileStatisticsServiceProtocol {
 
 final class ProfileStatisticsService: ProfileStatisticsServiceProtocol {
     
-    init(client: ProfileClient) {
+    init(client: any ProfileClientProtocol) {
         self.client = client
     }
     
@@ -67,5 +67,5 @@ final class ProfileStatisticsService: ProfileStatisticsServiceProtocol {
         )
     }
     
-    private let client: ProfileClient
+    private let client: any ProfileClientProtocol
 }

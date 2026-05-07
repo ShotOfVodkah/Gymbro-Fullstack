@@ -12,7 +12,7 @@ protocol WorkoutBuilderService {
 final class WorkoutBuilderServiceImpl: WorkoutBuilderService {
 
     init(
-        networkClient: WorkoutsClient,
+        networkClient: any WorkoutsClientProtocol,
         divLocalRepository: DivCacheRepository,
         actionsRepository: OfflineActionsRepository,
         localMapper: WorkoutsLocalMapper
@@ -57,7 +57,7 @@ final class WorkoutBuilderServiceImpl: WorkoutBuilderService {
 
     // MARK: - Private
 
-    private let networkClient: WorkoutsClient
+    private let networkClient: any WorkoutsClientProtocol
     private let divLocalRepository: DivCacheRepository
     private let actionsRepository: OfflineActionsRepository
     private let localMapper: WorkoutsLocalMapper

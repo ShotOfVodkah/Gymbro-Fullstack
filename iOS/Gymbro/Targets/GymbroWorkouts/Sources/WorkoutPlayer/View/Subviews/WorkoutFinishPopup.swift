@@ -44,6 +44,7 @@ struct WorkoutFinishPopup: View {
                     action: onSaveOnly,
                     wrapContent: false
                 )
+                .accessibilityIdentifier("workouts.finish.save_only")
 
                 AppButton(
                     String(localized: "workout.finish.action_share", bundle: .module),
@@ -51,6 +52,7 @@ struct WorkoutFinishPopup: View {
                     action: onShareWorkout,
                     wrapContent: false
                 )
+                .accessibilityIdentifier("workouts.finish.share")
             }
         }
         .padding(.vertical, 32)

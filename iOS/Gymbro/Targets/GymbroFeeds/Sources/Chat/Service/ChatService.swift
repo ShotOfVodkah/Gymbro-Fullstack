@@ -26,7 +26,7 @@ protocol ChatService {
 
 final class ChatServiceImpl: ChatService {
     
-    init(client: FeedsClient, realtimeClient: FeedsChatRealtimeClient) {
+    init(client: any FeedsClientProtocol, realtimeClient: FeedsChatRealtimeClient) {
         self.client = client
         self.realtimeClient = realtimeClient
     }
@@ -93,7 +93,7 @@ final class ChatServiceImpl: ChatService {
     func fetchAvailablePeopleToAdd() async throws -> [ChatParticipant] {
         async let friendsResponse = client.fetchFriends()
         async let followingResponse = client.fetchFollowing()
-        async let discoverResponse = client.fetchDiscoverPeople()
+        async let discoverResponse = client.fetchDiscoverPeople(query: nil)
         
         let friends = try await friendsResponse.map(PersonItem.init(response:))
         let following = try await followingResponse.map(PersonItem.init(response:))
@@ -117,6 +117,6 @@ final class ChatServiceImpl: ChatService {
         }
     }
     
-    private let client: FeedsClient
+    private let client: any FeedsClientProtocol
     private let realtimeClient: FeedsChatRealtimeClient
 }

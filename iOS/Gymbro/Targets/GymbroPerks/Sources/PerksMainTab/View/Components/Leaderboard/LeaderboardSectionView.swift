@@ -1,4 +1,5 @@
 import SwiftUI
+import GymbroCommonUI
 import GymbroTypes
 
 struct LeaderboardSectionView: View {
@@ -34,6 +35,9 @@ struct LeaderboardSectionView: View {
         .background(sectionBackground)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(sectionBorder)
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "perks.leaderboard.section")
+        }
     }
     
     private var headerView: some View {
@@ -53,7 +57,8 @@ struct LeaderboardSectionView: View {
             ForEach(LeaderboardFilter.allCases) { filter in
                 pickerChip(
                     title: filter.title,
-                    isSelected: selectedFilter == filter
+                    isSelected: selectedFilter == filter,
+                    accessibilityIdentifier: "perks.leaderboard.filter.\(filter.rawValue)"
                 ) {
                     selectedFilter = filter
                     onSelectionChanged(selectedFilter, selectedSort)
@@ -67,7 +72,8 @@ struct LeaderboardSectionView: View {
             ForEach(LeaderboardSort.allCases) { sort in
                 pickerChip(
                     title: sort.title,
-                    isSelected: selectedSort == sort
+                    isSelected: selectedSort == sort,
+                    accessibilityIdentifier: "perks.leaderboard.sort.\(sort.rawValue)"
                 ) {
                     selectedSort = sort
                     onSelectionChanged(selectedFilter, selectedSort)
@@ -79,6 +85,7 @@ struct LeaderboardSectionView: View {
     private func pickerChip(
         title: String,
         isSelected: Bool,
+        accessibilityIdentifier: String,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -93,6 +100,7 @@ struct LeaderboardSectionView: View {
                 )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
     
     private var leaderboardPreviewView: some View {

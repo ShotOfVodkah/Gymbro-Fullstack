@@ -1,50 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%@" : {
-
-    },
-    "%@ workouts" : {
-
-    },
-    "%@/%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@/%2$@"
-          }
-        }
-      }
-    },
-    "%@%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@%2$@"
-          }
-        }
-      }
-    },
-    "• %@" : {
-
-    },
-    "IP: %@" : {
-
-    },
-    "Log out from all devices" : {
-
-    },
-    "Manage sessions where your GymBro account is currently signed in." : {
-
-    },
-    "Monthly Trend" : {
-
-    },
-    "Profile saved" : {
-
-    },
     "profile.loading" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -401,24 +357,6 @@
           }
         }
       }
-    },
-    "Something went wrong" : {
-
-    },
-    "Something went wrong, oopsie..." : {
-
-    },
-    "This device" : {
-
-    },
-    "Weekly Activity" : {
-
-    },
-    "Year summary" : {
-
-    },
-    "Your changes will be lost." : {
-
     }
   },
   "version" : "1.0"

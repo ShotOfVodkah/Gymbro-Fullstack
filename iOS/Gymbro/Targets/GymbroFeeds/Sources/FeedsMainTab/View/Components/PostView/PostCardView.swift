@@ -35,58 +35,65 @@ struct PostCardView: View {
                     avatar: post.authorAvatar,
                     authorName: post.authorName,
                     postedAt: post.postedAt,
+                    authorAccessibilityIdentifier: "feeds.post.\(post.id).author",
                     onAuthorTap: onAuthorTap
                 )
             }
             
             VStack(alignment: .leading, spacing: 14) {
-                Group {
-                    Text(post.title)
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.white)
-                    
-                    PostMetaTagsView(
-                        category: post.category,
-                        duration: post.duration,
-                        timeAgo: post.timeAgo
-                    )
-                    
-                    if let location = post.location {
-                        HStack(spacing: 8) {
-                            Image(systemName: "location.fill")
-                                .foregroundStyle(.gray)
-                            
-                            Text(location)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(.gray)
-                        }
-                    }
-                    
-                    if !post.description.isEmpty {
-                        Text(post.description)
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.95))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    
-                    Text(String(localized: "feeds.post.exercises", bundle: .module))
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.7))
-                        .textCase(.uppercase)
-                }
-                .onTapGesture(count: 2) {
+                ZStack(alignment: .topLeading) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text(post.title)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(.white)
 
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        onDoubleTapLike()
-                    
-                    
+                        PostMetaTagsView(
+                            category: post.category,
+                            duration: post.duration,
+                            timeAgo: post.timeAgo
+                        )
+
+                        if let location = post.location {
+                            HStack(spacing: 8) {
+                                Image(systemName: "location.fill")
+                                    .foregroundStyle(.gray)
+
+                                Text(location)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(.gray)
+                            }
+                        }
+
+                        if !post.description.isEmpty {
+                            Text(post.description)
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundStyle(.white.opacity(0.95))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Text(String(localized: "feeds.post.exercises", bundle: .module))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .textCase(.uppercase)
+                    }
+                    .accessibilityHidden(true)
+
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                        .onTapGesture(count: 2) {
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            onDoubleTapLike()
+                        }
+                        .accessibilityIdentifier("feeds.post.\(post.id).doubleTapLikeArea")
                 }
-                
+
                 VStack(spacing: 12) {
                     ForEach(Array(post.exercises.prefix(2).enumerated()), id: \.element.id) { index, exercise in
                         ExercisePreviewCardView(
                             exercise: exercise,
-                            index: index + 1
+                            index: index + 1,
+                            accessibilityIdentifier: "feeds.post.\(post.id).exercise.\(index + 1)"
                         ) {
                             onExerciseTap(exercise)
                         }
@@ -113,6 +120,7 @@ struct PostCardView: View {
                         .overlay(Color.white.opacity(0.8))
                     
                     PostActionsView(
+                        postID: post.id,
                         likesCount: post.likesCount,
                         commentsCount: post.commentsCount,
                         isLiked: post.isLiked,

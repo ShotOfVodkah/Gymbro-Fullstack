@@ -6,6 +6,7 @@ import (
 	"regexp"
 
 	"github.com/alexandra-gritsaenko/gymbro-auth/service"
+	"github.com/alexandra-gritsaenko/gymbro-auth/types"
 	"github.com/alexandra-gritsaenko/gymbro-authmw"
 	"github.com/jmoiron/sqlx"
 )
@@ -16,13 +17,23 @@ var (
 )
 
 type userHandler struct {
-	service service.UserService
+	service UserService
+}
+
+type UserService interface {
+	ListUsers() ([]types.User, error)
+	GetUserByEmail(email string) (*types.User, error)
 }
 
 func NewUserHandler(db *sqlx.DB) *userHandler {
+	svc := service.NewUserService(db)
 	return &userHandler{
-		service: service.NewUserService(db),
+		service: &svc,
 	}
+}
+
+func NewUserHandlerWithService(svc UserService) *userHandler {
+	return &userHandler{service: svc}
 }
 
 func (h *userHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

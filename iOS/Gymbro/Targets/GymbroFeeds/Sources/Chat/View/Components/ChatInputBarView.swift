@@ -19,6 +19,7 @@ struct ChatInputBarView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 13)
                     .lineLimit(1...4)
+                    .accessibilityIdentifier("feeds.chat.input")
             }
             .background(Color.white.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -34,6 +35,7 @@ struct ChatInputBarView: View {
                     )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("feeds.chat.send")
             .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
     }

@@ -35,6 +35,9 @@ struct WorkoutShareView: View {
                         )
                     }
                 }
+                .overlay(alignment: .topLeading) {
+                    UITestMarker(id: "workouts.share.loaded")
+                }
                 
             case .offline:
                 VStack(spacing: 0) {
@@ -57,6 +60,9 @@ struct WorkoutShareView: View {
                                 )
                             )
                         }
+                    }
+                    .overlay(alignment: .topLeading) {
+                        UITestMarker(id: "workouts.share.loaded")
                     }
                 }
                 .ignoresSafeArea(.container, edges: .bottom)

@@ -1,19 +1,29 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/alexandra-gritsaenko/gymbro-authmw"
-	"github.com/alexandra-gritsaenko/gymbro-perks/service"
 	"github.com/alexandra-gritsaenko/gymbro-perks/types"
 )
 
 type PerksHandler struct {
-	service *service.PerksService
+	service PerksService
 }
 
-func NewPerksHandler(service *service.PerksService) *PerksHandler {
+type PerksService interface {
+	GetDashboard(ctx context.Context, userID int64) (types.PerksDashboardResponse, error)
+	GetStreak(ctx context.Context, userID int64) (types.StreakResponse, error)
+	UpdateWeeklyGoal(ctx context.Context, userID int64, goal int) (types.PerksDashboardResponse, error)
+	UseStreakFreeze(ctx context.Context, userID int64) (types.PerksDashboardResponse, error)
+	GetAchievements(ctx context.Context, userID int64) ([]types.AchievementResponse, error)
+	GetLeaderboard(ctx context.Context, userID int64, filter string, sort string) ([]types.LeaderboardResponse, error)
+	SaveEvent(ctx context.Context, userID int64, request types.PerksEventRequest) error
+}
+
+func NewPerksHandler(service PerksService) *PerksHandler {
 	return &PerksHandler{
 		service: service,
 	}

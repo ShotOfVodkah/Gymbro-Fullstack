@@ -32,6 +32,16 @@ public enum AppTab: Hashable {
         case .perks: return "trophy"
         }
     }
+    
+    public var accessibilityID: String {
+        switch self {
+        case .workouts: return "tab.workouts"
+        case .feeds: return "tab.feeds"
+        case .profile: return "tab.profile"
+        case .challenge: return "tab.challenge"
+        case .perks: return "tab.perks"
+        }
+    }
 }
 
 public struct AppTabBar: View {
@@ -109,6 +119,7 @@ public struct AppTabBar: View {
             }
         }
         .buttonStyle(PressScaleButtonStyle(pressedScale: 0.94))
+        .accessibilityIdentifier(tab.accessibilityID)
     }
 
     private let borderGradient = LinearGradient(

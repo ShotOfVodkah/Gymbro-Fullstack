@@ -34,7 +34,7 @@ struct FeedPostsPage {
 
 final class FeedsMainTabServiceImpl: FeedsMainTabService {
     
-    init(client: FeedsClient, perksEvents: any PerksEventTrackingService) {
+    init(client: any FeedsClientProtocol, perksEvents: any PerksEventTrackingService) {
         self.client = client
         self.perksEvents = perksEvents
     }
@@ -75,7 +75,7 @@ final class FeedsMainTabServiceImpl: FeedsMainTabService {
     func fetchChatCreationPeople() async throws -> [PersonItem] {
         async let friendsResponse = client.fetchFriends()
         async let followingResponse = client.fetchFollowing()
-        async let discoverResponse = client.fetchDiscoverPeople()
+        async let discoverResponse = client.fetchDiscoverPeople(query: nil)
         
         let friends = try await friendsResponse.map(PersonItem.init(response:))
         let following = try await followingResponse.map(PersonItem.init(response:))
@@ -114,7 +114,7 @@ final class FeedsMainTabServiceImpl: FeedsMainTabService {
         return FeedComment(response: response)
     }
     
-    private let client: FeedsClient
+    private let client: any FeedsClientProtocol
     private let perksEvents: any PerksEventTrackingService
     
     private func uniquePeople(_ people: [PersonItem]) -> [PersonItem] {

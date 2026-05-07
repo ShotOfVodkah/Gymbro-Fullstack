@@ -18,6 +18,7 @@ struct ChallengeLeaderboardPreviewView: View {
                 }
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(.purple.opacity(0.95))
+                .accessibilityIdentifier("challenges.details.leaderboard.viewAll")
             }
             
             VStack(spacing: 10) {

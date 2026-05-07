@@ -51,6 +51,11 @@ struct ProfileStatisticsView: View {
                 viewModel.reportChartSelection(chartKind: "workouts_by_month", selectionId: newValue)
             }
         }
+        .overlay(alignment: .topLeading) {
+            if viewModel.screenState == .loaded {
+                UITestMarker(id: "profile.statistics.screen")
+            }
+        }
     }
     
     private var contentView: some View {

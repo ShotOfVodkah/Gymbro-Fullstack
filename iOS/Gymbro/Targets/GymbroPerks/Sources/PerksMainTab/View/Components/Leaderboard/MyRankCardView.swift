@@ -38,6 +38,7 @@ struct MyRankCardView: View {
         ))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(cardBorder)
+        .accessibilityIdentifier("perks.leaderboard.myRank")
     }
     
     private var cardBackground: some View {

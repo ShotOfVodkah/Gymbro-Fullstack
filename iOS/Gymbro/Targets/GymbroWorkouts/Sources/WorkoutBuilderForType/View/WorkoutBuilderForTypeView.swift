@@ -45,6 +45,7 @@ struct WorkoutBuilderForTypeView: View {
                     .foregroundColor(.white)
                     .imageScale(.large)
             }
+            .accessibilityIdentifier("workouts.builderForType.back")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.top, viewModel.screenState == .offline ? 45 : 20)
             .padding(.leading, 16)
@@ -104,8 +105,12 @@ struct WorkoutBuilderForTypeView: View {
                 action: { viewModel.saveButtonTapped() },
                 wrapContent: false
             )
+            .accessibilityIdentifier("workouts.builderForType.save")
             .padding(.bottom, 30)
             .padding(.horizontal, 8)
+        }
+        .overlay(alignment: .topLeading) {
+            UITestMarker(id: "workouts.builderForType.loaded")
         }
     }
     

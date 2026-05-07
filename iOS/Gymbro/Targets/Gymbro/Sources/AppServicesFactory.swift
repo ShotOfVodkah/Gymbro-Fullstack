@@ -24,7 +24,8 @@ final class AppServicesFactory {
     let workoutsModelModifier = WorkoutsModelModifier()
     let localMapper: WorkoutsLocalMapper
 
-    let analytics: AnalyticsServiceImpl
+    let analytics: any AnalyticsService
+    let auth: any AuthServiceProtocol
     private let streakWidget: StreakWidgetControlling
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
 
@@ -34,12 +35,22 @@ final class AppServicesFactory {
     private var didStartOfflineSync = false
     
     private let watchConnectivityService: WatchConnectivityService
+    
+    private let clients: AppClients
+    private let isUITesting: Bool
+    private let perksEvents: PerksEventTrackingService
 
     init(
         router: AppRouter,
-        container: ModelContainer
+        container: ModelContainer,
+        clients: AppClients,
+        isUITesting: Bool = false
     ) {
         self.router = router
+        self.clients = clients
+        self.isUITesting = isUITesting
+        self.auth = clients.auth
+        self.perksEvents = PerksEventTrackingServiceImpl(client: clients.perks)
 
         let store = StreakWidgetStore()
         let reloader = StreakWidgetCenterTimelineReloader()
@@ -75,8 +86,8 @@ final class AppServicesFactory {
 
         self.offlineSyncService = OfflineSyncService(
             actionsRepository: actionsRepository,
-            networkClient: AppMicroservices.workouts,
-            feedsClient: AppMicroservices.feeds,
+            networkClient: clients.workouts,
+            feedsClient: clients.feeds,
             modelModifier: workoutsModelModifier,
             streakWidget: streakService,
             activityCalendarWidget: activityCalendarService,
@@ -84,13 +95,20 @@ final class AppServicesFactory {
         )
         self.watchConnectivityService = WatchConnectivityService(
             workoutsRepository: workoutsRepository,
-            feedsClient: AppMicroservices.feeds,
+            workoutsClient: clients.workouts,
+            feedsClient: clients.feeds,
             streakWidget: streakService,
             activityCalendarWidget: activityCalendarService
         )
-        let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
-        self.analytics = AnalyticsServiceImpl(client: analyticsClient)
-        watchConnectivityService.activate()
+        if isUITesting {
+            self.analytics = MockAnalyticsService()
+        } else {
+            let analyticsClient = AnalyticsClient(networkClient: AppMicroservices.shared.networkClient)
+            self.analytics = AnalyticsServiceImpl(client: analyticsClient)
+        }
+        if !isUITesting {
+            watchConnectivityService.activate()
+        }
 
         AuthEvents.onSessionCleared = {
             AppServicesFactory.resetWidgetsOnSessionCleared()
@@ -106,6 +124,7 @@ final class AppServicesFactory {
     }
 
     func startOfflineSyncIfNeeded() {
+        guard !isUITesting else { return }
         guard !didStartOfflineSync else { return }
         didStartOfflineSync = true
         offlineSyncService.start()
@@ -176,8 +195,8 @@ final class AppServicesFactory {
             workoutsRepository: workoutsRepository,
             exercisesRepository: exercisesRepository,
             modelModifier: workoutsModelModifier,
-            client: AppMicroservices.workouts,
-            feedsClient: AppMicroservices.feeds,
+            client: clients.workouts,
+            feedsClient: clients.feeds,
             localMapper: localMapper,
             analytics: analytics,
             streakWidget: streakWidget,
@@ -194,7 +213,7 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
-            сlient: AppMicroservices.workouts,
+            сlient: clients.workouts,
             localMapper: localMapper,
             analytics: analytics
         )
@@ -208,12 +227,12 @@ final class AppServicesFactory {
             modelModifier: workoutsModelModifier,
             workoutsRepository: workoutsRepository,
             actionsRepository: actionsRepository,
-            client: AppMicroservices.workouts,
-            feedsClient: AppMicroservices.feeds,
+            client: clients.workouts,
+            feedsClient: clients.feeds,
             analytics: analytics,
             streakWidget: streakWidget,
             activityCalendarWidget: activityCalendarWidget,
-            perksEvents: AppMicroservices.perksEvents
+            perksEvents: perksEvents
         )
     }
     
@@ -224,7 +243,7 @@ final class AppServicesFactory {
             divLocalRepository: divLocalRepository,
             actionsRepository: actionsRepository,
             modelModifier: workoutsModelModifier,
-            сlient: AppMicroservices.workouts,
+            сlient: clients.workouts,
             localMapper: localMapper,
             analytics: analytics
         )
@@ -240,11 +259,11 @@ final class AppServicesFactory {
             actionsRepository: actionsRepository,
             localMapper: localMapper,
             modelModifier: workoutsModelModifier,
-            сlient: AppMicroservices.workouts,
+            сlient: clients.workouts,
             type: type,
             workoutId: workoutId,
             analytics: analytics,
-            perksEvents: AppMicroservices.perksEvents
+            perksEvents: perksEvents
         )
     }
     
@@ -255,7 +274,7 @@ final class AppServicesFactory {
             modelModifier: workoutsModelModifier,
             actionsRepository: actionsRepository,
             workoutsRepository: workoutsRepository,
-            client: AppMicroservices.workouts,
+            client: clients.workouts,
             analytics: analytics
         )
     }
@@ -267,9 +286,9 @@ final class AppServicesFactory {
         screenFactories.workoutsShareFactory.makeView(
             input: input,
             router: router,
-            client: AppMicroservices.feeds,
+            client: clients.feeds,
             analytics: analytics,
-            perksEvents: AppMicroservices.perksEvents
+            perksEvents: perksEvents
         )
     }
     
@@ -277,9 +296,9 @@ final class AppServicesFactory {
     func makeFeedsMainTab() -> some View {
         screenFactories.feedsMainTabFactory.makeView(
             router: router,
-            client: AppMicroservices.feeds,
+            client: clients.feeds,
             analytics: analytics,
-            perksEvents: AppMicroservices.perksEvents
+            perksEvents: perksEvents
         )
     }
     
@@ -288,7 +307,7 @@ final class AppServicesFactory {
         screenFactories.feedsPeopleFactory.makeView(
             input: input,
             router: router,
-            client: AppMicroservices.feeds,
+            client: clients.feeds,
             analytics: analytics
         )
     }
@@ -298,7 +317,7 @@ final class AppServicesFactory {
         screenFactories.feedsCalendarFactory.makeView(
             input: CalendarScreenInput(context: context),
             router: router,
-            client: AppMicroservices.feeds,
+            client: clients.feeds,
             analytics: analytics
         )
     }
@@ -308,7 +327,7 @@ final class AppServicesFactory {
         screenFactories.feedsChatFactory.makeView(
             input: input,
             router: router,
-            client: AppMicroservices.feeds,
+            client: clients.feeds,
             realtimeClient: AppMicroservices.feedsRealtime,
             analytics: analytics
         )
@@ -319,7 +338,7 @@ final class AppServicesFactory {
         screenFactories.feedsPostsFactory.makeView(
             input: input,
             router: router,
-            client: AppMicroservices.feeds,
+            client: clients.feeds,
             analytics: analytics
         )
     }
@@ -336,9 +355,9 @@ final class AppServicesFactory {
         screenFactories.profileMainTabFactory.makeView(
             router: router,
             mode: mode,
-            gateway: ProfileGatewayImpl(profileClient: AppMicroservices.profile, feedsClient: AppMicroservices.feeds),
+            gateway: ProfileGatewayImpl(profileClient: clients.profile, feedsClient: clients.feeds),
             analytics: analytics,
-            perksEvents: AppMicroservices.perksEvents
+            perksEvents: perksEvents
         )
     }
     
@@ -346,7 +365,7 @@ final class AppServicesFactory {
     func makeEditProfileScreen() -> some View {
         screenFactories.editProfileFactory.makeView(
             router: router,
-            client: AppMicroservices.profile,
+            client: clients.profile,
             analytics: analytics
         )
     }
@@ -354,7 +373,7 @@ final class AppServicesFactory {
     @MainActor
     func makeProfileOnboarding(onCompleted: @escaping () -> Void) -> some View {
         screenFactories.profileOnboardingFactory.makeView(
-            client: AppMicroservices.profile,
+            client: clients.profile,
             analytics: analytics,
             onCompleted: onCompleted
         )
@@ -364,7 +383,7 @@ final class AppServicesFactory {
     func makeSettingsScreen() -> some View {
         screenFactories.settingsFactory.makeView(
             router: router,
-            client: AppMicroservices.profile,
+            client: clients.profile,
             analytics: analytics
         )
     }
@@ -374,7 +393,7 @@ final class AppServicesFactory {
         screenFactories.statisticsFactory.makeView(
             mode: mode,
             router: router,
-            client: AppMicroservices.profile,
+            client: clients.profile,
             analytics: analytics
         )
     }
@@ -385,7 +404,7 @@ final class AppServicesFactory {
     func makePerksMainTab() -> some View {
         screenFactories.perksMainTabFactory.makeView(
             router: router,
-            client: AppMicroservices.perks,
+            client: clients.perks,
             analytics: analytics
         )
     }
@@ -396,7 +415,7 @@ final class AppServicesFactory {
     func makeChallengesMainTab() -> some View {
         screenFactories.challengesMainTabFactory.makeView(
             router: router,
-            client: AppMicroservices.challenges,
+            client: clients.challenges,
             analytics: analytics
         )
     }
@@ -406,7 +425,7 @@ final class AppServicesFactory {
         screenFactories.challengeDetailsFactory.makeView(
             challengeID: challengeID,
             router: router,
-            client: AppMicroservices.challenges,
+            client: clients.challenges,
             analytics: analytics
         )
     }
@@ -416,7 +435,7 @@ final class AppServicesFactory {
         screenFactories.joinChallengeFactory.makeView(
             challengeID: challengeID,
             router: router,
-            client: AppMicroservices.challenges,
+            client: clients.challenges,
             analytics: analytics
         )
     }
@@ -426,7 +445,7 @@ final class AppServicesFactory {
         screenFactories.challengeLeaderboardFactory.makeView(
             challengeID: challengeID,
             router: router,
-            client: AppMicroservices.challenges,
+            client: clients.challenges,
             analytics: analytics
         )
     }

@@ -14,7 +14,7 @@ public final class ProfileStatisticsFactoryImpl {
     public func makeView(
         mode: ProfileViewMode,
         router: any Router,
-        client: ProfileClient,
+        client: any ProfileClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
         if let cached = viewModelCache[mode] {

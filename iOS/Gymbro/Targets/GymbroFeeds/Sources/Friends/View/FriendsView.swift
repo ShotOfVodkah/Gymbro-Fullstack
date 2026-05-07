@@ -2,7 +2,9 @@ import SwiftUI
 import GymbroCommonUI
 
 struct FeedsPeopleView: View {
-    
+
+    @State private var contentSafeAreaTop: CGFloat = 0
+
     init(viewModel: FeedsPeopleViewModel) {
         self.viewModel = viewModel
     }
@@ -11,7 +13,7 @@ struct FeedsPeopleView: View {
         Group {
             switch viewModel.screenState {
             case .loading:
-                FeedsPeopleViewStub()
+                FeedsPeopleViewStub(topSafeInset: contentSafeAreaTop)
                 
             case .loaded:
                 contentView
@@ -44,6 +46,15 @@ struct FeedsPeopleView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.ignoresSafeArea(.all))
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: FeedsContentSafeAreaTopKey.self,
+                    value: proxy.safeAreaInsets.top
+                )
+            }
+        )
+        .onPreferenceChange(FeedsContentSafeAreaTopKey.self) { contentSafeAreaTop = $0 }
         .ignoresSafeArea(.container, edges: .bottom)
     }
     
@@ -54,6 +65,7 @@ struct FeedsPeopleView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 18) {
                     header
+                        .padding(.top, contentSafeAreaTop + 4)
                     
                     PeopleSearchBar(text: $viewModel.searchText)
                         .padding(.horizontal, 12)
@@ -82,7 +94,10 @@ struct FeedsPeopleView: View {
                     .padding(.horizontal, 12)
                     .padding(.bottom, 24)
                 }
-                .padding(.top, 12)
+            }
+            .ignoresSafeArea(edges: .top)
+            .overlay(alignment: .topLeading) {
+                UITestMarker(id: "feeds.friends.screen")
             }
             .refreshable {
                 await viewModel.refresh()

@@ -22,6 +22,7 @@ struct CommunitiesSegmentPicker: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("feeds.tab.\(tab.rawValue)")
             }
         }
         .padding(.horizontal, 11)

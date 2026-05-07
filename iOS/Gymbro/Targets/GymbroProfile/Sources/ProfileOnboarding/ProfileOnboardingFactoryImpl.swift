@@ -9,7 +9,7 @@ public final class ProfileOnboardingFactoryImpl {
 
     @MainActor
     public func makeView(
-        client: ProfileClient,
+        client: any ProfileClientProtocol,
         analytics: any AnalyticsService,
         onCompleted: @escaping () -> Void
     ) -> some View {

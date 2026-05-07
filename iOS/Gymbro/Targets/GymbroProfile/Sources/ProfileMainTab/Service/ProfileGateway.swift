@@ -11,8 +11,8 @@ public protocol ProfileGateway {
 public final class ProfileGatewayImpl: ProfileGateway {
     
     public init(
-        profileClient: ProfileClient,
-        feedsClient: FeedsClient
+        profileClient: any ProfileClientProtocol,
+        feedsClient: any FeedsClientProtocol
     ) {
         self.profileClient = profileClient
         self.feedsClient = feedsClient
@@ -43,6 +43,6 @@ public final class ProfileGatewayImpl: ProfileGateway {
         }
     }
     
-    private let profileClient: ProfileClient
-    private let feedsClient: FeedsClient
+    private let profileClient: any ProfileClientProtocol
+    private let feedsClient: any FeedsClientProtocol
 }

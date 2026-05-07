@@ -4,16 +4,19 @@ struct EditProfileBioEditor: View {
     
     init(
         text: Binding<String>,
-        limit: Int
+        limit: Int,
+        accessibilityIdentifier: String = "profile.edit.field.bio"
     ) {
         self._text = text
         self.limit = limit
+        self.accessibilityIdentifier = accessibilityIdentifier
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             TextEditor(text: $text)
                 .scrollContentBackground(.hidden)
+                .accessibilityIdentifier(accessibilityIdentifier)
                 .frame(height: 120)
                 .padding(10)
                 .background(
@@ -31,4 +34,5 @@ struct EditProfileBioEditor: View {
     
     @Binding private var text: String
     private let limit: Int
+    private let accessibilityIdentifier: String
 }

@@ -15,6 +15,7 @@ struct WorkoutShareRecipientsStepView: View {
                     iconTint: .appPurple,
                     action: { viewModel.togglePublishToFeed() }
                 )
+                .accessibilityIdentifier("feeds.workoutShare.option.feed")
             }
             
             WorkoutShareSectionCard(title: "Existing Chats") {

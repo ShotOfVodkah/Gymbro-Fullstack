@@ -1,0 +1,63 @@
+name: iOS UI tests
+
+on:
+  push:
+    paths:
+      - "iOS/Gymbro/**"
+      - ".github/workflows/ios-ui-tests-ci.yml"
+  pull_request:
+    paths:
+      - "iOS/Gymbro/**"
+      - ".github/workflows/ios-ui-tests-ci.yml"
+
+env:
+  XCODEBUILD_DESTINATION: "platform=iOS Simulator,name=iPhone 16,OS=18.6"
+  TUIST_XCODE: "26.2"
+  RESULT_BUNDLE_PATH: "TestResults/UI-tests.xcresult"
+
+jobs:
+  ui_tests:
+    runs-on: macos-15
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: iOS/Gymbro
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.TUIST_XCODE }}
+
+      - name: Install Tuist
+        run: |
+          set -euo pipefail
+          brew tap tuist/tuist
+          brew install tuist
+
+      - name: Generate project (tuist)
+        run: |
+          set -euo pipefail
+          tuist install
+          tuist generate --no-open
+
+      - name: Run UI tests
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "${{ env.RESULT_BUNDLE_PATH }}")"
+
+          xcodebuild \
+            -workspace Gymbro.xcworkspace \
+            -scheme GymbroUITests \
+            -destination "${{ env.XCODEBUILD_DESTINATION }}" \
+            -resultBundlePath "${{ env.RESULT_BUNDLE_PATH }}" \
+            test
+
+      - name: Upload UI test result bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ui-tests-xcresult
+          path: iOS/Gymbro/${{ env.RESULT_BUNDLE_PATH }}

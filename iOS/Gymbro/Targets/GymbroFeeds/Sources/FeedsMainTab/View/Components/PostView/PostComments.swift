@@ -13,6 +13,9 @@ struct FeedCommentsSheetView: View {
     var body: some View {
         ZStack {
             backgroundView
+                .overlay(alignment: .topLeading) {
+                    UITestMarker(id: "feeds.comments.sheet")
+                }
             
             VStack(spacing: 0) {
                 header
@@ -27,6 +30,7 @@ struct FeedCommentsSheetView: View {
                 
                 inputBar
             }
+            .padding(.horizontal, 16)
         }
     }
     
@@ -44,7 +48,6 @@ struct FeedCommentsSheetView: View {
             }
         }
         .padding(.top, 20)
-        .padding(.horizontal, 20)
         .padding(.bottom, 16)
     }
     
@@ -86,7 +89,6 @@ struct FeedCommentsSheetView: View {
                         commentRow(comment)
                     }
                 }
-                .padding(.horizontal, 16)
                 .padding(.vertical, 16)
             }
         }
@@ -102,6 +104,7 @@ struct FeedCommentsSheetView: View {
                 .background(Color.white.opacity(0.08))
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .lineLimit(1...4)
+                .accessibilityIdentifier("feeds.comments.input")
             
             Button(action: onSendTap) {
                 Image(systemName: "paperplane.fill")
@@ -112,10 +115,10 @@ struct FeedCommentsSheetView: View {
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("feeds.comments.send")
             .disabled(draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .opacity(draftText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
         }
-        .padding(.horizontal, 16)
         .padding(.top, 14)
         .padding(.bottom, 18)
     }

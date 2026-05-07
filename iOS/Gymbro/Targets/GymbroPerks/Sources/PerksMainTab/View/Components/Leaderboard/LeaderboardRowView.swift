@@ -47,6 +47,7 @@ struct LeaderboardRowView: View {
         .background(cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(cardBorder)
+        .accessibilityIdentifier("perks.leaderboard.row.\(entry.id)")
     }
     
     private func rankView(_ rank: Int) -> some View {

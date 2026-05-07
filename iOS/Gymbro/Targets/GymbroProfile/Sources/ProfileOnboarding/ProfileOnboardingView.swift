@@ -85,7 +85,8 @@ struct ProfileOnboardingView: View {
                                     set: viewModel.updateName
                                 ),
                                 autocapitalization: .words,
-                                disableAutocorrection: true
+                                disableAutocorrection: true,
+                                accessibilityIdentifier: "profile.onboarding.field.fullName"
                             )
 
                             EditProfileTextField(
@@ -93,7 +94,7 @@ struct ProfileOnboardingView: View {
                                 text: Binding(
                                     get: { viewModel.form.username },
                                     set: viewModel.updateUsername
-                                )
+                                ), accessibilityIdentifier: "profile.onboarding.field.userName"
                             )
 
                             EditProfileTextField(
@@ -103,7 +104,8 @@ struct ProfileOnboardingView: View {
                                     set: viewModel.updateStatus
                                 ),
                                 autocapitalization: .sentences,
-                                disableAutocorrection: true
+                                disableAutocorrection: true,
+                                accessibilityIdentifier: "profile.onboarding.field.status"
                             )
 
                             EditProfileTextField(
@@ -113,7 +115,8 @@ struct ProfileOnboardingView: View {
                                     set: viewModel.updateSubtitle
                                 ),
                                 autocapitalization: .sentences,
-                                disableAutocorrection: true
+                                disableAutocorrection: true,
+                                accessibilityIdentifier: "profile.onboarding.field.subtitle"
                             )
                         }
                     }

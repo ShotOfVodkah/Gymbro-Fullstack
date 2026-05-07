@@ -1,0 +1,28 @@
+name: Auth CI
+
+on:
+  push:
+    paths:
+      - 'Backend/services/auth/**'
+      - '.github/workflows/auth-ci.yml'
+  pull_request:
+
+jobs:
+  test:
+    name: Go tests — auth service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend/services/auth
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: Backend/services/auth/go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./... -count=1 -short

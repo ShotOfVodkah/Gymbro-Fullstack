@@ -7,16 +7,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alexandra-gritsaenko/gymbro-perks/service"
 	"github.com/alexandra-gritsaenko/gymbro-perks/types"
 )
 
 type InternalPerksHandler struct {
-	service        *service.PerksService
+	service        PerksService
 	internalSecret string
 }
 
-func NewInternalPerksHandler(service *service.PerksService) *InternalPerksHandler {
+func NewInternalPerksHandler(service PerksService) *InternalPerksHandler {
 	return &InternalPerksHandler{
 		service:        service,
 		internalSecret: os.Getenv("INTERNAL_SERVICE_SECRET"),

@@ -26,9 +26,11 @@ final class AuthViewModel: ObservableObject {
     @Published var alertData: CustomAlertData = .init()
 
     private let analytics: any AnalyticsService
+    private let auth: any AuthServiceProtocol
 
-    init(analytics: any AnalyticsService) {
+    init(analytics: any AnalyticsService, auth: any AuthServiceProtocol) {
         self.analytics = analytics
+        self.auth = auth
     }
     
     func openLegal(_ type: LegalDocType) {
@@ -88,7 +90,7 @@ final class AuthViewModel: ObservableObject {
     }
     
     private func login(email: String, password: String) async throws {
-        let tokens = try await AppMicroservices.auth.login(
+        let tokens = try await auth.login(
             email: email,
             password: password
         )
@@ -101,7 +103,7 @@ final class AuthViewModel: ObservableObject {
     }
     
     private func register(email: String, password: String, role: String) async throws {
-        let user = try await AppMicroservices.auth.register(
+        let user = try await auth.register(
             email: email,
             password: password,
             role: role
@@ -127,7 +129,7 @@ final class AuthViewModel: ObservableObject {
 
         Task {
             do {
-                let response = try await AppMicroservices.auth.resendVerificationEmail(email: targetEmail)
+                let response = try await auth.resendVerificationEmail(email: targetEmail)
                 showAlert(response.message)
             } catch {
                 showAlert(error.localizedDescription)
@@ -175,7 +177,7 @@ final class AuthViewModel: ObservableObject {
         defer { isEmailVerificationInProgress = false }
 
         do {
-            let tokens = try await AppMicroservices.auth.verifyEmail(token: token)
+            let tokens = try await auth.verifyEmail(token: token)
 
             SessionManager.shared.setSession(tokens: tokens)
 

@@ -17,6 +17,7 @@ struct WorkoutShareActionBar: View {
                 wrapContent: false
             )
             .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("feeds.workoutShare.back")
             
             AppButton(
                 primaryButtonTitle,
@@ -25,6 +26,7 @@ struct WorkoutShareActionBar: View {
                 wrapContent: false
             )
             .frame(maxWidth: .infinity)
+            .accessibilityIdentifier("feeds.workoutShare.primary")
             .disabled(isPrimaryDisabled)
             .opacity(isPrimaryDisabled ? 0.5 : 1.0)
         }
