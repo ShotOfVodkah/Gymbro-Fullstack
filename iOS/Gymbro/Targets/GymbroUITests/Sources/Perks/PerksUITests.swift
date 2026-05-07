@@ -65,8 +65,27 @@ final class PerksUITests: BaseUITestCase {
     func testAchievementExpandedOpenAndClose() {
         openPerksDashboard()
 
-        let rookieCard = app.buttons[TestIDs.Perks.achievementCard("rookie")]
-        XCTAssertTrue(rookieCard.waitForExistence(timeout: 8))
+        let rookieID = TestIDs.Perks.achievementCard("rookie")
+        let rookieCards = app.buttons.matching(identifier: rookieID)
+        XCTAssertGreaterThan(rookieCards.count, 0, "Expected achievement card to exist: \(rookieID)")
+
+        // The card may exist in the hierarchy while being offscreen (ScrollView / TabView pages).
+        // Prefer tapping a hittable match; if none are hittable yet, scroll a bit and retry.
+        var rookieCard: XCUIElement?
+        for _ in 0..<6 {
+            let hittable = rookieCards.allElementsBoundByIndex.first(where: { $0.exists && $0.isHittable })
+            if let hittable {
+                rookieCard = hittable
+                break
+            }
+            app.swipeUp()
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+
+        guard let rookieCard else {
+            XCTFail("Expected a hittable achievement card: \(rookieID)")
+            return
+        }
         
         var didOpen = false
         for _ in 0..<3 {
