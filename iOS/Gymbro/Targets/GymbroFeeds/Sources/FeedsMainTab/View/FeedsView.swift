@@ -84,7 +84,7 @@ struct FeedsMainTabView: View {
                         onPeopleTap: viewModel.didTapOpenFriends,
                         onCalendarTap: viewModel.didTapCalendarButton
                     )
-                    .padding(.top, feedsScrollSafeAreaTop + 4)
+                    .padding(.top, 4)
                     .id(scrollToTopID)
 
                     CommunitiesSegmentPicker(selectedTab: $viewModel.selectedTab)
@@ -136,6 +136,10 @@ struct FeedsMainTabView: View {
                     }
                 }
             }
+            .tint(.white)
+            .refreshable {
+                await viewModel.refresh(showLoading: false)
+            }
             .overlay(alignment: .bottom) {
                 if viewModel.hasNewPostsAvailable {
                     Button {
@@ -175,12 +179,8 @@ struct FeedsMainTabView: View {
                 }
             }
         }
-        .ignoresSafeArea(edges: .top)
         .overlay(alignment: .topLeading) {
             UITestMarker(id: "feeds.content.loaded")
-        }
-        .refreshable {
-            await viewModel.refresh(showLoading: true)
         }
         .onAppear {
             viewModel.onAppear()

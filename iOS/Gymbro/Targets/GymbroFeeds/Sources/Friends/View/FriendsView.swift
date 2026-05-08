@@ -68,7 +68,7 @@ struct FeedsPeopleView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 18) {
                     header
-                        .padding(.top, contentSafeAreaTop + 4)
+                        .padding(.top, 4)
                     
                     PeopleSearchBar(text: $viewModel.searchText)
                         .padding(.horizontal, 12)
@@ -108,7 +108,7 @@ struct FeedsPeopleView: View {
                     }
                 }
             }
-            .ignoresSafeArea(edges: .top)
+            .tint(.white)
             .overlay(alignment: .topLeading) {
                 UITestMarker(id: "feeds.friends.screen")
             }

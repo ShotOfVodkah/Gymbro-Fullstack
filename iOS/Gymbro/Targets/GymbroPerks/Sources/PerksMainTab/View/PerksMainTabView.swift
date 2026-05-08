@@ -52,6 +52,9 @@ struct PerksMainTabView: View {
         .task {
             await viewModel.loadIfNeeded()
         }
+        .onAppear {
+            viewModel.onAppear()
+        }
         .sheet(isPresented: $viewModel.isStreakSettingsPresented) {
             if let streak = viewModel.dashboard?.streak {
                 StreakSettingsSheetView(

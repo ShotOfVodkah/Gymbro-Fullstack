@@ -56,7 +56,7 @@ final class FeedsProfilePostsViewModel: ObservableObject {
     }
     
     func refresh() async {
-        await loadPosts()
+        await loadPosts(showLoading: false)
     }
 
     func clearUserScopedState() {
@@ -66,7 +66,7 @@ final class FeedsProfilePostsViewModel: ObservableObject {
 
     func reload() {
         Task {
-            await loadPosts()
+            await loadPosts(showLoading: true)
         }
     }
     
@@ -75,12 +75,14 @@ final class FeedsProfilePostsViewModel: ObservableObject {
         router.navigate(to: .workoutInfo(id: sessionID, type: .session))
     }
 
-    private func loadPosts() async {
+    private func loadPosts(showLoading: Bool) async {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
 
-        screenState = .loading
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
 
         do {
             posts = try await service.fetchPosts(input: input)
