@@ -21,6 +21,7 @@ final class WorkoutShareViewModel: ObservableObject {
     private let router: any Router
     private let service: any WorkoutShareService
     private let analytics: any AnalyticsService
+    private let locationProvider = WorkoutShareLocationProvider()
 
     init(
         input: WorkoutShareInput,
@@ -234,6 +235,10 @@ final class WorkoutShareViewModel: ObservableObject {
 
     // MARK: - Details UI
 
+    @Published private(set) var isResolvingCurrentLocation: Bool = false
+    @Published private(set) var locationSuggestions: [String] = []
+    @Published private(set) var locationResolveErrorMessage: String? = nil
+
     func updateCaption(_ text: String) {
         let oldWasEmpty = draft.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         let newWasEmpty = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -251,10 +256,39 @@ final class WorkoutShareViewModel: ObservableObject {
         let newWasFilled = !(newValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         
         draft.location = newValue
+        if newValue == nil {
+            locationSuggestions = []
+        }
         
         if oldWasFilled != newWasFilled {
             analytics.track(.workoutShareLocationEdited(isFilled: newWasFilled))
         }
+    }
+
+    func fetchCurrentLocationSuggestions() async {
+        guard !isResolvingCurrentLocation else { return }
+        isResolvingCurrentLocation = true
+        locationResolveErrorMessage = nil
+
+        do {
+            let suggestions = try await locationProvider.requestSuggestedLocations()
+            locationSuggestions = suggestions
+        } catch let error as WorkoutShareLocationError {
+            switch error {
+            case .permissionDenied:
+                locationResolveErrorMessage = "Location permission is denied. Enable it in Settings to use current location."
+            case .unableToDetermineLocation:
+                locationResolveErrorMessage = "Couldn’t determine your location. Try again."
+            }
+        } catch {
+            locationResolveErrorMessage = error.localizedDescription
+        }
+
+        isResolvingCurrentLocation = false
+    }
+
+    func selectLocationSuggestion(_ value: String) {
+        updateLocation(value)
     }
 
     var locationText: String {

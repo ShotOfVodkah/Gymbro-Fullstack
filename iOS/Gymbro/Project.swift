@@ -22,6 +22,7 @@ let mainAppTarget: ProjectDescription.Target = .target(
             "CFBundleDevelopmentRegion": "en",
             "CFBundleLocalizations": ["en", "ru"],
             "CFBundleAllowMixedLocalizations": true,
+            "NSLocationWhenInUseUsageDescription": "We use geolocation to add to your workout posts.",
             "CFBundleURLTypes": [
                 [
                     "CFBundleURLName": "dev.tuist.Gymbro",
