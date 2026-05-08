@@ -23,6 +23,16 @@ public extension FeedsClient {
         )
     }
 
+    func fetchFollowers() async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/followers",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
     func fetchDiscoverPeople(query: String? = nil) async throws -> [PersonItemResponse] {
         let queryItems: [URLQueryItem]? = {
             guard let query, !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -83,6 +93,16 @@ public extension FeedsClient {
         try await client.request(
             method: .GET,
             path: "people/\(userID)/following",
+            body: Optional<EmptyBody>.none,
+            requiresAuth: true,
+            responseType: [PersonItemResponse].self
+        )
+    }
+
+    func fetchFollowersByUser(userID: String) async throws -> [PersonItemResponse] {
+        try await client.request(
+            method: .GET,
+            path: "people/\(userID)/followers",
             body: Optional<EmptyBody>.none,
             requiresAuth: true,
             responseType: [PersonItemResponse].self

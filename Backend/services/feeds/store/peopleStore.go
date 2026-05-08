@@ -54,6 +54,27 @@ func (ps *PeopleStore) ListFollowingIDsForUser(userID int) ([]int, error) {
 	return ids, nil
 }
 
+func (ps *PeopleStore) ListFollowerIDsForUser(userID int) ([]int, error) {
+	query := `
+		SELECT uf.follower_id
+		FROM user_follows uf
+		WHERE uf.followee_id = $1
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM user_follows back
+			WHERE back.follower_id = $1
+			  AND back.followee_id = uf.follower_id
+		  )
+		ORDER BY uf.follower_id
+	`
+
+	var ids []int
+	if err := ps.db.Select(&ids, query, userID); err != nil {
+		return nil, fmt.Errorf("ListFollowerIDsForUser: %w", err)
+	}
+	return ids, nil
+}
+
 func (ps *PeopleStore) ListAllFollowedIDsForUser(userID int) ([]int, error) {
 	query := `
 		SELECT followee_id

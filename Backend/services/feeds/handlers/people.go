@@ -37,6 +37,10 @@ func (h *PeopleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.GetFollowing(w, r)
 		return
 
+	case r.Method == http.MethodGet && r.URL.Path == "/people/followers":
+		h.GetFollowers(w, r)
+		return
+
 	case r.Method == http.MethodGet && r.URL.Path == "/people/discover":
 		h.GetDiscover(w, r)
 		return
@@ -47,6 +51,10 @@ func (h *PeopleHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/people/") && strings.HasSuffix(r.URL.Path, "/following"):
 		h.GetUserFollowing(w, r)
+		return
+
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/people/") && strings.HasSuffix(r.URL.Path, "/followers"):
+		h.GetUserFollowers(w, r)
 		return
 
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/people/") && !strings.HasSuffix(r.URL.Path, "/follow"):
@@ -105,6 +113,29 @@ func (h *PeopleHandler) GetFollowing(w http.ResponseWriter, r *http.Request) {
 	resp, err := h.buildPeopleResponse(r, claims.UserID, ids)
 	if err != nil {
 		http.Error(w, "failed to build following response", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *PeopleHandler) GetFollowers(w http.ResponseWriter, r *http.Request) {
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	ids, err := h.store.ListFollowerIDsForUser(claims.UserID)
+	if err != nil {
+		http.Error(w, "failed to load followers", http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := h.buildPeopleResponse(r, claims.UserID, ids)
+	if err != nil {
+		http.Error(w, "failed to build followers response", http.StatusInternalServerError)
 		return
 	}
 
@@ -293,6 +324,33 @@ func (h *PeopleHandler) GetUserFollowing(w http.ResponseWriter, r *http.Request)
 	resp, err := h.buildPeopleResponse(r, claims.UserID, ids)
 	if err != nil {
 		http.Error(w, "failed to build user following response", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+
+}
+
+func (h *PeopleHandler) GetUserFollowers(w http.ResponseWriter, r *http.Request) {
+
+	claims, ok := authmw.GetClaims(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	targetUserID, ok := personIDFromPeopleListPath(r.URL.Path, "/followers")
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	ids, err := h.store.ListFollowerIDsForUser(targetUserID)
+	if err != nil {
+		http.Error(w, "failed to load user followers", http.StatusInternalServerError)
+		return
+	}
+	resp, err := h.buildPeopleResponse(r, claims.UserID, ids)
+	if err != nil {
+		http.Error(w, "failed to build user followers response", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -48,6 +48,11 @@ struct FeedsCalendarView: View {
             }
         )
         .onPreferenceChange(FeedsContentSafeAreaTopKey.self) { contentSafeAreaTop = $0 }
+        .onAppear {
+            Task {
+                await viewModel.refresh()
+            }
+        }
     }
     
     private var contentView: some View {
@@ -79,6 +84,16 @@ struct FeedsCalendarView: View {
                     )
                     
                     CalendarLegendView()
+
+                    if !viewModel.hasAnyWorkoutsInMonth {
+                        FeedsEmptyStateView(
+                            systemImage: "calendar",
+                            title: String(localized: "feeds.calendar.empty.title", bundle: .module),
+                            subtitle: String(localized: "feeds.calendar.empty.subtitle", bundle: .module)
+                        )
+                        .frame(minHeight: 200)
+                        .padding(.top, 4)
+                    }
                     
                     if let selectedDay = viewModel.selectedDayForActions,
                        !selectedDay.myWorkouts.isEmpty || !selectedDay.partnerWorkouts.isEmpty {

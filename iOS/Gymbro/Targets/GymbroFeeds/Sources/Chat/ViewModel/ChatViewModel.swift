@@ -26,6 +26,8 @@ final class ChatViewModel: ObservableObject {
     @Published var messageStatuses: [String: ChatMessageLocalStatus] = [:]
     private var realtimeTask: Task<Void, Never>?
     private var typingStopTask: Task<Void, Never>?
+    private var lastRefreshAt: Date?
+    private var isRefreshing: Bool = false
     
     private var isTypingSent = false
 
@@ -91,12 +93,22 @@ final class ChatViewModel: ObservableObject {
             await loadChat()
         }
     }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
     
     private func loadChat() async {
         guard let chatID = input.chatID else {
             screenState = .error
             return
         }
+
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
         
         screenState = .loading
         
@@ -106,6 +118,7 @@ final class ChatViewModel: ObservableObject {
             messages = result.messages
             groupInfo = result.groupInfo
             screenState = .loaded
+            lastRefreshAt = Date()
             
             startRealtime()
             markLastMessageAsRead()
@@ -113,6 +126,12 @@ final class ChatViewModel: ObservableObject {
             print("Failed to load chat:", error)
             screenState = .error
         }
+    }
+
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await loadChat()
     }
     
     func didTapBack() {

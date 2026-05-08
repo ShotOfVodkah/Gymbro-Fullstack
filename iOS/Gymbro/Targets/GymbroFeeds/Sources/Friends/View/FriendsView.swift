@@ -55,6 +55,9 @@ struct FeedsPeopleView: View {
             }
         )
         .onPreferenceChange(FeedsContentSafeAreaTopKey.self) { contentSafeAreaTop = $0 }
+        .onAppear {
+            viewModel.onAppear()
+        }
         .ignoresSafeArea(.container, edges: .bottom)
     }
     
@@ -76,23 +79,33 @@ struct FeedsPeopleView: View {
                         onSelectTab: viewModel.didSelectTab(_:)
                     )
                     
-                    VStack(spacing: 18) {
-                        ForEach(viewModel.orderedSections, id: \.title) { section in
-                            if !section.people.isEmpty {
-                                PeopleSectionView(
-                                    title: section.title,
-                                    people: section.people,
-                                    currentUserID: viewModel.currentUserID,
-                                    onPersonTap: viewModel.didTapPerson(_ :),
-                                    onFollowTap: { person in
-                                        viewModel.toggleFollow(for: person.id)
-                                    }
-                                )
+                    if viewModel.orderedSections.allSatisfy({ $0.people.isEmpty }) {
+                        FeedsEmptyStateView(
+                            systemImage: "person.2",
+                            title: viewModel.emptyStateTitle,
+                            subtitle: viewModel.emptyStateSubtitle
+                        )
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 320)
+                    } else {
+                        VStack(spacing: 18) {
+                            ForEach(viewModel.orderedSections, id: \.title) { section in
+                                if !section.people.isEmpty {
+                                    PeopleSectionView(
+                                        title: section.title,
+                                        people: section.people,
+                                        currentUserID: viewModel.currentUserID,
+                                        onPersonTap: viewModel.didTapPerson(_ :),
+                                        onFollowTap: { person in
+                                            viewModel.toggleFollow(for: person.id)
+                                        }
+                                    )
+                                }
                             }
                         }
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 24)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 24)
                 }
             }
             .ignoresSafeArea(edges: .top)

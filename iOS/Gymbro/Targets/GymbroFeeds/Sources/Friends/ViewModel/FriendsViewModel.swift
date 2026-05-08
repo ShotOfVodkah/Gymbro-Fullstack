@@ -18,6 +18,7 @@ final class FeedsPeopleViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var friends: [PersonItem] = []
     @Published var followingPeople: [PersonItem] = []
+    @Published var followers: [PersonItem] = []
     @Published var discoverPeople: [PersonItem] = []
     @Published var selectedPerson: PersonItem?
     @Published var shouldShowDiscover: Bool = true
@@ -29,6 +30,8 @@ final class FeedsPeopleViewModel: ObservableObject {
     
     private let invalidationCenter: FeedsStateInvalidationCenter
     private var invalidationTask: Task<Void, Never>?
+    private var lastRefreshAt: Date?
+    private var isRefreshing: Bool = false
     
     var currentUserID: String { AppMicroservices.tokens.userId ?? "" }
     
@@ -54,21 +57,28 @@ final class FeedsPeopleViewModel: ObservableObject {
     deinit {
         invalidationTask?.cancel()
     }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
     
     func reload() {
         analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsPeople.rawValue))
         Task {
-            await loadPeople()
+            await loadPeople(showLoading: true)
         }
     }
     
     func refresh() async {
-        await loadPeople()
+        await loadPeople(showLoading: false)
     }
 
     func clearUserScopedState() {
         friends = []
         followingPeople = []
+        followers = []
         discoverPeople = []
         selectedPerson = nil
         searchText = ""
@@ -89,6 +99,7 @@ final class FeedsPeopleViewModel: ObservableObject {
         case .friends:
             var sections: [(String, [PersonItem])] = [
                 (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                (String(localized: "feeds.section.followers", bundle: .module), filteredFollowers),
                 (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
             ]
             if shouldShowDiscover {
@@ -99,7 +110,19 @@ final class FeedsPeopleViewModel: ObservableObject {
         case .following:
             var sections: [(String, [PersonItem])] = [
                 (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
+                (String(localized: "feeds.section.followers", bundle: .module), filteredFollowers),
                 (String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
+            ]
+            if shouldShowDiscover {
+                sections.append((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
+            }
+            return sections
+            
+        case .followers:
+            var sections: [(String, [PersonItem])] = [
+                (String(localized: "feeds.section.followers", bundle: .module), filteredFollowers),
+                (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
             ]
             if shouldShowDiscover {
                 sections.append((String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople))
@@ -110,12 +133,14 @@ final class FeedsPeopleViewModel: ObservableObject {
             guard shouldShowDiscover else {
                 return [
                     (String(localized: "feeds.section.friends", bundle: .module), filteredFriends),
+                    (String(localized: "feeds.section.followers", bundle: .module), filteredFollowers),
                     (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople)
                 ]
             }
             return [
                 (String(localized: "feeds.section.discover", bundle: .module), filteredDiscoverPeople),
                 (String(localized: "feeds.section.following", bundle: .module), filteredFollowingPeople),
+                (String(localized: "feeds.section.followers", bundle: .module), filteredFollowers),
                 (String(localized: "feeds.section.friends", bundle: .module), filteredFriends)
             ]
         }
@@ -131,7 +156,7 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     var availableTabs: [PeopleTab] {
-        shouldShowDiscover ? [.friends, .following, .discover] : [.friends, .following]
+        shouldShowDiscover ? [.friends, .following, .followers, .discover] : [.friends, .following, .followers]
     }
     
     var filteredFriends: [PersonItem] {
@@ -141,9 +166,39 @@ final class FeedsPeopleViewModel: ObservableObject {
     var filteredFollowingPeople: [PersonItem] {
         filter(people: followingPeople)
     }
+
+    var filteredFollowers: [PersonItem] {
+        filter(people: followers)
+    }
     
     var filteredDiscoverPeople: [PersonItem] {
         filter(people: discoverPeople)
+    }
+
+    var emptyStateTitle: String {
+        switch selectedTab {
+        case .friends:
+            return String(localized: "feeds.people.empty.friends.title", bundle: .module)
+        case .following:
+            return String(localized: "feeds.people.empty.following.title", bundle: .module)
+        case .followers:
+            return String(localized: "feeds.people.empty.followers.title", bundle: .module)
+        case .discover:
+            return shouldShowDiscover
+                ? String(localized: "feeds.people.empty.discover.title", bundle: .module)
+                : String(localized: "feeds.people.empty.default.title", bundle: .module)
+        }
+    }
+
+    var emptyStateSubtitle: String? {
+        switch selectedTab {
+        case .discover:
+            return shouldShowDiscover
+                ? String(localized: "feeds.people.empty.discover.subtitle", bundle: .module)
+                : nil
+        default:
+            return String(localized: "feeds.people.empty.default.subtitle", bundle: .module)
+        }
     }
     
     func didTapPerson(_ person: PersonItem) {
@@ -167,7 +222,7 @@ final class FeedsPeopleViewModel: ObservableObject {
             do {
                 guard let person = allPeople.first(where: { $0.id == personID }) else { return }
                 try await service.toggleFollow(for: person)
-                await loadPeople()
+                await loadPeople(showLoading: false)
                 
                 if selectedPerson?.id == personID {
                     selectedPerson = allPeople.first(where: { $0.id == personID })
@@ -181,7 +236,7 @@ final class FeedsPeopleViewModel: ObservableObject {
     }
     
     private var allPeople: [PersonItem] {
-        friends + followingPeople + discoverPeople
+        friends + followingPeople + followers + discoverPeople
     }
     
     func didTapViewProfile(for person: PersonItem) {
@@ -254,14 +309,21 @@ final class FeedsPeopleViewModel: ObservableObject {
         }
     }
     
-    private func loadPeople() async {
-        screenState = .loading
+    private func loadPeople(showLoading: Bool = true) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
         
         do {
             let result = try await service.fetchScreen(input: input)
             
             friends = result.friends
             followingPeople = result.following
+            followers = result.followers
             discoverPeople = result.discover
             shouldShowDiscover = result.shouldShowDiscover
             
@@ -270,9 +332,16 @@ final class FeedsPeopleViewModel: ObservableObject {
             }
             
             screenState = .loaded
+            lastRefreshAt = Date()
         } catch {
             print("Failed to load people:", error)
             screenState = .error
         }
+    }
+
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await loadPeople(showLoading: false)
     }
 }

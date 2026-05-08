@@ -137,6 +137,40 @@
         }
       }
     },
+    "feeds.calendar.empty.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No workouts this month"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В этом месяце нет тренировок"
+          }
+        }
+      }
+    },
+    "feeds.calendar.empty.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you log workouts, they’ll show up here."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Когда вы будете записывать тренировки, они появятся здесь."
+          }
+        }
+      }
+    },
     "feeds.chat.create.subtitle" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -579,6 +613,142 @@
         }
       }
     },
+    "feeds.feed.new_posts" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show new posts"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать новые"
+          }
+        }
+      }
+    },
+    "feeds.feed.empty.foryou.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your feed is empty"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лента пока пустая"
+          }
+        }
+      }
+    },
+    "feeds.feed.empty.friends.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No friends posts yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет постов друзей"
+          }
+        }
+      }
+    },
+    "feeds.feed.empty.personal.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No direct chat posts yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет постов из личных чатов"
+          }
+        }
+      }
+    },
+    "feeds.feed.empty.group.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No group posts yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет постов из групп"
+          }
+        }
+      }
+    },
+    "feeds.feed.empty.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull to refresh or check back later."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Потяните вниз, чтобы обновить, или зайдите позже."
+          }
+        }
+      }
+    },
+    "feeds.profile.posts.empty.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No posts yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет постов"
+          }
+        }
+      }
+    },
+    "feeds.profile.posts.empty.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workouts you share will show up here."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь появятся тренировки, которыми вы поделитесь."
+          }
+        }
+      }
+    },
     "feeds.group.add_people" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -783,6 +953,23 @@
         }
       }
     },
+    "feeds.people.tab.followers" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Followers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписчики"
+          }
+        }
+      }
+    },
     "feeds.people.tab.friends" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -813,6 +1000,125 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Люди"
+          }
+        }
+      }
+    },
+    "feeds.people.empty.default.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No people here yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока никого нет"
+          }
+        }
+      }
+    },
+    "feeds.people.empty.default.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try searching or come back later."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробуйте поиск или зайдите позже."
+          }
+        }
+      }
+    },
+    "feeds.people.empty.friends.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No friends yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет друзей"
+          }
+        }
+      }
+    },
+    "feeds.people.empty.following.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No following yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет подписок"
+          }
+        }
+      }
+    },
+    "feeds.people.empty.followers.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No followers yet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет подписчиков"
+          }
+        }
+      }
+    },
+    "feeds.people.empty.discover.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No one to discover right now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас никого нового"
+          }
+        }
+      }
+    },
+    "feeds.people.empty.discover.subtitle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re already following everyone we can suggest."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы уже подписаны на всех, кого можем порекомендовать."
           }
         }
       }
@@ -915,6 +1221,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Подписки"
+          }
+        }
+      }
+    },
+    "feeds.section.followers" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Followers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подписчики"
           }
         }
       }

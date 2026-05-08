@@ -6,6 +6,7 @@ struct FeedsMainTabView: View {
 
     @ObservedObject private var viewModel: FeedsMainTabViewModel
     @State private var feedsScrollSafeAreaTop: CGFloat = 0
+    private let scrollToTopID = "feeds.scroll.top"
 
     init(viewModel: FeedsMainTabViewModel) {
         self.viewModel = viewModel
@@ -76,51 +77,102 @@ struct FeedsMainTabView: View {
     }
 
     private var contentView: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 20) {
-                FeedsTopBar(
-                    onPeopleTap: viewModel.didTapOpenFriends,
-                    onCalendarTap: viewModel.didTapCalendarButton
-                )
-                .padding(.top, feedsScrollSafeAreaTop + 4)
-
-                CommunitiesSegmentPicker(selectedTab: $viewModel.selectedTab)
-                
-                if viewModel.shouldShowCommunities {
-                    CommunitiesScrollView(
-                        communities: viewModel.visibleCommunities,
-                        onCreateTap: viewModel.didTapCreateCommunity,
-                        onTap: viewModel.didTapCommunity(_:)
+        ScrollViewReader { proxy in
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 20) {
+                    FeedsTopBar(
+                        onPeopleTap: viewModel.didTapOpenFriends,
+                        onCalendarTap: viewModel.didTapCalendarButton
                     )
-                } else {
-                    CreateCommunityButtonView(onTap: viewModel.didTapCreateCommunity)
-                }
-                
-                LazyVStack(spacing: 15) {
-                    ForEach(viewModel.visiblePosts) { post in
-                        PostCardView(
-                            post: post,
-                            mode: .full,
-                            onAuthorTap: { viewModel.didTapAuthor(post) },
-                            onLikeTap: { viewModel.toggleLike(for: post.id) },
-                            onCommentTap: { viewModel.didTapComments(for: post) },
-                            onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) },
-                            onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) },
-                            onDoubleTapLike: { viewModel.doubleTapLike(for: post.id) },
+                    .padding(.top, feedsScrollSafeAreaTop + 4)
+                    .id(scrollToTopID)
+
+                    CommunitiesSegmentPicker(selectedTab: $viewModel.selectedTab)
+                    
+                    if viewModel.shouldShowCommunities {
+                        CommunitiesScrollView(
+                            communities: viewModel.visibleCommunities,
+                            onCreateTap: viewModel.didTapCreateCommunity,
+                            onTap: viewModel.didTapCommunity(_:)
                         )
-                        .onAppear {
-                            viewModel.loadNextPageIfNeeded(currentPost: post)
-                        }
+                    } else {
+                        CreateCommunityButtonView(onTap: viewModel.didTapCreateCommunity)
                     }
                     
-                    if viewModel.isLoadingNextPage {
-                        ProgressView()
-                            .tint(.white)
-                            .padding(.vertical, 16)
+                    if viewModel.visiblePosts.isEmpty {
+                        FeedsEmptyStateView(
+                            systemImage: "square.stack.3d.up",
+                            title: emptyFeedTitle,
+                            subtitle: String(localized: "feeds.feed.empty.subtitle", bundle: .module)
+                        )
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 320)
+                    } else {
+                        LazyVStack(spacing: 15) {
+                            ForEach(viewModel.visiblePosts) { post in
+                                PostCardView(
+                                    post: post,
+                                    mode: .full,
+                                    onAuthorTap: { viewModel.didTapAuthor(post) },
+                                    onLikeTap: { viewModel.toggleLike(for: post.id) },
+                                    onCommentTap: { viewModel.didTapComments(for: post) },
+                                    onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) },
+                                    onShowAllExercisesTap: { viewModel.didTapShowAllExercises(in: post) },
+                                    onDoubleTapLike: { viewModel.doubleTapLike(for: post.id) },
+                                )
+                                .onAppear {
+                                    viewModel.loadNextPageIfNeeded(currentPost: post)
+                                }
+                            }
+                            
+                            if viewModel.isLoadingNextPage {
+                                ProgressView()
+                                    .tint(.white)
+                                    .padding(.vertical, 16)
+                            }
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.bottom, 120)
                     }
                 }
-                .padding(.horizontal, 7)
-                .padding(.bottom, 120)
+            }
+            .overlay(alignment: .bottom) {
+                if viewModel.hasNewPostsAvailable {
+                    Button {
+                        Task {
+                            await viewModel.refresh(showLoading: false)
+                            await MainActor.run {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    proxy.scrollTo(scrollToTopID, anchor: .top)
+                                }
+                            }
+                        }
+                    } label: {
+                        Text(String(localized: "feeds.feed.new_posts", bundle: .module))
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Capsule().fill(Color.appPurple))
+                            .overlay(
+                                Capsule()
+                                    .stroke(LinearGradient(colors: [Color.white.opacity(0.8), Color.white.opacity(0.2), Color.clear],
+                                                           startPoint: .topLeading,
+                                                           endPoint: .bottomTrailing
+                                                          ),
+                                            lineWidth: 1
+                                    )
+                            )
+                            .overlay(
+                                Capsule()
+                                    .fill(LinearGradient(colors: [Color.white.opacity(0.3), Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .blendMode(.screen)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 120)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .ignoresSafeArea(edges: .top)
@@ -129,6 +181,25 @@ struct FeedsMainTabView: View {
         }
         .refreshable {
             await viewModel.refresh(showLoading: true)
+        }
+        .onAppear {
+            viewModel.onAppear()
+        }
+        .onDisappear {
+            viewModel.onDisappear()
+        }
+    }
+
+    private var emptyFeedTitle: String {
+        switch viewModel.selectedTab {
+        case .forYou:
+            return String(localized: "feeds.feed.empty.foryou.title", bundle: .module)
+        case .friends:
+            return String(localized: "feeds.feed.empty.friends.title", bundle: .module)
+        case .personal:
+            return String(localized: "feeds.feed.empty.personal.title", bundle: .module)
+        case .group:
+            return String(localized: "feeds.feed.empty.group.title", bundle: .module)
         }
     }
     

@@ -21,6 +21,8 @@ final class FeedsProfilePostsViewModel: ObservableObject {
     
     private let invalidationCenter: FeedsStateInvalidationCenter
     private var invalidationTask: Task<Void, Never>?
+    private var lastRefreshAt: Date?
+    private var isRefreshing: Bool = false
     
     init(
         input: PostsScreenInput,
@@ -41,6 +43,12 @@ final class FeedsProfilePostsViewModel: ObservableObject {
     
     deinit {
         invalidationTask?.cancel()
+    }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
     }
     
     var title: String {
@@ -68,15 +76,26 @@ final class FeedsProfilePostsViewModel: ObservableObject {
     }
 
     private func loadPosts() async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
         screenState = .loading
 
         do {
             posts = try await service.fetchPosts(input: input)
             screenState = .loaded
+            lastRefreshAt = Date()
         } catch {
             posts = []
             screenState = .error
         }
+    }
+
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh()
     }
 
     private func bindInvalidationEvents() {

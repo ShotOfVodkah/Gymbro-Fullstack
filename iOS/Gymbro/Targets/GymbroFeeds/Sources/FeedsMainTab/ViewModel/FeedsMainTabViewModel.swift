@@ -17,6 +17,7 @@ final class FeedsMainTabViewModel: ObservableObject {
         didSet {
             guard oldValue != selectedTab else { return }
             analytics.track(.feedsTabSelected(tab: selectedTab.rawValue))
+            hasNewPostsAvailable = false
             Task {
                 await reloadPosts()
             }
@@ -38,11 +39,13 @@ final class FeedsMainTabViewModel: ObservableObject {
     @Published var commentsDraftText: String = ""
     @Published var isCommentsLoading: Bool = false
     @Published var isLoadingNextPage: Bool = false
+    @Published var hasNewPostsAvailable: Bool = false
 
     private let pageLimit = 20
     private var nextFeedCursor: Date?
     private var hasMoreFeedPosts: Bool = true
     private var isRefreshing: Bool = false
+    private var lastPostsRefreshAt: Date?
     
     private let router: any Router
     private let service: any FeedsMainTabService
@@ -51,6 +54,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     private let invalidationCenter: FeedsStateInvalidationCenter
     private var invalidationTask: Task<Void, Never>?
     private var communitiesPollingTask: Task<Void, Never>?
+    private var newPostsPollingTask: Task<Void, Never>?
     var currentUserID: String { AppMicroservices.tokens.userId ?? "" }
     
     init(
@@ -73,6 +77,7 @@ final class FeedsMainTabViewModel: ObservableObject {
     
     deinit {
         communitiesPollingTask?.cancel()
+        newPostsPollingTask?.cancel()
         invalidationTask?.cancel()
     }
     
@@ -80,6 +85,18 @@ final class FeedsMainTabViewModel: ObservableObject {
         Task {
             await refresh(showLoading: true)
         }
+    }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+            startNewPostsPolling()
+        }
+    }
+
+    func onDisappear() {
+        newPostsPollingTask?.cancel()
+        newPostsPollingTask = nil
     }
 
     func reload() {
@@ -105,6 +122,8 @@ final class FeedsMainTabViewModel: ObservableObject {
             nextFeedCursor = screenData.nextCursor
             hasMoreFeedPosts = screenData.hasMorePosts
             screenState = .loaded
+            hasNewPostsAvailable = false
+            lastPostsRefreshAt = Date()
         } catch is CancellationError {
             return
         } catch {
@@ -119,8 +138,16 @@ final class FeedsMainTabViewModel: ObservableObject {
             posts = page.posts
             nextFeedCursor = page.nextCursor
             hasMoreFeedPosts = page.hasMore
+            hasNewPostsAvailable = false
+            lastPostsRefreshAt = Date()
         } catch {
             print("Failed to reload posts:", error)
+        }
+    }
+
+    func didTapShowNewPosts() {
+        Task {
+            await refresh(showLoading: false)
         }
     }
 
@@ -194,6 +221,8 @@ final class FeedsMainTabViewModel: ObservableObject {
         nextFeedCursor = nil
         hasMoreFeedPosts = true
         isLoadingNextPage = false
+        hasNewPostsAvailable = false
+        lastPostsRefreshAt = nil
 
         screenState = .loading
     }
@@ -245,6 +274,16 @@ final class FeedsMainTabViewModel: ObservableObject {
         case .group:
             return .groups
         }
+    }
+
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        guard isShowingCommentsSheet == false else { return }
+        guard isShowingChatCreation == false else { return }
+        guard isLoadingNextPage == false else { return }
+
+        let age = Date().timeIntervalSince(lastPostsRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh(showLoading: false)
     }
     
     var directChatSelectablePeople: [PersonItem] {
@@ -568,6 +607,40 @@ final class FeedsMainTabViewModel: ObservableObject {
                 try? await Task.sleep(nanoseconds: 5_000_000_000)
                 await self.reloadCommunities()
             }
+        }
+    }
+
+    private func startNewPostsPolling() {
+        newPostsPollingTask?.cancel()
+
+        newPostsPollingTask = Task { [weak self] in
+            guard let self else { return }
+
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 20_000_000_000)
+                await self.checkForNewPosts()
+            }
+        }
+    }
+
+    private func checkForNewPosts() async {
+        guard screenState == .loaded else { return }
+        guard isRefreshing == false else { return }
+        guard isLoadingNextPage == false else { return }
+        guard isShowingCommentsSheet == false else { return }
+        guard hasNewPostsAvailable == false else { return }
+
+        let currentLatestID = visiblePosts.first?.serverID ?? ""
+        guard currentLatestID.isEmpty == false else { return }
+
+        do {
+            let page = try await service.fetchPostsPage(scope: selectedFeedScope, limit: 1, cursor: nil)
+            let latestFromServer = page.posts.first?.serverID ?? ""
+            if !latestFromServer.isEmpty, latestFromServer != currentLatestID {
+                hasNewPostsAvailable = true
+            }
+        } catch {
+            return
         }
     }
 }

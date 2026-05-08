@@ -141,6 +141,10 @@ final class FeedsCalendarViewModel: ObservableObject {
         
         rebuildSelection()
     }
+
+    var hasAnyWorkoutsInMonth: Bool {
+        days.contains { !$0.myWorkouts.isEmpty || !$0.partnerWorkouts.isEmpty }
+    }
     
     private func rebuildSelection() {
         let selectedDate = selectedDayForActions?.date
