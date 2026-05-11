@@ -15,19 +15,42 @@ final class ConnectedDevicesViewModel: ObservableObject {
     @Published var sessions: [AuthSessionResponse] = []
     private let onSessionEnded: () -> Void
 
+    private var isRefreshing = false
+
     init(onSessionEnded: @escaping () -> Void) {
         self.onSessionEnded = onSessionEnded
     }
 
     func load() {
         Task {
-            screenState = .loading
+            await performLoad(showLoading: true)
+        }
+    }
 
-            do {
-                let response = try await AppMicroservices.auth.listSessions()
-                sessions = response.sessions
-                screenState = .loaded
-            } catch {
+    func refresh() async {
+        await performLoad(showLoading: false)
+    }
+
+    private func performLoad(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        let alreadyLoaded: Bool = {
+            if case .loaded = screenState { return true }
+            return false
+        }()
+
+        if showLoading || !alreadyLoaded {
+            screenState = .loading
+        }
+
+        do {
+            let response = try await AppMicroservices.auth.listSessions()
+            sessions = response.sessions
+            screenState = .loaded
+        } catch {
+            if sessions.isEmpty {
                 screenState = .error(error.localizedDescription)
             }
         }
@@ -42,7 +65,9 @@ final class ConnectedDevicesViewModel: ObservableObject {
                     onSessionEnded()
                     SessionManager.shared.forceLogoutLocally()
                 } else {
-                    load()
+                    Task {
+                        await performLoad(showLoading: false)
+                    }
                 }
             } catch {
                 screenState = .error(error.localizedDescription)

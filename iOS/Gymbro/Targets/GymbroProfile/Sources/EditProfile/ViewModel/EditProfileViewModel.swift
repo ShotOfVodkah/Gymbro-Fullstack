@@ -31,18 +31,29 @@ final class EditProfileViewModel: ObservableObject {
     private let router: any Router
     private let service: any EditProfileService
     private let analytics: any AnalyticsService
-    
+    private let invalidationCenter: ProfileStateInvalidationCenter
+
+    private var invalidationTask: Task<Void, Never>?
+    private var didTrackScreenOpen = false
+    private var lastRefreshAt: Date?
+    private var isRefreshing = false
+
     init(
         router: any Router,
         service: any EditProfileService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: ProfileStateInvalidationCenter? = nil
     ) {
         self.router = router
         self.service = service
         self.analytics = analytics
-        
-        analytics.track(.screenViewed(screen: .profileEdit))
-        Task { await loadProfile() }
+        self.invalidationCenter = invalidationCenter ?? .shared
+
+        bindInvalidationEvents()
+    }
+
+    deinit {
+        invalidationTask?.cancel()
     }
     
     var hasUnsavedChanges: Bool {
@@ -54,12 +65,30 @@ final class EditProfileViewModel: ObservableObject {
         !isSaving && validate().isEmpty && hasUnsavedChanges
     }
     
-    func onAppear() {}
-    
+    func loadIfNeeded() async {
+        if !didTrackScreenOpen {
+            didTrackScreenOpen = true
+            analytics.track(.screenViewed(screen: .profileEdit))
+        }
+
+        guard initialForm == nil else { return }
+        await loadProfile(showLoading: true)
+    }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
+
+    func refresh() async {
+        await loadProfile(showLoading: false)
+    }
+
     func reload() {
         Task {
             analytics.track(.errorRetryTapped(screen: AnalyticsScreen.profileEdit.rawValue))
-            await loadProfile()
+            await loadProfile(showLoading: true)
         }
     }
     
@@ -122,6 +151,7 @@ final class EditProfileViewModel: ObservableObject {
                 
                 analytics.track(.profileEditSaved)
                 router.pop()
+                ProfileStateInvalidationCenter.shared.invalidate(.ownProfileDataChanged)
             } catch {
                 isSaving = false
                 screenState = .error
@@ -161,9 +191,42 @@ final class EditProfileViewModel: ObservableObject {
         didSaveSuccessfully = false
     }
     
-    private func loadProfile() async {
-        screenState = .loading
-        
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh()
+    }
+
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+
+    private func handleInvalidation(_ reason: ProfileInvalidationReason) async {
+        switch reason {
+        case .accountChanged:
+            await refresh()
+        case .ownProfileDataChanged:
+            break
+        }
+    }
+
+    private func loadProfile(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
+
         do {
             let profile = try await service.fetchProfile()
             let loadedForm = EditProfileForm(
@@ -177,14 +240,17 @@ final class EditProfileViewModel: ObservableObject {
             form = loadedForm
             initialForm = loadedForm
             screenState = .loaded
+            lastRefreshAt = Date()
         } catch {
-            screenState = .error
-            analytics.track(
-                .errorOccurred(
-                    screen: AnalyticsScreen.profileEdit.rawValue,
-                    message: error.localizedDescription
+            if initialForm == nil {
+                screenState = .error
+                analytics.track(
+                    .errorOccurred(
+                        screen: AnalyticsScreen.profileEdit.rawValue,
+                        message: error.localizedDescription
+                    )
                 )
-            )
+            }
         }
     }
     
