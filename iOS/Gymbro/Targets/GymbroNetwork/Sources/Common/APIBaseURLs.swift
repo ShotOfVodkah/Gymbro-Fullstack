@@ -1,6 +1,5 @@
 import Foundation
 
-/// Base URLs for deployed backends (Yandex Cloud VM).
 public enum APIBaseURLs {
     public static let gateway = "http://111.88.145.152:8080"
 

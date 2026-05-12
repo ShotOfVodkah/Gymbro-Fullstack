@@ -54,7 +54,7 @@ public struct AuthView: View {
     
     private var header: some View {
         VStack(spacing: 6) {
-            ZStack { // поменять на иконку приложения
+            ZStack {
                 RoundedRectangle(cornerRadius: 18)
                     .fill(
                         LinearGradient(

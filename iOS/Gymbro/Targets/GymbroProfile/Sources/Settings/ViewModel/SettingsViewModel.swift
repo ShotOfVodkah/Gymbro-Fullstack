@@ -7,7 +7,6 @@ import GymbroNavigation
 import GymbroTypes
 
 private enum SettingsExternalLink {
-    /// Replace with your real help URL when the site is live.
     static let helpCenter = URL(string: "https://gymbro.app/help")!
     static let supportMail = URL(string: "mailto:support@gymbro.app?subject=GymBro%20Support")!
 }
