@@ -98,7 +98,8 @@ final class AppServicesFactory {
             workoutsClient: clients.workouts,
             feedsClient: clients.feeds,
             streakWidget: streakService,
-            activityCalendarWidget: activityCalendarService
+            activityCalendarWidget: activityCalendarService,
+            modelModifier: workoutsModelModifier
         )
         if isUITesting {
             self.analytics = MockAnalyticsService()

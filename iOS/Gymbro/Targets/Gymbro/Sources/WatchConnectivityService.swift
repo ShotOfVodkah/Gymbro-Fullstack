@@ -1,8 +1,10 @@
+import Combine
 import Foundation
 import WatchConnectivity
 
 import GymbroNetwork
 import GymbroTypes
+import GymbroWorkouts
 
 final class WatchConnectivityService: NSObject {
 
@@ -11,13 +13,26 @@ final class WatchConnectivityService: NSObject {
         workoutsClient: any WorkoutsClientProtocol,
         feedsClient: any FeedsClientProtocol,
         streakWidget: StreakWidgetControlling,
-        activityCalendarWidget: ActivityCalendarWidgetControlling
+        activityCalendarWidget: ActivityCalendarWidgetControlling,
+        modelModifier: WorkoutsModelModifier
     ) {
         self.workoutsRepository = workoutsRepository
         self.workoutsClient = workoutsClient
         self.feedsClient = feedsClient
         self.streakWidget = streakWidget
         self.activityCalendarWidget = activityCalendarWidget
+        super.init()
+
+        modelModifier.events
+            .sink { [weak self] event in
+                switch event {
+                case .workoutDeleted, .workoutAdded, .premadeWorkoutAdded, .workoutEdited, .forceReload:
+                    self?.pushUserWorkoutsToWatch()
+                case .statusChanged:
+                    break
+                }
+            }
+            .store(in: &cancellables)
     }
 
     func activate() {
@@ -38,11 +53,26 @@ final class WatchConnectivityService: NSObject {
         try? WCSession.default.updateApplicationContext(["workouts": data])
     }
 
+    private func pushUserWorkoutsToWatch() {
+        Task { [weak self] in
+            guard let self else { return }
+            let workouts: [Workout]
+            do {
+                workouts = try await self.workoutsClient.fetchUserWorkouts()
+            } catch {
+                workouts = self.workoutsRepository.loadWorkouts(key: "user")
+            }
+            if workouts.isEmpty { return }
+            self.syncWorkouts(workouts)
+        }
+    }
+
     private let workoutsRepository: WorkoutsCacheRepository
     private let workoutsClient: any WorkoutsClientProtocol
     private let feedsClient: any FeedsClientProtocol
     private let streakWidget: StreakWidgetControlling
     private let activityCalendarWidget: ActivityCalendarWidgetControlling
+    private var cancellables = Set<AnyCancellable>()
 }
 
 extension WatchConnectivityService: WCSessionDelegate {
@@ -89,16 +119,7 @@ extension WatchConnectivityService: WCSessionDelegate {
         guard activationState == .activated else {
             return
         }
-        Task {
-            let workouts: [Workout]
-            do {
-                workouts = try await workoutsClient.fetchUserWorkouts()
-            } catch {
-                workouts = workoutsRepository.loadWorkouts(key: "user")
-            }
-            if workouts.isEmpty { return }
-            syncWorkouts(workouts)
-        }
+        pushUserWorkoutsToWatch()
     }
 
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
