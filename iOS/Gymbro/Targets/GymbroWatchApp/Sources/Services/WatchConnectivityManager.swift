@@ -13,9 +13,22 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
     }
 
     func submitSession(_ payload: WatchSessionPayload) {
-        guard WCSession.default.activationState == .activated,
-              let data = try? JSONEncoder().encode(payload) else { return }
-        WCSession.default.transferUserInfo(["session": data])
+        let session = WCSession.default
+        guard session.activationState == .activated,
+              let data = try? JSONEncoder().encode(payload) else {
+            return
+        }
+        if session.isReachable {
+            session.sendMessage(
+                ["session": data],
+                replyHandler: { _ in },
+                errorHandler: { _ in
+                    session.transferUserInfo(["session": data])
+                }
+            )
+        } else {
+            session.transferUserInfo(["session": data])
+        }
     }
 
     // MARK: - Private

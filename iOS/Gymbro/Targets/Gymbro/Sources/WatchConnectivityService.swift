@@ -37,7 +37,7 @@ final class WatchConnectivityService: NSObject {
         guard let data = try? JSONEncoder().encode(payloads) else { return }
         try? WCSession.default.updateApplicationContext(["workouts": data])
     }
-    
+
     private let workoutsRepository: WorkoutsCacheRepository
     private let workoutsClient: any WorkoutsClientProtocol
     private let feedsClient: any FeedsClientProtocol
@@ -47,29 +47,11 @@ final class WatchConnectivityService: NSObject {
 
 extension WatchConnectivityService: WCSessionDelegate {
 
-    func session(
-        _ session: WCSession,
-        activationDidCompleteWith activationState: WCSessionActivationState,
-        error: Error?
-    ) {
-        guard activationState == .activated else {
+    private func processIncomingSessionUserInfo(_ userInfo: [String: Any]) {
+        guard let data = userInfo["session"] as? Data,
+              let payload = try? JSONDecoder().decode(WatchSessionPayload.self, from: data) else {
             return
         }
-        Task {
-            let workouts: [Workout]
-            do {
-                workouts = try await workoutsClient.fetchUserWorkouts()
-            } catch {
-                workouts = workoutsRepository.loadWorkouts(key: "user")
-            }
-            if workouts.isEmpty { return }
-            syncWorkouts(workouts)
-        }
-    }
-
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
-        guard let data = userInfo["session"] as? Data,
-              let payload = try? JSONDecoder().decode(WatchSessionPayload.self, from: data) else { return }
 
         let exercises = payload.exercises.map {
             WorkoutExerciseRequest(
@@ -97,6 +79,39 @@ extension WatchConnectivityService: WCSessionDelegate {
             } catch {
             }
         }
+    }
+
+    func session(
+        _ session: WCSession,
+        activationDidCompleteWith activationState: WCSessionActivationState,
+        error: Error?
+    ) {
+        guard activationState == .activated else {
+            return
+        }
+        Task {
+            let workouts: [Workout]
+            do {
+                workouts = try await workoutsClient.fetchUserWorkouts()
+            } catch {
+                workouts = workoutsRepository.loadWorkouts(key: "user")
+            }
+            if workouts.isEmpty { return }
+            syncWorkouts(workouts)
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        processIncomingSessionUserInfo(userInfo)
+    }
+
+    func session(
+        _ session: WCSession,
+        didReceiveMessage message: [String: Any],
+        replyHandler: @escaping ([String: Any]) -> Void
+    ) {
+        processIncomingSessionUserInfo(message)
+        replyHandler([:])
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {}
