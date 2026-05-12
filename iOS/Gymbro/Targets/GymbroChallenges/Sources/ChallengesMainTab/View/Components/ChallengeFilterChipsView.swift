@@ -13,7 +13,7 @@ struct ChallengeFilterChipsView: View {
                     Button {
                         onSelect(filter)
                     } label: {
-                        Text(filter.rawValue)
+                        Text(filter.localizedTitle)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(selectedFilter == filter ? .white : .white.opacity(0.62))
                             .padding(.horizontal, 16)
@@ -46,7 +46,7 @@ struct ChallengeCategoryChipsView: View {
                             Image(systemName: category.iconName)
                                 .font(.system(size: 13, weight: .semibold))
                             
-                            Text(category.rawValue)
+                            Text(category.localizedTitle)
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .foregroundStyle(selectedCategory == category ? .white : .white.opacity(0.62))

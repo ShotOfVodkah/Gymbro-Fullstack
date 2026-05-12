@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -35,13 +36,13 @@ struct LeaderboardProgressView: View {
             .frame(height: 10)
             
             HStack {
-                Text("\(team.currentValue) current")
+                Text(String(format: String(localized: "challenges.leaderboard.progress_current", bundle: .module), team.currentValue))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.48))
                 
                 Spacer()
                 
-                Text("\(team.targetValue) target")
+                Text(String(format: String(localized: "challenges.leaderboard.progress_target", bundle: .module), team.targetValue))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.48))
             }

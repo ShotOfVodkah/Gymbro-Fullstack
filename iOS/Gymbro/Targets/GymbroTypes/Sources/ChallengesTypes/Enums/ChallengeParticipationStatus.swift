@@ -18,10 +18,14 @@ public enum ChallengeParticipationStatus: String, Codable, Hashable {
     
     public var title: String {
         switch self {
-        case .notJoined: return "Not Joined"
-        case .inProgress: return "In Progress"
-        case .completed: return "Completed"
-        case .failed: return "Failed"
+        case .notJoined:
+            return String(localized: "challenge.status.not_joined", bundle: .module)
+        case .inProgress:
+            return String(localized: "challenge.status.in_progress", bundle: .module)
+        case .completed:
+            return String(localized: "challenge.status.completed", bundle: .module)
+        case .failed:
+            return String(localized: "challenge.status.failed", bundle: .module)
         }
     }
     

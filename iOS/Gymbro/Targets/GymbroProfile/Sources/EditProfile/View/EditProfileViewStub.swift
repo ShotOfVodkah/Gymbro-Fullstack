@@ -49,7 +49,7 @@ struct EditProfileViewStub: View {
     }
     
     private var basicInfoSectionSkeleton: some View {
-        ProfileSectionContainer(title: "Basic Info") {
+        ProfileSectionContainer(title: String(localized: "edit_profile.section_basic", bundle: .module)) {
             VStack(spacing: 14) {
                 fieldSkeleton(titleWidth: 80)
                 fieldSkeleton(titleWidth: 72)
@@ -60,7 +60,7 @@ struct EditProfileViewStub: View {
     }
     
     private var aboutSectionSkeleton: some View {
-        ProfileSectionContainer(title: "About") {
+        ProfileSectionContainer(title: String(localized: "edit_profile.section_about", bundle: .module)) {
             VStack(alignment: .leading, spacing: 8) {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.white.opacity(0.06))

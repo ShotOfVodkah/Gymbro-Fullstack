@@ -11,7 +11,10 @@ struct TeamProgressView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionTitle("Team Progress", "Current result for this challenge")
+            sectionTitle(
+                String(localized: "challenges.details.team_progress.title", bundle: .module),
+                String(localized: "challenges.details.team_progress.subtitle", bundle: .module)
+            )
             
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .lastTextBaseline) {
@@ -44,8 +47,8 @@ struct TeamProgressView: View {
                 .frame(height: 12)
                 
                 HStack {
-                    progressPill(title: "Current", value: "\(details.currentValue)", icon: "bolt.fill")
-                    progressPill(title: "Target", value: "\(details.targetValue)", icon: "target")
+                    progressPill(title: String(localized: "challenges.details.team_progress.current", bundle: .module), value: "\(details.currentValue)", icon: "bolt.fill")
+                    progressPill(title: String(localized: "challenges.details.team_progress.target", bundle: .module), value: "\(details.targetValue)", icon: "target")
                 }
             }
             .padding(18)

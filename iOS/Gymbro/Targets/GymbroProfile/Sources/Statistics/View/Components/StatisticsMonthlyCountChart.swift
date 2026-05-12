@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -86,7 +87,7 @@ struct StatisticsMonthlyCountChart: View {
     private var headerView: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Year summary")
+                Text(String(localized: "statistics.chart.year_summary", bundle: .module))
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(.white)
                 
@@ -165,7 +166,7 @@ struct StatisticsMonthlyCountChart: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white.opacity(0.7))
             
-            Text("\(item.value) workouts")
+            Text(String(format: String(localized: "statistics.chart.workouts_count", bundle: .module), locale: .current, item.value))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(.white)
         }

@@ -1,3 +1,5 @@
+import Foundation
+
 public enum LeaderboardFilter: String, CaseIterable, Identifiable {
     case all
     case following
@@ -10,11 +12,11 @@ public enum LeaderboardFilter: String, CaseIterable, Identifiable {
     public var title: String {
         switch self {
         case .all:
-            return "All"
+            return String(localized: "leaderboard.filter.all", bundle: .module)
         case .following:
-            return "Following"
+            return String(localized: "leaderboard.filter.following", bundle: .module)
         case .friends:
-            return "Friends"
+            return String(localized: "leaderboard.filter.friends", bundle: .module)
         }
     }
 }
@@ -30,9 +32,9 @@ public enum LeaderboardSort: String, CaseIterable, Identifiable {
     public var title: String {
         switch self {
         case .streak:
-            return "Streak"
+            return String(localized: "leaderboard.sort.streak", bundle: .module)
         case .workouts:
-            return "Workouts"
+            return String(localized: "leaderboard.sort.workouts", bundle: .module)
         }
     }
 }

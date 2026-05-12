@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -10,27 +11,27 @@ struct StatisticsHeroSection: View {
     var body: some View {
         VStack(spacing: 12) {
             StatisticsSummaryCard(
-                title: "Total Workouts",
+                title: String(localized: "statistics.hero.total_workouts", bundle: .module),
                 value: summary.totalWorkouts,
-                subtitle: "All recorded training sessions",
+                subtitle: String(localized: "statistics.hero.total_workouts_sub", bundle: .module),
                 iconSystemName: "figure.strengthtraining.traditional"
             )
             
             HStack(spacing: 12) {
                 StatisticsSummaryCard(
-                    title: "Total Duration",
+                    title: String(localized: "statistics.hero.total_duration", bundle: .module),
                     value: summary.totalDurationHours,
                     suffix: "h",
-                    subtitle: "Hours spent training",
+                    subtitle: String(localized: "statistics.hero.total_duration_sub", bundle: .module),
                     iconSystemName: "clock.fill"
                 )
                 .frame(maxWidth: .infinity)
                 
                 StatisticsSummaryCard(
-                    title: "Consistency",
+                    title: String(localized: "statistics.hero.consistency", bundle: .module),
                     value: summary.consistency,
                     suffix: "%",
-                    subtitle: "Training rhythm stability",
+                    subtitle: String(localized: "statistics.hero.consistency_sub", bundle: .module),
                     iconSystemName: "bolt.fill"
                 )
                 .frame(maxWidth: .infinity)

@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 import GymbroTypes
@@ -42,11 +43,11 @@ struct LeaderboardSectionView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Leaderboard")
+            Text(String(localized: "perks.leaderboard.section_title", bundle: .module))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Compare your streak and workout progress")
+            Text(String(localized: "perks.leaderboard.section_subtitle", bundle: .module))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.64))
         }
@@ -147,11 +148,11 @@ struct LeaderboardSectionView: View {
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.7))
             
-            Text("No users found")
+            Text(String(localized: "perks.leaderboard.empty_title", bundle: .module))
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Try switching the leaderboard filter.")
+            Text(String(localized: "perks.leaderboard.empty_subtitle", bundle: .module))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.white.opacity(0.58))
                 .multilineTextAlignment(.center)

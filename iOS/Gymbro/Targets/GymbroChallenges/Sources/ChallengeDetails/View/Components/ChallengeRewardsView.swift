@@ -7,7 +7,10 @@ struct ChallengeRewardsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
-            sectionTitle("Rewards", "Achievements your team can unlock")
+            sectionTitle(
+                String(localized: "challenges.details.rewards.title", bundle: .module),
+                String(localized: "challenges.details.rewards.subtitle", bundle: .module)
+            )
             
             VStack(spacing: 10) {
                 ForEach(rewards) { reward in

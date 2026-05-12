@@ -9,11 +9,11 @@ struct LeaderboardPodiumView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Top Teams")
+                Text(String(localized: "challenges.leaderboard.podium_title", bundle: .module))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text("The current podium of this challenge")
+                Text(String(localized: "challenges.leaderboard.podium_subtitle", bundle: .module))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.white.opacity(0.52))
             }

@@ -46,11 +46,11 @@ struct ChallengeLeaderboardView: View {
                 
                 VStack(alignment: .leading, spacing: 13) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("All Teams")
+                        Text(String(localized: "challenges.leaderboard.all_teams", bundle: .module))
                             .font(.system(size: 22, weight: .bold))
                             .foregroundStyle(.white)
                         
-                        Text("Tap a team to open its group chat")
+                        Text(String(localized: "challenges.leaderboard.all_teams_subtitle", bundle: .module))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(.white.opacity(0.52))
                     }
@@ -92,7 +92,7 @@ struct ChallengeLeaderboardView: View {
             
             Spacer()
             
-            Text("Leaderboard")
+            Text(String(localized: "challenges.leaderboard.title", bundle: .module))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.white)
             
@@ -116,11 +116,11 @@ struct ChallengeLeaderboardView: View {
             }
             
             VStack(alignment: .leading, spacing: 6) {
-                Text("Team standings")
+                Text(String(localized: "challenges.leaderboard.header_title", bundle: .module))
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text("Compare team progress, current values, and ranking inside this challenge.")
+                Text(String(localized: "challenges.leaderboard.header_subtitle", bundle: .module))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.white.opacity(0.62))
                     .fixedSize(horizontal: false, vertical: true)
@@ -134,11 +134,11 @@ struct ChallengeLeaderboardView: View {
                 .font(.system(size: 42, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.65))
             
-            Text("No teams yet")
+            Text(String(localized: "challenges.leaderboard.empty_title", bundle: .module))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("When teams join this challenge, their progress will appear here.")
+            Text(String(localized: "challenges.leaderboard.empty_subtitle", bundle: .module))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.58))
                 .multilineTextAlignment(.center)
@@ -146,7 +146,7 @@ struct ChallengeLeaderboardView: View {
             Button {
                 viewModel.reload()
             } label: {
-                Text("Refresh")
+                Text(GymbroCommonStrings.refresh)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 22)

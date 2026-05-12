@@ -22,11 +22,11 @@ struct EditProfileView: View {
                     
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(.white)
                         
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.reload()
                         }
                     }
@@ -35,12 +35,12 @@ struct EditProfileView: View {
                 }
             }
         }
-        .navigationTitle("Edit Profile")
+        .navigationTitle(String(localized: "edit_profile.nav_title", bundle: .module))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button("Cancel") {
+                Button(String(localized: "edit_profile.cancel", bundle: .module)) {
                     viewModel.didTapCancel()
                 }
                 .foregroundStyle(.white)
@@ -48,7 +48,7 @@ struct EditProfileView: View {
             }
             
             ToolbarItem(placement: .topBarTrailing) {
-                Button(viewModel.isSaving ? "Saving..." : "Save") {
+                Button(viewModel.isSaving ? String(localized: "edit_profile.saving", bundle: .module) : String(localized: "edit_profile.save", bundle: .module)) {
                     viewModel.didTapSave()
                 }
                 .foregroundStyle(viewModel.canSave ? .white : .gray)
@@ -56,19 +56,19 @@ struct EditProfileView: View {
                 .accessibilityIdentifier("profile.edit.save")
             }
         }
-        .alert("Discard changes?", isPresented: $viewModel.shouldShowDiscardAlert) {
-            Button("Keep Editing", role: .cancel) {
+        .alert(String(localized: "edit_profile.discard_title", bundle: .module), isPresented: $viewModel.shouldShowDiscardAlert) {
+            Button(String(localized: "edit_profile.keep_editing", bundle: .module), role: .cancel) {
                 viewModel.dismissDiscardAlert()
             }
-            Button("Discard", role: .destructive) {
+            Button(String(localized: "edit_profile.discard", bundle: .module), role: .destructive) {
                 viewModel.confirmDiscardChanges()
             }
         } message: {
-            Text("Your changes will be lost.")
+            Text(String(localized: "edit_profile.discard_body", bundle: .module))
         }
         .overlay(alignment: .top) {
             if viewModel.didSaveSuccessfully {
-                Text("Profile saved")
+                Text(String(localized: "edit_profile.saved", bundle: .module))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16)
@@ -107,10 +107,10 @@ struct EditProfileView: View {
                     avatarSystemName: viewModel.form.avatarSystemName
                 )
                 
-                ProfileSectionContainer(title: "Basic Info") {
+                ProfileSectionContainer(title: String(localized: "edit_profile.section_basic", bundle: .module)) {
                     VStack(spacing: 14) {
                         EditProfileTextField(
-                            title: "Full Name",
+                            title: String(localized: "edit_profile.field_full_name", bundle: .module),
                             text: Binding(
                                 get: { viewModel.form.fullName },
                                 set: viewModel.updateName
@@ -121,7 +121,7 @@ struct EditProfileView: View {
                         )
                         
                         EditProfileTextField(
-                            title: "Username",
+                            title: String(localized: "edit_profile.field_username", bundle: .module),
                             text: Binding(
                                 get: { viewModel.form.username },
                                 set: viewModel.updateUsername
@@ -130,7 +130,7 @@ struct EditProfileView: View {
                         )
                         
                         EditProfileTextField(
-                            title: "Status",
+                            title: String(localized: "edit_profile.field_status", bundle: .module),
                             text: Binding(
                                 get: { viewModel.form.status },
                                 set: viewModel.updateStatus
@@ -141,7 +141,7 @@ struct EditProfileView: View {
                         )
                         
                         EditProfileTextField(
-                            title: "Subtitle",
+                            title: String(localized: "edit_profile.field_subtitle", bundle: .module),
                             text: Binding(
                                 get: { viewModel.form.subtitle },
                                 set: viewModel.updateSubtitle
@@ -153,7 +153,7 @@ struct EditProfileView: View {
                     }
                 }
                 
-                ProfileSectionContainer(title: "About") {
+                ProfileSectionContainer(title: String(localized: "edit_profile.section_about", bundle: .module)) {
                     EditProfileBioEditor(
                         text: Binding(
                             get: { viewModel.form.bio },

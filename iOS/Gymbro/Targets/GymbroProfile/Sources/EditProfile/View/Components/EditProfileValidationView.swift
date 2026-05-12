@@ -7,7 +7,7 @@ struct EditProfileValidationView: View {
     }
     
     var body: some View {
-        ProfileSectionContainer(title: "Please check") {
+        ProfileSectionContainer(title: String(localized: "edit_profile.validation_title", bundle: .module)) {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(messages, id: \.self) { message in
                     Text("• \(message)")

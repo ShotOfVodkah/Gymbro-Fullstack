@@ -7,7 +7,10 @@ struct ChallengeParticipantsView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
-            sectionTitle("Contribution Ranking", "Who moves the team forward")
+            sectionTitle(
+                String(localized: "challenges.details.participants.title", bundle: .module),
+                String(localized: "challenges.details.participants.subtitle", bundle: .module)
+            )
             
             VStack(spacing: 10) {
                 ForEach(participants.sorted { $0.rankInTeam < $1.rankInTeam }) { participant in
@@ -34,7 +37,7 @@ struct ChallengeParticipantsView: View {
                                     .foregroundStyle(.white)
                                 
                                 if participant.isMVP {
-                                    Text("MVP")
+                                    Text(String(localized: "challenges.details.participants.mvp", bundle: .module))
                                         .font(.system(size: 10, weight: .bold))
                                         .foregroundStyle(.yellow)
                                         .padding(.horizontal, 7)

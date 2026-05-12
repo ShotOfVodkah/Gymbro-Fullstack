@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 import GymbroAuth
@@ -22,11 +23,11 @@ struct ProfileSettingsView: View {
                     
                 case .error:
                     VStack(alignment: .center) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(.white)
                         
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.reload()
                         }
                     }
@@ -35,7 +36,7 @@ struct ProfileSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Settings")
+        .navigationTitle(String(localized: "settings.nav_title", bundle: .module))
         .sheet(isPresented: $viewModel.isLegalSheetPresented) {
             LegalDocScreen(
                 type: viewModel.legalSheetType,

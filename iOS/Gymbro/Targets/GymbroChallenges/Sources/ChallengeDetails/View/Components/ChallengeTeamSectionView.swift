@@ -13,26 +13,23 @@ struct ChallengeTeamSectionView: View {
     
     private var title: String {
         if details.participationStatus == .notJoined {
-            return "Choose Team"
+            return String(localized: "challenges.details.team.choose_title", bundle: .module)
         }
-        
-        return "Team"
+        return String(localized: "challenges.details.team.title", bundle: .module)
     }
     
     private var subtitle: String {
         if details.participationStatus == .notJoined {
-            return "Pick one of your group chats to join this challenge"
+            return String(localized: "challenges.details.team.choose_subtitle", bundle: .module)
         }
-        
-        return "Group chat participating in this challenge"
+        return String(localized: "challenges.details.team.joined_subtitle", bundle: .module)
     }
     
     private var buttonTitle: String {
         if details.participationStatus == .notJoined {
-            return "Join"
+            return String(localized: "challenges.details.team.join_button", bundle: .module)
         }
-        
-        return "Open Chat"
+        return String(localized: "challenges.details.team.open_chat", bundle: .module)
     }
     
     private var buttonIcon: String {
@@ -59,7 +56,7 @@ struct ChallengeTeamSectionView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(team?.teamName ?? "Select group chat")
+                    Text(team?.teamName ?? String(localized: "challenges.details.team.select_chat_placeholder", bundle: .module))
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(.white)
                     
@@ -106,9 +103,13 @@ struct ChallengeTeamSectionView: View {
     
     private var teamDescription: String {
         if let team {
-            return "\(team.membersCount) members • \(Int(team.progressPercent * 100))% completed"
+            return String(
+                format: String(localized: "challenges.details.team.members_progress", bundle: .module),
+                locale: .current,
+                team.membersCount,
+                Int(team.progressPercent * 100)
+            )
         }
-        
-        return "Your group chat will become the challenge team"
+        return String(localized: "challenges.details.team.empty_hint", bundle: .module)
     }
 }

@@ -9,11 +9,14 @@ struct ChallengeLeaderboardPreviewView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
             HStack {
-                sectionTitle("Leaderboard", "Top teams in this challenge")
+                sectionTitle(
+                    String(localized: "challenges.preview.leaderboard_title", bundle: .module),
+                    String(localized: "challenges.preview.leaderboard_subtitle", bundle: .module)
+                )
                 
                 Spacer()
                 
-                Button("View all") {
+                Button(String(localized: "challenges.preview.view_all", bundle: .module)) {
                     onTap()
                 }
                 .font(.system(size: 13, weight: .bold))

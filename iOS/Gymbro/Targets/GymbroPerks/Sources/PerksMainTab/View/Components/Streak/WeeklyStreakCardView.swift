@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 import GymbroTypes
@@ -105,7 +106,7 @@ struct WeeklyStreakCardView: View {
     private var headerView: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Weekly Streak")
+                Text(String(localized: "perks.streak.weekly_title", bundle: .module))
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.white)
                 
@@ -131,18 +132,24 @@ struct WeeklyStreakCardView: View {
     
     private var headerSubtitle: String {
         if streak.wasFreezeUsedThisWeek {
-            return "Your streak is protected with a freeze."
+            return String(localized: "perks.streak.header.freeze", bundle: .module)
         }
-        
         if streak.isGoalCompleted {
-            return "Goal completed this week."
+            return String(localized: "perks.streak.header.goal_done", bundle: .module)
         }
-        
         if isDangerState {
-            return "\(daysLeft) day\(daysLeft == 1 ? "" : "s") left and \(streak.remainingToGoal) workout\(streak.remainingToGoal == 1 ? "" : "s") still needed."
+            return String(
+                format: String(localized: "perks.streak.header.danger", bundle: .module),
+                locale: .current,
+                daysLeft,
+                streak.remainingToGoal
+            )
         }
-        
-        return "\(streak.remainingToGoal) workout\(streak.remainingToGoal == 1 ? "" : "s") left to keep the fire alive."
+        return String(
+            format: String(localized: "perks.streak.header.normal", bundle: .module),
+            locale: .current,
+            streak.remainingToGoal
+        )
     }
     
     private var progressView: some View {
@@ -163,7 +170,7 @@ struct WeeklyStreakCardView: View {
                         .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(.white.opacity(0.82))
                     
-                    Text("\(daysLeft)d left")
+                    Text(String(format: String(localized: "perks.streak.days_left_compact", bundle: .module), locale: .current, daysLeft))
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(isDangerState ? .red.opacity(0.92) : .white.opacity(0.48))
                 }
@@ -182,7 +189,7 @@ struct WeeklyStreakCardView: View {
             }
             .frame(height: 12)
             
-            Text("Weekly goal progress")
+            Text(String(localized: "perks.streak.progress_caption", bundle: .module))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.48))
         }
@@ -191,20 +198,20 @@ struct WeeklyStreakCardView: View {
     private var statsView: some View {
         HStack(spacing: 10) {
             statPill(
-                title: "Current",
+                title: String(localized: "perks.streak.stat_current", bundle: .module),
                 value: "\(streak.currentStreakWeeks)w",
                 iconName: "flame.circle.fill"
             )
             
             statPill(
-                title: "Best",
+                title: String(localized: "perks.streak.stat_best", bundle: .module),
                 value: "\(streak.bestStreakWeeks)w",
                 iconName: "crown.fill"
             )
             
             statPill(
-                title: "Goal",
-                value: "\(streak.weeklyGoal)/week",
+                title: String(localized: "perks.streak.stat_goal", bundle: .module),
+                value: "\(streak.weeklyGoal)" + String(localized: "perks.streak.per_week", bundle: .module),
                 iconName: "target"
             )
         }
@@ -217,11 +224,11 @@ struct WeeklyStreakCardView: View {
                 .foregroundStyle(.yellow)
             
             VStack(alignment: .leading, spacing: 3) {
-                Text("Goal scheduled")
+                Text(String(localized: "perks.streak.goal_scheduled_title", bundle: .module))
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text("Next week your goal will be \(nextGoal) workout\(nextGoal == 1 ? "" : "s").")
+                Text(String(format: String(localized: "perks.streak.goal_scheduled_body", bundle: .module), locale: .current, nextGoal))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.white.opacity(0.58))
             }
@@ -252,16 +259,20 @@ struct WeeklyStreakCardView: View {
             }
             
             VStack(alignment: .leading, spacing: 3) {
-                Text(streak.wasFreezeUsedThisWeek ? "Freezed this week" : "Streak Freeze")
+                Text(streak.wasFreezeUsedThisWeek ? String(localized: "perks.streak.freeze_title_active", bundle: .module) : String(localized: "perks.streak.freeze_title_idle", bundle: .module))
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text(streak.wasFreezeUsedThisWeek ? "Your streak is protected." : "\(streak.streakFreezeCount) freeze\(streak.streakFreezeCount == 1 ? "" : "s") available")
+                Text(
+                    streak.wasFreezeUsedThisWeek
+                    ? String(localized: "perks.streak.freeze_sub_protected", bundle: .module)
+                    : String(format: String(localized: "perks.streak.freeze_sub_available", bundle: .module), locale: .current, streak.streakFreezeCount)
+                )
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.white.opacity(0.58))
                 
                 if streak.wasFreezeUsedThisWeek {
-                    Text("\(streak.streakFreezeCount) freeze\(streak.streakFreezeCount == 1 ? "" : "s") remaining")
+                    Text(String(format: String(localized: "perks.streak.freeze_remaining", bundle: .module), locale: .current, streak.streakFreezeCount))
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.cyan.opacity(0.82))
                 }
@@ -277,7 +288,7 @@ struct WeeklyStreakCardView: View {
                     freezePulse = false
                 }
             } label: {
-                Text(streak.wasFreezeUsedThisWeek ? "Used" : "Use")
+                Text(streak.wasFreezeUsedThisWeek ? String(localized: "perks.streak.freeze_used", bundle: .module) : String(localized: "perks.streak.freeze_use", bundle: .module))
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(streak.canUseStreakFreeze ? .white : .white.opacity(0.38))
                     .padding(.horizontal, 14)
@@ -309,7 +320,7 @@ struct WeeklyStreakCardView: View {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 14, weight: .semibold))
                 
-                Text("Change weekly goal")
+                Text(String(localized: "perks.streak.change_goal", bundle: .module))
                     .font(.system(size: 14, weight: .bold))
                 
                 Spacer()
@@ -369,14 +380,17 @@ struct WeeklyStreakCardView: View {
     
     private var footerText: String {
         if streak.wasFreezeUsedThisWeek {
-            return "Freeze protected your streak this week."
+            return String(localized: "perks.streak.footer_freeze", bundle: .module)
         }
-        
         if streak.isGoalCompleted {
-            return "Your streak is safe this week."
+            return String(localized: "perks.streak.footer_safe", bundle: .module)
         }
-        
-        return "\(streak.remainingToGoal) more workout\(streak.remainingToGoal == 1 ? "" : "s") needed in \(daysLeft) day\(daysLeft == 1 ? "" : "s")."
+        return String(
+            format: String(localized: "perks.streak.footer_danger", bundle: .module),
+            locale: .current,
+            streak.remainingToGoal,
+            daysLeft
+        )
     }
     
     private func statPill(

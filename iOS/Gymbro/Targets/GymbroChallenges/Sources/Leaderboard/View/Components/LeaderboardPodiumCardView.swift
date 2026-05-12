@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -53,7 +54,7 @@ struct LeaderboardPodiumCardView: View {
                                 .lineLimit(1)
                         }
                         
-                        Text("\(team.membersCount) members")
+                        Text(String(format: String(localized: "challenges.join.members_count", bundle: .module), team.membersCount))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(.white.opacity(0.56))
                     }
@@ -76,7 +77,7 @@ struct LeaderboardPodiumCardView: View {
                     LeaderboardStatusBadgeView(status: team.status)
                     
                     if team.isCurrentUserTeam {
-                        Text("Your team")
+                        Text(String(localized: "challenges.leaderboard.your_team", bundle: .module))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.purple)
                             .padding(.horizontal, 10)

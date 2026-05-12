@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import GymbroAuth
 import GymbroNavigation
 import GymbroNetwork
@@ -86,9 +87,9 @@ final class ProfileMainTabViewModel: ObservableObject {
     var followButtonTitle: String {
         switch relationshipState {
         case .following:
-            return "Unfollow"
+            return String(localized: "profile.relationship.unfollow", bundle: .module)
         case .notFollowing, .none:
-            return "Follow"
+            return String(localized: "profile.relationship.follow", bundle: .module)
         }
     }
     

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import GymbroNetwork
 import GymbroTypes
 
@@ -39,18 +40,18 @@ final class ProfileMainServiceImpl: ProfileMainTabService {
             ),
             actions: isOwnProfile
             ? [
-                .init(id: "edit_profile", title: "Edit Profile", iconSystemName: "square.and.pencil", kind: .editProfile),
-                .init(id: "settings", title: "Settings", iconSystemName: "gearshape.fill", kind: .settings),
-                .init(id: "posts", title: "Posts", iconSystemName: "square.grid.2x2.fill", kind: .posts),
-                .init(id: "friends", title: "Friends", iconSystemName: "person.2.fill", kind: .friends),
-                .init(id: "calendar", title: "Workout Calendar", iconSystemName: "calendar", kind: .workoutCalendar),
-                .init(id: "statistics", title: "Statistics", iconSystemName: "chart.bar.fill", kind: .statistics),
-                .init(id: "logout", title: "Log Out", iconSystemName: "rectangle.portrait.and.arrow.right", kind: .logout)
+                .init(id: "edit_profile", title: String(localized: "profile.action.edit_profile", bundle: .module), iconSystemName: "square.and.pencil", kind: .editProfile),
+                .init(id: "settings", title: String(localized: "profile.action.settings", bundle: .module), iconSystemName: "gearshape.fill", kind: .settings),
+                .init(id: "posts", title: String(localized: "profile.action.posts", bundle: .module), iconSystemName: "square.grid.2x2.fill", kind: .posts),
+                .init(id: "friends", title: String(localized: "profile.action.friends", bundle: .module), iconSystemName: "person.2.fill", kind: .friends),
+                .init(id: "calendar", title: String(localized: "profile.action.workout_calendar", bundle: .module), iconSystemName: "calendar", kind: .workoutCalendar),
+                .init(id: "statistics", title: String(localized: "profile.action.statistics", bundle: .module), iconSystemName: "chart.bar.fill", kind: .statistics),
+                .init(id: "logout", title: String(localized: "profile.action.logout", bundle: .module), iconSystemName: "rectangle.portrait.and.arrow.right", kind: .logout)
             ]
             : [
-                .init(id: "friends", title: "Friends", iconSystemName: "person.2.fill", kind: .friends),
-                .init(id: "calendar", title: "Workout Calendar", iconSystemName: "calendar", kind: .workoutCalendar),
-                .init(id: "statistics", title: "Statistics", iconSystemName: "chart.bar.fill", kind: .statistics)
+                .init(id: "friends", title: String(localized: "profile.action.friends", bundle: .module), iconSystemName: "person.2.fill", kind: .friends),
+                .init(id: "calendar", title: String(localized: "profile.action.workout_calendar", bundle: .module), iconSystemName: "calendar", kind: .workoutCalendar),
+                .init(id: "statistics", title: String(localized: "profile.action.statistics", bundle: .module), iconSystemName: "chart.bar.fill", kind: .statistics)
             ],
             statsPreview: ProfileStatsPreviewModel(
                 workoutsThisMonth: response.workouts_this_month,

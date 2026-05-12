@@ -27,11 +27,11 @@ struct RecentUnlocksView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Recent Unlocks")
+            Text(String(localized: "perks.recent.title", bundle: .module))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Your latest earned achievements")
+            Text(String(localized: "perks.recent.subtitle", bundle: .module))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.64))
         }
@@ -49,7 +49,7 @@ struct RecentUnlocksView: View {
     }
     
     private var emptyView: some View {
-        Text("No achievements unlocked yet.")
+        Text(String(localized: "perks.recent.empty", bundle: .module))
             .font(.system(size: 14, weight: .medium))
             .foregroundStyle(.white.opacity(0.58))
             .frame(maxWidth: .infinity, alignment: .leading)

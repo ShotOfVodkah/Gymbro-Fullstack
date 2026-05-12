@@ -15,17 +15,17 @@ public enum AchievementCategory: String, Codable, Sendable, CaseIterable, Identi
     public var title: String {
         switch self {
         case .all:
-            return "All"
+            return String(localized: "achievement.category.all", bundle: .module)
         case .workoutMilestones:
-            return "Milestones"
+            return String(localized: "achievement.category.milestones", bundle: .module)
         case .consistency:
-            return "Consistency"
+            return String(localized: "achievement.category.consistency", bundle: .module)
         case .timeChallenges:
-            return "Time"
+            return String(localized: "achievement.category.time", bundle: .module)
         case .social:
-            return "Social"
+            return String(localized: "achievement.category.social", bundle: .module)
         case .special:
-            return "Special"
+            return String(localized: "achievement.category.special", bundle: .module)
         }
     }
 }
@@ -39,13 +39,13 @@ public enum AchievementRarity: String, Codable, Sendable, CaseIterable {
     public var title: String {
         switch self {
         case .common:
-            return "Common"
+            return String(localized: "achievement.rarity.common", bundle: .module)
         case .rare:
-            return "Rare"
+            return String(localized: "achievement.rarity.rare", bundle: .module)
         case .epic:
-            return "Epic"
+            return String(localized: "achievement.rarity.epic", bundle: .module)
         case .legendary:
-            return "Legendary"
+            return String(localized: "achievement.rarity.legendary", bundle: .module)
         }
     }
 }

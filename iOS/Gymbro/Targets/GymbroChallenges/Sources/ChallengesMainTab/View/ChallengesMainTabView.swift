@@ -44,11 +44,11 @@ struct ChallengesMainTabView: View {
                 if let featured = viewModel.featuredChallenge {
                     VStack(alignment: .leading, spacing: 13) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Featured Challenge")
+                            Text(String(localized: "challenges.main.featured_title", bundle: .module))
                                 .font(.system(size: 21, weight: .bold))
                                 .foregroundStyle(.white)
                             
-                            Text("The most relevant challenge for your team right now")
+                            Text(String(localized: "challenges.main.featured_subtitle", bundle: .module))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.52))
                         }
@@ -85,24 +85,24 @@ struct ChallengesMainTabView: View {
                 }
                 
                 ChallengeSectionView(
-                    title: "Active Challenges",
-                    subtitle: "Keep pushing with your team",
+                    title: String(localized: "challenges.main.section_active_title", bundle: .module),
+                    subtitle: String(localized: "challenges.main.section_active_subtitle", bundle: .module),
                     challenges: viewModel.activeChallenges,
                     onTap: viewModel.challengeTapped,
                     onJoinTap: viewModel.joinChallengeTapped
                 )
                 
                 ChallengeSectionView(
-                    title: "Available Challenges",
-                    subtitle: "Join with one of your group chats",
+                    title: String(localized: "challenges.main.section_available_title", bundle: .module),
+                    subtitle: String(localized: "challenges.main.section_available_subtitle", bundle: .module),
                     challenges: viewModel.availableChallenges,
                     onTap: viewModel.challengeTapped,
                     onJoinTap: viewModel.joinChallengeTapped
                 )
                 
                 ChallengeSectionView(
-                    title: "Completed History",
-                    subtitle: "Your team story so far",
+                    title: String(localized: "challenges.main.section_completed_title", bundle: .module),
+                    subtitle: String(localized: "challenges.main.section_completed_subtitle", bundle: .module),
                     challenges: viewModel.completedHistory,
                     onTap: viewModel.challengeTapped,
                     onJoinTap: viewModel.joinChallengeTapped
@@ -122,11 +122,11 @@ struct ChallengesMainTabView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Challenges")
+            Text(String(localized: "challenges.main.title", bundle: .module))
                 .font(.system(size: 34, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Turn your group chats into teams and conquer fitness goals together.")
+            Text(String(localized: "challenges.main.subtitle", bundle: .module))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.white.opacity(0.62))
                 .fixedSize(horizontal: false, vertical: true)
@@ -139,11 +139,11 @@ struct ChallengesMainTabView: View {
                 .font(.system(size: 42, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.7))
             
-            Text("No challenges yet")
+            Text(String(localized: "challenges.main.empty_title", bundle: .module))
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.white)
             
-            Text("When new team challenges appear, they will be waiting here.")
+            Text(String(localized: "challenges.main.empty_subtitle", bundle: .module))
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)

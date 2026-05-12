@@ -16,10 +16,10 @@ struct ChallengeStatsSummaryView: View {
             ],
             spacing: 10
         ) {
-            statCard(title: "Active", value: activeCount, icon: "bolt.fill")
-            statCard(title: "Completed", value: completedCount, icon: "checkmark.seal.fill")
-            statCard(title: "Teams", value: teamsCount, icon: "person.3.fill")
-            statCard(title: "Available", value: availableCount, icon: "flag.checkered")
+            statCard(title: String(localized: "challenges.stats.active", bundle: .module), value: activeCount, icon: "bolt.fill")
+            statCard(title: String(localized: "challenges.stats.completed", bundle: .module), value: completedCount, icon: "checkmark.seal.fill")
+            statCard(title: String(localized: "challenges.stats.teams", bundle: .module), value: teamsCount, icon: "person.3.fill")
+            statCard(title: String(localized: "challenges.stats.available", bundle: .module), value: availableCount, icon: "flag.checkered")
         }
     }
     

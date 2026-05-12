@@ -7,7 +7,10 @@ struct ChallengeRulesView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
-            sectionTitle("Rules", "How this challenge counts progress")
+            sectionTitle(
+                String(localized: "challenges.details.rules.title", bundle: .module),
+                String(localized: "challenges.details.rules.subtitle", bundle: .module)
+            )
             
             VStack(spacing: 10) {
                 ForEach(rules) { rule in

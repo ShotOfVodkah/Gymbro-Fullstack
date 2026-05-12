@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 import GymbroTypes
@@ -63,11 +64,18 @@ struct AchievementsSectionView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Achievements")
+            Text(String(localized: "perks.achievements.title", bundle: .module))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("\(achievements.filter { $0.isUnlocked }.count)/\(achievements.count) unlocked")
+            Text(
+                String(
+                    format: String(localized: "perks.achievements.unlocked_format", bundle: .module),
+                    locale: .current,
+                    achievements.filter(\.isUnlocked).count,
+                    achievements.count
+                )
+            )
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.64))
         }
@@ -181,11 +189,11 @@ struct AchievementsSectionView: View {
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.7))
             
-            Text("No achievements here yet")
+            Text(String(localized: "perks.achievements.empty_title", bundle: .module))
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Try another category or keep training to unlock more.")
+            Text(String(localized: "perks.achievements.empty_subtitle", bundle: .module))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.white.opacity(0.58))
                 .multilineTextAlignment(.center)

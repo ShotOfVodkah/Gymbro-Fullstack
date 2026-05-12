@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import UIKit
 
 import GymbroAuth
@@ -160,8 +161,12 @@ final class ProfileSettingsViewModel: ObservableObject {
     var appVersionText: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown"
-        
-        return "GymBro\nVersion \(version)\nBuild \(build)"
+        return String(
+            format: String(localized: "settings.app_version.format", bundle: .module),
+            locale: .current,
+            version,
+            build
+        )
     }
     
     func handleTap(_ item: SettingsItem) {
@@ -169,8 +174,8 @@ final class ProfileSettingsViewModel: ObservableObject {
         switch item.id {
         case "change_password":
             activeInfo = SettingsInfoPresentation(
-                title: "Change Password",
-                message: "Changing your password from this screen is not available yet. Sign out, then use “Forgot password” on the login screen, or contact support.",
+                title: String(localized: "settings.info.change_password.title", bundle: .module),
+                message: String(localized: "settings.info.change_password.message", bundle: .module),
                 secondary: .openSupportMail
             )
 
@@ -179,22 +184,22 @@ final class ProfileSettingsViewModel: ObservableObject {
 
         case "language":
             activeInfo = SettingsInfoPresentation(
-                title: "Language",
-                message: "GymBro uses your device language. To change it, open iOS Settings → General → Language & Region (or open this app’s page in Settings below).",
+                title: String(localized: "settings.info.language.title", bundle: .module),
+                message: String(localized: "settings.info.language.message", bundle: .module),
                 secondary: .openAppSettings
             )
 
         case "app_icon":
             activeInfo = SettingsInfoPresentation(
-                title: "App Icon",
-                message: "Alternate app icons are not available in this build yet.",
+                title: String(localized: "settings.info.app_icon.title", bundle: .module),
+                message: String(localized: "settings.info.app_icon.message", bundle: .module),
                 secondary: nil
             )
 
         case "blocked_users":
             activeInfo = SettingsInfoPresentation(
-                title: "Blocked Users",
-                message: "Managing blocked users from the app is coming soon.",
+                title: String(localized: "settings.info.blocked_users.title", bundle: .module),
+                message: String(localized: "settings.info.blocked_users.message", bundle: .module),
                 secondary: nil
             )
 
@@ -215,8 +220,8 @@ final class ProfileSettingsViewModel: ObservableObject {
 
         case "delete_account":
             activeInfo = SettingsInfoPresentation(
-                title: "Delete Account",
-                message: "There is no in-app account deletion yet. To remove your account, contact support and we will process your request.",
+                title: String(localized: "settings.info.delete_account.title", bundle: .module),
+                message: String(localized: "settings.info.delete_account.message", bundle: .module),
                 secondary: .openSupportMail
             )
 

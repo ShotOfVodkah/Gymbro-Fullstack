@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import GymbroTypes
 
 enum SettingsSectionsBuilder {
@@ -7,29 +8,29 @@ enum SettingsSectionsBuilder {
         [
             SettingsSection(
                 id: "account",
-                title: "Account",
+                title: String(localized: "settings.section.account", bundle: .module),
                 items: [
                     .init(
                         id: "change_password",
-                        title: "Change Password",
+                        title: String(localized: "settings.row.change_password", bundle: .module),
                         icon: "key.fill",
                         type: .navigation
                     ),
                     .init(
                         id: "devices",
-                        title: "Connected Devices",
+                        title: String(localized: "settings.row.connected_devices", bundle: .module),
                         icon: "iphone.and.arrow.forward",
                         type: .navigation
                     ),
                     .init(
                         id: "language",
-                        title: "Language",
+                        title: String(localized: "settings.row.language", bundle: .module),
                         icon: "globe",
                         type: .navigation
                     ),
                     .init(
                         id: "delete_account",
-                        title: "Delete Account",
+                        title: String(localized: "settings.row.delete_account", bundle: .module),
                         icon: "trash.fill",
                         type: .destructive
                     )
@@ -38,17 +39,17 @@ enum SettingsSectionsBuilder {
             
             SettingsSection(
                 id: "notifications",
-                title: "Notifications",
+                title: String(localized: "settings.section.notifications", bundle: .module),
                 items: [
                     .init(
                         id: "push",
-                        title: "Push Notifications",
+                        title: String(localized: "settings.row.push", bundle: .module),
                         icon: "bell.fill",
                         type: .toggle(isOn: state.pushNotificationsEnabled)
                     ),
                     .init(
                         id: "workout_reminders",
-                        title: "Workout Reminders",
+                        title: String(localized: "settings.row.workout_reminders", bundle: .module),
                         icon: "figure.run",
                         type: .toggle(isOn: state.workoutRemindersEnabled)
                     )
@@ -57,17 +58,17 @@ enum SettingsSectionsBuilder {
             
             SettingsSection(
                 id: "appearance",
-                title: "Appearance",
+                title: String(localized: "settings.section.appearance", bundle: .module),
                 items: [
                     .init(
                         id: "dark_mode",
-                        title: "Dark Mode",
+                        title: String(localized: "settings.row.dark_mode", bundle: .module),
                         icon: "moon.fill",
                         type: .toggle(isOn: true)
                     ),
                     .init(
                         id: "app_icon",
-                        title: "App Icon",
+                        title: String(localized: "settings.row.app_icon", bundle: .module),
                         icon: "app.fill",
                         type: .navigation
                     )
@@ -76,29 +77,29 @@ enum SettingsSectionsBuilder {
             
             SettingsSection(
                 id: "privacy",
-                title: "Privacy",
+                title: String(localized: "settings.section.privacy", bundle: .module),
                 items: [
                     .init(
                         id: "private_account",
-                        title: "Private Account",
+                        title: String(localized: "settings.row.private_account", bundle: .module),
                         icon: "lock.fill",
                         type: .toggle(isOn: state.privateAccountEnabled)
                     ),
                     .init(
                         id: "show_activity",
-                        title: "Show Activity to Friends",
+                        title: String(localized: "settings.row.show_activity", bundle: .module),
                         icon: "eye.fill",
                         type: .toggle(isOn: state.showActivityEnabled)
                     ),
                     .init(
                         id: "discover_visibility",
-                        title: "Show Profile in Discover",
+                        title: String(localized: "settings.row.discover", bundle: .module),
                         icon: "magnifyingglass",
                         type: .toggle(isOn: state.discoverVisibilityEnabled)
                     ),
                     .init(
                         id: "blocked_users",
-                        title: "Blocked Users",
+                        title: String(localized: "settings.row.blocked_users", bundle: .module),
                         icon: "hand.raised.fill",
                         type: .navigation
                     )
@@ -107,35 +108,35 @@ enum SettingsSectionsBuilder {
             
             SettingsSection(
                 id: "help_about",
-                title: "Help & About",
+                title: String(localized: "settings.section.help", bundle: .module),
                 items: [
                     .init(
                         id: "help_center",
-                        title: "Help Center",
+                        title: String(localized: "settings.row.help_center", bundle: .module),
                         icon: "questionmark.circle",
                         type: .navigation
                     ),
                     .init(
                         id: "support",
-                        title: "Contact Support",
+                        title: String(localized: "settings.row.contact_support", bundle: .module),
                         icon: "message.fill",
                         type: .navigation
                     ),
                     .init(
                         id: "terms",
-                        title: "Terms of Service",
+                        title: String(localized: "settings.row.terms", bundle: .module),
                         icon: "doc.text.fill",
                         type: .navigation
                     ),
                     .init(
                         id: "privacy_policy",
-                        title: "Privacy Policy",
+                        title: String(localized: "settings.row.privacy_policy", bundle: .module),
                         icon: "shield.fill",
                         type: .navigation
                     ),
                     .init(
                         id: "app_version",
-                        title: "App Version",
+                        title: String(localized: "settings.row.app_version", bundle: .module),
                         icon: "info.circle.fill",
                         type: .navigation
                     )
@@ -148,7 +149,7 @@ enum SettingsSectionsBuilder {
                 items: [
                     .init(
                         id: "logout",
-                        title: "Log Out",
+                        title: String(localized: "settings.row.logout", bundle: .module),
                         icon: "rectangle.portrait.and.arrow.right",
                         type: .destructive
                     )
