@@ -206,6 +206,7 @@ struct GymbroApp: App {
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
             }
+            .background(Color.black.ignoresSafeArea(.all))
             .ignoresSafeArea(.container, edges: .bottom)
         }
     }
