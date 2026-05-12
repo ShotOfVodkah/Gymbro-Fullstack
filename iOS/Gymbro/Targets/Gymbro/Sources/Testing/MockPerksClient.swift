@@ -58,10 +58,44 @@ final class MockPerksClient: PerksClient {
         if arguments.contains("-uitest-perks-streak-danger") {
             return Self.streakDangerJSON()
         }
-        return Self.streakDefaultJSON
+        return Self.streakDefaultJSON()
     }
 
-    private static let streakDefaultJSON = """
+    private static func streakDefaultJSON() -> String {
+        let cal = Calendar.current
+        let todayStart = cal.startOfDay(for: Date())
+        guard let weekEndDay = cal.date(byAdding: .day, value: 5, to: todayStart),
+              let weekEnd = cal.date(bySettingHour: 23, minute: 59, second: 59, of: weekEndDay),
+              let weekStart = cal.date(byAdding: .day, value: -1, to: todayStart)
+        else {
+            return streakDefaultJSONFallback
+        }
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+
+        let startStr = formatter.string(from: weekStart)
+        let endStr = formatter.string(from: weekEnd)
+
+        return """
+        {
+          "currentStreakWeeks": 4,
+          "bestStreakWeeks": 8,
+          "weeklyGoal": 3,
+          "nextWeeklyGoal": 4,
+          "completedThisWeek": 2,
+          "remainingToGoal": 1,
+          "weekStartDate": "\(startStr)",
+          "weekEndDate": "\(endStr)",
+          "isGoalCompleted": false,
+          "streakFreezeCount": 1,
+          "canUseStreakFreeze": true,
+          "wasFreezeUsedThisWeek": false
+        }
+        """
+    }
+
+    private static let streakDefaultJSONFallback = """
     {
       "currentStreakWeeks": 4,
       "bestStreakWeeks": 8,
@@ -69,8 +103,8 @@ final class MockPerksClient: PerksClient {
       "nextWeeklyGoal": 4,
       "completedThisWeek": 2,
       "remainingToGoal": 1,
-      "weekStartDate": "2026-05-04T00:00:00Z",
-      "weekEndDate": "2026-05-10T23:59:59Z",
+      "weekStartDate": "2030-05-01T00:00:00Z",
+      "weekEndDate": "2030-05-07T23:59:59Z",
       "isGoalCompleted": false,
       "streakFreezeCount": 1,
       "canUseStreakFreeze": true,
@@ -116,7 +150,7 @@ final class MockPerksClient: PerksClient {
         let cal = Calendar.current
         let todayStart = cal.startOfDay(for: Date())
         guard let endDay = cal.date(byAdding: .day, value: 2, to: todayStart) else {
-            return streakDefaultJSON
+            return Self.streakDefaultJSON()
         }
         let weekEnd = cal.date(bySettingHour: 23, minute: 59, second: 59, of: endDay) ?? endDay
 
