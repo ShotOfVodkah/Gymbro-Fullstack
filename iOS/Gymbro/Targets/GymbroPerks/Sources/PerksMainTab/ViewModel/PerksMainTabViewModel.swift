@@ -23,6 +23,8 @@ final class PerksMainTabViewModel: ObservableObject {
     private let analytics: any AnalyticsService
     
     private var didTrackScreenOpen = false
+    private var lastRefreshAt: Date?
+    private var isRefreshing: Bool = false
     
     init(
         router: any Router,
@@ -41,12 +43,18 @@ final class PerksMainTabViewModel: ObservableObject {
         }
         
         guard dashboard == nil else { return }
-        await loadDashboard()
+        await loadDashboard(showLoading: true)
+    }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
     }
     
     func reload() {
         Task {
-            await loadDashboard()
+            await loadDashboard(showLoading: true)
         }
     }
     
@@ -130,19 +138,32 @@ final class PerksMainTabViewModel: ObservableObject {
     }
     
     func refresh() async {
-        await loadDashboard()
+        await loadDashboard(showLoading: false)
     }
     
-    private func loadDashboard() async {
-        screenState = .loading
+    private func loadDashboard(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
         
         do {
             dashboard = try await service.fetchDashboard()
             screenState = .loaded
+            lastRefreshAt = Date()
         } catch {
             if dashboard == nil {
                 screenState = .error
             }
         }
+    }
+
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh()
     }
 }

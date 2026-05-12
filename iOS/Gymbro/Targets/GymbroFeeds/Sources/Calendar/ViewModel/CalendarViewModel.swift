@@ -27,6 +27,7 @@ final class FeedsCalendarViewModel: ObservableObject {
     
     private let invalidationCenter: FeedsStateInvalidationCenter
     private var invalidationTask: Task<Void, Never>?
+    private var isRefreshing: Bool = false
     
     init(
         input: CalendarScreenInput,
@@ -54,12 +55,12 @@ final class FeedsCalendarViewModel: ObservableObject {
     func reload() {
         Task {
             analytics.track(.errorRetryTapped(screen: AnalyticsScreen.feedsCalendar.rawValue))
-            await loadCalendar()
+            await loadCalendar(showLoading: true)
         }
     }
     
     func refresh() async {
-        await loadCalendar()
+        await loadCalendar(showLoading: false)
     }
 
     func clearUserScopedState() {
@@ -141,6 +142,10 @@ final class FeedsCalendarViewModel: ObservableObject {
         
         rebuildSelection()
     }
+
+    var hasAnyWorkoutsInMonth: Bool {
+        days.contains { !$0.myWorkouts.isEmpty || !$0.partnerWorkouts.isEmpty }
+    }
     
     private func rebuildSelection() {
         let selectedDate = selectedDayForActions?.date
@@ -157,8 +162,14 @@ final class FeedsCalendarViewModel: ObservableObject {
         }
     }
     
-    private func loadCalendar() async {
-        screenState = .loading
+    private func loadCalendar(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
         
         do {
             let data = try await service.fetchInitialScreen(

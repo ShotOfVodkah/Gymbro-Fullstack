@@ -92,6 +92,12 @@ struct EditProfileView: View {
                 UITestMarker(id: "profile.edit.screen")
             }
         }
+        .task {
+            await viewModel.loadIfNeeded()
+        }
+        .onAppear {
+            viewModel.onAppear()
+        }
     }
     
     private var contentView: some View {
@@ -167,6 +173,9 @@ struct EditProfileView: View {
             .padding(.horizontal, 16)
             .padding(.top, 12)
             .padding(.bottom, 120)
+        }
+        .refreshable {
+            await viewModel.refresh()
         }
     }
     

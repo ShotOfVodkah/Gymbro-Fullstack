@@ -56,6 +56,12 @@ struct ProfileStatisticsView: View {
                 UITestMarker(id: "profile.statistics.screen")
             }
         }
+        .task {
+            await viewModel.loadIfNeeded()
+        }
+        .onAppear {
+            viewModel.onAppear()
+        }
     }
     
     private var contentView: some View {
@@ -118,6 +124,9 @@ struct ProfileStatisticsView: View {
             .padding(.bottom, 120)
         }
         .coordinateSpace(name: "statisticsScroll")
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
     
     private var detailStatsSection: some View {

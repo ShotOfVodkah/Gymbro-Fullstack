@@ -85,6 +85,7 @@ func main() {
 
 	mux.Handle("/people/friends", authMiddleware(peopleH))
 	mux.Handle("/people/following", authMiddleware(peopleH))
+	mux.Handle("/people/followers", authMiddleware(peopleH))
 	mux.Handle("/people/discover", authMiddleware(peopleH))
 	mux.Handle("/people/", authMiddleware(peopleH))
 

@@ -51,6 +51,9 @@ struct ChatView: View {
         .toolbar(.hidden, for: .navigationBar)
         .toolbarBackground(.hidden, for: .navigationBar)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
+            viewModel.onAppear()
+        }
     }
     
     private var contentView: some View {

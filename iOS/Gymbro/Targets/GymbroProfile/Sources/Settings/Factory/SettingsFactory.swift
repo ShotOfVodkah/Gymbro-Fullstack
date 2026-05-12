@@ -7,6 +7,7 @@ import GymbroTypes
 
 public final class ProfileSettingsFactoryImpl {
     
+    private var cachedUserID: String?
     private var viewModelCache: ProfileSettingsViewModel?
     
     public init() {}
@@ -17,6 +18,14 @@ public final class ProfileSettingsFactoryImpl {
         client: any ProfileClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
+        let currentUserID = AppMicroservices.tokens.userId ?? ""
+
+        if cachedUserID != currentUserID {
+            viewModelCache = nil
+            cachedUserID = currentUserID
+            ProfileStateInvalidationCenter.shared.invalidate(.accountChanged)
+        }
+
         if let viewModelCache {
             return ProfileSettingsView(viewModel: viewModelCache)
         }

@@ -96,11 +96,14 @@ final class ChallengesMainTabViewModel: ObservableObject {
     var availableCountText: String {
         "\(challenges.filter { !$0.isJoined }.count)"
     }
-    
+
     private let router: any Router
     private let service: any ChallengesMainTabService
     private let analytics: any AnalyticsService
-    
+
+    private var invalidationTask: Task<Void, Never>?
+    private var lastChallengesRefreshAt: Date?
+
     init(
         router: any Router,
         service: any ChallengesMainTabService,
@@ -109,33 +112,78 @@ final class ChallengesMainTabViewModel: ObservableObject {
         self.router = router
         self.service = service
         self.analytics = analytics
+        bindInvalidationEvents()
         reload()
-        
+
         analytics.track(.challengeListOpened)
         analytics.track(.screenViewed(screen: .challenges))
     }
-    
+
+    deinit {
+        invalidationTask?.cancel()
+    }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
+
     func reload() {
         Task {
-            await loadChallenges()
+            await loadChallenges(showLoading: true)
         }
     }
 
     func refresh() {
         analytics.track(.errorRetryTapped(screen: AnalyticsScreen.challenges.rawValue))
         Task {
-            await loadChallenges()
+            let background = screenState == .loaded
+            await loadChallenges(showLoading: !background)
         }
     }
 
-    private func loadChallenges() async {
-        screenState = .loading
-        
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 20) async {
+        if case .loaded = screenState {
+            let age = Date().timeIntervalSince(lastChallengesRefreshAt ?? .distantPast)
+            guard age > maxAgeSeconds else { return }
+        }
+        let background = screenState == .loaded
+        await loadChallenges(showLoading: !background)
+    }
+
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+        invalidationTask = Task { [weak self] in
+            for await reason in ChallengesStateInvalidationCenter.shared.events() {
+                await MainActor.run {
+                    guard let self else { return }
+                    switch reason {
+                    case .accountChanged, .listShouldRefresh:
+                        Task {
+                            let background = self.screenState == .loaded
+                            await self.loadChallenges(showLoading: !background)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func loadChallenges(showLoading: Bool) async {
+        if showLoading {
+            screenState = .loading
+        }
+
         do {
-            challenges = try await service.fetchChallenges()
-            screenState = challenges.isEmpty ? .empty : .loaded
+            let next = try await service.fetchChallenges()
+            challenges = next
+            screenState = next.isEmpty ? .empty : .loaded
+            lastChallengesRefreshAt = Date()
         } catch {
-            screenState = .error
+            if showLoading {
+                screenState = .error
+            }
         }
     }
     

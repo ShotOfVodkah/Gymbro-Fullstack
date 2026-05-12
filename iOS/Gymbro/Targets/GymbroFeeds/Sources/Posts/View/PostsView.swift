@@ -35,25 +35,40 @@ struct FeedsProfilePostsView: View {
         }
         .navigationTitle(viewModel.title)
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.onAppear()
+        }
     }
     
     private var contentView: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            LazyVStack(spacing: 15) {
-                ForEach(viewModel.posts) { post in
-                    PostCardView(
-                        post: post,
-                        mode: .exerciseOnly,
-                        onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) }
-                    )
+        Group {
+            if viewModel.posts.isEmpty {
+                FeedsEmptyStateView(
+                    systemImage: "square.stack.3d.up",
+                    title: String(localized: "feeds.profile.posts.empty.title", bundle: .module),
+                    subtitle: String(localized: "feeds.profile.posts.empty.subtitle", bundle: .module)
+                )
+                .padding(.horizontal, 12)
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
+                    LazyVStack(spacing: 15) {
+                        ForEach(viewModel.posts) { post in
+                            PostCardView(
+                                post: post,
+                                mode: .exerciseOnly,
+                                onExerciseTap: { exercise in viewModel.didTapExercise(exercise, in: post) }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 7)
+                    .padding(.top, 8)
+                    .padding(.bottom, 120)
+                }
+                .tint(.white)
+                .refreshable {
+                    await viewModel.refresh()
                 }
             }
-            .padding(.horizontal, 7)
-            .padding(.top, 8)
-            .padding(.bottom, 120)
-        }
-        .refreshable {
-            await viewModel.refresh()
         }
     }
     

@@ -6,6 +6,7 @@ import GymbroTypes
 
 public final class EditProfileFactoryImpl {
     
+    private var cachedUserID: String?
     private var viewModelCache: EditProfileViewModel?
     
     public init() {}
@@ -16,6 +17,14 @@ public final class EditProfileFactoryImpl {
         client: any ProfileClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
+        let currentUserID = AppMicroservices.tokens.userId ?? ""
+
+        if cachedUserID != currentUserID {
+            viewModelCache = nil
+            cachedUserID = currentUserID
+            ProfileStateInvalidationCenter.shared.invalidate(.accountChanged)
+        }
+
         if let viewModelCache {
             return EditProfileView(viewModel: viewModelCache)
         }

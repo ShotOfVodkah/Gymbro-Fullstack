@@ -23,20 +23,31 @@ final class ProfileMainTabViewModel: ObservableObject {
     private let router: any Router
     private let service: any ProfileMainTabService
     private let analytics: any AnalyticsService
-    
+    private let invalidationCenter: ProfileStateInvalidationCenter
+
+    private var invalidationTask: Task<Void, Never>?
+    private var didTrackScreenOpen = false
+    private var lastRefreshAt: Date?
+    private var isRefreshing = false
+
     init(
         router: any Router,
         mode: ProfileViewMode,
         service: any ProfileMainTabService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: ProfileStateInvalidationCenter? = nil
     ) {
         self.router = router
         self.mode = mode
         self.service = service
         self.analytics = analytics
-        
-        analytics.track(.screenViewed(screen: .profile))
-        Task { await loadProfile() }
+        self.invalidationCenter = invalidationCenter ?? .shared
+
+        bindInvalidationEvents()
+    }
+
+    deinit {
+        invalidationTask?.cancel()
     }
     
     var isOwnProfile: Bool {
@@ -81,13 +92,30 @@ final class ProfileMainTabViewModel: ObservableObject {
         }
     }
     
-    func onAppear() {
+    func loadIfNeeded() async {
+        if !didTrackScreenOpen {
+            didTrackScreenOpen = true
+            analytics.track(.screenViewed(screen: .profile))
+        }
+
+        guard screenModel == nil else { return }
+        await loadProfile(showLoading: true)
     }
-    
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
+
+    func refresh() async {
+        await loadProfile(showLoading: false)
+    }
+
     func reload() {
         Task {
             analytics.track(.errorRetryTapped(screen: AnalyticsScreen.profile.rawValue))
-            await loadProfile()
+            await loadProfile(showLoading: true)
         }
     }
     
@@ -241,26 +269,63 @@ final class ProfileMainTabViewModel: ObservableObject {
         }
     }
     
-    private func loadProfile() async {
-        screenState = .loading
-        
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh()
+    }
+
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+
+    private func handleInvalidation(_ reason: ProfileInvalidationReason) async {
+        switch reason {
+        case .accountChanged:
+            await refresh()
+        case .ownProfileDataChanged:
+            guard isOwnProfile else { return }
+            await refresh()
+        }
+    }
+
+    private func loadProfile(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
+
         do {
             let model = try await service.fetchScreen(mode: mode)
             screenModel = model
             relationshipState = model.relationshipState
             screenState = .loaded
+            lastRefreshAt = Date()
 
             await service.trackProfileOpened(mode: mode)
         } catch {
             print("Failed to load profile:", error)
-            screenModel = nil
-            screenState = .error
-            analytics.track(
-                .errorOccurred(
-                    screen: AnalyticsScreen.profile.rawValue,
-                    message: error.localizedDescription
+            if screenModel == nil {
+                screenModel = nil
+                screenState = .error
+                analytics.track(
+                    .errorOccurred(
+                        screen: AnalyticsScreen.profile.rawValue,
+                        message: error.localizedDescription
+                    )
                 )
-            )
+            }
         }
     }
 

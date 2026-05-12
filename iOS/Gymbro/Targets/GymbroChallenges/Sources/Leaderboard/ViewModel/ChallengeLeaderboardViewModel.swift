@@ -1,6 +1,7 @@
 import Foundation
 
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 @MainActor
@@ -21,17 +22,20 @@ final class ChallengeLeaderboardViewModel: ObservableObject {
     private let router: any Router
     private let service: any ChallengeLeaderboardService
     private let analytics: any AnalyticsService
+    private let feedsClient: any FeedsClientProtocol
     
     init(
         challengeID: String,
         router: any Router,
         service: any ChallengeLeaderboardService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        feedsClient: any FeedsClientProtocol
     ) {
         self.challengeID = challengeID
         self.router = router
         self.service = service
         self.analytics = analytics
+        self.feedsClient = feedsClient
         
         reload()
         
@@ -79,6 +83,14 @@ final class ChallengeLeaderboardViewModel: ObservableObject {
                     chatId: team.chatID
                 )
             )
-        // later: router.navigate(to: .feedsChat(input: ...))
+        Task {
+            do {
+                let room = try await feedsClient.fetchChat(id: team.chatID)
+                let input = ChatSessionInput(response: room)
+                router.navigate(to: .feedsChat(input: input))
+            } catch {
+                print("Failed to open challenge team chat:", error)
+            }
+        }
     }
 }

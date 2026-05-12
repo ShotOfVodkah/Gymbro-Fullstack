@@ -22,20 +22,51 @@ final class ProfileStatisticsViewModel: ObservableObject {
     private let service: any ProfileStatisticsServiceProtocol
     private let router: any Router
     private let analytics: any AnalyticsService
-    
+    private let invalidationCenter: ProfileStateInvalidationCenter
+
+    private var invalidationTask: Task<Void, Never>?
+    private var didTrackScreenOpen = false
+    private var lastRefreshAt: Date?
+    private var isRefreshing = false
+
     init(
         mode: ProfileViewMode,
         service: any ProfileStatisticsServiceProtocol,
         router: any Router,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        invalidationCenter: ProfileStateInvalidationCenter? = nil
     ) {
         self.mode = mode
         self.service = service
         self.router = router
         self.analytics = analytics
-        
-        analytics.track(.profileStatisticsScreenViewed(isOwnProfile: mode == .myProfile))
-        Task { await loadStatistics() }
+        self.invalidationCenter = invalidationCenter ?? .shared
+
+        bindInvalidationEvents()
+    }
+
+    deinit {
+        invalidationTask?.cancel()
+    }
+
+    func loadIfNeeded() async {
+        if !didTrackScreenOpen {
+            didTrackScreenOpen = true
+            analytics.track(.profileStatisticsScreenViewed(isOwnProfile: mode == .myProfile))
+        }
+
+        guard model == nil else { return }
+        await loadStatistics(showLoading: true)
+    }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
+
+    func refresh() async {
+        await loadStatistics(showLoading: false)
     }
     
     var summary: StatisticsSummaryModel? {
@@ -99,6 +130,34 @@ final class ProfileStatisticsViewModel: ObservableObject {
         }
     }
 
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh()
+    }
+
+    private func bindInvalidationEvents() {
+        invalidationTask?.cancel()
+
+        invalidationTask = Task { [weak self] in
+            guard let self else { return }
+
+            for await reason in invalidationCenter.events() {
+                await self.handleInvalidation(reason)
+            }
+        }
+    }
+
+    private func handleInvalidation(_ reason: ProfileInvalidationReason) async {
+        switch reason {
+        case .accountChanged:
+            await refresh()
+        case .ownProfileDataChanged:
+            guard mode == .myProfile else { return }
+            await refresh()
+        }
+    }
+
     func reportChartSelection(chartKind: String, selectionId: String) {
         analytics.track(.statisticsChartSelected(chartKind: chartKind, selectionId: selectionId))
     }
@@ -108,25 +167,34 @@ final class ProfileStatisticsViewModel: ObservableObject {
         selectedMonthlyPointID = nil
         selectedMonthCountID = nil
         visibleSectionIDs = []
-        await loadStatistics()
+        await loadStatistics(showLoading: true)
     }
-    
-    private func loadStatistics() async {
-        screenState = .loading
-        
+
+    private func loadStatistics(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
+
         do {
             model = try await service.fetchStatistics(mode: mode)
             screenState = .loaded
+            lastRefreshAt = Date()
             animateSectionsIn()
         } catch {
-            model = nil
-            screenState = .error
-            analytics.track(
-                .errorOccurred(
-                    screen: AnalyticsScreen.profileStatistics.rawValue,
-                    message: error.localizedDescription
+            if model == nil {
+                model = nil
+                screenState = .error
+                analytics.track(
+                    .errorOccurred(
+                        screen: AnalyticsScreen.profileStatistics.rawValue,
+                        message: error.localizedDescription
+                    )
                 )
-            )
+            }
         }
     }
 }

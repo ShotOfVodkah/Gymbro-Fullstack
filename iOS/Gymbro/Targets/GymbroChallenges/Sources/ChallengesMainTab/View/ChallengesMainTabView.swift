@@ -31,6 +31,9 @@ struct ChallengesMainTabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
+        .onAppear {
+            viewModel.onAppear()
+        }
     }
     
     private var contentView: some View {

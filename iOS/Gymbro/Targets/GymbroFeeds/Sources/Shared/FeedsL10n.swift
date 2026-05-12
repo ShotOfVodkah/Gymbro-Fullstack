@@ -9,6 +9,8 @@ extension PeopleTab {
             return String(localized: "feeds.people.tab.friends", bundle: .module)
         case .following:
             return String(localized: "feeds.people.tab.following", bundle: .module)
+        case .followers:
+            return String(localized: "feeds.people.tab.followers", bundle: .module)
         case .discover:
             return String(localized: "feeds.people.tab.discover", bundle: .module)
         }

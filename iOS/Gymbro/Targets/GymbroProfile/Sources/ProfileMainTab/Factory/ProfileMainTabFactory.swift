@@ -7,6 +7,7 @@ import GymbroTypes
 
 public final class ProfileMainTabFactoryImpl {
     
+    private var cachedUserID: String?
     private var viewModelCache: [ProfileViewMode: ProfileMainTabViewModel] = [:]
     
     public init() {}
@@ -19,6 +20,14 @@ public final class ProfileMainTabFactoryImpl {
         analytics: any AnalyticsService,
         perksEvents: any PerksEventTrackingService
     ) -> some View {
+        let currentUserID = AppMicroservices.tokens.userId ?? ""
+
+        if cachedUserID != currentUserID {
+            viewModelCache.removeAll()
+            cachedUserID = currentUserID
+            ProfileStateInvalidationCenter.shared.invalidate(.accountChanged)
+        }
+
         if let cachedViewModel = viewModelCache[mode] {
             return ProfileMainTabView(viewModel: cachedViewModel)
         }

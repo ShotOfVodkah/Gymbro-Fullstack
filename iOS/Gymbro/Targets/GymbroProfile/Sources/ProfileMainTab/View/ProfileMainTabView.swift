@@ -46,6 +46,9 @@ struct ProfileMainTabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea(.container, edges: .bottom)
+        .task {
+            await viewModel.loadIfNeeded()
+        }
         .onAppear {
             viewModel.onAppear()
         }
@@ -138,6 +141,9 @@ struct ProfileMainTabView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 120)
+        }
+        .refreshable {
+            await viewModel.refresh()
         }
     }
     

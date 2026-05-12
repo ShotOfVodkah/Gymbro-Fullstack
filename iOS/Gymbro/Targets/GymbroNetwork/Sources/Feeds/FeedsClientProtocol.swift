@@ -21,12 +21,14 @@ public protocol FeedsClientProtocol {
 
     func fetchFriends() async throws -> [PersonItemResponse]
     func fetchFollowing() async throws -> [PersonItemResponse]
+    func fetchFollowers() async throws -> [PersonItemResponse]
     func fetchDiscoverPeople(query: String?) async throws -> [PersonItemResponse]
     func fetchPerson(id: String) async throws -> PersonItemResponse
     func followPerson(id: String) async throws
     func unfollowPerson(id: String) async throws
     func fetchFriendsByUser(userID: String) async throws -> [PersonItemResponse]
     func fetchFollowingByUser(userID: String) async throws -> [PersonItemResponse]
+    func fetchFollowersByUser(userID: String) async throws -> [PersonItemResponse]
 
     func fetchCalendarPeople(context: CalendarContext) async throws -> [CalendarPersonResponse]
 

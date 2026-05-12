@@ -426,6 +426,7 @@ final class AppServicesFactory {
             challengeID: challengeID,
             router: router,
             client: clients.challenges,
+            feedsClient: clients.feeds,
             analytics: analytics
         )
     }
@@ -446,6 +447,7 @@ final class AppServicesFactory {
             challengeID: challengeID,
             router: router,
             client: clients.challenges,
+            feedsClient: clients.feeds,
             analytics: analytics
         )
     }

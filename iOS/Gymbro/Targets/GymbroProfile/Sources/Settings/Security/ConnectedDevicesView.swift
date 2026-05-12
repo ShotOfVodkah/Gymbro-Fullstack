@@ -71,6 +71,9 @@ struct ConnectedDevicesView: View {
                 }
                 .padding()
             }
+            .refreshable {
+                await viewModel.refresh()
+            }
 
         case .error(let message):
             VStack(spacing: 16) {

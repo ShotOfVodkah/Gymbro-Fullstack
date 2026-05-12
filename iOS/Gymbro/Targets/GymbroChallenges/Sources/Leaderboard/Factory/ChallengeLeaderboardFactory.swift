@@ -14,6 +14,7 @@ public final class ChallengeLeaderboardFactoryImpl {
         challengeID: String,
         router: any Router,
         client: any ChallengesClient,
+        feedsClient: any FeedsClientProtocol,
         analytics: any AnalyticsService
     ) -> some View {
         let service = ChallengeLeaderboardServiceImpl(client: client)
@@ -21,7 +22,8 @@ public final class ChallengeLeaderboardFactoryImpl {
             challengeID: challengeID,
             router: router,
             service: service,
-            analytics: analytics
+            analytics: analytics,
+            feedsClient: feedsClient
         )
         return ChallengeLeaderboardView(viewModel: viewModel)
     }

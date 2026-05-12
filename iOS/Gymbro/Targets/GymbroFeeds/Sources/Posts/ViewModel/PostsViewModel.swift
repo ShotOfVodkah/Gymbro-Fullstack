@@ -21,6 +21,8 @@ final class FeedsProfilePostsViewModel: ObservableObject {
     
     private let invalidationCenter: FeedsStateInvalidationCenter
     private var invalidationTask: Task<Void, Never>?
+    private var lastRefreshAt: Date?
+    private var isRefreshing: Bool = false
     
     init(
         input: PostsScreenInput,
@@ -42,13 +44,19 @@ final class FeedsProfilePostsViewModel: ObservableObject {
     deinit {
         invalidationTask?.cancel()
     }
+
+    func onAppear() {
+        Task {
+            await refreshIfStale()
+        }
+    }
     
     var title: String {
         input.isOwnProfile ? "My Posts" : "\(input.userName)'s Posts"
     }
     
     func refresh() async {
-        await loadPosts()
+        await loadPosts(showLoading: false)
     }
 
     func clearUserScopedState() {
@@ -58,7 +66,7 @@ final class FeedsProfilePostsViewModel: ObservableObject {
 
     func reload() {
         Task {
-            await loadPosts()
+            await loadPosts(showLoading: true)
         }
     }
     
@@ -67,16 +75,29 @@ final class FeedsProfilePostsViewModel: ObservableObject {
         router.navigate(to: .workoutInfo(id: sessionID, type: .session))
     }
 
-    private func loadPosts() async {
-        screenState = .loading
+    private func loadPosts(showLoading: Bool) async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        if showLoading || screenState != .loaded {
+            screenState = .loading
+        }
 
         do {
             posts = try await service.fetchPosts(input: input)
             screenState = .loaded
+            lastRefreshAt = Date()
         } catch {
             posts = []
             screenState = .error
         }
+    }
+
+    private func refreshIfStale(maxAgeSeconds: TimeInterval = 15) async {
+        let age = Date().timeIntervalSince(lastRefreshAt ?? .distantPast)
+        guard age > maxAgeSeconds else { return }
+        await refresh()
     }
 
     private func bindInvalidationEvents() {

@@ -48,13 +48,18 @@ struct FeedsCalendarView: View {
             }
         )
         .onPreferenceChange(FeedsContentSafeAreaTopKey.self) { contentSafeAreaTop = $0 }
+        .onAppear {
+            Task {
+                await viewModel.refresh()
+            }
+        }
     }
     
     private var contentView: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 18) {
                 CalendarHeaderView(onBackTap: viewModel.didTapBack)
-                    .padding(.top, contentSafeAreaTop + 4)
+                    .padding(.top, 4)
                 
                 if viewModel.availablePeople.count > 1 {
                     CalendarPersonPickerView(
@@ -79,6 +84,16 @@ struct FeedsCalendarView: View {
                     )
                     
                     CalendarLegendView()
+
+                    if !viewModel.hasAnyWorkoutsInMonth {
+                        FeedsEmptyStateView(
+                            systemImage: "calendar",
+                            title: String(localized: "feeds.calendar.empty.title", bundle: .module),
+                            subtitle: String(localized: "feeds.calendar.empty.subtitle", bundle: .module)
+                        )
+                        .frame(minHeight: 200)
+                        .padding(.top, 4)
+                    }
                     
                     if let selectedDay = viewModel.selectedDayForActions,
                        !selectedDay.myWorkouts.isEmpty || !selectedDay.partnerWorkouts.isEmpty {
@@ -105,7 +120,7 @@ struct FeedsCalendarView: View {
             }
             .padding(.bottom, 24)
         }
-        .ignoresSafeArea(edges: .top)
+        .tint(.white)
         .overlay(alignment: .topLeading) {
             UITestMarker(id: "feeds.calendar.screen")
         }

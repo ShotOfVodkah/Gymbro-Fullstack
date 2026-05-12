@@ -101,36 +101,6 @@ struct ChallengeTeamSectionView: View {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .stroke(.white.opacity(0.07), lineWidth: 1)
             )
-            
-            if details.participationStatus == .inProgress {
-                Button {
-                    onJoinAnotherTeamTap()
-                } label: {
-                    HStack(spacing: 9) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 14, weight: .bold))
-                        
-                        Text("Join with another team")
-                            .font(.system(size: 14, weight: .bold))
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .bold))
-                    }
-                    .foregroundStyle(details.accentColor)
-                    .padding(14)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(details.accentColor.opacity(0.12))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(details.accentColor.opacity(0.18), lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
         }
     }
     

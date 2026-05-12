@@ -53,10 +53,39 @@ struct ProfileSettingsView: View {
         } message: {
             Text(viewModel.appVersionText)
         }
+        .alert(
+            viewModel.activeInfo?.title ?? "",
+            isPresented: Binding(
+                get: { viewModel.activeInfo != nil },
+                set: { if !$0 { viewModel.activeInfo = nil } }
+            ),
+            actions: {
+                if let secondary = viewModel.activeInfo?.secondary {
+                    Button(Self.secondaryButtonTitle(secondary)) {
+                        viewModel.handleInfoSecondary(secondary)
+                        viewModel.activeInfo = nil
+                    }
+                }
+                Button("OK", role: .cancel) {
+                    viewModel.activeInfo = nil
+                }
+            },
+            message: {
+                if let message = viewModel.activeInfo?.message {
+                    Text(message)
+                }
+            }
+        )
         .overlay(alignment: .topLeading) {
             if viewModel.screenState == .loaded {
                 UITestMarker(id: "profile.settings.screen")
             }
+        }
+        .task {
+            await viewModel.loadIfNeeded()
+        }
+        .onAppear {
+            viewModel.onAppear()
         }
     }
     
@@ -88,6 +117,9 @@ struct ProfileSettingsView: View {
             }
             .padding()
         }
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
     
     private var backgroundView: some View {
@@ -104,4 +136,13 @@ struct ProfileSettingsView: View {
     }
     
     @ObservedObject private var viewModel: ProfileSettingsViewModel
+
+    private static func secondaryButtonTitle(_ action: SettingsInfoPresentation.SecondaryAction) -> String {
+        switch action {
+        case .openAppSettings:
+            return "Open App Settings"
+        case .openSupportMail:
+            return "Email Support"
+        }
+    }
 }

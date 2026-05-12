@@ -8,15 +8,15 @@ struct PeopleSegmentPicker: View {
     let onSelectTab: (PeopleTab) -> Void
     
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 9) {
             ForEach(availableTabs) { tab in
                 Button {
                     onSelectTab(tab)
                 } label: {
                     Text(tab.localizedTitle)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(selectedTab == tab ? .white : .gray)
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                         .background(
                             Capsule()
