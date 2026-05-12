@@ -80,6 +80,7 @@ final class JoinChallengeViewModel: ObservableObject {
                         chatId: selectedTeam.chatID
                     )
                 )
+                ChallengesStateInvalidationCenter.shared.invalidate(.listShouldRefresh)
             } catch {
                 isConfirmationPresented = false
                 screenState = .error

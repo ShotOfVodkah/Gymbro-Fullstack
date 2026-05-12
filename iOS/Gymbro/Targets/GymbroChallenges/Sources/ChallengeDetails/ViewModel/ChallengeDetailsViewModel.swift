@@ -1,6 +1,7 @@
 import Foundation
 
 import GymbroNavigation
+import GymbroNetwork
 import GymbroTypes
 
 @MainActor
@@ -22,17 +23,20 @@ final class ChallengeDetailsViewModel: ObservableObject {
     private let router: any Router
     private let service: any ChallengeDetailsService
     private let analytics: any AnalyticsService
+    private let feedsClient: any FeedsClientProtocol
     
     init(
         challengeID: String,
         router: any Router,
         service: any ChallengeDetailsService,
-        analytics: any AnalyticsService
+        analytics: any AnalyticsService,
+        feedsClient: any FeedsClientProtocol
     ) {
         self.challengeID = challengeID
         self.router = router
         self.service = service
         self.analytics = analytics
+        self.feedsClient = feedsClient
         
         reload()
         
@@ -75,11 +79,19 @@ final class ChallengeDetailsViewModel: ObservableObject {
         case .notJoined:
             router.navigate(to: .joinChallenge(id: challengeID))
         case .inProgress, .completed, .failed:
-            if let chatID = details.team?.chatID {
-                analytics.track(.challengeOpenChatTapped(challengeId: challengeID, chatId: chatID))
+            guard let team = details.team else { return }
+            analytics.track(
+                .challengeOpenChatTapped(challengeId: challengeID, chatId: team.chatID)
+            )
+            Task {
+                do {
+                    let room = try await feedsClient.fetchChat(id: team.chatID)
+                    let input = ChatSessionInput(response: room)
+                    router.navigate(to: .feedsChat(input: input))
+                } catch {
+                    print("Failed to open challenge team chat:", error)
+                }
             }
-            // later: router.navigate(to: .feedsChat(input: ...))
-            break
         }
     }
     
@@ -92,6 +104,7 @@ final class ChallengeDetailsViewModel: ObservableObject {
                     challengeID: challengeID,
                     teamID: teamID
                 )
+                ChallengesStateInvalidationCenter.shared.invalidate(.listShouldRefresh)
                 await loadDetails()
             } catch {
                 screenState = .error
