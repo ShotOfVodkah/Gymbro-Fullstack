@@ -1,6 +1,124 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "/ %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "/ %1$@ %2$@"
+          }
+        }
+      }
+    },
+    "#%@" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@ • %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ • %3$@"
+          }
+        }
+      }
+    },
+    "%@ current" : {
+
+    },
+    "%@ members" : {
+
+    },
+    "%@ target" : {
+
+    },
+    "%@/%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "%@%%" : {
+
+    },
+    "A group chat becomes your challenge team. Its members will contribute progress automatically after workouts." : {
+
+    },
+    "All Teams" : {
+
+    },
+    "Back to Challenge" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Challenge" : {
+
+    },
+    "Challenges" : {
+
+    },
+    "Choose team" : {
+
+    },
+    "Choose Team" : {
+
+    },
+    "Compare team progress, current values, and ranking inside this challenge." : {
+
+    },
+    "Entry" : {
+
+    },
+    "Featured Challenge" : {
+
+    },
+    "Join" : {
+
+    },
+    "Join challenge?" : {
+
+    },
+    "Leaderboard" : {
+
+    },
+    "Leave Challenge" : {
+
+    },
+    "MVP" : {
+
+    },
+    "No challenges yet" : {
+
+    },
+    "No teams yet" : {
+
+    },
+    "Only group chats can participate in team challenges." : {
+
+    },
+    "Pick your squad" : {
+
+    },
     "profile.loading" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -68,6 +186,51 @@
           }
         }
       }
+    },
+    "Refresh" : {
+
+    },
+    "Tap a team to open its group chat" : {
+
+    },
+    "Team challenge progress" : {
+
+    },
+    "Team joined" : {
+
+    },
+    "Team standings" : {
+
+    },
+    "The current podium of this challenge" : {
+
+    },
+    "The most relevant challenge for your team right now" : {
+
+    },
+    "This group chat will become your team for the challenge. All completed workouts from team members will contribute to progress." : {
+
+    },
+    "Top Teams" : {
+
+    },
+    "Turn your group chats into teams and conquer fitness goals together." : {
+
+    },
+    "When new team challenges appear, they will be waiting here." : {
+
+    },
+    "When teams join this challenge, their progress will appear here." : {
+
+    },
+    "You" : {
+
+    },
+    "Your group chat is now participating in this challenge." : {
+
+    },
+    "Your team" : {
+
     }
   },
   "version" : "1.0"

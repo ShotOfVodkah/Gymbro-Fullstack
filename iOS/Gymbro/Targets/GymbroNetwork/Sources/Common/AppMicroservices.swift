@@ -24,11 +24,11 @@ public final class AppMicroservices {
         let args = ProcessInfo.processInfo.arguments
         let shouldDisableRefresh: Bool = args.contains("-ui-testing") || args.contains("-mock-network")
         
-        let refreshClient = NetworkClient(baseURL: "http://localhost:8080")
+        let refreshClient = NetworkClient(baseURL: APIBaseURLs.gateway)
         let refreshAuthService = AuthService(client: refreshClient)
         
         networkClient = NetworkClient(
-            baseURL: "http://localhost:8080",
+            baseURL: APIBaseURLs.gateway,
             tokenProvider: { storage.accessToken },
             refreshHandler: shouldDisableRefresh ? nil : { [refreshCoordinator] in
                 try await refreshCoordinator.refreshIfNeeded {
@@ -65,7 +65,7 @@ public final class AppMicroservices {
         perksEvents = PerksEventTrackingServiceImpl(client: perksClient)
         challengesClient = ChallengesClientImpl(client: networkClient)
         feedsRealtimeClient = FeedsChatRealtimeClient(
-            baseURL: URL(string: "http://localhost:8080")!,
+            baseURL: APIBaseURLs.gatewayURL,
             tokenProvider: { storage.accessToken }
         )
     }

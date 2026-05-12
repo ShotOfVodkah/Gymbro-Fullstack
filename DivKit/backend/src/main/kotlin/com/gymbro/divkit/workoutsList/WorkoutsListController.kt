@@ -4,6 +4,7 @@ import com.gymbro.divkit.Language
 import com.gymbro.divkit.WorkoutType
 import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
+import com.gymbro.divkit.config.DivKitPublicUrls
 import divkit.dsl.Divan
 import divkit.dsl.data
 import divkit.dsl.divan
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.RestController
 import jakarta.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping("/workoutsList")
-class WorkoutsListController(private val backendClient: GymbroBackendClient) {
+class WorkoutsListController(
+    private val backendClient: GymbroBackendClient,
+    private val divKitPublicUrls: DivKitPublicUrls,
+) {
 
     @GetMapping
     fun getWorkouts(
@@ -66,7 +70,8 @@ class WorkoutsListController(private val backendClient: GymbroBackendClient) {
                             weekEnd,
                             wasFreezeUsedThisWeek,
                             isGoalCompleted,
-                            language
+                            language,
+                            divKitPublicUrls.assetsBaseUrl,
                         ) },
                     variables = listOf(
                         stringVariable(

@@ -3,6 +3,7 @@ package com.gymbro.divkit.workoutInfo
 import com.gymbro.divkit.Language
 import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
+import com.gymbro.divkit.config.DivKitPublicUrls
 import com.gymbro.divkit.client.toDomain
 import com.gymbro.divkit.client.toWorkout
 import divkit.dsl.Divan
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/workoutInfo")
-class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
+class WorkoutInfoController(
+    private val backendClient: GymbroBackendClient,
+    private val divKitPublicUrls: DivKitPublicUrls,
+) {
 
     companion object {
         const val WORKOUT_INFO_SOURCE_VARIABLE = "workout_info_source"
@@ -65,7 +69,9 @@ class WorkoutInfoController(private val backendClient: GymbroBackendClient) {
             divan {
                 data(
                     logId = "workouts_list",
-                    div = with(WorkoutInfoRenderer) { render(workout, sourceKind, translations) },
+                    div = with(WorkoutInfoRenderer) {
+                        render(workout, sourceKind, translations, divKitPublicUrls.assetsBaseUrl)
+                    },
                     variables = listOf()
                 )
             },

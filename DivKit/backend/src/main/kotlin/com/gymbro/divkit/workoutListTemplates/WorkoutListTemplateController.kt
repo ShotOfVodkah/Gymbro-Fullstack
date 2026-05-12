@@ -1,5 +1,6 @@
 package com.gymbro.divkit.workoutListTemplates
 
+import com.gymbro.divkit.config.DivKitPublicUrls
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -8,16 +9,21 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/divkit/templates") // localhost:8090/divkit/templates
-class DivkitTemplatesController {
-
+@RequestMapping("/divkit/templates")
+class DivkitTemplatesController(
+    private val divKitPublicUrls: DivKitPublicUrls,
+) {
 
     @GetMapping(
         value = ["/workout_info"],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun getWorkoutInfoTemplates(): ResponseEntity<String> {
-        return ResponseEntity.ok(WORKOUT_INFO_TEMPLATES_JSON)
+        val json = WORKOUT_INFO_TEMPLATES_JSON.replace(
+            "http://localhost:8090",
+            divKitPublicUrls.publicBaseUrl,
+        )
+        return ResponseEntity.ok(json)
     }
 }
 

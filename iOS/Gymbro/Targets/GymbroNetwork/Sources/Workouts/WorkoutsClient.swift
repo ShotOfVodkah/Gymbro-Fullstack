@@ -132,7 +132,7 @@ public final class WorkoutsClient {
         }
         return try await client.requestData(
             method: .GET,
-            base: URL(string: "http://localhost:8090"),
+            base: APIBaseURLs.divKitURL,
             path: "workoutsList",
             queryItems: queryItems,
             body: Optional<EmptyBody>.none,
@@ -164,7 +164,7 @@ public final class WorkoutsClient {
     public func fetchWorkoutInfoTemplates() async throws -> Data {
         return try await client.requestData(
             method: .GET,
-            base: URL(string: "http://localhost:8090"),
+            base: APIBaseURLs.divKitURL,
             path: "divkit/templates/workout_info",
             body: Optional<EmptyBody>.none,
             requiresAuth: false
@@ -174,7 +174,7 @@ public final class WorkoutsClient {
     public func fetchWorkoutBuilderTitleJson() async throws -> Data {
         return try await client.requestData(
             method: .GET,
-            base: URL(string: "http://localhost:8090"),
+            base: APIBaseURLs.divKitURL,
             path: "workoutBuilderTitle",
             queryItems: [divKitLanguageQueryItem()],
             body: Optional<EmptyBody>.none,
@@ -199,7 +199,7 @@ public final class WorkoutsClient {
         
         return try await client.requestData(
             method: .GET,
-            base: URL(string: "http://localhost:8090"),
+            base: APIBaseURLs.divKitURL,
             path: "workoutBuilderForType",
             queryItems: queryItems,
             body: Optional<EmptyBody>.none,
@@ -214,7 +214,7 @@ public final class WorkoutsClient {
         ]
         return try await client.requestData(
             method: .GET,
-            base: URL(string: "http://localhost:8090"),
+            base: APIBaseURLs.divKitURL,
             path: "workoutBuilderSheet",
             queryItems: queryItems,
             body: Optional<EmptyBody>.none,
@@ -225,7 +225,7 @@ public final class WorkoutsClient {
     public func fetchWorkoutInfoDivJson(with id: String, type: WorkoutInfoType) async throws -> Data {
         return try await client.requestData(
             method: .GET,
-            base: URL(string: "http://localhost:8090"),
+            base: APIBaseURLs.divKitURL,
             path: "workoutInfo",
             queryItems: [
                 URLQueryItem(name: "id", value: id),

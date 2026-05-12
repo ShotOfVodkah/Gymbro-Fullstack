@@ -161,21 +161,21 @@ public enum WorkoutType: String, Codable {
                 headerGradientStart: "#2E27FF",
                 headerGradientEnd: "#732AFF",
                 exerciseGradientColor: "#2E27FF",
-                iconUrl: "http://localhost:8080/assets/strength.png"
+                iconUrl: "http://111.88.145.152:8080/assets/strength.png"
             )
         case .cardio:
             return WorkoutStyle(
                 headerGradientStart: "#BC31CF",
                 headerGradientEnd: "#732AFF",
                 exerciseGradientColor: "#BC31CF",
-                iconUrl: "http://localhost:8080/assets/cardio.png"
+                iconUrl: "http://111.88.145.152:8080/assets/cardio.png"
             )
         case .yoga:
             return WorkoutStyle(
                 headerGradientStart: "#73FF7A",
                 headerGradientEnd: "#732AFF",
                 exerciseGradientColor: "#73FF7A",
-                iconUrl: "http://localhost:8080/assets/yoga.png"
+                iconUrl: "http://111.88.145.152:8080/assets/yoga.png"
             )
         }
     }

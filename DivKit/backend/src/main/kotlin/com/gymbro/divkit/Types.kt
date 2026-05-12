@@ -65,8 +65,8 @@ data class Workout(
 )
 
 
-fun styleFor(type: WorkoutType): WorkoutStyle {
-    val base = "http://localhost:8090/assets"
+fun styleFor(type: WorkoutType, assetsBaseUrl: String): WorkoutStyle {
+    val base = assetsBaseUrl.trimEnd('/')
     return when (type) {
         WorkoutType.STRENGTH -> WorkoutStyle(
             backgroundColor = "#2E27FF",

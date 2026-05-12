@@ -1,6 +1,107 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "@%@" : {
+
+    },
+    "/ %@" : {
+
+    },
+    "#%@" : {
+
+    },
+    "#%@ • %@w streak • %@ workouts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "#%1$@ • %2$@w streak • %3$@ workouts"
+          }
+        }
+      }
+    },
+    "%@" : {
+
+    },
+    "%@ freeze%@ remaining" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ freeze%2$@ remaining"
+          }
+        }
+      }
+    },
+    "%@/%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "%@/%@ unlocked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@ unlocked"
+          }
+        }
+      }
+    },
+    "%@%%" : {
+
+    },
+    "%@d left" : {
+
+    },
+    "Achievements" : {
+
+    },
+    "Change weekly goal" : {
+
+    },
+    "Choose how many workouts you want to complete every week." : {
+
+    },
+    "Compare your streak and workout progress" : {
+
+    },
+    "Currently scheduled: %@ workouts per week" : {
+
+    },
+    "Goal scheduled" : {
+
+    },
+    "Leaderboard" : {
+
+    },
+    "Next week your goal will be %@ workout%@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Next week your goal will be %1$@ workout%2$@."
+          }
+        }
+      }
+    },
+    "No achievements here yet" : {
+
+    },
+    "No achievements unlocked yet." : {
+
+    },
+    "No users found" : {
+
+    },
+    "Perks" : {
+
+    },
     "profile.loading" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -68,6 +169,42 @@
           }
         }
       }
+    },
+    "Progress" : {
+
+    },
+    "Recent Unlocks" : {
+
+    },
+    "This change will be applied from next week to keep streak progress fair and prevent streak abuse." : {
+
+    },
+    "Track your consistency, unlock achievements, and climb the leaderboard." : {
+
+    },
+    "Try another category or keep training to unlock more." : {
+
+    },
+    "Try switching the leaderboard filter." : {
+
+    },
+    "Weekly Goal" : {
+
+    },
+    "Weekly goal progress" : {
+
+    },
+    "Weekly Streak" : {
+
+    },
+    "x" : {
+
+    },
+    "Your latest earned achievements" : {
+
+    },
+    "Your Rank" : {
+
     }
   },
   "version" : "1.0"

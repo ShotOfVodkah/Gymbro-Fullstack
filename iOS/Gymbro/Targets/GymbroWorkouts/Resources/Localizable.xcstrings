@@ -1,6 +1,12 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "·" : {
+
+    },
+    "%@" : {
+
+    },
     "workout.available_exercises" : {
       "extractionState" : "stale",
       "localizations" : {

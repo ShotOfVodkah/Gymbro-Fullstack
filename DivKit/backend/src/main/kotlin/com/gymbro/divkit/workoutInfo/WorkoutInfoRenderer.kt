@@ -47,6 +47,7 @@ object WorkoutInfoRenderer {
         workout: Workout,
         type: String,
         t: WorkoutInfoTranslations,
+        assetsBaseUrl: String,
     ): Div {
         val showControls = type == "workout"
         val showAdd = type =="session_other"
@@ -61,14 +62,15 @@ object WorkoutInfoRenderer {
                     height = matchParentSize(),
                     orientation = vertical,
                     items = listOfNotNull(
-                        if (showControls) buttons(workout.id) else null,
+                        if (showControls) buttons(workout.id, assetsBaseUrl) else null,
                         if (!showControls) spacer() else null,
                         header(
                             workout.name,
                             t.workoutType(workout.type),
                             workout.exercises.count(),
-                            styleFor(workout.type),
+                            styleFor(workout.type, assetsBaseUrl),
                             t,
+                            assetsBaseUrl,
                         ),
                         text(
                             text = t.exercisesSection(),
@@ -85,7 +87,7 @@ object WorkoutInfoRenderer {
                             orientation = vertical,
                             columnCount = 1,
                             items = workout.exercises.mapIndexed { index, exercise ->
-                                exerciseCard(exercise, number = index + 1, card)
+                                exerciseCard(exercise, number = index + 1, card, assetsBaseUrl)
                             }
                         )
                     )
@@ -107,7 +109,8 @@ object WorkoutInfoRenderer {
     }
 
     private fun DivScope.buttons(
-        id: String
+        id: String,
+        assetsBaseUrl: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -163,7 +166,7 @@ object WorkoutInfoRenderer {
                             paddings = edgeInsets(8),
                             items = listOf(
                                 image(
-                                    imageUrl = Url.create("http://localhost:8090/assets/edit.png"),
+                                    imageUrl = Url.create("$assetsBaseUrl/edit.png"),
                                     width = fixedSize(21),
                                     height = fixedSize(21)
                                 )
@@ -233,7 +236,7 @@ object WorkoutInfoRenderer {
                         paddings = edgeInsets(8),
                         items = listOf(
                             image(
-                                imageUrl = Url.create("http://localhost:8090/assets/trash.png"),
+                                imageUrl = Url.create("$assetsBaseUrl/trash.png"),
                                 width = fixedSize(21),
                                 height = fixedSize(21)
                             )
@@ -265,6 +268,7 @@ object WorkoutInfoRenderer {
         amount: Int,
         style: WorkoutStyle,
         t: WorkoutInfoTranslations,
+        assetsBaseUrl: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -294,7 +298,7 @@ object WorkoutInfoRenderer {
                             textColor = color("#FFFFFF"),
                             maxLines = 1
                         ),
-                        amountLabel(style.iconUrl, typeLabel, t.exerciseCount(amount))
+                        amountLabel(style.iconUrl, typeLabel, t.exerciseCount(amount), assetsBaseUrl)
                     )
                 )
             )
@@ -305,6 +309,7 @@ object WorkoutInfoRenderer {
         imageUrl: String,
         typeLabel: String,
         exerciseCountText: String,
+        assetsBaseUrl: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -344,7 +349,7 @@ object WorkoutInfoRenderer {
                     border = border(cornerRadius = 15),
                     items = listOf(
                         image(
-                            imageUrl = Url.create("http://localhost:8090/assets/dumbell.png"),
+                            imageUrl = Url.create("$assetsBaseUrl/dumbell.png"),
                             width = fixedSize(20),
                             height = fixedSize(20)
                         ),
@@ -526,11 +531,12 @@ object WorkoutInfoRenderer {
         exercise: Exercise,
         number: Int,
         card: ExerciseCardStrings,
+        assetsBaseUrl: String,
     ): Div {
         return when (exercise) {
-            is StrengthExercise -> strengthExerciseCard(exercise, number, styleFor(WorkoutType.STRENGTH).backgroundColor, card)
-            is CardioExercise -> cardioExerciseCard(exercise, number, styleFor(WorkoutType.CARDIO).backgroundColor, card)
-            is YogaExercise -> yogaExerciseCard(exercise, number, styleFor(WorkoutType.YOGA).backgroundColor, card)
+            is StrengthExercise -> strengthExerciseCard(exercise, number, styleFor(WorkoutType.STRENGTH, assetsBaseUrl).backgroundColor, card)
+            is CardioExercise -> cardioExerciseCard(exercise, number, styleFor(WorkoutType.CARDIO, assetsBaseUrl).backgroundColor, card)
+            is YogaExercise -> yogaExerciseCard(exercise, number, styleFor(WorkoutType.YOGA, assetsBaseUrl).backgroundColor, card)
         }
     }
 
