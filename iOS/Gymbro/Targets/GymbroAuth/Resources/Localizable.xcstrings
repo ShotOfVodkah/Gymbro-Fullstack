@@ -443,6 +443,12 @@
         }
       }
     },
+    "Back to login" : {
+
+    },
+    "Confirm your email" : {
+
+    },
     "legal.accepted" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -561,6 +567,12 @@
           }
         }
       }
+    },
+    "Resend email" : {
+
+    },
+    "We sent a confirmation link to %@. Open it to activate your GymBro account." : {
+
     }
   },
   "version" : "1.0"

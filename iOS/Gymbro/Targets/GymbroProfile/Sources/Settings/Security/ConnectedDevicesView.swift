@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroNetwork
 
@@ -21,11 +22,11 @@ struct ConnectedDevicesView: View {
 
                 content
             }
-            .navigationTitle("Connected Devices")
+            .navigationTitle(String(localized: "devices.nav_title", bundle: .module))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(String(localized: "devices.done", bundle: .module)) {
                         dismiss()
                     }
                     .foregroundStyle(.white)
@@ -48,7 +49,7 @@ struct ConnectedDevicesView: View {
         case .loaded:
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("Manage sessions where your GymBro account is currently signed in.")
+                    Text(String(localized: "devices.manage_sessions", bundle: .module))
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.65))
 
@@ -59,7 +60,7 @@ struct ConnectedDevicesView: View {
                     Button {
                         viewModel.logoutAllDevices()
                     } label: {
-                        Text("Log out from all devices")
+                        Text(String(localized: "devices.logout_all", bundle: .module))
                             .font(.headline)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity)
@@ -77,7 +78,7 @@ struct ConnectedDevicesView: View {
 
         case .error(let message):
             VStack(spacing: 16) {
-                Text("Something went wrong")
+                Text(String(localized: "devices.error", bundle: .module))
                     .font(.headline)
                     .foregroundStyle(.white)
 
@@ -86,7 +87,7 @@ struct ConnectedDevicesView: View {
                     .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
 
-                Button("Try again") {
+                Button(String(localized: "devices.try_again", bundle: .module)) {
                     viewModel.load()
                 }
                 .foregroundStyle(.white)
@@ -115,7 +116,7 @@ struct ConnectedDevicesView: View {
                                 .foregroundStyle(.white)
                             
                             if session.isCurrent {
-                                Text("This device")
+                                Text(String(localized: "devices.this_device", bundle: .module))
                                     .font(.caption.bold())
                                     .foregroundStyle(.green)
                             }
@@ -131,12 +132,12 @@ struct ConnectedDevicesView: View {
                 
                 HStack {
                     if let ip = session.ipAddress {
-                        Text("IP: \(ip)")
+                        Text(String(format: String(localized: "devices.ip_format", bundle: .module), locale: .current, ip))
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.45))
                     }
                     Spacer()
-                    Text(session.isCurrent ? "Log out this device" : "Revoke session")
+                    Text(session.isCurrent ? String(localized: "devices.logout_this_device", bundle: .module) : String(localized: "devices.revoke_session", bundle: .module))
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.red)
                 }

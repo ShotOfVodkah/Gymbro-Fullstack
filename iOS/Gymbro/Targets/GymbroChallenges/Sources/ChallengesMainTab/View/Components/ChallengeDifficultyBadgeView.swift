@@ -7,10 +7,14 @@ struct ChallengeDifficultyBadgeView: View {
     
     private var title: String {
         switch difficulty {
-        case .easy: return "Easy"
-        case .medium: return "Medium"
-        case .hard: return "Hard"
-        case .legendary: return "Legendary"
+        case .easy:
+            return String(localized: "challenges.difficulty.easy", bundle: .module)
+        case .medium:
+            return String(localized: "challenges.difficulty.medium", bundle: .module)
+        case .hard:
+            return String(localized: "challenges.difficulty.hard", bundle: .module)
+        case .legendary:
+            return String(localized: "challenges.difficulty.legendary", bundle: .module)
         }
     }
     

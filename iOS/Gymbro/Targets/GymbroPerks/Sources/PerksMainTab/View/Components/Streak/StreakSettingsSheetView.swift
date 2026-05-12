@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 
@@ -44,11 +45,11 @@ struct StreakSettingsSheetView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Weekly Goal")
+            Text(String(localized: "perks.streak.settings.title", bundle: .module))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Choose how many workouts you want to complete every week.")
+            Text(String(localized: "perks.streak.settings.subtitle", bundle: .module))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white.opacity(0.62))
         }
@@ -120,12 +121,12 @@ struct StreakSettingsSheetView: View {
             
             VStack(alignment: .leading,spacing: 6) {
                 if let scheduledGoal {
-                    Text("Currently scheduled: \(scheduledGoal) workouts per week")
+                    Text(String(format: String(localized: "perks.streak.settings.scheduled", bundle: .module), locale: .current, scheduledGoal))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.purple.opacity(0.8))
                 }
                 
-                Text("This change will be applied from next week to keep streak progress fair and prevent streak abuse.")
+                Text(String(localized: "perks.streak.settings.hint", bundle: .module))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.white.opacity(0.56))
                     .fixedSize(horizontal: false, vertical: true)
@@ -135,13 +136,13 @@ struct StreakSettingsSheetView: View {
 
     private var actionsView: some View {
         HStack(spacing: 12) {
-            AppButton("Cancel", size: .l, action: {
+            AppButton(String(localized: "perks.streak.settings.cancel", bundle: .module), size: .l, action: {
                 onCancel()
             }, wrapContent: false)
             .opacity(isSaving ? 0.6 : 1)
             .disabled(isSaving)
             
-            AppButton(isSaving ? "Saving..." : "Save", size: .l, action: {
+            AppButton(isSaving ? String(localized: "perks.streak.settings.saving", bundle: .module) : String(localized: "perks.streak.settings.save", bundle: .module), size: .l, action: {
                 onSave(selectedGoal)
             }, wrapContent: false)
             .opacity(isSaveDisabled ? 0.55 : 1)

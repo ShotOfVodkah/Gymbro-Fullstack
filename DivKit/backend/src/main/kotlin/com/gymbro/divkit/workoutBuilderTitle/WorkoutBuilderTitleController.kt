@@ -4,6 +4,7 @@ import com.gymbro.divkit.Language
 import com.gymbro.divkit.auth.GymbroJwtAuth
 import com.gymbro.divkit.client.GymbroBackendClient
 import com.gymbro.divkit.client.toDomain
+import com.gymbro.divkit.config.DivKitPublicUrls
 import divkit.dsl.Divan
 import divkit.dsl.data
 import divkit.dsl.divan
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController
 import jakarta.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping("/workoutBuilderTitle")
-class WorkoutBuilerTitleController(private val backendClient: GymbroBackendClient) {
+class WorkoutBuilerTitleController(
+    private val backendClient: GymbroBackendClient,
+    private val divKitPublicUrls: DivKitPublicUrls,
+) {
 
     @GetMapping
     fun getWorkoutInfo(
@@ -37,7 +41,13 @@ class WorkoutBuilerTitleController(private val backendClient: GymbroBackendClien
             divan {
                 data(
                     logId = "workoutBuilderTitle",
-                    div = with(WorkoutBuilderTitleRenderer) { render(workouts = workouts, t = translations) },
+                    div = with(WorkoutBuilderTitleRenderer) {
+                        render(
+                            workouts = workouts,
+                            t = translations,
+                            assetsBaseUrl = divKitPublicUrls.assetsBaseUrl,
+                        )
+                    },
                     variables = listOf()
                 )
             },

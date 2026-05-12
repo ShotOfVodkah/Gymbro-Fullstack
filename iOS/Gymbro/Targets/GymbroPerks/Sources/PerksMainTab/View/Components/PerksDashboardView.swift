@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -34,11 +35,11 @@ struct PerksDashboardView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Perks")
+            Text(String(localized: "perks.dashboard.title", bundle: .module))
                 .font(.system(size: 34, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Track your consistency, unlock achievements, and climb the leaderboard.")
+            Text(String(localized: "perks.dashboard.subtitle", bundle: .module))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.white.opacity(0.62))
                 .fixedSize(horizontal: false, vertical: true)

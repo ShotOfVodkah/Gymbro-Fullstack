@@ -57,11 +57,11 @@ struct JoinChallengeView: View {
                 
                 VStack(alignment: .leading, spacing: 13) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Choose Team")
+                        Text(String(localized: "challenges.join.section_title", bundle: .module))
                             .font(.system(size: 23, weight: .bold))
                             .foregroundStyle(.white)
                         
-                        Text("Only group chats can participate in team challenges.")
+                        Text(String(localized: "challenges.join.section_subtitle", bundle: .module))
                             .font(.system(size: 13, weight: .medium))
                             .foregroundStyle(.white.opacity(0.52))
                     }
@@ -103,7 +103,7 @@ struct JoinChallengeView: View {
             
             Spacer()
             
-            Text("Join")
+            Text(String(localized: "challenges.join.nav_title", bundle: .module))
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.white)
             
@@ -127,11 +127,11 @@ struct JoinChallengeView: View {
             }
             
             VStack(alignment: .leading, spacing: 6) {
-                Text("Pick your squad")
+                Text(String(localized: "challenges.join.pick_squad_title", bundle: .module))
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text("A group chat becomes your challenge team. Its members will contribute progress automatically after workouts.")
+                Text(String(localized: "challenges.join.pick_squad_subtitle", bundle: .module))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.white.opacity(0.62))
                     .fixedSize(horizontal: false, vertical: true)
@@ -171,14 +171,14 @@ struct JoinChallengeView: View {
     private var teamsSummaryView: some View {
         HStack(spacing: 10) {
             summaryPill(
-                title: "Available",
+                title: String(localized: "challenges.join.summary_available", bundle: .module),
                 value: viewModel.availableTeamsCountText,
                 iconName: "checkmark.circle.fill",
                 color: .green
             )
             
             summaryPill(
-                title: "Group Chats",
+                title: String(localized: "challenges.join.summary_group_chats", bundle: .module),
                 value: "\(viewModel.teams.count)",
                 iconName: "bubble.left.and.bubble.right.fill",
                 color: .blue
@@ -239,11 +239,11 @@ struct JoinChallengeView: View {
                     .foregroundStyle(.green)
             }
             
-            Text("Team joined")
+            Text(String(localized: "challenges.join.success_title", bundle: .module))
                 .font(.system(size: 28, weight: .bold))
                 .foregroundStyle(.white)
             
-            Text("Your group chat is now participating in this challenge.")
+            Text(String(localized: "challenges.join.success_subtitle", bundle: .module))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.white.opacity(0.62))
                 .multilineTextAlignment(.center)
@@ -251,7 +251,7 @@ struct JoinChallengeView: View {
             Button {
                 viewModel.successDoneTapped()
             } label: {
-                Text("Back to Challenge")
+                Text(String(localized: "challenges.join.back_to_challenge", bundle: .module))
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

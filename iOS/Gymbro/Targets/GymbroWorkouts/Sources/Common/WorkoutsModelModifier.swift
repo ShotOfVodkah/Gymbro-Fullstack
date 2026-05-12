@@ -11,7 +11,7 @@ public enum WorkoutEvent {
 }
 
 public final class WorkoutsModelModifier {
-    let events = PassthroughSubject<WorkoutEvent, Never> ()
+    public let events = PassthroughSubject<WorkoutEvent, Never> ()
     
     public init() {}
 }

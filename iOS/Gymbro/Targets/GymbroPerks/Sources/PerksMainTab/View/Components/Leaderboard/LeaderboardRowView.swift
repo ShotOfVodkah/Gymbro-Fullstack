@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -37,7 +38,7 @@ struct LeaderboardRowView: View {
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text(selectedSort == .streak ? "streak" : "workouts")
+                Text(selectedSort.title)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(.white.opacity(0.48))
                     .textCase(.uppercase)

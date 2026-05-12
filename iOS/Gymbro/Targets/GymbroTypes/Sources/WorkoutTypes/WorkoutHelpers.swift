@@ -120,7 +120,6 @@ public enum WorkoutType: String, Codable {
     case cardio
     case yoga
 
-    /// English label for APIs, analytics, and DivKit `type` query (not for user-visible UI).
     public var title: String {
         switch self {
         case .strength: return "Strength"
@@ -140,7 +139,6 @@ public enum WorkoutType: String, Codable {
         }
     }
 
-    /// Same as `title`; stable token for `workoutBuilderForType` requests.
     public var builderTypeQueryValue: String { title }
 
     public static func resolvingBuilderTypeToken(_ token: String) -> WorkoutType {
@@ -161,21 +159,21 @@ public enum WorkoutType: String, Codable {
                 headerGradientStart: "#2E27FF",
                 headerGradientEnd: "#732AFF",
                 exerciseGradientColor: "#2E27FF",
-                iconUrl: "http://localhost:8080/assets/strength.png"
+                iconUrl: "http://111.88.145.152:8080/assets/strength.png"
             )
         case .cardio:
             return WorkoutStyle(
                 headerGradientStart: "#BC31CF",
                 headerGradientEnd: "#732AFF",
                 exerciseGradientColor: "#BC31CF",
-                iconUrl: "http://localhost:8080/assets/cardio.png"
+                iconUrl: "http://111.88.145.152:8080/assets/cardio.png"
             )
         case .yoga:
             return WorkoutStyle(
                 headerGradientStart: "#73FF7A",
                 headerGradientEnd: "#732AFF",
                 exerciseGradientColor: "#73FF7A",
-                iconUrl: "http://localhost:8080/assets/yoga.png"
+                iconUrl: "http://111.88.145.152:8080/assets/yoga.png"
             )
         }
     }
@@ -184,7 +182,6 @@ public enum WorkoutType: String, Codable {
 public enum PaceType: String, CaseIterable, Hashable, Codable {
     case walk, jog, run, sprint, recovery
 
-    /// English label for persistence and APIs.
     public var title: String {
         switch self {
         case .walk: return "Walk"
@@ -215,7 +212,6 @@ public enum MuscleGroup: String, Codable {
     case chest, back, shoulders, biceps, triceps, legs, glutes, core
     case fullBody = "full_body"
 
-    /// English label for persistence and APIs.
     public var title: String {
         switch self {
         case .chest: return "Chest"

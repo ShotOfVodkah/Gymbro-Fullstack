@@ -44,6 +44,7 @@ object WorkoutBuilderTitleRenderer {
     fun DivScope.render(
         workouts: List<Workout>,
         t: WorkoutBuilderTitleTranslations,
+        assetsBaseUrl: String,
     ): Div {
         return container(
             width = matchParentSize(),
@@ -58,15 +59,15 @@ object WorkoutBuilderTitleRenderer {
                     orientation = vertical,
                     columnCount = 1,
                     items = listOf(
-                        aiCard(t),
-                        categories(t),
+                        aiCard(t, assetsBaseUrl),
+                        categories(t, assetsBaseUrl),
                         pagerWithIndicator(
                             t = t,
                             items = workouts.map { workout ->
                                 premadeCard(
                                     name = workout.name,
                                     workoutType = workout.type,
-                                    color = styleFor(workout.type).backgroundColor,
+                                    color = styleFor(workout.type, assetsBaseUrl).backgroundColor,
                                     amount = workout.exercises.count(),
                                     id = workout.id,
                                     t = t,
@@ -104,8 +105,8 @@ object WorkoutBuilderTitleRenderer {
         )
     }
 
-    private fun DivScope.aiCard(t: WorkoutBuilderTitleTranslations): Div {
-        val imageUrl = "http://localhost:8090/assets/lightning.png"
+    private fun DivScope.aiCard(t: WorkoutBuilderTitleTranslations, assetsBaseUrl: String): Div {
+        val imageUrl = "$assetsBaseUrl/lightning.png"
         return container(
             orientation = vertical,
             alignmentVertical = center,
@@ -232,7 +233,7 @@ object WorkoutBuilderTitleRenderer {
         )
     }
 
-    private fun DivScope.categories(t: WorkoutBuilderTitleTranslations): Div {
+    private fun DivScope.categories(t: WorkoutBuilderTitleTranslations, assetsBaseUrl: String): Div {
         return container(
             orientation = vertical,
             width = matchParentSize(),
@@ -253,9 +254,9 @@ object WorkoutBuilderTitleRenderer {
                     height = wrapContentSize(),
                     margins = edgeInsets(top = 16),
                     items = listOf(
-                        typeCard(styleFor(WorkoutType.YOGA), WorkoutType.YOGA, t),
-                        typeCard(styleFor(WorkoutType.STRENGTH), WorkoutType.STRENGTH, t),
-                        typeCard(styleFor(WorkoutType.CARDIO), WorkoutType.CARDIO, t),
+                        typeCard(styleFor(WorkoutType.YOGA, assetsBaseUrl), WorkoutType.YOGA, t),
+                        typeCard(styleFor(WorkoutType.STRENGTH, assetsBaseUrl), WorkoutType.STRENGTH, t),
+                        typeCard(styleFor(WorkoutType.CARDIO, assetsBaseUrl), WorkoutType.CARDIO, t),
                     )
                 )
             )

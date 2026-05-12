@@ -36,7 +36,14 @@ struct ExerciseRowView: View {
         case .strength(let e):
             return "\(e.sets)×\(e.reps) · \(Int(e.weightKg)) \(String(localized: "watch.field.kg", bundle: .module))"
         case .cardio(let e):
-            return "\(e.durationMinutes) min · \(e.pace.title)"
+            let unit = String(localized: "watch.detail.min_abbr", bundle: .module)
+            return String(
+                format: String(localized: "watch.detail.cardio_line", bundle: .module),
+                locale: .current,
+                e.durationMinutes,
+                unit,
+                e.pace.title
+            )
         case .yoga(let e):
             return "\(e.holdSeconds)s · \(e.breathCount) \(String(localized: "watch.field.breath", bundle: .module))"
         case .fallback:

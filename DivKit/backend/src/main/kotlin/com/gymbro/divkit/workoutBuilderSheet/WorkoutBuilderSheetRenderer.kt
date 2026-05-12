@@ -39,6 +39,7 @@ object WorkoutBuilderSheetRenderer {
     fun DivScope.render(
         workout: Workout,
         t: WorkoutBuilderSheetTranslations,
+        assetsBaseUrl: String,
     ): Div {
         val card = t.exerciseCard
         return container(
@@ -53,15 +54,16 @@ object WorkoutBuilderSheetRenderer {
                     orientation = vertical,
                     columnCount = 1,
                     items = workout.exercises.mapIndexed { index, exercise ->
-                        exerciseCard(exercise, number = index + 1, card)
+                        exerciseCard(exercise, number = index + 1, card, assetsBaseUrl)
                     }
                 ),
                 header(
                     workout.name,
                     t.workoutType(workout.type),
                     workout.exercises.count(),
-                    styleFor(workout.type),
+                    styleFor(workout.type, assetsBaseUrl),
                     t,
+                    assetsBaseUrl,
                 ),
                 addButton(workout.id, t)
             )
@@ -74,6 +76,7 @@ object WorkoutBuilderSheetRenderer {
         amount: Int,
         style: WorkoutStyle,
         t: WorkoutBuilderSheetTranslations,
+        assetsBaseUrl: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -102,7 +105,7 @@ object WorkoutBuilderSheetRenderer {
                             textColor = color("#FFFFFF"),
                             maxLines = 1
                         ),
-                        amountLabel(style.iconUrl, typeLabel, t.exerciseCount(amount))
+                        amountLabel(style.iconUrl, typeLabel, t.exerciseCount(amount), assetsBaseUrl)
                     )
                 )
             )
@@ -113,6 +116,7 @@ object WorkoutBuilderSheetRenderer {
         imageUrl: String,
         typeLabel: String,
         exerciseCountText: String,
+        assetsBaseUrl: String,
     ): Div {
         return container(
             orientation = horizontal,
@@ -152,7 +156,7 @@ object WorkoutBuilderSheetRenderer {
                     border = border(cornerRadius = 15),
                     items = listOf(
                         image(
-                            imageUrl = Url.create("http://localhost:8090/assets/dumbell.png"),
+                            imageUrl = Url.create("$assetsBaseUrl/dumbell.png"),
                             width = fixedSize(20),
                             height = fixedSize(20)
                         ),

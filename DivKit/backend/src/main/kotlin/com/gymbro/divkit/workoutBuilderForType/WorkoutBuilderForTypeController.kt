@@ -5,6 +5,7 @@ import com.gymbro.divkit.WorkoutType
 import com.gymbro.divkit.i18n.DomainStrings
 import com.gymbro.divkit.client.GymbroBackendClient
 import com.gymbro.divkit.client.toExercise
+import com.gymbro.divkit.config.DivKitPublicUrls
 import com.gymbro.divkit.styleFor
 import divkit.dsl.Divan
 import divkit.dsl.data
@@ -18,7 +19,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/workoutBuilderForType")
-class WorkoutBuilderForTypeController(private val backendClient: GymbroBackendClient) {
+class WorkoutBuilderForTypeController(
+    private val backendClient: GymbroBackendClient,
+    private val divKitPublicUrls: DivKitPublicUrls,
+) {
 
     @GetMapping
     fun getWorkoutInfo(
@@ -38,7 +42,7 @@ class WorkoutBuilderForTypeController(private val backendClient: GymbroBackendCl
             else -> WorkoutType.YOGA
         }
 
-        val color = styleFor(workoutType).backgroundColor
+        val color = styleFor(workoutType, divKitPublicUrls.assetsBaseUrl).backgroundColor
         val selected = exerciseIds?.toSet().orEmpty()
 
         return ResponseEntity(

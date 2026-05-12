@@ -1,975 +1,977 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "workout.available_exercises" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Available exercises"
+  "sourceLanguage": "en",
+  "strings": {
+    "·": {},
+    "%@": {},
+    "workout.available_exercises": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available exercises"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Доступные упражнения"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступные упражнения"
           }
         }
       }
     },
-    "workout.builder.action_okay" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Okay"
+    "workout.builder.action_okay": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okay"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ОК"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ОК"
           }
         }
       }
     },
-    "workout.builder.action_save" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save"
+    "workout.builder.action_save": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить"
           }
         }
       }
     },
-    "workout.builder.alert_empty" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "So empty here... Make sure to add some exercises and name your workout before saving!"
+    "workout.builder.alert_empty": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So empty here... Make sure to add some exercises and name your workout before saving!"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пока пусто… Добавьте упражнения и укажите название тренировки перед сохранением."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока пусто… Добавьте упражнения и укажите название тренировки перед сохранением."
           }
         }
       }
     },
-    "workout.builder.offline_generator" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workout generator is unavailable in offline mode."
+    "workout.builder.offline_generator": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout generator is unavailable in offline mode."
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Генератор недоступен в офлайн-режиме."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Генератор недоступен в офлайн-режиме."
           }
         }
       }
     },
-    "workout.builder.placeholder_name" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workout name"
+    "workout.builder.placeholder_name": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout name"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Название тренировки"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название тренировки"
           }
         }
       }
     },
-    "workout.builder.screen_title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ workout"
+    "workout.builder.screen_title": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ workout"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тренировка: %@"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тренировка: %@"
           }
         }
       }
     },
-    "workout.cardio.action_next" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next →"
+    "workout.cardio.action_next": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next →"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Далее →"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далее →"
           }
         }
       }
     },
-    "workout.detail.cardio" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ min · %@"
+    "workout.detail.cardio": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ min · %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ мин · %@"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ мин · %@"
           }
         }
       }
     },
-    "workout.detail.strength" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ sets × %@ reps · %@"
+    "workout.detail.strength": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sets × %@ reps · %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@×%@ повт. · %@"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@×%@ повт. · %@"
           }
         }
       }
     },
-    "workout.detail.yoga" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@s hold · %@ breaths"
+    "workout.detail.yoga": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@s hold · %@ breaths"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ с удерж. · %@ вдох."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ с удерж. · %@ вдох."
           }
         }
       }
     },
-    "workout.exercise.param_pace" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pace"
+    "workout.exercise.param_pace": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pace"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Темп"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Темп"
           }
         }
       }
     },
-    "workout.exercise.param_reps" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reps"
+    "workout.exercise.param_reps": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reps"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Повторы"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторы"
           }
         }
       }
     },
-    "workout.exercise.param_sets" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets"
+    "workout.exercise.param_sets": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подходы"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подходы"
           }
         }
       }
     },
-    "workout.field.breath" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Breath"
+    "workout.field.breath": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breath"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дыхание"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дыхание"
           }
         }
       }
     },
-    "workout.field.duration" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duration"
+    "workout.field.duration": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duration"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Длительность"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длительность"
           }
         }
       }
     },
-    "workout.field.hold" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold"
+    "workout.field.hold": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удержание"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удержание"
           }
         }
       }
     },
-    "workout.field.kg" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kg"
+    "workout.field.kg": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kg"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кг"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кг"
           }
         }
       }
     },
-    "workout.field.min" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Min"
+    "workout.field.min": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Мин"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мин"
           }
         }
       }
     },
-    "workout.field.pace" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pace"
+    "workout.field.pace": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pace"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Темп"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Темп"
           }
         }
       }
     },
-    "workout.field.reps" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reps"
+    "workout.field.reps": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reps"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Повторы"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторы"
           }
         }
       }
     },
-    "workout.field.sets" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets"
+    "workout.field.sets": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sets"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подходы"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подходы"
           }
         }
       }
     },
-    "workout.field.weight" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weight"
+    "workout.field.weight": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вес"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вес"
           }
         }
       }
     },
-    "workout.finish.action_done" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Done"
+    "workout.finish.action_done": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Готово"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово"
           }
         }
       }
     },
-    "workout.finish.action_save_only" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save only"
+    "workout.finish.action_save_only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save only"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить"
           }
         }
       }
     },
-    "workout.finish.action_share" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share"
+    "workout.finish.action_share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поделиться"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поделиться"
           }
         }
       }
     },
-    "workout.finish.subtitle" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You crushed it! Choose next actions:"
+    "workout.finish.subtitle": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You crushed it! Choose next actions:"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Отлично! Выберите дальнейшие действия:"
+        "ru": {
+          "stringUnit": {
+            "state": "needs_review",
+            "value": "Отлично! Выберите дальнейшие действия:"
           }
         }
       }
     },
-    "workout.finish.title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workout Complete!"
+    "workout.finish.title": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workout Complete!"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тренировка завершена!"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тренировка завершена!"
           }
         }
       }
     },
-    "workout.generator.action_generate" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Generate"
+    "workout.generator.action_generate": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сгенерировать"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сгенерировать"
           }
         }
       }
     },
-    "workout.generator.action_save" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save"
+    "workout.generator.action_save": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить"
           }
         }
       }
     },
-    "workout.generator.alert_empty_prompt" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fill in the prompt before generating"
+    "workout.generator.alert_empty_prompt": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill in the prompt before generating"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Введите описание перед генерацией"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите описание перед генерацией"
           }
         }
       }
     },
-    "workout.generator.disclaimer" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AI can make mistakes. Check important info."
+    "workout.generator.disclaimer": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI can make mistakes. Check important info."
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ИИ может ошибаться. Проверьте важные детали."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ИИ может ошибаться. Проверьте важные детали."
           }
         }
       }
     },
-    "workout.generator.error_prompt" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Looks like there is an error generating. Make sure the prompt is correct."
+    "workout.generator.error_prompt": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looks like there is an error generating. Make sure the prompt is correct."
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось сгенерировать. Проверьте описание."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось сгенерировать. Проверьте описание."
           }
         }
       }
     },
-    "workout.generator.field_prompt_title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Describe your workout"
+    "workout.generator.field_prompt_title": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe your workout"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Опишите тренировку"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опишите тренировку"
           }
         }
       }
     },
-    "workout.generator.injuries_label" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Injuries and conditions"
+    "workout.generator.injuries_label": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Injuries and conditions"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Травмы и ограничения"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Травмы и ограничения"
           }
         }
       }
     },
-    "workout.generator.title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Generate Workout"
+    "workout.generator.title": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate Workout"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сгенерировать тренировку"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сгенерировать тренировку"
           }
         }
       }
     },
-    "workout.info.action_oh_ok" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oh.. Ok"
+    "workout.info.action_oh_ok": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oh.. Ok"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Понятно"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Понятно"
           }
         }
       }
     },
-    "workout.info.add_error" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "There was an error adding this workout"
+    "workout.info.add_error": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There was an error adding this workout"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось добавить тренировку"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось добавить тренировку"
           }
         }
       }
     },
-    "workout.info.delete_action" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
+    "workout.info.delete_action": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить"
           }
         }
       }
     },
-    "workout.info.delete_confirm" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Are you sure you want to delete this workout?"
+    "workout.info.delete_confirm": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to delete this workout?"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удалить эту тренировку?"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить эту тренировку?"
           }
         }
       }
     },
-    "workout.player.action_finish" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finish"
+    "workout.player.action_finish": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Завершить"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завершить"
           }
         }
       }
     },
-    "workout.player.action_yes" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yes"
+    "workout.player.action_yes": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Да"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Да"
           }
         }
       }
     },
-    "workout.player.all_done" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Looks like you're all done!"
+    "workout.player.all_done": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looks like you're all done!"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вы всё сделали!"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вы всё сделали!"
           }
         }
       }
     },
-    "workout.player.breath_count" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Breath count"
+    "workout.player.breath_count": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breath count"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дыхание"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дыхание"
           }
         }
       }
     },
-    "workout.player.exit_confirm" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Are you sure you want to exit this workout?"
+    "workout.player.exit_confirm": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to exit this workout?"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выйти из тренировки?"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выйти из тренировки?"
           }
         }
       }
     },
-    "workout.player.hold_for" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hold"
+    "workout.player.hold_for": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Удержание"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удержание"
           }
         }
       }
     },
-    "workout.player.label_duration" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duration"
+    "workout.player.label_duration": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duration"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Длительность"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длительность"
           }
         }
       }
     },
-    "workout.player.label_weight" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weight"
+    "workout.player.label_weight": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вес"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вес"
           }
         }
       }
     },
-    "workout.player.no_exercises" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No exercises in this workout"
+    "workout.player.no_exercises": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No exercises in this workout"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "В этой тренировке нет упражнений"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В этой тренировке нет упражнений"
           }
         }
       }
     },
-    "workout.player.up_next" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up Next"
+    "workout.player.up_next": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up Next"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Далее"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далее"
           }
         }
       }
     },
-    "workout.result.bodyweight" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bodyweight"
+    "workout.result.bodyweight": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bodyweight"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "без веса"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "без веса"
           }
         }
       }
     },
-    "workout.streak.days_left" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld days left"
+    "workout.streak.days_left": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld days left"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Осталось %lld дн."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Осталось %lld дн."
           }
         }
       }
     },
-    "workout.streak.motivation.danger" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your streak is in danger! Let's get to work and keep on pushing!"
+    "workout.streak.motivation.danger": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your streak is in danger! Let's get to work and keep on pushing!"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Серия под угрозой! Пора тренироваться и её сохранить!"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стрик под угрозой! Пора тренироваться и сохранить его!"
           }
         }
       }
     },
-    "workout.streak.motivation.freeze" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your streak is protected this week. Stay consistent next week!"
+    "workout.streak.motivation.freeze": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your streak is protected this week. Stay consistent next week!"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Стрик защищён на этой неделе. Продолжайте в том же духе на следующей!"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стрик защищён на этой неделе. Продолжайте в том же духе на следующей!"
           }
         }
       }
     },
-    "workout.streak.motivation.safe" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Doing great! Keep those reps going and lock in! \nMaintaining your streak gives you achievements, unlock them all!"
+    "workout.streak.motivation.safe": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doing great! Keep those reps going and lock in! \nMaintaining your streak gives you achievements, unlock them all!"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Так держать! Продолжайте тренироваться.\nСерия даёт достижения — откройте их все!"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Так держать! Продолжайте тренироваться.\nСтрик даёт достижения — откройте их все!"
           }
         }
       }
     },
-    "workout.streak.title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your streak"
+    "workout.streak.title": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your streak"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ваш стрик"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш стрик"
           }
         }
       }
     },
-    "workout.weight_picker.title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update your weight"
+    "workout.weight_picker.title": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update your weight"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Обновите вес"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновите вес"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

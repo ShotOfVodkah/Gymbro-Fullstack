@@ -60,7 +60,8 @@ object WorkoutsListRenderer {
         weekEnd: String,
         wasFreezeUsedThisWeek: Boolean,
         isGoalCompleted: Boolean,
-        language: Language
+        language: Language,
+        assetsBaseUrl: String,
     ): Div {
         val translations = WorkoutsListTranslations(language)
         return container(
@@ -76,16 +77,17 @@ object WorkoutsListRenderer {
                     weekEnd,
                     wasFreezeUsedThisWeek,
                     isGoalCompleted,
-                    translations
+                    translations,
+                    assetsBaseUrl,
                 ),
-                workoutSecondRow(),
+                workoutSecondRow(assetsBaseUrl),
                 gallery(
                     width = matchParentSize(),
                     height = matchParentSize(),
                     paddings = edgeInsets(bottom = 100),
                     orientation = vertical,
                     columnCount = 1,
-                    items = workouts.map { workoutCard(it, translations) }
+                    items = workouts.map { workoutCard(it, translations, assetsBaseUrl) }
                 )
             )
         )
@@ -99,9 +101,10 @@ object WorkoutsListRenderer {
         weekEnd: String,
         wasFreezeUsedThisWeek: Boolean,
         isGoalCompleted: Boolean,
-        translations: WorkoutsListTranslations
+        translations: WorkoutsListTranslations,
+        assetsBaseUrl: String,
     ): Div {
-        val imageUrl = "http://localhost:8090/assets/fire.png"
+        val imageUrl = "$assetsBaseUrl/fire.png"
         val streakOpenUrl = openStreakUrl(
             streakData,
             streakGoal,
@@ -228,8 +231,8 @@ object WorkoutsListRenderer {
         }
     }
 
-    private fun DivScope.workoutSecondRow(): Div {
-        val imageUrl = "http://localhost:8090/assets/plus.png"
+    private fun DivScope.workoutSecondRow(assetsBaseUrl: String): Div {
+        val imageUrl = "$assetsBaseUrl/plus.png"
         return container(
             width = matchParentSize(),
             height = wrapContentSize(),
@@ -306,13 +309,13 @@ object WorkoutsListRenderer {
                         )
                     )
                 ),
-                workoutSearchBar()
+                workoutSearchBar(assetsBaseUrl)
             )
         )
     }
 
-    private fun DivScope.workoutSearchBar(): Div {
-        val imageUrl = "http://localhost:8090/assets/search.png"
+    private fun DivScope.workoutSearchBar(assetsBaseUrl: String): Div {
+        val imageUrl = "$assetsBaseUrl/search.png"
         return container(
             width = matchParentSize(),
             height = wrapContentSize(),
@@ -354,9 +357,10 @@ object WorkoutsListRenderer {
 
     private fun DivScope.workoutCard(
         item: WorkoutItem,
-        translations: WorkoutsListTranslations
+        translations: WorkoutsListTranslations,
+        assetsBaseUrl: String,
     ): Div {
-        val style = styleFor(item.type)
+        val style = styleFor(item.type, assetsBaseUrl)
 
 
         val encoded = URLEncoder.encode(item.id, UTF_8).replace("+", "%20")

@@ -18,9 +18,9 @@ struct ProfileRelationshipActionsView: View {
         HStack(spacing: 12) {
             primaryButton(title: followTitle, systemName: "person.badge.plus", action: onFollowTap)
             
-            secondaryButton(title: "Write", systemName: "paperplane", action: onWriteTap)
+            secondaryButton(title: String(localized: "profile.relationship.write", bundle: .module), systemName: "paperplane", action: onWriteTap)
             
-            secondaryButton(title: "Posts", systemName: "square.grid.2x2", action: onPostsTap)
+            secondaryButton(title: String(localized: "profile.relationship.posts", bundle: .module), systemName: "square.grid.2x2", action: onPostsTap)
         }
     }
     

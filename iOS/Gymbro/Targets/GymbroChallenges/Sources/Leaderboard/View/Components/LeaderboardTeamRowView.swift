@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -40,7 +41,7 @@ struct LeaderboardTeamRowView: View {
                                 .lineLimit(1)
                         }
                         
-                        Text("\(team.membersCount) members")
+                        Text(String(format: String(localized: "challenges.join.members_count", bundle: .module), team.membersCount))
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(.white.opacity(0.52))
                     }
@@ -63,7 +64,7 @@ struct LeaderboardTeamRowView: View {
                 HStack {
                     LeaderboardStatusBadgeView(status: team.status)
                     if team.isCurrentUserTeam {
-                        Text("You")
+                        Text(String(localized: "challenges.leaderboard.you", bundle: .module))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(.purple)
                             .padding(.horizontal, 10)

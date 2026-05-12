@@ -24,7 +24,7 @@ struct JoinChallengeConfirmationView: View {
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Join challenge?")
+                        Text(String(localized: "challenges.join.confirm.title", bundle: .module))
                             .font(.system(size: 22, weight: .bold))
                             .foregroundStyle(.white)
                         
@@ -36,7 +36,7 @@ struct JoinChallengeConfirmationView: View {
                     Spacer()
                 }
                 
-                Text("This group chat will become your team for the challenge. All completed workouts from team members will contribute to progress.")
+                Text(String(localized: "challenges.join.confirm.body", bundle: .module))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.white.opacity(0.62))
                     .fixedSize(horizontal: false, vertical: true)
@@ -45,7 +45,7 @@ struct JoinChallengeConfirmationView: View {
                     Button {
                         onCancel()
                     } label: {
-                        Text("Cancel")
+                        Text(String(localized: "challenges.join.confirm.cancel", bundle: .module))
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white.opacity(0.76))
                             .frame(maxWidth: .infinity)
@@ -61,7 +61,7 @@ struct JoinChallengeConfirmationView: View {
                     Button {
                         onConfirm()
                     } label: {
-                        Text("Join")
+                        Text(String(localized: "challenges.join.confirm.join", bundle: .module))
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)

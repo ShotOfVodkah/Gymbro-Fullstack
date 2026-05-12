@@ -68,7 +68,7 @@ struct AchievementExpandedCardView: View {
     private var progressView: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Progress")
+                Text(String(localized: "perks.achievement.progress", bundle: .module))
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.white.opacity(0.62))
                 
@@ -99,7 +99,7 @@ struct AchievementExpandedCardView: View {
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(achievement.isUnlocked ? .green : .white.opacity(0.48))
             
-            Text(achievement.isUnlocked ? "Achievement unlocked" : "Achievement locked")
+            Text(achievement.isUnlocked ? String(localized: "perks.achievement.status_unlocked", bundle: .module) : String(localized: "perks.achievement.status_locked", bundle: .module))
                 .font(.system(size: 14, weight: .bold))
                 .foregroundStyle(.white.opacity(0.7))
         }

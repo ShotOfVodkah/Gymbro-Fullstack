@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroCommonUI
 
@@ -21,11 +22,11 @@ struct ProfileStatisticsView: View {
                     
                 case .error:
                     VStack(alignment: .center, spacing: 16) {
-                        Text("Something went wrong, oopsie...")
+                        Text(GymbroCommonStrings.genericError)
                             .font(.title3)
                             .foregroundStyle(.white)
                         
-                        AppButton("Refresh", size: .xl) {
+                        AppButton(GymbroCommonStrings.refresh, size: .xl) {
                             viewModel.reload()
                         }
                     }
@@ -134,37 +135,37 @@ struct ProfileStatisticsView: View {
         
         return AnyView(
             ProfileSectionContainer(
-                title: "Detailed Stats",
-                subtitle: "Short-term performance overview"
+                title: String(localized: "statistics.detailed_title", bundle: .module),
+                subtitle: String(localized: "statistics.detailed_sub", bundle: .module)
             ) {
                 VStack(spacing: 12) {
                     HStack(spacing: 12) {
                         ProfileStatCardView(
-                            title: "This Week",
+                            title: String(localized: "statistics.this_week", bundle: .module),
                             value: "\(summary.workoutsThisWeek)",
-                            subtitle: "workouts",
+                            subtitle: String(localized: "statistics.sub_workouts", bundle: .module),
                             iconSystemName: "medal.fill"
                         )
 
                         ProfileStatCardView(
-                            title: "This Month",
+                            title: String(localized: "statistics.this_month", bundle: .module),
                             value: "\(summary.workoutsThisMonth)",
-                            subtitle: "workouts",
+                            subtitle: String(localized: "statistics.sub_workouts", bundle: .module),
                             iconSystemName: "trophy.fill"
                         )
                     }
                     
                     HStack(spacing: 12) {
                         ProfileStatCardView(
-                            title: "Avg Duration",
+                            title: String(localized: "statistics.avg_duration", bundle: .module),
                             value: "\(summary.averageWorkoutDurationMinutes)m",
-                            subtitle: "per workout",
+                            subtitle: String(localized: "statistics.per_workout", bundle: .module),
                             iconSystemName: "bolt.fill"
                         )
                         ProfileStatCardView(
-                            title: "Completion",
+                            title: String(localized: "statistics.completion", bundle: .module),
                             value: "\(summary.completionRate)%",
-                            subtitle: "plan completion",
+                            subtitle: String(localized: "statistics.plan_completion", bundle: .module),
                             iconSystemName: "chart.pie.fill"
                         )
                     }
@@ -178,19 +179,19 @@ struct ProfileStatisticsView: View {
         
         return AnyView(
             ProfileSectionContainer(
-                title: "Insights",
-                subtitle: "Quick takeaways from training activity"
+                title: String(localized: "statistics.insights_title", bundle: .module),
+                subtitle: String(localized: "statistics.insights_sub", bundle: .module)
             ) {
                 VStack(spacing: 12) {
                     HStack(spacing: 12) {
                         ProfileStatCardView(
-                            title: "Fav muscle group",
+                            title: String(localized: "statistics.fav_muscle", bundle: .module),
                             value: "\(summary.favoriteMuscleGroup)",
                             iconSystemName: "heart.fill"
                         )
 
                         ProfileStatCardView(
-                            title: "Most active day",
+                            title: String(localized: "statistics.most_active_day", bundle: .module),
                             value: "\(summary.mostActiveDay)",
                             iconSystemName: "1.calendar"
                         )

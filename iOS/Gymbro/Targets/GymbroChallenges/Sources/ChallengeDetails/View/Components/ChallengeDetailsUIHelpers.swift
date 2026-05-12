@@ -8,7 +8,14 @@ extension ChallengeDetailsModel {
     }
     
     var dateRangeText: String {
-        "\(startDate.formatted(date: .abbreviated, time: .omitted)) - \(endDate.formatted(date: .abbreviated, time: .omitted))"
+        let a = startDate.formatted(date: .abbreviated, time: .omitted)
+        let b = endDate.formatted(date: .abbreviated, time: .omitted)
+        return String(
+            format: String(localized: "challenges.details.date_range", bundle: .module),
+            locale: .current,
+            a,
+            b
+        )
     }
 }
 

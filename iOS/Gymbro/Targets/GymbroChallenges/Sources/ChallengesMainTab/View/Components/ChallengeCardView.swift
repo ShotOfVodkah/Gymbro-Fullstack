@@ -136,7 +136,7 @@ struct ChallengeCardView: View {
             }
             .frame(height: 12)
             
-            Text("Team challenge progress")
+            Text(String(localized: "challenges.card.progress_caption", bundle: .module))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.48))
         }
@@ -171,8 +171,8 @@ struct ChallengeCardView: View {
             HStack(spacing: 10) {
                 if challenge.isJoined {
                     metaPill(
-                        title: "Team",
-                        value: challenge.teamName ?? "Team",
+                        title: String(localized: "challenges.card.meta_team", bundle: .module),
+                        value: challenge.teamName ?? String(localized: "challenges.card.team_fallback", bundle: .module),
                         iconName: "person.3.fill"
                     )
                 } else {
@@ -180,7 +180,7 @@ struct ChallengeCardView: View {
                 }
                 
                 metaPill(
-                    title: "Members",
+                    title: String(localized: "challenges.card.meta_members", bundle: .module),
                     value: challenge.membersCount.map { "\($0)" } ?? "—",
                     iconName: "person.2.fill"
                 )
@@ -197,12 +197,12 @@ struct ChallengeCardView: View {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 12, weight: .semibold))
                     
-                    Text("Entry")
+                    Text(String(localized: "challenges.card.entry_label", bundle: .module))
                         .font(.system(size: 12, weight: .semibold))
                 }
                 .foregroundStyle(.white.opacity(0.56))
                 
-                Text("Choose team")
+                Text(String(localized: "challenges.card.choose_team", bundle: .module))
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.blue)
                     .lineLimit(1)

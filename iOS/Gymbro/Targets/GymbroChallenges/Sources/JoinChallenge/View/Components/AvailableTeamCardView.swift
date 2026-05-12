@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -30,7 +31,7 @@ struct AvailableTeamCardView: View {
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(.white)
                     
-                    Text("\(team.membersCount) members")
+                    Text(String(format: String(localized: "challenges.join.members_count", bundle: .module), team.membersCount))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.white.opacity(0.56))
                     

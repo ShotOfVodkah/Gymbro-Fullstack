@@ -94,7 +94,7 @@ struct ChallengeDetailsView: View {
             
             Spacer()
             
-            Text("Challenge")
+            Text(String(localized: "challenges.details.nav_title", bundle: .module))
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(.white)
             
@@ -113,7 +113,7 @@ struct ChallengeDetailsView: View {
                 Image(systemName: "rectangle.portrait.and.arrow.right")
                     .font(.system(size: 15, weight: .semibold))
                 
-                Text("Leave Challenge")
+                Text(String(localized: "challenges.details.leave_button", bundle: .module))
                     .font(.system(size: 15, weight: .bold))
                 
                 Spacer()

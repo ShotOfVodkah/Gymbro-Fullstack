@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -7,7 +8,10 @@ struct ChallengeActivityTimelineView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
-            sectionTitle("Activity", "Recent team actions")
+            sectionTitle(
+                String(localized: "challenges.details.activity.title", bundle: .module),
+                String(localized: "challenges.details.activity.subtitle", bundle: .module)
+            )
             
             VStack(spacing: 0) {
                 ForEach(activity) { item in
@@ -47,13 +51,21 @@ struct ChallengeActivityTimelineView: View {
     private func activityTitle(_ item: ChallengeActivityModel) -> String {
         switch item.action {
         case .completedWorkout:
-            return "\(item.userName) completed a workout"
+            return String(
+                format: String(localized: "challenges.activity.user_completed_workout", bundle: .module),
+                locale: .current,
+                item.userName
+            )
         case .joinedChallenge:
-            return "\(item.userName) joined the challenge"
+            return String(
+                format: String(localized: "challenges.activity.user_joined", bundle: .module),
+                locale: .current,
+                item.userName
+            )
         case .completedChallenge:
-            return "Challenge completed"
+            return String(localized: "challenges.activity.completed", bundle: .module)
         case .failedChallenge:
-            return "Challenge failed"
+            return String(localized: "challenges.activity.failed", bundle: .module)
         }
     }
     

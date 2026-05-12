@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -18,11 +19,11 @@ struct MyRankCardView: View {
             }
             
             VStack(alignment: .leading, spacing: 5) {
-                Text("Your Rank")
+                Text(String(localized: "perks.leaderboard.your_rank", bundle: .module))
                     .font(.system(size: 17, weight: .bold))
                     .foregroundStyle(.white)
                 
-                Text("#\(myRank.rank) • \(myRank.currentStreakWeeks)w streak • \(myRank.completedWorkouts) workouts")
+                Text(String(format: String(localized: "perks.leaderboard.my_rank_format", bundle: .module), locale: .current, myRank.rank, myRank.currentStreakWeeks, myRank.completedWorkouts))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.62))
                     .lineLimit(2)

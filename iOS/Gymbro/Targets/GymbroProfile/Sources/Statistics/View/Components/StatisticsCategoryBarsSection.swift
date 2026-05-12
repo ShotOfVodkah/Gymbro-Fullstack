@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import GymbroTypes
 
@@ -9,8 +10,8 @@ struct StatisticsCategoryBarsSection: View {
     
     var body: some View {
         ProfileSectionContainer(
-            title: "Top Exercise Categories",
-            subtitle: "Most frequent training focus areas"
+            title: String(localized: "statistics.categories.title", bundle: .module),
+            subtitle: String(localized: "statistics.categories.sub", bundle: .module)
         ) {
             VStack(spacing: 14) {
                 ForEach(items) { item in

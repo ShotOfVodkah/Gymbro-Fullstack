@@ -18,6 +18,9 @@ let mainAppTarget: ProjectDescription.Target = .target(
     deploymentTargets: .iOS(iOSTargetVersion),
     infoPlist: .extendingDefault(
         with: [
+            "NSAppTransportSecurity": [
+                "NSAllowsArbitraryLoads": true,
+            ],
             "UILaunchScreen": [:],
             "CFBundleDevelopmentRegion": "en",
             "CFBundleLocalizations": ["en", "ru"],

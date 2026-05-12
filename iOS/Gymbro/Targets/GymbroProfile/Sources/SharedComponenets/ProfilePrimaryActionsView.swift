@@ -12,7 +12,7 @@ struct ProfilePrimaryActionsView: View {
     }
     
     var body: some View {
-        ProfileSectionContainer(title: "Actions") {
+        ProfileSectionContainer(title: String(localized: "profile.actions.section", bundle: .module)) {
             VStack(spacing: 10) {
                 ForEach(actions) { action in
                     ProfileActionButton(model: action) {

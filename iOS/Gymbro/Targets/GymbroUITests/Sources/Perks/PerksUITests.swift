@@ -159,7 +159,7 @@ final class PerksUITests: BaseUITestCase {
         configuration.perksStreakVariant = .freezeActive
         openPerksDashboard(configuration: configuration)
         assertExists(TestIDs.Perks.streakStateFreeze)
-        XCTAssertTrue(app.staticTexts["Freezed this week"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["Freeze protected your streak this week."].waitForExistence(timeout: 8))
     }
 
     func testStreakFooterShowsDangerState() {
